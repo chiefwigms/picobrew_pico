@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block content %}
+  <div id="live_session" style="min-width: 320px; height: 400px; margin: 0 auto"></div>
+  <script>var graph_data = {{graph_data|tojson}};</script>
+  <script src="static/js/highcharts/highcharts.js"></script>
+  <script src="static/js/highcharts/annotations.js"></script>
+  <script src="static/js/highcharts/export-data.js"></script>
+  <script src="static/js/highcharts/exporting.js"></script>
+  <script src="static/js/highcharts/dark-unica.js"></script>
+  <script src="static/js/socketio/socket.io.slim.js"></script>
+  <script src="static/js/graph_socketio.js"></script>
+{% endblock %}
