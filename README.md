@@ -1,5 +1,5 @@
 # picobrew_pico
-Allows for full control of the PicoBrew Pico S/C/Pro models.  
+Allows for full control of the PicoBrew Pico S/C/Pro models.  Shout out to https://github.com/hotzenklotz/picobrew-server
 
 ## Requirements
 Python >= 3.6.9  
