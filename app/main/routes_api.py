@@ -84,7 +84,7 @@ def process_error(args):
 #    Response: '#{0}#\r\n' where {0} : 20 character alpha-numeric session id
 get_session_args = {
     'uid': fields.Str(required=True),       #32 character alpha-numeric serial number
-    'sesType': fields.Int(required=True),   #0 = Brewing (never happens since session = 14 alpha-numeric RFID), 1 = Deep Clean, 2 = Sous Vide
+    'sesType': fields.Int(required=True),   #0 = Brewing (never happens since session = 14 alpha-numeric RFID), 1 = Deep Clean, 2 = Sous Vide, 4 = Cold Brew, 5 = Manual Brew
 }
 @main.route('/API/pico/getSession')
 @use_args(get_session_args, location='querystring')
@@ -94,6 +94,11 @@ def process_get_session(args):
         current_session.name = 'Deep Clean'
     elif args['sesType'] == 2:
         current_session.name = 'Sous Vide'
+    elif args['sesType'] == 4:
+        current_session.name = 'Cold Brew'
+    elif args['sesType'] == 5:
+        current_session.name = 'Manual Brew'
+        create_new_session()
     else:
         current_session.name = 'Unknown'
     return '#{0}#\r\n'.format(current_session.uid)
