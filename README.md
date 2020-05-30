@@ -16,8 +16,8 @@ Clone this repo, then run
 The table for adding/removing/editing recipe steps has several validation checks in it, but there is always the possiblity of ruining your Pico.  DO NOT EDIT or MOVE Rows 1-3 (Preparing to Brew/Heating/Dough In).  Drain times should all be 0 except for Mash Out (2 minutes) and the last hop addition (5 minutes) (for example, if you only have Hops 1 & 2, set the drain time on Hops 2 to 5, and remove the Hops 3 and 4 rows)
 
 ## Features
-Multiple devices
-Device Aliasing
+Multiple devices  
+Device Aliasing  
 Live session graphing  
 Historical session graphing  
 Recipe Library  
