@@ -1,6 +1,7 @@
 import json
 from .. import *
 
+
 class PicoBrewRecipeStep():
     def __init__(self):
         self.name = None
@@ -17,6 +18,7 @@ class PicoBrewRecipeStep():
             self.location,
             self.name
         )
+
 
 class PicoBrewRecipe():
     def __init__(self):
