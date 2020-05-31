@@ -59,8 +59,9 @@ class PicoFermSession():
     def __init__(self):
         self.file = None
         self.filepath = None
-        self.uninit = True
         self.alias = ''
+        self.uninit = True
+        self.voltage = '-'
         self.start_time = None
         self.data = []
 
@@ -68,9 +69,10 @@ class PicoFermSession():
         if self.file and self.filepath:
             self.file.close()
             shutil.move(str(self.filepath), str(Path(FERM_ARCHIVE_PATH)))
-        self.uninit = True
         self.file = None
         self.filepath = None
+        self.uninit = True
+        self.voltage = '-'
         self.start_time = None
         self.data = []
 

@@ -26,7 +26,7 @@ Highcharts.chart(graph_data.chart_id, {
 
   title: graph_data.title,
 
-  //subtitle: graph_data.subtitle,
+  subtitle: graph_data.subtitle,
 
   xAxis: {
     type: 'datetime',

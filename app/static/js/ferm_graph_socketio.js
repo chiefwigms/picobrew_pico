@@ -43,9 +43,7 @@ plotOptions: {
 
 title: graph_data.title,
 
-subtitle: {
-  text: 'Voltage: -',
-},
+subtitle: graph_data.subtitle,
 
 xAxis: {
   type: 'datetime',

@@ -76,6 +76,7 @@ def process_log_ferm_dataset(args):
         time = time + time_delta
         active_ferm_sessions[uid].file.write('\t{},\n'.format(json.dumps(point)))
     active_ferm_sessions[uid].data.extend(session_data)
+    active_ferm_sessions[uid].voltage = str(args['voltage']) + 'V'
     graph_update = json.dumps({'voltage': args['voltage'], 'data': session_data})
     socketio.emit('ferm_session_update|{}'.format(args['uid']), graph_update)
     active_ferm_sessions[uid].file.flush()

@@ -113,7 +113,7 @@ def get_brew_graph_data(chart_id, session_name, session_step, session_data):
 def load_active_ferm_sessions():
     ferm_sessions = []
     for uid in active_ferm_sessions:
-        ferm_sessions.append({'alias': active_ferm_sessions[uid].alias, 'graph': get_ferm_graph_data(uid, 'Fermentation', active_ferm_sessions[uid].data)})
+        ferm_sessions.append({'alias': active_ferm_sessions[uid].alias, 'graph': get_ferm_graph_data(uid, active_ferm_sessions[uid].voltage, active_ferm_sessions[uid].data)})
     return ferm_sessions
 
 
@@ -136,10 +136,10 @@ def load_ferm_session(file):
     name = info[1]
     if info[1] in active_ferm_sessions:
         name = active_ferm_sessions[info[1]].alias
-    return({'date': info[0], 'name': name, 'graph': get_ferm_graph_data(chart_id, 'Fermentation', json_data)})
+    return({'date': info[0], 'name': name, 'graph': get_ferm_graph_data(chart_id, None, json_data)})
 
 
-def get_ferm_graph_data(chart_id, title, session_data):
+def get_ferm_graph_data(chart_id, voltage, session_data):
     temp_data = []
     pres_data = []
     for data in session_data:
@@ -147,9 +147,11 @@ def get_ferm_graph_data(chart_id, title, session_data):
         pres_data.append([data['time'], float(data['pres'])])
     graph_data = {
         'chart_id': chart_id,
-        'title': {'text': title},
+        'title': {'text': 'Fermentation'},
         'series':  [{'name': 'Temperature', 'data': temp_data}, {'name': 'Pressure', 'data': pres_data, 'yAxis': 1}],
     }
+    if voltage:
+        graph_data.update({'subtitle': {'text': 'Voltage: ' + voltage}})
     return graph_data
 
 
