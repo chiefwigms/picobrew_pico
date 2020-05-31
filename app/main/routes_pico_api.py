@@ -173,11 +173,12 @@ def process_log(args):
                                'event': event,
                                })
     socketio.emit('brew_session_update|{}'.format(uid), graph_update)
-    active_brew_sessions[uid].file.write('\t{},\n'.format(json.dumps(session_data)))
-    active_brew_sessions[uid].file.flush()
     if 'complete' in active_brew_sessions[uid].step.lower():
-        active_brew_sessions[uid].file.write(']')
+        active_brew_sessions[uid].file.write('\t{}\n]'.format(json.dumps(session_data)))
         active_brew_sessions[uid].cleanup()
+    else:
+        active_brew_sessions[uid].file.write('\t{},\n'.format(json.dumps(session_data)))
+        active_brew_sessions[uid].file.flush()
     return '\r\n\r\n'
 
 

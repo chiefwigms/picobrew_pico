@@ -67,6 +67,7 @@ def process_log_ferm_dataset(args):
     time_delta = args['rate'] * 60 * 1000
     time = ((datetime.utcnow()-datetime(1970, 1, 1)).total_seconds() * 1000) - (time_delta * (len(data) - 1))
     session_data = []
+    log_data = ''
     for d in data:
         point = {'time': time,
                  'temp': d['s1'],
@@ -74,17 +75,18 @@ def process_log_ferm_dataset(args):
                  }
         session_data.append(point)
         time = time + time_delta
-        active_ferm_sessions[uid].file.write('\t{},\n'.format(json.dumps(point)))
+        log_data += '\t{},\n'.format(json.dumps(point))
     active_ferm_sessions[uid].data.extend(session_data)
     active_ferm_sessions[uid].voltage = str(args['voltage']) + 'V'
     graph_update = json.dumps({'voltage': args['voltage'], 'data': session_data})
     socketio.emit('ferm_session_update|{}'.format(args['uid']), graph_update)
-    active_ferm_sessions[uid].file.flush()
     if (datetime.now().date() - active_ferm_sessions[uid].start_time.date()).days > 14:
-        active_ferm_sessions[uid].file.write(']')
+        active_ferm_sessions[uid].file.write('{}\n]'.format(log_data[:-2]))
         active_ferm_sessions[uid].cleanup()
         return '#2,4#'
     else:
+        active_ferm_sessions[uid].file.write(log_data)
+        active_ferm_sessions[uid].file.flush()
         return '#10,0#'  # Errors like '10,16' send data but mark data error.  '10,0' tells the PicoFerm to continue to send data.  The server makes a determination when fermenting is done based on the datalog after it sends '2,4'
 
 
