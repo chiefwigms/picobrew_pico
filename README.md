@@ -1,5 +1,5 @@
 # picobrew_pico
-Allows for full control of the PicoBrew Pico S/C/Pro models.  Shout out to https://github.com/hotzenklotz/picobrew-server and Brian Moineau for PicoFerm API
+Allows for full control of the PicoBrew Pico S/C/Pro & Zymatic models.  Shout out to https://github.com/hotzenklotz/picobrew-server and Brian Moineau for PicoFerm API
 
 ## Requirements
 Python >= 3.6.9  
