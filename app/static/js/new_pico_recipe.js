@@ -88,7 +88,7 @@ $(document).ready(function(){
         recipe.image = ''
         recipe.steps = table.getData();
 		$.ajax({
-			url: 'new_recipe_save',
+			url: 'new_pico_recipe_save',
 			type: 'POST',
             data: JSON.stringify(recipe),
             dataType: "json",

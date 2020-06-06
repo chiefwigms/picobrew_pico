@@ -7,7 +7,7 @@ from flask_socketio import emit
 from webargs import fields
 from webargs.flaskparser import use_args, FlaskParser
 from . import main
-from .routes_frontend import get_recipes
+from .routes_frontend import get_pico_recipes
 from .. import *
 
 arg_parser = FlaskParser()
@@ -166,8 +166,7 @@ def process_log(args):
     active_brew_sessions[uid].step = args['step']
     active_brew_sessions[uid].data.append(session_data)
     graph_update = json.dumps({'time': session_data['time'],
-                               'wort': session_data['wort'],
-                               'therm': session_data['therm'],
+                               'data': [session_data['wort'], session_data['therm']],
                                'session': active_brew_sessions[uid].name,
                                'step': active_brew_sessions[uid].step,
                                'event': event,
@@ -184,18 +183,18 @@ def process_log(args):
 
 # -------- Utility --------
 def get_recipe_by_id(recipe_id):
-    recipe = next((r for r in get_recipes() if r.id == recipe_id), None)
+    recipe = next((r for r in get_pico_recipes() if r.id == recipe_id), None)
     return recipe.serialize()
 
 
 def get_recipe_name_by_id(recipe_id):
-    recipe = next((r for r in get_recipes() if r.id == recipe_id), None)
+    recipe = next((r for r in get_pico_recipes() if r.id == recipe_id), None)
     return recipe.name
 
 
 def get_recipe_list():
     recipe_list = ''
-    for r in get_recipes():
+    for r in get_pico_recipes():
         recipe_list += r.id + ',' + r.name + '|'
     return recipe_list
 

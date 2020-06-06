@@ -5,7 +5,7 @@
     <div class="card bg-dark text-white-50">
       <h5 class="card-header" id="h_{{session.graph.chart_id}}">
         <a class="collapsed" role="button" data-toggle="collapse" href="#c_{{session.graph.chart_id}}" data-parent="#accordion" aria-expanded="false" aria-controls="c_{{session.graph.chart_id}}">
-          {{session.name}} (Brewed on {{session.date}})
+          {{session.name}} (Brewed {{session.date}}{% if session.alias is defined and session.alias|length %} with {{session.alias}}{% endif %}) 
         </a>
       </h5>
       <div id="c_{{session.graph.chart_id}}" class="collapse" aria-labelledby="h_{{session.graph.chart_id}}">

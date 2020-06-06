@@ -16,6 +16,7 @@
               <tr>
                 <th scope = "col">Step #</th>
                 <th scope = "col">Name</th>
+                <th scope = "col">Location</th>
                 <th scope = "col">Temp (°F)</th>
                 <th scope = "col">Time (min)</th>
                 <th scope = "col">Drain (min)</th>
@@ -24,8 +25,10 @@
             <tbody>
               {% for step in recipe.steps %}
               <tr>
+                {% set LOCATION = {'0': 'Prime', '1': 'Mash', '2': 'PassThru', '3': 'Adjunct1', '4': 'Adjunct2', '6': 'Adjunct3', '5': 'Adjunct4'} %}
                 <th scope="row">{{loop.index}}</th>
                 <td>{{step.name}}</td>
+                <td>{{LOCATION[step.location]}}</td>
                 <td>{{step.temperature}}</td>
                 <td>{{step.step_time}}</td>
                 <td>{{step.drain_time}}</td>

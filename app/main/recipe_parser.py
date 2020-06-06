@@ -1,5 +1,78 @@
-import json
+import json, uuid
 from .. import *
+
+
+class ZymaticRecipeStep():
+    def __init__(self):
+        self.name = None
+        self.temperature = None
+        self.step_time = None
+        self.location = None
+        self.drain_time = None
+
+    def serialize(self):
+        return '{0},{1},{2},{3},{4}/'.format(
+            self.name,
+            self.temperature,
+            self.step_time,
+            self.location,
+            self.drain_time
+        )
+
+
+class ZymaticRecipe():
+    def __init__(self):
+        self.id = None
+        self.name = None
+        self.name_ = None
+        self.steps = []
+
+    def parse(self, file):
+        recipe = None
+        with open(file) as f:
+            recipe = json.load(f)
+        self.id = recipe.get('id', 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX') or 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX'
+        self.name = recipe.get('name', 'Empty Recipe') or 'Empty Recipe'
+        self.name_ = self.name.replace(" ", "_")
+        if 'steps' in recipe:
+            for recipe_step in recipe['steps']:
+                step = ZymaticRecipeStep()
+                step.name = recipe_step.get('name', 'Empty Step') or 'Empty Step'
+                step.temperature = recipe_step.get('temperature', 70) or 70
+                step.step_time = recipe_step.get('step_time', 0) or 0
+                step.location = ZYMATIC_LOCATION[recipe_step.get('location', 'PassThru') or 'PassThru']
+                step.drain_time = recipe_step.get('drain_time', 0) or 0
+                self.steps.append(step)
+
+    def serialize(self):
+        steps = map(lambda step: step.serialize(), self.steps)
+        return '{0}/{1}/{2}|'.format(
+            self.name,
+            self.id,
+            ''.join(steps)
+        )
+
+
+def ZymaticRecipeImport(recipes):
+    for recipe in recipes.strip('#|').split('|'):
+        r = {}
+        steps = list(filter(None, recipe.split('/')))
+        r['name'] = steps.pop(0)
+        r['id'] = steps.pop(0)
+        r['steps'] = []
+        for step in steps:
+            values = step.split(',')
+            s = {}
+            s['name'] = values[0]
+            s['temperature'] = values[1]
+            s['step_time'] = values[2]
+            s['location'] = next(k for k, v in ZYMATIC_LOCATION.items() if v == values[3])
+            s['drain_time'] = values[4]
+            r['steps'].append(s)
+        filename = Path(ZYMATIC_RECIPE_PATH).joinpath('{}.json'.format(r['name'].replace(' ', '_')))
+        if not filename.exists():
+            with open(filename, "w") as file:
+                json.dump(r, file, indent=4, sort_keys=True)
 
 
 class PicoBrewRecipeStep():
@@ -66,3 +139,30 @@ class PicoBrewRecipe():
             ''.join(steps),
             self.image
         )
+
+
+def PicoBrewRecipeImport(recipe, rfid=None):
+    r = {}
+    r['id'] = uuid.uuid4().hex[:14] if rfid is None else rfid
+    tmp = recipe.strip('#|').split('|')
+    r['image'] = tmp[1]
+    tmp = tmp[0].split('/')
+    r['name'] = tmp[0]
+    steps = list(filter(None, tmp[1].split(',')))
+    r['abv_tweak'] = steps.pop(0)
+    r['ibu_tweak'] = steps.pop(0)
+    r['abv'] = steps.pop(0)
+    r['ibu'] = steps.pop(0)
+    r['steps'] = []
+    for step in [steps[i:i + 5] for i in range(0, len(steps), 5)]:
+        s = {}
+        s['temperature'] = step[0]
+        s['step_time'] = step[1]
+        s['drain_time'] = step[2]
+        s['location'] = next(k for k, v in PICO_LOCATION.items() if v == step[3])
+        s['name'] = step[4]
+        r['steps'].append(s)
+    filename = Path(PICO_RECIPE_PATH).joinpath('{}.json'.format(r['name'].replace(' ', '_')))
+    if not filename.exists():
+        with open(filename, "w") as file:
+            json.dump(r, file, indent=4, sort_keys=True)

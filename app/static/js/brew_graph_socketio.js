@@ -8,15 +8,16 @@ Highcharts.chart(graph_data.chart_id, {
   chart: {
     events: {
       load: function () {
-        var socket = io.connect('http://' + document.domain + ':' + location.port)
         var self = this
+        var socket = io.connect('http://' + document.domain + ':' + location.port)
         var event_name = 'brew_session_update|' + graph_data.chart_id
         socket.on(event_name, function (event)
         {
             var data = JSON.parse(event);
             self.setTitle({text: data.session}, {text: data.step});
-            self.series[0].addPoint([data.time, data.wort]);
-            self.series[1].addPoint([data.time, data.therm]);
+            for (var i = 0; i < data.data.length; i++){
+              self.series[i].addPoint([data.time, data.data[i]]);
+            }
             if (data.event)
             {
               self.xAxis[0].addPlotLine({ 'color': 'black', 'width': '2', 'value': data.time, 'label': {'text': data.event, 'style': {'color': 'white', 'fontWeight': 'bold'}, 'verticalAlign': 'top', 'x': -15, 'y': 0}});
@@ -33,7 +34,7 @@ Highcharts.chart(graph_data.chart_id, {
     enabled: false
   },
 
-  colors: ['#6CF', '#39F', '#06C', '#036', '#000'],
+  colors: ['#39F', '#F0F', '#FF6', '#F00', '#000'],
 
   plotOptions: {
     spline: {

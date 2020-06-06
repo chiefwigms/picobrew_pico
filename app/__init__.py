@@ -5,12 +5,22 @@ import json
 from pathlib import Path
 import shutil
 
-RECIPE_PATH = 'app/recipes'
+ZYMATIC_RECIPE_PATH = 'app/recipes/zymatic'
+PICO_RECIPE_PATH = 'app/recipes/pico'
 BREW_ACTIVE_PATH = 'app/sessions/brew/active'
 BREW_ARCHIVE_PATH = 'app/sessions/brew/archive'
 FERM_ACTIVE_PATH = 'app/sessions/ferm/active'
 FERM_ARCHIVE_PATH = 'app/sessions/ferm/archive'
 
+ZYMATIC_LOCATION = {
+    "PassThru": "0",
+    "Mash": "1",
+    "Adjunct1": "2",
+    "Adjunct2": "3",
+    "Adjunct3": "4",
+    "Adjunct4": "5",
+    "Pause": "6",
+}
 PICO_LOCATION = {
     "Prime": "0",
     "Mash": "1",
@@ -39,6 +49,9 @@ class PicoBrewSession():
         self.alias = ''
         self.name = 'Waiting To Brew'
         self.step = ''
+        self.session = ''
+        self.recovery = ''
+        self.is_pico = True
         self.data = []
 
     def cleanup(self):
@@ -49,6 +62,8 @@ class PicoBrewSession():
         self.filepath = None
         self.name = 'Waiting To Brew'
         self.step = ''
+        self.session = ''
+        self.recovery = ''
         self.data = []
 
 
@@ -93,6 +108,13 @@ def create_app(debug=False):
     socketio.init_app(app)
     with open('aliases.json', 'r') as f:
         aliases = json.load(f, strict=False)
+        if "Zymatic" in aliases:
+            for uid in aliases["Zymatic"]:
+                if uid != "uid":
+                    active_brew_sessions[uid] = PicoBrewSession()
+                    active_brew_sessions[uid].alias = aliases["Zymatic"][uid]
+                    active_brew_sessions[uid].is_pico = False
+                    # todo: if anything in active folder, load data in since the server probably crashed?
         if "PicoBrew" in aliases:
             for uid in aliases["PicoBrew"]:
                 if uid != "uid":

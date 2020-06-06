@@ -5,11 +5,7 @@
     <div class="card bg-dark text-white-50">
       <h5 class="card-header" id="h_{{brew_session.graph.chart_id}}">
         <a class="collapsed" role="button" data-toggle="collapse" href="#c_{{brew_session.graph.chart_id}}" data-parent="#accordion" aria-expanded="false" aria-controls="c_{{brew_session.graph.chart_id}}">
-          {% if brew_session.alias is defined and brew_session.alias|length %}
-          {{brew_session.alias}}
-          {% else %}
-          {{brew_session.graph.chart_id}}
-          {% endif %}
+          {% if brew_session.alias is defined and brew_session.alias|length %}{{brew_session.alias}}{% else %}{{brew_session.graph.chart_id}}{% endif %}
         </a>
       </h5>
       <div id="c_{{brew_session.graph.chart_id}}" class="collapse show" aria-labelledby="h_{{brew_session.graph.chart_id}}">
@@ -33,11 +29,7 @@
     <div class="card bg-dark text-white-50">
       <h5 class="card-header" id="h_{{ferm_session.graph.chart_id}}">
         <a class="collapsed" role="button" data-toggle="collapse" href="#c_{{ferm_session.graph.chart_id}}" data-parent="#accordion" aria-expanded="false" aria-controls="c_{{ferm_session.graph.chart_id}}">
-          {% if ferm_session.alias is defined and ferm_session.alias|length %}
-          {{ferm_session.alias}}
-          {% else %}
-          {{ferm_session.graph.chart_id}}
-          {% endif %}
+          {% if ferm_session.alias is defined and ferm_session.alias|length %}{{ferm_session.alias}}{% else %}{{ferm_session.graph.chart_id}}{% endif %}
         </a>
       </h5>
       <div id="c_{{ferm_session.graph.chart_id}}" class="collapse show" aria-labelledby="h_{{ferm_session.graph.chart_id}}">

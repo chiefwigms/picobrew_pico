@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block content %}
+  <form id="recipe_header">
+    <div class="form-row">
+      <div class="form-group col-sm-3">
+        <input type="text" class="form-control form-control-sm" id="recipe_name" placeholder="Recipe Name">
+      </div>
+    </div>
+  </form>
+  <div class="w-75 table-sm table-striped table-bordered table-light" id="recipe-table"></div>
+  <div><button class="w-75 btn btn-sm btn-secondary btn-block" type="button">Save</button></div>
+  <script src="static/js/new_zymatic_recipe.js"></script>
+{% endblock %}
