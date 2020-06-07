@@ -9,7 +9,7 @@ DNS Forwarding (either through a router, RaspberryPi etc)
 
 ## Setup/Run
 Clone this repo, then run  
-`pip3 install -r requirements.txt`  
+`sudo pip3 install -r requirements.txt` on *nix or `pip3 install -r requirements.txt` as an Administrator in windows  
 `sudo python3 server.py` on *nix or `python3 server.py` as an Administrator in windows
 
 ## Manual Recipe Editing
