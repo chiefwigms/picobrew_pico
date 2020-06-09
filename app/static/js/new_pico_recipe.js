@@ -88,12 +88,16 @@ $(document).ready(function(){
         recipe.image = ''
         recipe.steps = table.getData();
 		$.ajax({
-			url: 'new_pico_recipe_save',
+			url: 'new_pico_recipe',
 			type: 'POST',
             data: JSON.stringify(recipe),
             dataType: "json",
             processData: false,
             contentType: "application/json; charset=UTF-8",
+            success: function(data) {
+                $("#alert").show();
+                setTimeout(function () { window.location.href = "pico_recipes";}, 2000);
+            },
 		});
 	});
 });

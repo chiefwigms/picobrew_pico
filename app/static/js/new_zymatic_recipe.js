@@ -87,12 +87,16 @@ $(document).ready(function(){
         recipe.name = document.getElementById('recipe_header').elements['recipe_name'].value;
         recipe.steps = table.getData();
 		$.ajax({
-			url: 'new_zymatic_recipe_save',
+			url: 'new_zymatic_recipe',
 			type: 'POST',
             data: JSON.stringify(recipe),
             dataType: "json",
             processData: false,
             contentType: "application/json; charset=UTF-8",
+            success: function(data) {
+                $("#alert").show();
+                setTimeout(function () { window.location.href = "zymatic_recipes";}, 2000);
+            },
 		});
 	});
 });

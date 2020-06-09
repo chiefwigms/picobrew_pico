@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block content %}
+  <h5 class="text-white bg-dark">Remove any DNSMASQ/Routing Before Importing!</h5>
+  <form id="import_recipes" action="import_pico_recipe" method="post">
+    <div class="form-row">
+      <div class="form-group col-sm-5">
+        <input type="text" class="form-control form-control-sm" name="rfid" id="rfid" placeholder="14 Character RFID on PicoPak">
+      </div>
+      <div>
+        <button class="btn btn-sm btn-secondary btn-block" type="submit">Import</button>
+      </div>
+    </div>
+    <div id=alert class="w-75 alert alert-success text-center collapse" role="alert">Success!</div>
+  </form>
+{% endblock %}

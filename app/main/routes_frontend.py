@@ -1,8 +1,8 @@
-import json, uuid
+import json, uuid, requests
 from pathlib import Path
 from flask import *
 from . import main
-from .recipe_parser import PicoBrewRecipe, ZymaticRecipe
+from .recipe_parser import PicoBrewRecipe, PicoBrewRecipeImport, ZymaticRecipe, ZymaticRecipeImport
 from .. import *
 import sys
 
@@ -24,26 +24,43 @@ def ferm_history():
 
 
 @main.route('/zymatic_recipes')
-def zymatic_recipes():
+def _zymatic_recipes():
     global zymatic_recipes
     zymatic_recipes = load_zymatic_recipes()
     return render_template('zymatic_recipes.html', recipes=zymatic_recipes)
 
 
-@main.route('/new_zymatic_recipe')
+@main.route('/new_zymatic_recipe', methods = ['GET','POST'])
 def new_zymatic_recipe():
-    return render_template('new_zymatic_recipe.html')
+    if request.method == 'POST':
+        recipe = request.get_json()
+        recipe['id'] = uuid.uuid4().hex[:32]
+        filename = Path(ZYMATIC_RECIPE_PATH).joinpath('{}.json'.format(recipe['name'].replace(' ', '_')))
+        if not filename.exists():
+            with open(filename, "w") as file:
+                json.dump(recipe, file, indent=4, sort_keys=True)
+        return '', 204
+    else:
+        return render_template('new_zymatic_recipe.html')
 
 
-@main.route('/new_zymatic_recipe_save', methods=['POST'])
-def new_zymatic_recipe_save():
-    recipe = request.get_json()
-    recipe['id'] = uuid.uuid4().hex[:32]
-    filename = Path(ZYMATIC_RECIPE_PATH).joinpath('{}.json'.format(recipe['name'].replace(' ', '_')))
-    if not filename.exists():
-        with open(filename, "w") as file:
-            json.dump(recipe, file, indent=4, sort_keys=True)
-    return '', 204
+@main.route('/import_zymatic_recipe', methods = ['GET','POST'])
+def import_zymatic_recipe():
+    if request.method == 'POST':
+        recipes = ''
+        guid = request.form['guid']
+        machine = next((uid for uid in active_brew_sessions if active_brew_sessions[uid].is_pico == False), None)
+        try:
+            r = requests.get('http://picobrew.com/API/SyncUSer?user={}&machine={}'.format(guid, machine))
+            recipes = r.text.strip()
+        except:
+            pass
+        print('DEBUG: Zymatic Recipes Dumped: \"{}\"'.format(recipes))
+        if len(recipes) > 2 and recipes[0] == '#' and recipes[-1] == '#':
+            ZymaticRecipeImport(recipes)
+        return '', 204
+    else:
+        return render_template('import_zymatic_recipe.html')
 
 
 def load_zymatic_recipes():
@@ -64,26 +81,43 @@ def get_zymatic_recipes():
 
 
 @main.route('/pico_recipes')
-def pico_recipes():
+def _pico_recipes():
     global pico_recipes
     pico_recipes = load_pico_recipes()
     return render_template('pico_recipes.html', recipes=pico_recipes)
 
 
-@main.route('/new_pico_recipe')
+@main.route('/new_pico_recipe', methods = ['GET','POST'])
 def new_pico_recipe():
-    return render_template('new_pico_recipe.html')
+    if request.method == 'POST':
+        recipe = request.get_json()
+        recipe['id'] = uuid.uuid4().hex[:14]
+        filename = Path(PICO_RECIPE_PATH).joinpath('{}.json'.format(recipe['name'].replace(' ', '_')))
+        if not filename.exists():
+            with open(filename, "w") as file:
+                json.dump(recipe, file, indent=4, sort_keys=True)
+        return '', 204
+    else:
+        return render_template('new_pico_recipe.html')
 
 
-@main.route('/new_pico_recipe_save', methods=['POST'])
-def new_pico_recipe_save():
-    recipe = request.get_json()
-    recipe['id'] = uuid.uuid4().hex[:14]
-    filename = Path(PICO_RECIPE_PATH).joinpath('{}.json'.format(recipe['name'].replace(' ', '_')))
-    if not filename.exists():
-        with open(filename, "w") as file:
-            json.dump(recipe, file, indent=4, sort_keys=True)
-    return '', 204
+@main.route('/import_pico_recipe', methods = ['GET','POST'])
+def import_pico_recipe():
+    if request.method == 'POST':
+        recipe = ''
+        rfid = request.form['rfid']
+        uid = next((uid for uid in active_brew_sessions if active_brew_sessions[uid].is_pico == True), None)
+        try:
+            r = requests.get('http://picobrew.com/API/pico/getRecipe?uid={}&rfid={}&ibu=-1&abv=-1.0'.format(uid, rfid))
+            recipe = r.text.strip()
+        except:
+            pass
+        print('DEBUG: Pico Recipe Dumped: \"{}\"'.format(recipe))
+        if len(recipe) > 2 and recipe[0] == '#' and recipe[-1] == '#' and recipe != '#Invalid|#':
+            PicoBrewRecipeImport(recipe, rfid)
+        return '', 204
+    else:
+        return render_template('import_pico_recipe.html')
 
 
 def load_pico_recipes():
