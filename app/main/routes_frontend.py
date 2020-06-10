@@ -30,7 +30,7 @@ def _zymatic_recipes():
     return render_template('zymatic_recipes.html', recipes=zymatic_recipes)
 
 
-@main.route('/new_zymatic_recipe', methods = ['GET','POST'])
+@main.route('/new_zymatic_recipe', methods=['GET', 'POST'])
 def new_zymatic_recipe():
     if request.method == 'POST':
         recipe = request.get_json()
@@ -44,12 +44,12 @@ def new_zymatic_recipe():
         return render_template('new_zymatic_recipe.html')
 
 
-@main.route('/import_zymatic_recipe', methods = ['GET','POST'])
+@main.route('/import_zymatic_recipe', methods=['GET', 'POST'])
 def import_zymatic_recipe():
     if request.method == 'POST':
         recipes = ''
         guid = request.form['guid']
-        machine = next((uid for uid in active_brew_sessions if active_brew_sessions[uid].is_pico == False), None)
+        machine = next((uid for uid in active_brew_sessions if not active_brew_sessions[uid].is_pico), None)
         try:
             r = requests.get('http://picobrew.com/API/SyncUSer?user={}&machine={}'.format(guid, machine))
             recipes = r.text.strip()
@@ -87,7 +87,7 @@ def _pico_recipes():
     return render_template('pico_recipes.html', recipes=pico_recipes)
 
 
-@main.route('/new_pico_recipe', methods = ['GET','POST'])
+@main.route('/new_pico_recipe', methods=['GET', 'POST'])
 def new_pico_recipe():
     if request.method == 'POST':
         recipe = request.get_json()
@@ -102,12 +102,12 @@ def new_pico_recipe():
         return render_template('new_pico_recipe.html')
 
 
-@main.route('/import_pico_recipe', methods = ['GET','POST'])
+@main.route('/import_pico_recipe', methods=['GET', 'POST'])
 def import_pico_recipe():
     if request.method == 'POST':
         recipe = ''
         rfid = request.form['rfid']
-        uid = next((uid for uid in active_brew_sessions if active_brew_sessions[uid].is_pico == True), None)
+        uid = next((uid for uid in active_brew_sessions if active_brew_sessions[uid].is_pico), None)
         try:
             r = requests.get('http://picobrew.com/API/pico/getRecipe?uid={}&rfid={}&ibu=-1&abv=-1.0'.format(uid, rfid))
             recipe = r.text.strip()
