@@ -189,12 +189,12 @@ def get_zymatic_recipe_list():
 
 def get_recipe_name_by_id(recipe_id):
     recipe = next((r for r in get_zymatic_recipes() if r.id == recipe_id), None)
-    return recipe.name
+    return 'Invalid Recipe' if not recipe else recipe.name
 
 
 def get_recipe_by_name(recipe_name):
     recipe = next((r for r in get_zymatic_recipes() if r.name == recipe_name), None)
-    return recipe.serialize()
+    return '' if not recipe else recipe.serialize()
 
 
 def get_machine_by_session(session):

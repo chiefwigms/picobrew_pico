@@ -99,7 +99,7 @@ def create_app(debug=False):
     """Create an application."""
     app = Flask(__name__)
     CORS(app)
-    app.config.update(CORS_HEADERS='Content-Type')
+    app.config.update(SECRET_KEY='bosco', CORS_HEADERS='Content-Type')
 
     from .main import main as main_blueprint
 

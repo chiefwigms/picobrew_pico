@@ -184,12 +184,12 @@ def process_log(args):
 # -------- Utility --------
 def get_recipe_by_id(recipe_id):
     recipe = next((r for r in get_pico_recipes() if r.id == recipe_id), None)
-    return recipe.serialize()
+    return '' if not recipe else recipe.serialize()
 
 
 def get_recipe_name_by_id(recipe_id):
     recipe = next((r for r in get_pico_recipes() if r.id == recipe_id), None)
-    return recipe.name
+    return 'Invalid Recipe' if not recipe else recipe.name
 
 
 def get_recipe_list():
