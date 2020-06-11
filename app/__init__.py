@@ -4,6 +4,7 @@ from flask_socketio import SocketIO
 import json
 from pathlib import Path
 import shutil
+import yaml
 
 ZYMATIC_RECIPE_PATH = 'app/recipes/zymatic'
 PICO_RECIPE_PATH = 'app/recipes/pico'
@@ -13,22 +14,22 @@ FERM_ACTIVE_PATH = 'app/sessions/ferm/active'
 FERM_ARCHIVE_PATH = 'app/sessions/ferm/archive'
 
 ZYMATIC_LOCATION = {
-    "PassThru": "0",
-    "Mash": "1",
-    "Adjunct1": "2",
-    "Adjunct2": "3",
-    "Adjunct3": "4",
-    "Adjunct4": "5",
-    "Pause": "6",
+    'PassThru': '0',
+    'Mash': '1',
+    'Adjunct1': '2',
+    'Adjunct2': '3',
+    'Adjunct3': '4',
+    'Adjunct4': '5',
+    'Pause': '6',
 }
 PICO_LOCATION = {
-    "Prime": "0",
-    "Mash": "1",
-    "PassThru": "2",
-    "Adjunct1": "3",
-    "Adjunct2": "4",
-    "Adjunct3": "6",
-    "Adjunct4": "5",
+    'Prime': '0',
+    'Mash': '1',
+    'PassThru': '2',
+    'Adjunct1': '3',
+    'Adjunct2': '4',
+    'Adjunct3': '6',
+    'Adjunct4': '5',
 }
 PICO_SESSION = {
     0: 'Brewing',
@@ -70,6 +71,9 @@ class PicoBrewSession():
 active_ferm_sessions = {}
 
 
+server_cfg = {}
+
+
 class PicoFermSession():
     def __init__(self):
         self.file = None
@@ -106,25 +110,24 @@ def create_app(debug=False):
     # ----- Routes ----------
     app.register_blueprint(main_blueprint)
     socketio.init_app(app)
-    with open('aliases.json', 'r') as f:
-        aliases = json.load(f, strict=False)
-        if "Zymatic" in aliases:
-            for uid in aliases["Zymatic"]:
-                if uid != "uid":
-                    active_brew_sessions[uid] = PicoBrewSession()
-                    active_brew_sessions[uid].alias = aliases["Zymatic"][uid]
-                    active_brew_sessions[uid].is_pico = False
-                    # todo: if anything in active folder, load data in since the server probably crashed?
-        if "PicoBrew" in aliases:
-            for uid in aliases["PicoBrew"]:
-                if uid != "uid":
-                    active_brew_sessions[uid] = PicoBrewSession()
-                    active_brew_sessions[uid].alias = aliases["PicoBrew"][uid]
-                    # todo: if anything in active folder, load data in since the server probably crashed?
-        if "PicoFerm" in aliases:
-            for uid in aliases["PicoFerm"]:
-                if uid != "uid":
-                    active_ferm_sessions[uid] = PicoFermSession()
-                    active_ferm_sessions[uid].alias = aliases["PicoFerm"][uid]
-                    # todo: if anything in active folder, load data in since the server probably crashed?
+    with open('config.yaml', 'r') as f:
+        server_cfg = yaml.safe_load(f)
+    
+    if 'aliases' in server_cfg:
+        if 'Zymatic' in server_cfg['aliases'] and server_cfg['aliases']['Zymatic']:
+            for uid in server_cfg['aliases']['Zymatic']:
+                active_brew_sessions[uid] = PicoBrewSession()
+                active_brew_sessions[uid].alias = server_cfg['aliases']['Zymatic'][uid]
+                active_brew_sessions[uid].is_pico = False
+                # todo: if anything in active folder, load data in since the server probably crashed?
+        if 'PicoBrew' in server_cfg['aliases'] and server_cfg['aliases']['PicoBrew']:
+            for uid in server_cfg['aliases']['PicoBrew']:
+                active_brew_sessions[uid] = PicoBrewSession()
+                active_brew_sessions[uid].alias = server_cfg['aliases']['PicoBrew'][uid]
+                # todo: if anything in active folder, load data in since the server probably crashed?
+        if 'PicoFerm' in server_cfg['aliases'] and server_cfg['aliases']['PicoFerm']:
+            for uid in server_cfg['aliases']['PicoFerm']:
+                active_ferm_sessions[uid] = PicoFermSession()
+                active_ferm_sessions[uid].alias = server_cfg['aliases']['PicoFerm'][uid]
+                # todo: if anything in active folder, load data in since the server probably crashed?
     return app
