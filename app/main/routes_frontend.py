@@ -39,7 +39,9 @@ def new_zymatic_recipe():
         if not filename.exists():
             with open(filename, "w") as file:
                 json.dump(recipe, file, indent=4, sort_keys=True)
-        return '', 204
+            return '', 204
+        else:
+            return 'Recipe Exists!', 418
     else:
         return render_template('new_zymatic_recipe.html')
 
@@ -48,7 +50,8 @@ def new_zymatic_recipe():
 def import_zymatic_recipe():
     if request.method == 'POST':
         recipes = ''
-        guid = request.form['guid']
+        data = request.get_json()
+        guid = data['guid']
         machine = next((uid for uid in active_brew_sessions if not active_brew_sessions[uid].is_pico), None)
         try:
             r = requests.get('http://picobrew.com/API/SyncUSer?user={}&machine={}'.format(guid, machine))
@@ -58,7 +61,9 @@ def import_zymatic_recipe():
         print('DEBUG: Zymatic Recipes Dumped: \"{}\"'.format(recipes))
         if len(recipes) > 2 and recipes[0] == '#' and recipes[-1] == '#':
             ZymaticRecipeImport(recipes)
-        return '', 204
+            return '', 204
+        else:
+            return 'Import Failed: \"' + recipes + '\"', 418
     else:
         return render_template('import_zymatic_recipe.html')
 
@@ -97,7 +102,9 @@ def new_pico_recipe():
         if not filename.exists():
             with open(filename, "w") as file:
                 json.dump(recipe, file, indent=4, sort_keys=True)
-        return '', 204
+            return '', 204
+        else:
+            return 'Recipe Exists!', 418
     else:
         return render_template('new_pico_recipe.html')
 
@@ -106,7 +113,8 @@ def new_pico_recipe():
 def import_pico_recipe():
     if request.method == 'POST':
         recipe = ''
-        rfid = request.form['rfid']
+        data = request.get_json()
+        rfid = data['rfid']
         uid = next((uid for uid in active_brew_sessions if active_brew_sessions[uid].is_pico), None)
         try:
             r = requests.get('http://picobrew.com/API/pico/getRecipe?uid={}&rfid={}&ibu=-1&abv=-1.0'.format(uid, rfid))
@@ -116,7 +124,9 @@ def import_pico_recipe():
         print('DEBUG: Pico Recipe Dumped: \"{}\"'.format(recipe))
         if len(recipe) > 2 and recipe[0] == '#' and recipe[-1] == '#' and recipe != '#Invalid|#':
             PicoBrewRecipeImport(recipe, rfid)
-        return '', 204
+            return '', 204
+        else:
+            return 'Import Failed: \"' + recipe + '\"', 418
     else:
         return render_template('import_pico_recipe.html')
 

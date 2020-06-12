@@ -1,15 +1,14 @@
 {% extends "base.html" %}
 {% block content %}
   <h5 class="text-white bg-dark">Remove any DNSMASQ/Routing Before Importing!</h5>
-  <form id="import_recipes" action="import_zymatic_recipe" method="post">
+  <form id="import_recipe">
     <div class="form-row">
       <div class="form-group col-sm-5">
         <input type="text" class="form-control form-control-sm" name="guid" id="guid" placeholder="32 Character Profile GUID (Username > Settings)">
       </div>
-      <div>
-        <button class="btn btn-sm btn-secondary btn-block" type="submit">Import</button>
-      </div>
+      <div><button class="btn btn-sm btn-secondary btn-block" type="button">Import</button></div>
     </div>
-    <div id=alert class="w-75 alert alert-success text-center collapse" role="alert">Success!</div>
   </form>
+  <div id=alert class='hide'></div>
+  <script src="static/js/import_recipe.js"></script>
 {% endblock %}
