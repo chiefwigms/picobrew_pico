@@ -1,3 +1,7 @@
+# python files
+**/__pycache__
+
+# project specific ignores
 app/recipes/pico/*
 app/recipes/zymatic/*
 app/recipes/zseries/*

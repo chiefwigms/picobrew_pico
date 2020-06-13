@@ -7,7 +7,7 @@ import shutil
 import yaml
 import os
 
-BASE_PATH = os.getenv('BASE_PATH', Path(__file__).parents[1])
+BASE_PATH = Path(__file__).parents[1]
 ZYMATIC_RECIPE_PATH = str(BASE_PATH.joinpath('app/recipes/zymatic'))
 PICO_RECIPE_PATH = str(BASE_PATH.joinpath('app/recipes/pico'))
 BREW_ACTIVE_PATH = str(BASE_PATH.joinpath('app/sessions/brew/active'))
