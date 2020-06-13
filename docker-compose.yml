@@ -1,0 +1,18 @@
+version: "3.8"
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment: 
+      FLASK_ENV: development
+    volumes:
+      - type: bind
+        source: ./app/recipes
+        target: /app/recipes
+      - type: bind
+        source: ./app/sessions
+        target: /app/sessions
+    ports:
+      - 8080:80
+
