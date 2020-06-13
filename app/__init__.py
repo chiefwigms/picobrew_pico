@@ -5,7 +5,6 @@ import json
 from pathlib import Path
 import shutil
 import yaml
-import os
 
 BASE_PATH = Path(__file__).parents[1]
 ZYMATIC_RECIPE_PATH = str(BASE_PATH.joinpath('app/recipes/zymatic'))

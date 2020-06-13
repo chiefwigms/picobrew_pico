@@ -147,8 +147,8 @@ def PicoBrewRecipeImport(recipe, rfid=None):
     if len(tmp) > 1:
         r['image'] = tmp[1]
     tmp = tmp[0].split('/')
-    r['name'] = tmp[0]
-    steps = list(filter(None, tmp[1].split(',')))
+    steps = list(filter(None, tmp.pop().split(',')))
+    r['name'] = ''.join(tmp)
     r['abv_tweak'] = steps.pop(0)
     r['ibu_tweak'] = steps.pop(0)
     r['abv'] = steps.pop(0)
