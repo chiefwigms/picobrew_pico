@@ -1,0 +1,591 @@
+import json, uuid, os
+from datetime import datetime
+from pathlib import Path
+from time import mktime
+from flask import *
+from flask_socketio import emit
+from webargs import fields
+from webargs.flaskparser import use_args, FlaskParser
+from . import main
+from .routes_frontend import get_zseries_recipes, load_brew_sessions_by_machine
+from .. import *
+from enum import Enum
+from random import seed
+from random import randint
+
+
+arg_parser = FlaskParser()
+seed(1)
+
+events = {}
+
+latest_firmware = {
+    "version": "0.0.119",
+    "source": "https://picobrewcontent.blob.core.windows.net/firmware/zseries/zseries_0_0_119.bin"
+}
+
+
+class SessionType(int, Enum):
+    RINSE = 0
+    CLEAN = 1
+    DRAIN = 2
+    RACK_BEER = 3
+    CIRCULATE = 4
+    SOUS_VIDE = 5
+    BEER = 6
+    COFFEE = 12
+    CHILL = 13
+
+
+class ZProgramId(int, Enum):
+    RINSE = 1
+    DRAIN = 2
+    RACK_BEER = 3
+    CIRRCULATE = 4
+    SOUS_VIDE = 6
+    CLEAN = 12
+    BEER_OR_COFFEE = 24
+    CHILL = 27
+
+
+# ZState: PUT /Vendors/input.cshtml?type=ZState&token={}
+#             Response: '\r\n\r\n#{0}#' where {0} : Machine State Response (firmware, boilertype, session stats, reg token)
+zseries_query_args = {
+    'type': fields.Str(required=False),          # API request type identifier
+    'token': fields.Str(required=True),         # alpha-numeric unique identifier for Z
+    'id': fields.Str(required=False),           # alpha-numeric unique identifier for Z session/recipe
+    'ctl': fields.Str(required=False)           # recipe list request doesn't use `type` param
+}
+
+
+# ZFetchRecipeSummary: POST /Vendors/input.cshtml?ctl=RecipeRefListController&token={}
+#                           Response: '\r\n\r\n#{0}#' where {0} : Recipes Response 
+# ZSessionUpdate:      POST /Vendors/input.cshtml?type=ZSessionLog&token={}
+#                      Response: '\r\n\r\n#{0}#' where {0} : Echo Session Log Request with ID and Date
+# ZSession: POST /Vendors/input.cshtml?type=ZSession&token={}&id={}  // id == session_id is only present on "complete session" request
+#               Response: '\r\n\r\n#{0}#' where {0} : Machine State Response (firmware, boilertype, session stats, reg token)
+@main.route('/Vendors/input.cshtml', methods=['POST'])
+@use_args(zseries_query_args, location='querystring')
+def process_zseries_post_request(args):
+    type = request.args.get('type')
+    controller = request.args.get('ctl')
+
+    # current_app.logger.debug('DEBUG: ZSeries POST request args = {}; request = {}'.format(args, request.json))
+    
+    if controller == 'RecipeRefListController':
+        body = request.json
+        ret = {
+            "Kind": body['Kind'],
+            "MaxCount": body['MaxCount'],
+            "Offset": body['Offset'],
+            "Recipes": get_zseries_recipe_metadata_list()
+        }
+        return Response(json.dumps(ret), mimetype='application/json')
+    elif type == 'ZSessionLog':
+        return update_session_log(request.args.get('token'), request.json)
+    elif type == 'ZSession':
+        return create_or_close_session(request)
+    else:
+        abort(404)
+
+
+# ZState:   PUT /Vendors/input.cshtml?type=ZState&token={}
+#               Response: '\r\n\r\n#{0}#' where {0} : Machine State Response (firmware, boilertype, session stats, reg token)
+# ZSession: PUT /Vendors/input.cshtml?type=ZSession&token={}&id={}  // id == session_id is only present on "complete session" request
+#               Response: '\r\n\r\n#{0}#' where {0} : Machine State Response (firmware, boilertype, session stats, reg token)
+@main.route('/Vendors/input.cshtml', methods=['PUT'])
+@use_args(zseries_query_args, location='querystring')
+def process_zseries_put_request(args):
+    type = request.args.get('type')
+    if type == 'ZState' and request.json['CurrentFirmware']:
+        return process_zstate(request)
+    elif type == 'ZSession':
+        return create_or_close_session(request)
+    else:
+        abort(404)
+
+
+# ZRecipeDetails:   GET /Vendors/input.cshtml?type=Recipe&token={}&id={} // id == recipe_id
+#                       Response: '\r\n\r\n#{0}#' where {0} : Remaining Recipe Steps (based on last session update from machine)
+# ZResumeSession:   GET /Vendors/input.cshtml?type=ResumableSession&token={}&id={} // id == session_id
+#                       Response: '\r\n\r\n#{0}#' where {0} : Remaining Recipe Steps (based on last session update from machine)
+@main.route('/Vendors/input.cshtml', methods=['GET'])
+@use_args(zseries_query_args, location='querystring')
+def process_zseries_get_request(args):
+    type = request.args.get('type')
+    identifier = request.args.get('id')
+
+    # current_app.logger.debug('DEBUG: ZSeries GET request args = {};'.format(args))
+
+    if type == 'Recipe' and identifier != None:
+        return process_recipe_request(identifier)
+    elif type == 'ResumableSession' and identifier != None:
+        return process_recover_session(request.args.get('token'), identifier)
+    else:
+        abort(404)
+
+
+# GET /Vendors/input.cshtml?type=Recipe&token={}&id={} // id == recipe_id
+def process_recipe_request(recipe_id):
+    recipe = get_recipe_by_id(recipe_id)
+    return recipe.serialize()
+
+
+# SyncUser: /API/SyncUser?user={}&machine={}
+# Response: '\r\n\r\n#{0}#' where {0} : Cleaning/Recipe List
+sync_user_args = {
+    'user': fields.Str(required=True),          # 32 character alpha-numeric Profile GUID
+    'machine': fields.Str(required=True),       # 12 character alpha-numeric Product ID
+}
+# @main.route('/API/SyncUser')
+# @main.route('/API/SyncUSer')
+# @use_args(sync_user_args, location='querystring')
+# def process_sync_user(args):
+#     if args['user'] == '00000000000000000000000000000000':
+#         # New Clean V6
+#         # -Make sure that all 3 mash screens are in place in the step filter. Do not insert the adjunct loaf/hop cages.
+#         # -Place cleaning tablet in the right area of the adjunct compartment, on top of the smaller screen, at the end of the metal tab. 1/4 cup of powdered dishwasher detergent can also be used.
+#         # -Add 1.5 gallons of HOT tap water to the keg at completion of cleaning cycle (prompt notes/before final step) -Empty and rinse keg, step filter, screens, and in-line filter.
+#         # -Fill keg with 4 gallons of hot tap water
+#         # -Connect black fitting to 'OUT' post on keg
+#         # -Attach wand to grey fitting and run it into bucket or sink, OR attach grey fitting to 'IN' post on empty keg
+#         # -Continue, this will rinse your system. There should be no water left in the keg at the end of this step.
+#         # Share your experience with info@picobrew.com, Subject - New Clean Beta attn: Kevin, attach pictures of debris removed and collected on screens if possible.
+#         return '\r\n\r\n#Cleaning v1/7f489e3740f848519558c41a036fe2cb/Heat Water,152,0,0,0/Clean Mash,152,15,1,5/Heat to Temp,152,0,0,0/Adjunct,152,3,2,1/Adjunct,152,2,3,1/Adjunct,152,2,4,1/Adjunct,152,2,5,1/Heat to Temp,197,0,0,0/Clean Mash,197,10,1,0/Clean Mash,197,2,1,0/Clean Adjunct,197,2,2,0/Chill,120,10,0,2/|Rinse v3/0160275741134b148eff90acdd5e462f/Rinse,0,2,0,5/|New Clean Beta v6/c66b2c4f4a3f42fb8180c795d0d01813/Fill Mash,0,5,1,0/Balance Temps,0,5,5,0/Heat to 120,120,0,0,0/120,120,20,5,0/Heat to 140,140,0,0,0/140,140,35,5,0/Mash,0,5,1,0/Balance Temps,0,3,0,0/140,140,5,5,0/160,160,5,5,0/175,175,5,5,0/Heat to 200,197,0,0,0/200,197,19,5,0/Mash,0,3,1,0/Balance Temps,0,3,0,0/Cool,120,3,5,0/Mash,0,5,1,8/See RecP Notes,0,0,6,0/Flush System,0,12,5,0/|#'
+#     else:
+#         # Brew Recipes
+#         return '\r\n\r\n#{0}#'.format(get_zymatic_recipe_list())
+
+
+# checksync: /Vendors/input.cshtml?type=ZState&token=<token>
+#  Request:    { "BoilerType": 1|2, "CurrentFirmware": "1.2.3" }
+#  Response (example):
+#              {
+#                   "Alias": "ZSeries",
+#                   "BoilerType": 1,
+#                   "CurrentFirmware": "0.0.116",
+#                   "IsRegistered": true,
+#                   "IsUpdated": true,
+#                   "ProgramUri": null,
+#                   "RegistrationToken": "-1",
+#                   "SessionStats": {
+#                       "DirtySessionsSinceClean": 1,
+#                       "LastSessionType": 5,
+#                       "ResumableSessionID": -1
+#                   },
+#                   "TokenExpired": false,
+#                   "UpdateAddress": "-1",
+#                   "UpdateToFirmware": null,
+#                   "ZBackendError": 0
+#               }
+def process_zstate(args):
+    json = request.json
+    update_required = json['CurrentFirmware'] != latest_firmware['version']
+    uid = request.args['token']
+    
+    returnVal = {
+        "Alias": "ZSeries",
+        "BoilerType": json['BoilerType'],       # TODO sometimes machine loses boilertype, need to resync with known state
+        "IsRegistered": True,                   # likely we don't care about registration with BYOS
+        "IsUpdated": False if update_required else True,
+        "ProgramUri": None,                     # what is this?
+        "RegistrationToken": -1,
+        "SessionStats": {
+            "DirtySessionsSinceClean": dirty_sessions_since_clean(uid),
+            "LastSessionType": last_session_type(uid),
+            "ResumableSessionID": resumable_session_id(uid)
+        },
+        "UpdateAddress": latest_firmware['source'] if update_required else "-1",
+        "UpdateToFirmware": None,
+        "ZBackendError": 0
+    }
+    return returnVal
+
+
+def dirty_sessions_since_clean(uid):
+    brew_sessions = get_archived_sessions_by_machine(uid)
+    post_clean_sessions = []
+    clean_found = False
+    for s in reversed(brew_sessions):
+        session_type = SessionType(s['type'])
+        if (session_type == SessionType.CLEAN):
+            clean_found = True
+        
+        if (not clean_found and session_type in [SessionType.BEER.value, SessionType.COFFEE.value, SessionType.SOUS_VIDE.value]):
+            post_clean_sessions.append(s)
+        
+    return len(post_clean_sessions)
+
+
+def last_session_type(uid):
+    brew_sessions = get_archived_sessions_by_machine(uid)
+    
+    if len(brew_sessions) == 0:
+        return SessionType.CLEAN
+    else:
+        last_session = brew_sessions[len(brew_sessions) - 1]
+        # just assume last session was a rinse session (session after a brew)
+        session_type = SessionType(last_session['type']) if last_session['type'] != None else SessionType.RINSE
+        return session_type
+
+def resumable_session_id(uid):
+    if uid not in active_brew_sessions:
+        return -1
+    
+    return active_brew_sessions[uid].id
+
+
+# checksync: /Vendors/input.cshtml?type=ZSession&token=<token>&id=<session_id>
+#  Request (example - beer session):    
+#              {
+#                   "DurationSec": 11251,
+#                   "FirmwareVersion": "0.0.119",
+#                   "GroupSession": true,
+#                   "MaxTemp": 98.22592515,
+#                   "MaxTempAddedSec": 0,
+#                   "Name": "All Good Things",
+#                   "PressurePa": 101975.6172,
+#                   "ProgramParams": {
+#                       "Abv": -1,              # not a customization feature on the Z
+#                       "Duration": 0,          
+#                       "Ibu": -1,
+#                       "Intensity": 0,
+#                       "Temperature": 0,
+#                       "Water": 13.1
+#                   },
+#                   "RecipeID": "150xxx",
+#                   "SessionType": 6,           # see options in SessionType
+#                   "ZProgramId": 24            # see options in ZProgram
+#               }
+# #  Response (example - begin session):
+#              {
+#                   "Active": false,
+#                   "CityLat": xx.xxxxxx,
+#                   "CityLng": -yyy.yyyyyy,
+#                   "ClosingDate": "2020-05-04T19:54:58.74",
+#                   "CreationDate": "2020-05-04T19:46:04.153",
+#                   "Deleted": false,
+#                   "DurationSec": 578,
+#                   "FirmwareVersion": "0.0.119",
+#                   "GUID": "<all upper case machine guid>",
+#                   "GroupSession": false,
+#                   "ID": <session-id>,
+#                   "LastLogID": 11407561,
+#                   "Lat": xx.xxxxxx,
+#                   "Lng": -yyy.yyyyyy,
+#                   "MaxTemp": 98.24455443,
+#                   "MaxTempAddedSec": 0,
+#                   "Name": "RINSE",
+#                   "Notes": null,
+#                   "Pressure": 0,
+#                   "ProfileID": zzzz,
+#                   "ProgramParams": {
+#                       "Abv": null,              # not a customization feature on the Z
+#                       "Duration": 0.0,          
+#                       "Ibu": null,
+#                       "Intensity": 0.0,
+#                       "Temperature": 0.0,
+#                       "Water": 0.0
+#                   },
+#                   "RecipeGuid": null,
+#                   "RecipeID": null,
+#                   "SecondsRemaining": 0,
+#                   "SessionLogs": [],
+#                   "SessionType": 0,
+#                   "StillUID": null,
+#                   "StillVer": null,
+#                   "ZProgramId": 1,
+#                   "ZSeriesID": www
+#               }
+def create_or_close_session(args):
+    session_id = request.args.get('id')
+
+    if session_id:
+        return close_session(request.args.get('token'), session_id, request.json)
+    else:
+        return create_session(request.args.get('token'), request.json)
+    
+    
+
+def create_session(token, body):
+    uid = token                # token uniquely identifies the machine
+    recipe = get_recipe_by_name(body['Name'])
+
+    # error out if recipe isn't known where session is beer type (ie 6)
+    # due to rinse, rack beer, clean, coffee, sous vide, etc not having server known "recipes"
+    if recipe == None and body['SessionType'] == SessionType.BEER:
+        return Response("{ 'error': 'recipe not found - unable to start session' }", status=404, mimetype='application/json')
+    elif recipe:
+        current_app.logger.debug('recipe for session: {}'.format(recipe.serialize()))
+
+    if uid not in active_brew_sessions:
+        active_brew_sessions[uid] = PicoBrewSession()
+
+    session_guid = uuid.uuid4().hex[:32]
+    session_id = increment_session_id(uid)
+    
+    active_brew_sessions[uid].guid = session_guid
+    active_brew_sessions[uid].id = session_id
+    active_brew_sessions[uid].created_at = datetime.utcnow().isoformat()
+    active_brew_sessions[uid].name = recipe.name if recipe else body['Name']
+    active_brew_sessions[uid].type = body['SessionType']
+    active_brew_sessions[uid].filepath = Path(BREW_ACTIVE_PATH).joinpath('{0}#{1}#{2}#{3}#{4}.json'.format(datetime.now().strftime('%Y%m%d_%H%M%S'), uid, active_brew_sessions[uid].guid, active_brew_sessions[uid].name.replace(' ', '_'), active_brew_sessions[uid].type))
+    
+    current_app.logger.debug('ZSeries - session file created {}'.format(active_brew_sessions[uid].filepath))
+    
+    if session_id not in events:
+        events[session_id] = []
+
+    active_brew_sessions[uid].file = open(active_brew_sessions[uid].filepath, 'w')
+    active_brew_sessions[uid].file.write('[\n')
+    active_brew_sessions[uid].file.flush()
+
+    ret = {
+        "Active": False,
+        "ClosingDate": None,
+        "CreationDate": active_brew_sessions[uid].created_at,
+        "Deleted": False,
+        "DurationSec": body['DurationSec'],
+        "FirmwareVersion": body['FirmwareVersion'],
+        "GUID": active_brew_sessions[uid].session,
+        "ID": active_brew_sessions[uid].id,
+        "LastLogID": active_brew_sessions[uid].id,
+        "MaxTemp": body['MaxTemp'],
+        "MaxTempAddedSec": body['MaxTempAddedSec'],
+        "Name": active_brew_sessions[uid].name,
+        "Notes": None,
+        "Pressure": 0,              # is this related to an attached picostill?
+        "ProfileID": 28341,         # how to get the userId
+        "SecondsRemaining": 0,
+        "SessionLogs": [],
+        "SessionType": active_brew_sessions[uid].type,
+        "StillUID": None,
+        "StillVer": None,
+        "ZProgramId": body['ZProgramId'],
+        "ZSeriesID": uid
+    }
+    if 'ProgramParams' in body:
+        ret.update({
+            "ProgramParams": body['ProgramParams']
+        })
+    if 'RecipeID' in body:
+        ret.update({
+            "RecipeGuid": None,
+            "RecipeID": body['RecipeID']
+        })
+    return ret
+
+
+def update_session_log(token, body):
+    session_id = body['ZSessionID']
+    uid = get_machine_by_session(session_id)
+
+    if uid is None:
+        error = {
+            'error': 'session_id {} not found to be active - unable to resume session'.format(session_id)
+        }
+        return Response(json.dumps(error), status=400, mimetype='application/json') 
+
+    active_session = active_brew_sessions[uid]
+
+    if active_session.id != session_id:   # session_id is hex string; session.id is number
+        current_app.logger.warn('WARN: ZSeries reported session_id not active session')
+
+        error = {
+            'error': 'matching server log identifier {} does not match requested session_id {}'.format(active_session.id, session_id)
+        }
+        return Response(json.dumps(error), status=400, mimetype='application/json')
+    
+    if active_session not in events:
+        events[active_session] = []
+    
+    events[active_session].append(body['StepName'])
+
+    active_session.step = body['StepName']
+    log_time = datetime.utcnow()
+    session_data = {
+        'time': ((log_time-datetime(1970, 1, 1)).total_seconds() * 1000),
+        'timeStr': log_time.isoformat(),
+        'timeLeft': body['SecondsRemaining'],
+        'step': body['StepName'],
+        'target': body['TargetTemp'],
+        'ambient': body['AmbientTemp'],
+        'drain': body['DrainTemp'],
+        'wort': body['WortTemp'],
+        'therm': body['ThermoBlockTemp'],
+        'recovery': body['StepName'],
+        'position': body['ValvePosition']
+    }
+
+    event = None
+    if active_session in events and len(events[active_session]) > 0:
+        if len(events[active_session]) > 1:
+            current_app.logger.debug('DEBUG: ZSeries events > 1 - size = {}'.format(len(events[session])))
+        event = events[active_session].pop(0)
+        session_data.update({'event': event})
+    
+    active_brew_sessions[uid].data.append(session_data)
+    active_brew_sessions[uid].recovery = body['StepName']
+    active_brew_sessions[uid].remaining_time = body['SecondsRemaining']
+    # for Z graphs we have more data available: wort, hex/therm, target, drain, ambient
+    graph_update = json.dumps({'time': session_data['time'],
+                                'data': [session_data['target'], session_data['wort'], session_data['therm'], session_data['drain'], session_data['ambient']],
+                                'session': active_brew_sessions[uid].name,
+                                'step': active_brew_sessions[uid].step,
+                                'event': event,
+                                })
+    socketio.emit('brew_session_update|{}'.format(uid), graph_update)
+    active_brew_sessions[uid].file.write('\t{},\n'.format(json.dumps(session_data)))
+    active_brew_sessions[uid].file.flush()
+
+    ret = {
+        "ID": randint(0, 10000),
+        "LogDate": session_data['timeStr'],
+    }
+    ret.update(body)
+    return ret
+    
+
+def close_session(uid, session_id, body):
+    ret = {
+        "Active": False,
+        "ClosingDate": datetime.utcnow().isoformat(),
+        "CreationDate": active_brew_sessions[uid].created_at,
+        "Deleted": False,
+        "DurationSec": body['DurationSec'],
+        "FirmwareVersion": body['FirmwareVersion'],
+        "GUID": active_brew_sessions[uid].session,
+        "ID": active_brew_sessions[uid].id,
+        "LastLogID": active_brew_sessions[uid].id,
+        "MaxTemp": body['MaxTemp'],
+        "MaxTempAddedSec": body['MaxTempAddedSec'],
+        "Name": active_brew_sessions[uid].name,
+        "Notes": None,
+        "Pressure": 0,              # is this related to an attached picostill?
+        "ProfileID": 28341,         # how to get the userId
+        "SecondsRemaining": 0,
+        "SessionLogs": [],
+        "SessionType": body['SessionType'],
+        "StillUID": None,
+        "StillVer": None,
+        "ZProgramId": body['ZProgramId'],
+        "ZSeriesID": uid
+    }
+
+    if 'ProgramParams' in body:
+        ret.update({
+            "ProgramParams": body['ProgramParams']
+        })
+    if 'RecipeID' in body:
+        ret.update({
+            "RecipeGuid": None,
+            "RecipeID": body['RecipeID']
+        })
+
+    active_brew_sessions[uid].file.seek(0, os.SEEK_END)
+    active_brew_sessions[uid].file.seek(active_brew_sessions[uid].file.tell() - 2, os.SEEK_SET)  # Remove trailing , from last data set
+    active_brew_sessions[uid].file.write('\n]')
+    active_brew_sessions[uid].cleanup()
+    
+    return ret
+
+
+# GET /Vendors/input.cshtml?type=ResumableSession&token=<token>&id=<session_id> HTTP/1.1
+def process_recover_session(token, session_id):
+    # TODO can one recover a RINSE / CLEAN or otherwise non-BEER or COFFEE session?
+    uid = get_machine_by_session(session_id)
+
+    if uid is None:
+        error = {
+            'error': 'session_id {} not found to be active - unable to resume session'.format(session_id)
+        }
+        return Response(json.dumps(error), status=400, mimetype='application/json') 
+
+    active_session = active_brew_sessions[uid]
+
+    if active_session.id == session_id:   # session_id is hex string; session.id is number
+        recipe = get_recipe_by_name(active_session.name)
+        current_step = active_session.recovery
+        remaining_time = active_session.remaining_time
+
+        steps = []
+        step_found = False
+        for s in recipe.steps:
+            if (s.name == current_step):
+                step_found = True
+            
+            if (step_found):
+                steps.append(s)
+
+        if (not step_found or len(steps) == 0):
+            current_app.logger.warn("most recently logged step not found in linked recipe steps")
+            error = {
+                'error': 'active brew session\'s most recently logged step not found in linked recipe'
+            }
+            return Response(json.dumps(error), status=400, mimetype='application/json')
+
+        if (len(steps) >= 1):
+            current_app.logger.debug("ZSeries step_count={}, active_step={}, time_remaining={}".format(len(steps), current_step, remaining_time))
+            
+            # modify runtime of the first step (most recently active)
+            steps[0].step_time = remaining_time
+            recipe.steps = steps
+
+        ret = {
+            "Recipe": json.loads(recipe.serialize()),
+            "SessionID": active_session.id,
+            "SessionType": active_session.type,
+            "ZPicoRecipe": None                         # does this identity the Z pak recipe? 
+        }
+        return ret
+    else:
+        error = {
+            'error': 'matching server log identifier {} does not match requested session_id {}'.format(active_session.id, session_id)
+        }
+        return Response(json.dumps(error), status=400, mimetype='application/json')
+
+
+# -------- Utility --------
+def get_zseries_recipe_list():
+    recipe_list = []
+    for r in get_zseries_recipes():
+        recipe_list.append(r)
+    return recipe_list
+
+
+def get_zseries_recipe_metadata_list():
+    recipe_metadata = []
+    for r in get_zseries_recipes():
+        meta = {
+            "ID": r.id,
+            "Name": r.name,
+            "Kind": r.kind_code,
+            "Uri": None,
+            "Abv": -1,
+            "Ibu": -1
+        }
+        recipe_metadata.append(meta)
+    return recipe_metadata
+
+
+def get_recipe_by_id(recipe_id):
+    recipe = next((r for r in get_zseries_recipes() if r.id ==  int(recipe_id)), None)
+    return recipe
+
+
+def get_recipe_by_name(recipe_name):
+    recipe = next((r for r in get_zseries_recipes() if r.name == recipe_name), None)
+    return recipe
+
+
+def increment_session_id(uid):
+    return len(get_archived_sessions_by_machine(uid)) + (1 if active_brew_sessions[uid].session != '' else 0)
+
+
+def get_machine_by_session(session_id):
+    return next((uid for uid in active_brew_sessions if active_brew_sessions[uid].session == session_id or active_brew_sessions[uid].id == int(session_id)), None)
+
+
+def get_archived_sessions_by_machine(uid):
+    brew_sessions = load_brew_sessions_by_machine(uid)
+    return brew_sessions
