@@ -1,0 +1,8 @@
+app/recipes/pico/*
+app/recipes/zymatic/*
+app/recipes/zseries/*
+
+app/sessions/brew/active/*
+app/sessions/brew/archive/*
+app/sessions/ferm/active/*
+app/sessions/ferm/archive/*
