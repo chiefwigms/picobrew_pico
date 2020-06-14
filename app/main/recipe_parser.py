@@ -84,7 +84,6 @@ class ZSeriesRecipeStep():
         self.drain_time = None
 
     def serialize(self):
-        # TODO serialize a recipe step
         return '{0},{1},{2},{3},{4}/'.format(
             self.name,
             self.temperature,
@@ -107,7 +106,8 @@ class ZSeriesRecipe():
         recipe = None
         with open(file) as f:
             recipe = json.load(f)
-        self.id = recipe.get('id', 0) or 0  # TODO should just fail as we need to have a unique identifer
+        # TODO should this just fail or increment the number to be unique?
+        self.id = recipe.get('id', 0) or 0
         self.name = recipe.get('name', 'Empty Recipe') or 'Empty Recipe'
         self.name_ = self.name.replace(" ", "_").replace("\'", "")
         self.start_water = recipe.get('start_water', 13.1) or 13.1
