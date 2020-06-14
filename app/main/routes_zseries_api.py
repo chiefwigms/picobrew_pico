@@ -131,32 +131,6 @@ def process_recipe_request(recipe_id):
     return recipe.serialize()
 
 
-# SyncUser: /API/SyncUser?user={}&machine={}
-# Response: '\r\n\r\n#{0}#' where {0} : Cleaning/Recipe List
-sync_user_args = {
-    'user': fields.Str(required=True),          # 32 character alpha-numeric Profile GUID
-    'machine': fields.Str(required=True),       # 12 character alpha-numeric Product ID
-}
-# @main.route('/API/SyncUser')
-# @main.route('/API/SyncUSer')
-# @use_args(sync_user_args, location='querystring')
-# def process_sync_user(args):
-#     if args['user'] == '00000000000000000000000000000000':
-#         # New Clean V6
-#         # -Make sure that all 3 mash screens are in place in the step filter. Do not insert the adjunct loaf/hop cages.
-#         # -Place cleaning tablet in the right area of the adjunct compartment, on top of the smaller screen, at the end of the metal tab. 1/4 cup of powdered dishwasher detergent can also be used.
-#         # -Add 1.5 gallons of HOT tap water to the keg at completion of cleaning cycle (prompt notes/before final step) -Empty and rinse keg, step filter, screens, and in-line filter.
-#         # -Fill keg with 4 gallons of hot tap water
-#         # -Connect black fitting to 'OUT' post on keg
-#         # -Attach wand to grey fitting and run it into bucket or sink, OR attach grey fitting to 'IN' post on empty keg
-#         # -Continue, this will rinse your system. There should be no water left in the keg at the end of this step.
-#         # Share your experience with info@picobrew.com, Subject - New Clean Beta attn: Kevin, attach pictures of debris removed and collected on screens if possible.
-#         return '\r\n\r\n#Cleaning v1/7f489e3740f848519558c41a036fe2cb/Heat Water,152,0,0,0/Clean Mash,152,15,1,5/Heat to Temp,152,0,0,0/Adjunct,152,3,2,1/Adjunct,152,2,3,1/Adjunct,152,2,4,1/Adjunct,152,2,5,1/Heat to Temp,197,0,0,0/Clean Mash,197,10,1,0/Clean Mash,197,2,1,0/Clean Adjunct,197,2,2,0/Chill,120,10,0,2/|Rinse v3/0160275741134b148eff90acdd5e462f/Rinse,0,2,0,5/|New Clean Beta v6/c66b2c4f4a3f42fb8180c795d0d01813/Fill Mash,0,5,1,0/Balance Temps,0,5,5,0/Heat to 120,120,0,0,0/120,120,20,5,0/Heat to 140,140,0,0,0/140,140,35,5,0/Mash,0,5,1,0/Balance Temps,0,3,0,0/140,140,5,5,0/160,160,5,5,0/175,175,5,5,0/Heat to 200,197,0,0,0/200,197,19,5,0/Mash,0,3,1,0/Balance Temps,0,3,0,0/Cool,120,3,5,0/Mash,0,5,1,8/See RecP Notes,0,0,6,0/Flush System,0,12,5,0/|#'
-#     else:
-#         # Brew Recipes
-#         return '\r\n\r\n#{0}#'.format(get_zymatic_recipe_list())
-
-
 # checksync: /Vendors/input.cshtml?type=ZState&token=<token>
 #  Request:    { "BoilerType": 1|2, "CurrentFirmware": "1.2.3" }
 #  Response (example):
