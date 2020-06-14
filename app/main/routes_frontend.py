@@ -236,7 +236,7 @@ def load_brew_session(file):
     alias = '' if info[1] not in active_brew_sessions else active_brew_sessions[info[1]].alias
 
     session_type = None
-    if len(info) >= 4:
+    if len(info) > 4:
         session_type = int(info[4])
 
     session = {

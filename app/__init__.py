@@ -147,11 +147,11 @@ def create_app(debug=False):
                     if uid in aliases[mtype] and uid != "uid":
                         if mtype == "PicoFerm":
                             active_ferm_sessions[uid] = PicoFermSession()
+                            active_ferm_sessions[uid].alias = aliases[mtype][uid]
                         else:
                             active_brew_sessions[uid] = PicoBrewSession()
+                            active_brew_sessions[uid].alias = aliases[mtype][uid]
                             active_brew_sessions[uid].is_pico = True if mtype == "PicoBrew" else False
-
-                        # todo: if anything in active folder, load data in since the server probably crashed?
-                        active_ferm_sessions[uid].alias = aliases[mtype][uid]
+                    # todo: if anything in active folder, load data in since the server probably crashed?
 
     return app
