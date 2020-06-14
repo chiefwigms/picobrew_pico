@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block content %}
+  <div id="accordion">
+    {% for recipe in recipes %}
+    <div class="card bg-dark text-white-50">
+      <h5 class="card-header" id="h_{{recipe.name_}}">
+        <a class="collapsed" role="button" data-toggle="collapse" href="#c_{{recipe.name_}}" data-parent="#accordion" aria-expanded="false" aria-controls="c_{{recipe.name_}}">
+          {{recipe.name}}
+        </a>
+      </h5>
+      <div id="c_{{recipe.name_}}" class="collapse" aria-labelledby="h_{{recipe.name_}}">
+        <div class="card-body">
+          {% if recipe.steps %}
+          <table class="table table-striped table-dark table-sm">
+            <thead>
+              <tr>
+                <th scope = "col">Step #</th>
+                <th scope = "col">Name</th>
+                <th scope = "col">Location</th>
+                <th scope = "col">Temp (°F)</th>
+                <th scope = "col">Time (min)</th>
+                <th scope = "col">Drain (min)</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for step in recipe.steps %}
+              <tr>
+                {% set LOCATION = {'0': 'PassThru', '1': 'Mash', '2': 'Adjunct1', '3': 'Adjunct2', '4': 'Adjunct3', '5': 'Adjunct4', '6': 'Pause'} %}
+                <th scope="row">{{loop.index}}</th>
+                <td>{{step.name}}</td>
+                <td>{{LOCATION[step.location]}}</td>
+                <td>{{step.temperature}}</td>
+                <td>{{step.step_time}}</td>
+                <td>{{step.drain_time}}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+          {% else %}
+          <p>This recipe contains no mashing program. It will not be synced to your PicoBrew machine.</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+{% endblock %}

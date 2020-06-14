@@ -75,6 +75,70 @@ def ZymaticRecipeImport(recipes):
                 json.dump(r, file, indent=4, sort_keys=True)
 
 
+class ZSeriesRecipeStep():
+    def __init__(self):
+        self.name = None
+        self.temperature = None
+        self.step_time = None
+        self.location = None
+        self.drain_time = None
+
+    def serialize(self):
+        return '{0},{1},{2},{3},{4}/'.format(
+            self.name,
+            self.temperature,
+            self.step_time,
+            self.location,
+            self.drain_time
+        )
+
+
+class ZSeriesRecipe():
+    def __init__(self):
+        self.id = None
+        self.name = None
+        self.start_water = 13.1
+        self.kind_code = 0
+        self.type_code = None
+        self.steps = []
+
+    def parse(self, file):
+        recipe = None
+        with open(file) as f:
+            recipe = json.load(f)
+        # TODO should this just fail or increment the number to be unique?
+        self.id = recipe.get('id', 0) or 0
+        self.name = recipe.get('name', 'Empty Recipe') or 'Empty Recipe'
+        self.name_ = self.name.replace(" ", "_").replace("\'", "")
+        self.start_water = recipe.get('start_water', 13.1) or 13.1
+        self.type_code = recipe.get('type_code', "Beer") or "Beer"
+        if 'steps' in recipe:
+            for recipe_step in recipe['steps']:
+                step = ZSeriesRecipeStep()
+                step.name = recipe_step.get('name', 'Empty Step') or 'Empty Step'
+                step.temperature = recipe_step.get('temperature', 70) or 70
+                step.step_time = recipe_step.get('step_time', 0) or 0
+                step.location = ZSERIES_LOCATION[recipe_step.get('location', 'PassThru') or 'PassThru']
+                step.drain_time = recipe_step.get('drain_time', 0) or 0
+                self.steps.append(step)
+
+    def serialize(self):
+        r = {}
+        r['ID'] = self.id;
+        r['Name'] = self.name;
+        r['StartWater'] = self.start_water;
+        r['Steps'] = []
+        for step in self.steps:
+            s = {}
+            s['Name'] = step.name
+            s['Location'] = step.location
+            s['Temp'] = step.temperature
+            s['Time'] = step.step_time
+            s['Drain'] = step.drain_time
+            r['Steps'].append(s)
+        return r
+
+
 class PicoBrewRecipeStep():
     def __init__(self):
         self.name = None

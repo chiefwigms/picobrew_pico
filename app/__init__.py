@@ -1,14 +1,18 @@
 from flask import *
 from flask_cors import CORS
 from flask_socketio import SocketIO
-import json
 from pathlib import Path
 import shutil
 import yaml
 
 BASE_PATH = Path(__file__).parents[1]
+
+# recipe paths
 ZYMATIC_RECIPE_PATH = str(BASE_PATH.joinpath('app/recipes/zymatic'))
+ZSERIES_RECIPE_PATH = str(BASE_PATH.joinpath('app/recipes/zseries'))
 PICO_RECIPE_PATH = str(BASE_PATH.joinpath('app/recipes/pico'))
+
+# sessions paths
 BREW_ACTIVE_PATH = str(BASE_PATH.joinpath('app/sessions/brew/active'))
 BREW_ARCHIVE_PATH = str(BASE_PATH.joinpath('app/sessions/brew/archive'))
 FERM_ACTIVE_PATH = str(BASE_PATH.joinpath('app/sessions/ferm/active'))
@@ -23,6 +27,17 @@ ZYMATIC_LOCATION = {
     'Adjunct4': '5',
     'Pause': '6',
 }
+
+ZSERIES_LOCATION = {
+    'PassThru': '0',
+    'Mash': '1',
+    'Adjunct1': '2',
+    'Adjunct2': '3',
+    'Adjunct3': '4',
+    'Adjunct4': '5',
+    'Pause': '6',
+}
+
 PICO_LOCATION = {
     'Prime': '0',
     'Mash': '1',
@@ -49,10 +64,14 @@ class PicoBrewSession():
         self.file = None
         self.filepath = None
         self.alias = ''
+        self.created_at = None
         self.name = 'Waiting To Brew'
+        self.type = 0
         self.step = ''
-        self.session = ''
+        self.session = ''   # session guid
+        self.id = -1        # session id (interger)
         self.recovery = ''
+        self.remaining_time = None
         self.is_pico = True
         self.data = []
 
@@ -62,10 +81,14 @@ class PicoBrewSession():
             shutil.move(str(self.filepath), str(Path(BREW_ARCHIVE_PATH)))
         self.file = None
         self.filepath = None
+        self.created_at = None
         self.name = 'Waiting To Brew'
+        self.type = 0
         self.step = ''
         self.session = ''
+        self.id = -1
         self.recovery = ''
+        self.remaining_time = None
         self.data = []
 
 
@@ -114,22 +137,21 @@ def create_app(debug=False):
     cfg_file = BASE_PATH.joinpath('config.yaml')
     with open(cfg_file, 'r') as f:
         server_cfg = yaml.safe_load(f)
-    
+
     if 'aliases' in server_cfg:
-        if 'Zymatic' in server_cfg['aliases'] and server_cfg['aliases']['Zymatic']:
-            for uid in server_cfg['aliases']['Zymatic']:
-                active_brew_sessions[uid] = PicoBrewSession()
-                active_brew_sessions[uid].alias = server_cfg['aliases']['Zymatic'][uid]
-                active_brew_sessions[uid].is_pico = False
-                # todo: if anything in active folder, load data in since the server probably crashed?
-        if 'PicoBrew' in server_cfg['aliases'] and server_cfg['aliases']['PicoBrew']:
-            for uid in server_cfg['aliases']['PicoBrew']:
-                active_brew_sessions[uid] = PicoBrewSession()
-                active_brew_sessions[uid].alias = server_cfg['aliases']['PicoBrew'][uid]
-                # todo: if anything in active folder, load data in since the server probably crashed?
-        if 'PicoFerm' in server_cfg['aliases'] and server_cfg['aliases']['PicoFerm']:
-            for uid in server_cfg['aliases']['PicoFerm']:
-                active_ferm_sessions[uid] = PicoFermSession()
-                active_ferm_sessions[uid].alias = server_cfg['aliases']['PicoFerm'][uid]
-                # todo: if anything in active folder, load data in since the server probably crashed?
+        machine_types = ["ZSeries", "Zymatic", "PicoBrew", "PicoFerm"]
+        for mtype in machine_types:
+            aliases = server_cfg['aliases']
+            if mtype in aliases and aliases[mtype] != None:
+                for uid in aliases[mtype]:
+                    if uid in aliases[mtype] and uid != "uid":
+                        if mtype == "PicoFerm":
+                            active_ferm_sessions[uid] = PicoFermSession()
+                        else:
+                            active_brew_sessions[uid] = PicoBrewSession()
+                            active_brew_sessions[uid].is_pico = True if mtype == "PicoBrew" else False
+
+                        # todo: if anything in active folder, load data in since the server probably crashed?
+                        active_ferm_sessions[uid].alias = aliases[mtype][uid]
+
     return app
