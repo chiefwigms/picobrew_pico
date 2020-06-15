@@ -209,6 +209,15 @@ def resumable_session_id(uid):
     return active_brew_sessions[uid].id
 
 
+def create_or_close_session(args):
+    session_id = request.args.get('id')
+
+    if session_id:
+        return close_session(request.args.get('token'), session_id, request.json)
+    else:
+        return create_session(request.args.get('token'), request.json)
+
+
 # checksync: /Vendors/input.cshtml?type=ZSession&token=<token>&id=<session_id>
 #  Request (example - beer session):    
 #              {
@@ -271,16 +280,6 @@ def resumable_session_id(uid):
 #                   "ZProgramId": 1,
 #                   "ZSeriesID": www
 #               }
-def create_or_close_session(args):
-    session_id = request.args.get('id')
-
-    if session_id:
-        return close_session(request.args.get('token'), session_id, request.json)
-    else:
-        return create_session(request.args.get('token'), request.json)
-    
-    
-
 def create_session(token, body):
     uid = token                # token uniquely identifies the machine
     recipe = get_recipe_by_name(body['Name'])
@@ -298,12 +297,12 @@ def create_session(token, body):
     session_guid = uuid.uuid4().hex[:32]
     session_id = increment_session_id(uid)
     
-    active_brew_sessions[uid].guid = session_guid
+    active_brew_sessions[uid].session = session_guid
     active_brew_sessions[uid].id = session_id
     active_brew_sessions[uid].created_at = datetime.utcnow().isoformat()
     active_brew_sessions[uid].name = recipe.name if recipe else body['Name']
     active_brew_sessions[uid].type = body['SessionType']
-    active_brew_sessions[uid].filepath = Path(BREW_ACTIVE_PATH).joinpath('{0}#{1}#{2}#{3}#{4}.json'.format(datetime.now().strftime('%Y%m%d_%H%M%S'), uid, active_brew_sessions[uid].guid, active_brew_sessions[uid].name.replace(' ', '_'), active_brew_sessions[uid].type))
+    active_brew_sessions[uid].filepath = Path(BREW_ACTIVE_PATH).joinpath('{0}#{1}#{2}#{3}#{4}.json'.format(datetime.now().strftime('%Y%m%d_%H%M%S'), uid, active_brew_sessions[uid].session, active_brew_sessions[uid].name.replace(' ', '_'), active_brew_sessions[uid].type))
     
     current_app.logger.debug('ZSeries - session file created {}'.format(active_brew_sessions[uid].filepath))
     
@@ -321,6 +320,7 @@ def create_session(token, body):
         "Deleted": False,
         "DurationSec": body['DurationSec'],
         "FirmwareVersion": body['FirmwareVersion'],
+        "GroupSession": False,      # need to capture traffic from a Z2+ setup for group brewing
         "GUID": active_brew_sessions[uid].session,
         "ID": active_brew_sessions[uid].id,
         "LastLogID": active_brew_sessions[uid].id,
@@ -553,7 +553,7 @@ def get_recipe_by_name(recipe_name):
 
 
 def increment_session_id(uid):
-    return len(get_archived_sessions_by_machine(uid)) + (1 if active_brew_sessions[uid].session != '' else 0)
+    return len(get_archived_sessions_by_machine(uid)) + (1 if active_brew_sessions[uid].session != '' else 1)
 
 
 def get_machine_by_session(session_id):
