@@ -7,7 +7,7 @@ from flask_socketio import emit
 from webargs import fields
 from webargs.flaskparser import use_args, FlaskParser
 from . import main
-from .routes_frontend import get_zseries_recipes, load_brew_sessions_by_machine
+from .routes_frontend import get_zseries_recipes, load_brew_sessions
 from .. import *
 from enum import Enum
 from random import seed
@@ -287,7 +287,10 @@ def create_session(token, body):
     # error out if recipe isn't known where session is beer type (ie 6)
     # due to rinse, rack beer, clean, coffee, sous vide, etc not having server known "recipes"
     if recipe == None and body['SessionType'] == SessionType.BEER:
-        return Response("{ 'error': 'recipe not found - unable to start session' }", status=404, mimetype='application/json')
+        error = {
+            'error': 'recipe \'{}\' not found - unable to start session'.format(body['Name'])
+        }
+        return Response(json.dumps(error), status=404, mimetype='application/json')
     elif recipe:
         current_app.logger.debug('recipe for session: {}'.format(recipe.serialize()))
 
@@ -356,13 +359,17 @@ def update_session_log(token, body):
 
     if uid is None:
         error = {
-            'error': 'session_id {} not found to be active - unable to resume session'.format(session_id)
+            'error': 'machine_id {} session {} does not have a matching active session log'.format(token, session_id)
         }
         return Response(json.dumps(error), status=400, mimetype='application/json') 
 
     active_session = active_brew_sessions[uid]
 
-    if active_session.id != session_id:   # session_id is hex string; session.id is number
+    if active_session.id == -1:
+        # update reference to corrupted active_session 
+        # upon file load with -1 (assume this is the right session to log with)
+        active_session.id = session_id
+    elif active_session.id != session_id:   # session_id is hex string; session.id is number
         current_app.logger.warn('WARN: ZSeries reported session_id not active session')
 
         error = {
@@ -558,9 +565,9 @@ def increment_session_id(uid):
 
 
 def get_machine_by_session(session_id):
-    return next((uid for uid in active_brew_sessions if active_brew_sessions[uid].session == session_id or active_brew_sessions[uid].id == int(session_id)), None)
+    return next((uid for uid in active_brew_sessions if active_brew_sessions[uid].session == session_id or active_brew_sessions[uid].id == int(session_id) or active_brew_sessions[uid].id == -1), None)
 
 
 def get_archived_sessions_by_machine(uid):
-    brew_sessions = load_brew_sessions_by_machine(uid)
+    brew_sessions = load_brew_sessions(uid=uid)
     return brew_sessions

@@ -4,19 +4,23 @@ from flask_socketio import SocketIO
 from pathlib import Path
 import shutil
 import yaml
+import os
 
-BASE_PATH = Path(__file__).parents[1]
+if os.getenv("BASE_PATH"):
+    BASE_PATH = Path(os.getenv("BASE_PATH"))
+else:
+    BASE_PATH = Path(__file__).parents[1].joinpath('app')
 
 # recipe paths
-ZYMATIC_RECIPE_PATH = str(BASE_PATH.joinpath('app/recipes/zymatic'))
-ZSERIES_RECIPE_PATH = str(BASE_PATH.joinpath('app/recipes/zseries'))
-PICO_RECIPE_PATH = str(BASE_PATH.joinpath('app/recipes/pico'))
+ZYMATIC_RECIPE_PATH = str(BASE_PATH.joinpath('recipes/zymatic'))
+ZSERIES_RECIPE_PATH = str(BASE_PATH.joinpath('recipes/zseries'))
+PICO_RECIPE_PATH = str(BASE_PATH.joinpath('recipes/pico'))
 
 # sessions paths
-BREW_ACTIVE_PATH = str(BASE_PATH.joinpath('app/sessions/brew/active'))
-BREW_ARCHIVE_PATH = str(BASE_PATH.joinpath('app/sessions/brew/archive'))
-FERM_ACTIVE_PATH = str(BASE_PATH.joinpath('app/sessions/ferm/active'))
-FERM_ARCHIVE_PATH = str(BASE_PATH.joinpath('app/sessions/ferm/archive'))
+BREW_ACTIVE_PATH = str(BASE_PATH.joinpath('sessions/brew/active'))
+BREW_ARCHIVE_PATH = str(BASE_PATH.joinpath('sessions/brew/archive'))
+FERM_ACTIVE_PATH = str(BASE_PATH.joinpath('sessions/ferm/active'))
+FERM_ARCHIVE_PATH = str(BASE_PATH.joinpath('sessions/ferm/archive'))
 
 ZYMATIC_LOCATION = {
     'PassThru': '0',
@@ -69,7 +73,7 @@ class PicoBrewSession():
         self.type = 0
         self.step = ''
         self.session = ''   # session guid
-        self.id = -1        # session id (interger)
+        self.id = -1        # session id (integer)
         self.recovery = ''
         self.remaining_time = None
         self.is_pico = True
@@ -152,6 +156,5 @@ def create_app(debug=False):
                             active_brew_sessions[uid] = PicoBrewSession()
                             active_brew_sessions[uid].alias = aliases[mtype][uid]
                             active_brew_sessions[uid].is_pico = True if mtype == "PicoBrew" else False
-                    # todo: if anything in active folder, load data in since the server probably crashed?
 
     return app

@@ -197,6 +197,36 @@ def get_pico_recipes():
 
 def load_active_brew_sessions():
     brew_sessions = []
+
+    # initialize active sessions during start up
+    if active_brew_sessions == {}:
+        # print('DEBUG: load_active_brew_sessions() fetching abandoned server active sessions')
+        active_brew_session_files = list(Path(BREW_ACTIVE_PATH).glob("*.json"))
+        for file in active_brew_session_files:
+            # print('DEBUG: load_active_brew_sessions() found {} as an active session'.format(file))
+            brew_session = load_brew_session(file)
+            # print('DEBUG: load_active_brew_sessions() {}'.format(brew_session))
+            if brew_session['uid'] not in active_brew_sessions:
+                active_brew_sessions[brew_session['uid']] = []
+            
+            session = PicoBrewSession()
+            session.file = open(file, 'a')
+            session.file.flush()
+            session.filepath = file
+            session.alias = brew_session['alias']
+            session.created_at = brew_session['date']
+            session.name = brew_session['name']
+            session.type = brew_session['type']
+            session.session = brew_session['session']   # session guid
+            session.id = -1                             # session id (interger)
+            # session.recovery = ''                     # find last step name
+            # session.remaining_time = None
+            # session.is_pico = True
+            session.data = brew_session['data']
+            print('machine {}'.format(brew_session['uid']))
+            active_brew_sessions[brew_session['uid']] = session
+
+    # process brew_sessions from memory
     for uid in active_brew_sessions:
         brew_sessions.append({'alias': active_brew_sessions[uid].alias,
                               'graph': get_brew_graph_data(uid, active_brew_sessions[uid].name,
@@ -206,14 +236,12 @@ def load_active_brew_sessions():
     return brew_sessions
 
 
-def load_brew_sessions():
-    files = list(Path(BREW_ARCHIVE_PATH).glob("*.json"))
-    brew_sessions = [load_brew_session(file) for file in files]
-    return brew_sessions
-
-
-def load_brew_sessions_by_machine(uid):
-    files = list(Path(BREW_ARCHIVE_PATH).glob("*#{}*.json".format(uid)))
+def load_brew_sessions(uid = None):
+    files = []
+    if uid:
+        files = list(Path(BREW_ARCHIVE_PATH).glob("*#{}*.json".format(uid)))
+    else:
+        files = list(Path(BREW_ARCHIVE_PATH).glob("*.json"))
     brew_sessions = [load_brew_session(file) for file in files]
     return brew_sessions
 
@@ -228,8 +256,11 @@ def load_brew_session(file):
     with open(file) as fp:
         raw_data = fp.read().rstrip()
         if raw_data.endswith(','):
-            # Recover from incomplete json data file
+            # Recover from incomplete session json data file
             raw_data = raw_data[:-1] + '\n]'
+        elif raw_data.endswith('[') or raw_data == '':
+            # Recover from aborted session data file
+            raw_data = '[\n]'
         json_data = json.loads(raw_data)
     chart_id = info[0] + '_' + info[2]
 
@@ -243,8 +274,10 @@ def load_brew_session(file):
         'date': info[0],
         'name': name,
         'uid': info[1],
+        'session': info[2],
         'type': session_type,
         'alias': alias,
+        'data': json_data,
         'graph': get_brew_graph_data(chart_id, name, step, json_data)
     }
     return (session)
@@ -383,6 +416,8 @@ pico_recipes = load_pico_recipes()
 zymatic_recipes = load_zymatic_recipes()
 zseries_recipes = load_zseries_recipes()
 
+# todo: if anything in active folder, load data in since the server probably crashed?
+brew_sessions = load_active_brew_sessions()
 
 # utilities
 

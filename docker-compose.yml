@@ -6,6 +6,7 @@ services:
       dockerfile: Dockerfile
     environment: 
       FLASK_ENV: development
+      BASE_PATH: /app
     volumes:
       - type: bind
         source: ./app/recipes
@@ -14,5 +15,5 @@ services:
         source: ./app/sessions
         target: /app/sessions
     ports:
-      - 8080:80
+      - 80:80
 
