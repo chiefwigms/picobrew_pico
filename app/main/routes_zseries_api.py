@@ -373,7 +373,8 @@ def update_session_log(token, body):
     if active_session not in events:
         events[active_session] = []
     
-    events[active_session].append(body['StepName'])
+    if active_brew_sessions[uid].recovery != body['StepName']:
+        events[active_session].append(body['StepName'])
 
     active_session.step = body['StepName']
     log_time = datetime.utcnow()
