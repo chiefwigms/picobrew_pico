@@ -156,5 +156,5 @@ def create_app(debug=False):
                             active_brew_sessions[uid] = PicoBrewSession()
                             active_brew_sessions[uid].alias = aliases[mtype][uid]
                             active_brew_sessions[uid].is_pico = True if mtype == "PicoBrew" else False
-
+    
     return app

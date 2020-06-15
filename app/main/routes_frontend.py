@@ -223,7 +223,6 @@ def load_active_brew_sessions():
             # session.remaining_time = None
             # session.is_pico = True
             session.data = brew_session['data']
-            print('machine {}'.format(brew_session['uid']))
             active_brew_sessions[brew_session['uid']] = session
 
     # process brew_sessions from memory
@@ -416,8 +415,9 @@ pico_recipes = load_pico_recipes()
 zymatic_recipes = load_zymatic_recipes()
 zseries_recipes = load_zseries_recipes()
 
-# todo: if anything in active folder, load data in since the server probably crashed?
+# load all brew sessions including those that are in the active folder into memory
 brew_sessions = load_active_brew_sessions()
+# todo: if anything in ferm/active folder, load data in since the server probably crashed?
 
 # utilities
 
