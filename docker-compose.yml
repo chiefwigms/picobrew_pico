@@ -6,7 +6,7 @@ services:
       dockerfile: Dockerfile
     environment: 
       FLASK_ENV: development
-      BASE_PATH: /app
+      BASE_PATH: /
     volumes:
       - type: bind
         source: ./app/recipes

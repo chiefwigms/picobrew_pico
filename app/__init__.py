@@ -6,21 +6,23 @@ import shutil
 import yaml
 import os
 
+APP_FOLDER = 'app'
+
 if os.getenv("BASE_PATH"):
     BASE_PATH = Path(os.getenv("BASE_PATH"))
 else:
-    BASE_PATH = Path(__file__).parents[1].joinpath('app')
+    BASE_PATH = Path(__file__).parents[1]
 
 # recipe paths
-ZYMATIC_RECIPE_PATH = str(BASE_PATH.joinpath('recipes/zymatic'))
-ZSERIES_RECIPE_PATH = str(BASE_PATH.joinpath('recipes/zseries'))
-PICO_RECIPE_PATH = str(BASE_PATH.joinpath('recipes/pico'))
+ZYMATIC_RECIPE_PATH = str(BASE_PATH.joinpath('app/recipes/zymatic'))
+ZSERIES_RECIPE_PATH = str(BASE_PATH.joinpath('app/recipes/zseries'))
+PICO_RECIPE_PATH = str(BASE_PATH.joinpath('app/recipes/pico'))
 
 # sessions paths
-BREW_ACTIVE_PATH = str(BASE_PATH.joinpath('sessions/brew/active'))
-BREW_ARCHIVE_PATH = str(BASE_PATH.joinpath('sessions/brew/archive'))
-FERM_ACTIVE_PATH = str(BASE_PATH.joinpath('sessions/ferm/active'))
-FERM_ARCHIVE_PATH = str(BASE_PATH.joinpath('sessions/ferm/archive'))
+BREW_ACTIVE_PATH = str(BASE_PATH.joinpath('app/sessions/brew/active'))
+BREW_ARCHIVE_PATH = str(BASE_PATH.joinpath('app/sessions/brew/archive'))
+FERM_ACTIVE_PATH = str(BASE_PATH.joinpath('app/sessions/ferm/active'))
+FERM_ARCHIVE_PATH = str(BASE_PATH.joinpath('app/sessions/ferm/archive'))
 
 ZYMATIC_LOCATION = {
     'PassThru': '0',
@@ -138,7 +140,7 @@ def create_app(debug=False):
     # ----- Routes ----------
     app.register_blueprint(main_blueprint)
     socketio.init_app(app)
-    cfg_file = BASE_PATH.joinpath('config.yaml')
+    cfg_file = BASE_PATH.joinpath('app/config.yaml') if os.getenv("BASE_PATH") else BASE_PATH.joinpath('config.yaml')
     with open(cfg_file, 'r') as f:
         server_cfg = yaml.safe_load(f)
 
