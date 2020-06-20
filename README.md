@@ -33,8 +33,8 @@ Either provide all variables to docker command directly.
 
 ```
 docker run -d -it -p 80:80 \
-  --mount type=bind,source=<absolute-path-to-recipes>,target=/app/recipes \
-  --mount type=bind,source=<absolute-path-to-sessions>,target=/app/sessions \
+  --mount type=bind,source=<absolute-path-to-recipes>,target=/picobrew/app/recipes \
+  --mount type=bind,source=<absolute-path-to-sessions>,target=/picobrew/app/sessions \
   chiefwigms/picobrew_pico
 ```
 

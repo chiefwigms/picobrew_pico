@@ -1,4 +1,7 @@
 import json, uuid
+
+from .config import zymatic_recipe_path, zseries_recipe_path, pico_recipe_path
+from .model import PICO_LOCATION, ZYMATIC_LOCATION, ZSERIES_LOCATION
 from .. import *
 
 
@@ -69,7 +72,7 @@ def ZymaticRecipeImport(recipes):
             s['location'] = next(k for k, v in ZYMATIC_LOCATION.items() if v == values[3])
             s['drain_time'] = values[4]
             r['steps'].append(s)
-        filename = Path(ZYMATIC_RECIPE_PATH).joinpath('{}.json'.format(r['name'].replace(' ', '_')))
+        filename = zymatic_recipe_path().joinpath('{}.json'.format(r['name'].replace(' ', '_')))
         if not filename.exists():
             with open(filename, "w") as file:
                 json.dump(r, file, indent=4, sort_keys=True)
@@ -226,7 +229,7 @@ def PicoBrewRecipeImport(recipe, rfid=None):
         s['location'] = next(k for k, v in PICO_LOCATION.items() if v == step[3])
         s['name'] = step[4]
         r['steps'].append(s)
-    filename = Path(PICO_RECIPE_PATH).joinpath('{}.json'.format(r['name'].replace(' ', '_')))
+    filename = pico_recipe_path().joinpath('{}.json'.format(r['name'].replace(' ', '_')))
     if not filename.exists():
         with open(filename, "w") as file:
             json.dump(r, file, indent=4, sort_keys=True)

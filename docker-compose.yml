@@ -9,10 +9,10 @@ services:
     volumes:
       - type: bind
         source: ./app/recipes
-        target: /app/recipes
+        target: /picobrew/app/recipes
       - type: bind
         source: ./app/sessions
-        target: /app/sessions
+        target: /picobrew/app/sessions
     ports:
-      - 8080:80
+      - 80:80
 

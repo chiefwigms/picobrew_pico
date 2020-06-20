@@ -1,12 +1,12 @@
 FROM python:3.6.9
 
-WORKDIR /app
+WORKDIR /picobrew
 
 RUN pip3 install -U pip
 
-COPY requirements.txt /app/requirements.txt
+COPY requirements.txt /picobrew/requirements.txt
 RUN pip install -r requirements.txt
 
-COPY . /app
+COPY . /picobrew
 
 CMD python3 server.py
