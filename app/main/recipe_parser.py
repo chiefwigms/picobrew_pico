@@ -127,9 +127,9 @@ class ZSeriesRecipe():
 
     def serialize(self):
         r = {}
-        r['ID'] = self.id;
-        r['Name'] = self.name;
-        r['StartWater'] = self.start_water;
+        r['ID'] = self.id
+        r['Name'] = self.name
+        r['StartWater'] = self.start_water
         r['Steps'] = []
         for step in self.steps:
             s = {}

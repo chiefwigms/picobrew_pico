@@ -5,8 +5,10 @@ from flask import current_app
 def zymatic_recipe_path():
     return current_app.config['RECIPES_PATH'].joinpath('zymatic')
 
+
 def zseries_recipe_path():
     return current_app.config['RECIPES_PATH'].joinpath('zseries')
+
 
 def pico_recipe_path():
     return current_app.config['RECIPES_PATH'].joinpath('pico')

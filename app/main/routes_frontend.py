@@ -209,7 +209,7 @@ def load_active_brew_sessions():
     return brew_sessions
 
 
-def load_brew_sessions(uid = None):
+def load_brew_sessions(uid=None):
     files = []
     if uid:
         files = list(brew_archive_sessions_path().glob("*#{}*.json".format(uid)))
@@ -232,6 +232,7 @@ def load_ferm_sessions():
     files = list(ferm_archive_sessions_path().glob("*.json"))
     ferm_sessions = [load_ferm_session(file) for file in files]
     return ferm_sessions
+
 
 # Read initial recipe list on load
 pico_recipes = []

@@ -33,7 +33,7 @@ def create_app(debug=False):
         server_cfg = yaml.safe_load(f)
 
     app.config.update(
-        SECRET_KEY='bosco', 
+        SECRET_KEY='bosco',
         CORS_HEADERS='Content-Type',
         RECIPES_PATH=BASE_PATH.joinpath('app/recipes'),
         SESSIONS_PATH=BASE_PATH.joinpath('app/sessions'),
@@ -47,7 +47,7 @@ def create_app(debug=False):
         machine_types = ["ZSeries", "Zymatic", "PicoBrew", "PicoFerm"]
         for mtype in machine_types:
             aliases = server_cfg['aliases']
-            if mtype in aliases and aliases[mtype] != None:
+            if mtype in aliases and aliases[mtype] is not None:
                 for uid in aliases[mtype]:
                     if uid in aliases[mtype] and uid != "uid":
                         if mtype == "PicoFerm":
@@ -57,5 +57,5 @@ def create_app(debug=False):
                             active_brew_sessions[uid] = PicoBrewSession()
                             active_brew_sessions[uid].alias = aliases[mtype][uid]
                             active_brew_sessions[uid].is_pico = True if mtype == "PicoBrew" else False
-    
+
     return app

@@ -2,7 +2,6 @@ import shutil
 from .config import brew_archive_sessions_path, ferm_archive_sessions_path
 
 
-
 ZYMATIC_LOCATION = {
     'PassThru': '0',
     'Mash': '1',
@@ -72,6 +71,7 @@ class PicoBrewSession():
         self.recovery = ''
         self.remaining_time = None
         self.data = []
+
 
 class PicoFermSession():
     def __init__(self):

@@ -165,7 +165,7 @@ def restore_active_sessions():
     # not defined... circular dependency????
     if active_brew_sessions == {}:
         print('DEBUG: load_active_brew_sessions() fetching abandoned server active sessions')
-        
+
         active_brew_session_files = list(brew_active_sessions_path().glob("*.json"))
         for file in active_brew_session_files:
             # print('DEBUG: load_active_brew_sessions() found {} as an active session'.format(file))
@@ -173,7 +173,7 @@ def restore_active_sessions():
             # print('DEBUG: load_active_brew_sessions() {}'.format(brew_session))
             if brew_session['uid'] not in active_brew_sessions:
                 active_brew_sessions[brew_session['uid']] = []
-            
+
             session = PicoBrewSession()
             session.file = open(file, 'a')
             session.file.flush()
