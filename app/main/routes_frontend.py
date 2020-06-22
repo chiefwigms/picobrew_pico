@@ -58,7 +58,9 @@ def import_zymatic_recipe():
         guid = data['guid']
         machine = next((uid for uid in active_brew_sessions if not active_brew_sessions[uid].is_pico), None)
         try:
-            r = requests.get('http://picobrew.com/API/SyncUSer?user={}&machine={}'.format(guid, machine))
+            sync_user_uri = 'http://picobrew.com/API/SyncUSer?user={}&machine={}'.format(guid, machine)
+            print('DEBUG: import_zymatic_recipe - {}'.format(sync_user_uri))
+            r = requests.get(sync_user_uri)
             recipes = r.text.strip()
         except:
             pass
@@ -165,7 +167,9 @@ def import_pico_recipe():
         rfid = data['rfid']
         uid = next((uid for uid in active_brew_sessions if active_brew_sessions[uid].is_pico), None)
         try:
-            r = requests.get('http://picobrew.com/API/pico/getRecipe?uid={}&rfid={}&ibu=-1&abv=-1.0'.format(uid, rfid))
+            get_recipes_uri = 'http://picobrew.com/API/pico/getRecipe?uid={}&rfid={}&ibu=-1&abv=-1.0'.format(uid, rfid)
+            print('DEBUG: import_pico_recipe - {}'.format(get_recipes_uri))
+            r = requests.get(get_recipes_uri)
             recipe = r.text.strip()
         except:
             pass

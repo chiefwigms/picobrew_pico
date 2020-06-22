@@ -38,6 +38,7 @@ def load_brew_session(file):
         'name': name,
         'uid': info[1],
         'session': info[2],
+        'is_pico': len(info[1]) == 32,
         'type': session_type,
         'alias': alias,
         'data': json_data,
@@ -186,6 +187,6 @@ def restore_active_sessions():
             session.id = -1                             # session id (interger)
             # session.recovery = ''                     # find last step name
             # session.remaining_time = None
-            # session.is_pico = True
+            session.is_pico = brew_session['is_pico']
             session.data = brew_session['data']
             active_brew_sessions[brew_session['uid']] = session
