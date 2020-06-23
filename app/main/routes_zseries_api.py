@@ -180,7 +180,7 @@ def dirty_sessions_since_clean(uid):
     brew_sessions = get_archived_sessions_by_machine(uid)
     post_clean_sessions = []
     clean_found = False
-    for s in reversed(brew_sessions):
+    for s in brew_sessions:
         session_type = SessionType(s['type'])
         if (session_type == SessionType.CLEAN):
             clean_found = True
@@ -197,7 +197,7 @@ def last_session_type(uid):
     if len(brew_sessions) == 0:
         return SessionType.CLEAN
     else:
-        last_session = brew_sessions[len(brew_sessions) - 1]
+        last_session = brew_sessions[0]
         # just assume last session was a rinse session (session after a brew)
         session_type = SessionType(last_session['type']) if last_session['type'] is not None else SessionType.RINSE
         return session_type
