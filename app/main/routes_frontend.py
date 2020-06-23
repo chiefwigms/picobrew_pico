@@ -245,6 +245,9 @@ zseries_recipes = []
 
 
 def initialize_data():
+    global pico_recipes, zymatic_recipes, zseries_recipes
+    global brew_sessions
+
     # Read initial recipe list on load
     pico_recipes = load_pico_recipes()
     zymatic_recipes = load_zymatic_recipes()
