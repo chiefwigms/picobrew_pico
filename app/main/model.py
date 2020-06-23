@@ -31,6 +31,7 @@ PICO_LOCATION = {
     'Adjunct3': '6',
     'Adjunct4': '5',
 }
+
 PICO_SESSION = {
     0: 'Brewing',
     1: 'Deep Clean',

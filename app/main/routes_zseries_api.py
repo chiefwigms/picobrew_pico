@@ -7,7 +7,10 @@ from flask_socketio import emit
 from webargs import fields
 from webargs.flaskparser import use_args, FlaskParser
 from . import main
+from .config import brew_active_sessions_path, brew_archive_sessions_path
+from .model import PicoBrewSession
 from .routes_frontend import get_zseries_recipes, load_brew_sessions
+from .session_parser import active_brew_sessions
 from .. import *
 from enum import Enum
 from random import seed
@@ -180,7 +183,7 @@ def dirty_sessions_since_clean(uid):
     brew_sessions = get_archived_sessions_by_machine(uid)
     post_clean_sessions = []
     clean_found = False
-    for s in reversed(brew_sessions):
+    for s in brew_sessions:
         session_type = SessionType(s['type'])
         if (session_type == SessionType.CLEAN):
             clean_found = True
@@ -197,7 +200,7 @@ def last_session_type(uid):
     if len(brew_sessions) == 0:
         return SessionType.CLEAN
     else:
-        last_session = brew_sessions[len(brew_sessions) - 1]
+        last_session = brew_sessions[0]
         # just assume last session was a rinse session (session after a brew)
         session_type = SessionType(last_session['type']) if last_session['type'] is not None else SessionType.RINSE
         return session_type
@@ -305,7 +308,7 @@ def create_session(token, body):
     active_brew_sessions[uid].created_at = datetime.utcnow().isoformat()
     active_brew_sessions[uid].name = recipe.name if recipe else body['Name']
     active_brew_sessions[uid].type = body['SessionType']
-    active_brew_sessions[uid].filepath = Path(BREW_ACTIVE_PATH).joinpath('{0}#{1}#{2}#{3}#{4}.json'.format(datetime.now().strftime('%Y%m%d_%H%M%S'), uid, active_brew_sessions[uid].session, active_brew_sessions[uid].name.replace(' ', '_'), active_brew_sessions[uid].type))
+    active_brew_sessions[uid].filepath = brew_active_sessions_path().joinpath('{0}#{1}#{2}#{3}#{4}.json'.format(datetime.now().strftime('%Y%m%d_%H%M%S'), uid, active_brew_sessions[uid].session, active_brew_sessions[uid].name.replace(' ', '_'), active_brew_sessions[uid].type))
 
     current_app.logger.debug('ZSeries - session file created {}'.format(active_brew_sessions[uid].filepath))
 

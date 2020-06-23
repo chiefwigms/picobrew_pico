@@ -7,7 +7,10 @@ from flask_socketio import emit
 from webargs import fields
 from webargs.flaskparser import use_args, FlaskParser
 from . import main
+from .config import brew_active_sessions_path
+from .model import PicoBrewSession, PICO_SESSION
 from .routes_frontend import get_pico_recipes
+from .session_parser import active_brew_sessions
 from .. import *
 
 arg_parser = FlaskParser()
@@ -208,6 +211,6 @@ def create_new_session(uid, sesId, sesType):
         active_brew_sessions[uid].name = PICO_SESSION[sesType]
     else:
         active_brew_sessions[uid].name = 'Unknown Session ({})'.format(sesType)
-    active_brew_sessions[uid].filepath = Path(BREW_ACTIVE_PATH).joinpath('{0}#{1}#{2}#{3}.json'.format(datetime.now().strftime('%Y%m%d_%H%M%S'), uid, sesId, active_brew_sessions[uid].name.replace(' ', '_')))
+    active_brew_sessions[uid].filepath = brew_active_sessions_path().joinpath('{0}#{1}#{2}#{3}.json'.format(datetime.now().strftime('%Y%m%d_%H%M%S'), uid, sesId, active_brew_sessions[uid].name.replace(' ', '_')))
     active_brew_sessions[uid].file = open(active_brew_sessions[uid].filepath, 'w')
     active_brew_sessions[uid].file.write('[\n')

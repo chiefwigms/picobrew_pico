@@ -6,6 +6,9 @@ from flask import *
 from flask_socketio import emit
 from webargs import fields
 from webargs.flaskparser import use_args, FlaskParser
+from .config import ferm_active_sessions_path, ferm_archive_sessions_path
+from .model import PicoFermSession
+from .session_parser import active_ferm_sessions
 from . import main
 from .. import *
 
@@ -96,6 +99,6 @@ def create_new_session(uid):
         active_ferm_sessions[uid] = PicoFermSession()
     active_ferm_sessions[uid].uninit = False
     active_ferm_sessions[uid].start_time = datetime.now()  # Not now, but X samples * 60*RATE sec ago
-    active_ferm_sessions[uid].filepath = Path(FERM_ACTIVE_PATH).joinpath('{0}#{1}.json'.format(active_ferm_sessions[uid].start_time.strftime('%Y%m%d_%H%M%S'), uid))
+    active_ferm_sessions[uid].filepath = ferm_active_sessions_path().joinpath('{0}#{1}.json'.format(active_ferm_sessions[uid].start_time.strftime('%Y%m%d_%H%M%S'), uid))
     active_ferm_sessions[uid].file = open(active_ferm_sessions[uid].filepath, 'w')
     active_ferm_sessions[uid].file.write('[\n')

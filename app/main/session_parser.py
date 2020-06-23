@@ -2,7 +2,7 @@ import json, uuid
 from pathlib import Path
 
 from .config import brew_active_sessions_path
-from .model import PicoBrewSession, PicoFermSession
+from .model import PicoBrewSession
 from .. import *
 
 active_brew_sessions = {}
@@ -162,16 +162,14 @@ def get_ferm_graph_data(chart_id, voltage, session_data):
 
 def restore_active_sessions():
     # initialize active sessions during start up
-
-    # not defined... circular dependency????
     if active_brew_sessions == {}:
-        print('DEBUG: load_active_brew_sessions() fetching abandoned server active sessions')
+        print('DEBUG: restore_active_sessions() fetching abandoned server active sessions')
 
         active_brew_session_files = list(brew_active_sessions_path().glob("*.json"))
         for file in active_brew_session_files:
-            # print('DEBUG: load_active_brew_sessions() found {} as an active session'.format(file))
+            # print('DEBUG: restore_active_sessions() found {} as an active session'.format(file))
             brew_session = load_brew_session(file)
-            # print('DEBUG: load_active_brew_sessions() {}'.format(brew_session))
+            # print('DEBUG: restore_active_sessions() {}'.format(brew_session))
             if brew_session['uid'] not in active_brew_sessions:
                 active_brew_sessions[brew_session['uid']] = []
 
