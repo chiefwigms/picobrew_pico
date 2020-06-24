@@ -60,6 +60,55 @@ WebSocket transport not available. Install eventlet or gevent and gevent-websock
 ### Option 2: Running server via Python directly
 Python >= 3.6.9  
 
+### Option 2: Running server on a Raspberry Pi 3
+1. Use Rufus (https://rufus.ie/ I use the portable version) and "burn" buster to sdcard. 
+https://www.raspberrypi.org/downloads/raspbian/ - (2020-02-13 for the guide).
+
+2. Go ahead and create an SSH file in the root.  This will activate the SSH server and save you from going downstairs.  I speak from experience.
+
+For Windows users: navigate to D: | Create a Next Text Document | Change the Name to SSH  (no extension)
+
+Eject the drive safely.
+
+3. Start up your Raspberry PI 3. Default username/pass is pi/raspberry.  Change the default password:
+<pre> passwd </pre>
+
+5. Run the following:
+<pre>sudo apt-get update
+
+6. Clone the repo in the home directory:
+<pre> git clone https://github.com/chiefwigms/picobrew_pico </pre>
+
+7. Run the setup script.
+<pre> cd ~/picobrew_pico/bin
+sudo ./setupRPI3.sh </pre>
+
+<i> This script does many things. There will be some error messages. Ignore the messages about isc-dhcp-server failing to start.
+a. It sets up a subnet of 192.168.42.0.  Parameters are at the top of the file.  Adjust as needed.
+b. It also makes your RPI3 an acess point on the wlan0 interface.
+The SSID = picobrewers. The wifi passphrase = 12345678. You may adjust both of these in the setupRPI.sh file before running or just leave them alone. 
+You can change the passphrase later by editing /etc/hostapd/hostapd.conf file.
+c. It installs many needed packages.
+d. It creates self signed certificates. </i>
+
+8. Reboot your RPI3
+sudo reboot
+
+9. Start the server
+cd /home/pi/picobrewr_pico
+sudo bin/startup.sh
+
+10. Connect to the recipe crafter.
+a. On your RPI3: navigate to localhost:8080 in the browser.
+b. On another computer or phone: join the picobrewers wireless lan, then navigate to https://picobrew.com in your browser.
+
+11. Connect your Picobrew 
+a. Turn on your Zseries
+b. Update the Wifi settings. Connect to SSID:picobrewers with passphrase: 12345678
+c. brew
+
+
+
 #### Setup/Run
 Clone this repo, then run  
 `sudo pip3 install -r requirements.txt` on *nix or `pip3 install -r requirements.txt` as an Administrator in windows  
