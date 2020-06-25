@@ -56,6 +56,16 @@ apt -y update
 apt -y --autoremove purge ifupdown dhcpcd5 isc-dhcp-client isc-dhcp-common rsyslog avahi-daemon
 apt-mark hold ifupdown dhcpcd5 isc-dhcp-client isc-dhcp-common rsyslog raspberrypi-net-mods openresolv avahi-daemon libnss-mdns
 apt -y install libnss-resolve hostapd dnsmasq samba git python3 python3-pip
+
+# Install Picobrew server
+cd /
+git clone https://github.com/chiefwigms/picobrew_pico.git
+cd /picobrew_pico
+git update-index --assume-unchanged config.yaml
+pip3 install -r requirements.txt
+cd /
+
+# Setup Hostapd
 rm -rf /etc/network /etc/dhcp
 systemctl enable systemd-networkd.service systemd-resolved.service
 systemctl unmask hostapd.service
@@ -223,22 +233,15 @@ service smbd restart
 # Startup Script
 sed -i 's/exit 0//g' /etc/rc.local
 cat >> /etc/rc.local <<EOF
-if [ ! -d "/picobrew_pico" ]
+if [ -d "/picobrew_pico" ]
 then
-  echo 'Installing Picobrew Server...'
-  cd /
-  git clone https://github.com/chiefwigms/picobrew_pico.git
-  cd /picobrew_pico
-  git update-index --assume-unchanged config.yaml
-  pip3 install -r requirements.txt
-else
   echo 'Updating Picobrew Server...'
   cd /picobrew_pico
   git pull
   pip3 install -r requirements.txt
+  echo 'Starting Picobrew Server...'
+  python3 server.py &
 fi
-echo 'Starting Picobrew Server...'
-python3 server.py &
 
 exit 0
 EOF
@@ -247,5 +250,8 @@ EOF
 #systemctl enable apt-daily.timer
 #systemctl enable apt-daily-upgrade.timer
 
-(echo "Finished setup - Rebooting system in 10 seconds!"; sleep 10; reboot) &
+# Rename script
+mv /boot/firstboot.sh /boot/firstboot.done
 
+echo "Finished setup - rebooting now!"
+reboot

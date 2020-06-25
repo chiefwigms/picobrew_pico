@@ -1,6 +1,7 @@
 Creating a custom image:
 Download lastest Lite image from https://www.raspberrypi.org/downloads/raspberry-pi-os/
 Download firstboot.service from https://github.com/nmcclain/raspberian-firstboot
+(Remove ExecStartPost from firstboot.service - script will rename itself)
 Extract img from zip
 
 mkdir mnt boot
