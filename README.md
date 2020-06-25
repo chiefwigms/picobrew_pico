@@ -63,7 +63,7 @@ Python >= 3.6.9
 #### Setup/Run
 Clone this repo, then run  
 `sudo pip3 install -r requirements.txt` on *nix or `pip3 install -r requirements.txt` as an Administrator in windows  
-`sudo python3 server.py` on *nix or `python3 server.py` as an Administrator in windows
+`sudo python3 server.py` on *nix or `python3 server.py` as an Administrator in windows (default host interface is `0.0.0.0` and port `80`, but these can be specified via command-line arguments like so `python3 server.py <interface> <port>`)
 
 ## Manual Recipe Editing
 The table for adding/removing/editing recipe steps has several validation checks in it, but there is always the possiblity of ruining your Pico.  

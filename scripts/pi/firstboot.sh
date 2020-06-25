@@ -55,7 +55,7 @@ apt -y update
 #apt -y upgrade
 apt -y --autoremove purge ifupdown dhcpcd5 isc-dhcp-client isc-dhcp-common rsyslog avahi-daemon
 apt-mark hold ifupdown dhcpcd5 isc-dhcp-client isc-dhcp-common rsyslog raspberrypi-net-mods openresolv avahi-daemon libnss-mdns
-apt -y install libnss-resolve hostapd dnsmasq samba git python3 python3-pip
+apt -y install libnss-resolve hostapd dnsmasq samba git python3 python3-pip nginx openssh-server
 
 # Install Picobrew server
 cd /
@@ -181,6 +181,7 @@ sed -i 's/.*IGNORE_RESOLVCONF.*/IGNORE_RESOLVCONF=yes/g' /etc/default/dnsmasq
 # Setup dnsmasq
 cat >> /etc/dnsmasq.conf <<EOF
 address=/picobrew.com/${AP_IP}
+address=/www.picobrew.com/${AP_IP}
 server=8.8.8.8
 server=8.8.4.4
 EOF
@@ -188,7 +189,65 @@ EOF
 # Add picobrew to /etc/hosts
 cat >> /etc/hosts <<EOF
 ${AP_IP}       picobrew.com
+${AP_IP}       www.picobrew.com
 EOF
+
+# Generate self-signed SSL certs
+mkdir /certs
+cat > /certs/req.cnf <<EOF
+[v3_req]
+keyUsage = critical, digitalSignature, keyAgreement
+extendedKeyUsage = serverAuth
+subjectAltName = @alt_names
+[alt_names]
+DNS.1 = picobrew.com
+DNS.2 = www.picobrew.com
+EOF
+
+openssl req -x509 -sha256 -newkey rsa:2048 -nodes -keyout /certs/domain.key -days 1825  -out  /certs/domain.crt  -subj "/CN=chiefwigms_Picobrew_Pico CA"
+
+openssl req -newkey rsa:2048 -nodes -subj "/CN=picobrew.com" \
+      -keyout  /certs/server.key -out  /certs/server.csr
+
+openssl x509 \
+        -CA /certs/domain.crt -CAkey /certs/domain.key -CAcreateserial \
+       -in /certs/server.csr \
+       -req -days 1825 -out /certs/server.crt -extfile /certs/req.cnf -extensions v3_req
+
+cat /certs/server.crt /certs/domain.crt > /certs/bundle.crt
+
+# Setup nginx for http and https
+cat > /etc/nginx/sites-available/picobrew.com.conf <<EOF
+server {
+    listen 80;
+    server_name picobrew.com;
+    
+    location / {
+        proxy_set_header    Host \$http_host;
+        proxy_pass          http://localhost:8080;
+    }
+}
+
+server {
+    listen 443 ssl;
+    server_name picobrew.com;
+    ssl_certificate             /certs/bundle.crt;
+    ssl_certificate_key         /certs/server.key;
+    access_log                  /var/log/nginx/picobrew.access.log;
+    error_log                   /var/log/nginx/picobrew.error.log;
+    
+    location / {
+        proxy_set_header    Host \$http_host;
+        proxy_set_header    X-Real-IP \$remote_addr;
+        proxy_set_header    X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header    X-Forwarded-Proto \$scheme;
+        proxy_pass          http://localhost:8080;
+    }
+  }
+EOF
+ln -s /etc/nginx/sites-available/picobrew.com.conf /etc/nginx/sites-enabled/picobrew.com.conf
+systemctl stop nginx
+systemctl start nginx
 
 # Setup Samba
 cat > /etc/samba/smb.conf <<EOF
@@ -240,7 +299,7 @@ then
   git pull
   pip3 install -r requirements.txt
   echo 'Starting Picobrew Server...'
-  python3 server.py &
+  python3 server.py 0.0.0.0 8080 &
 fi
 
 exit 0
