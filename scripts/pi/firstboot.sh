@@ -170,7 +170,7 @@ sed -i 's/.*IGNORE_RESOLVCONF.*/IGNORE_RESOLVCONF=yes/g' /etc/default/dnsmasq
 
 # Setup dnsmasq
 cat >> /etc/dnsmasq.conf <<EOF
-address=/picobrew.com/127.0.0.1
+address=/picobrew.com/${AP_IP}
 server=8.8.8.8
 server=8.8.4.4
 EOF
@@ -247,4 +247,5 @@ EOF
 #systemctl enable apt-daily.timer
 #systemctl enable apt-daily-upgrade.timer
 
-reboot
+(echo "Finished setup - Rebooting system in 10 seconds!"; sleep 10; reboot) &
+
