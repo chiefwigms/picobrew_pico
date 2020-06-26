@@ -233,7 +233,7 @@ server {
         proxy_buffering off;
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection "Upgrade";
-        proxy_pass http://localhosts:8080/socket.io;
+        proxy_pass http://localhost:8080/socket.io;
     }
 }
 
