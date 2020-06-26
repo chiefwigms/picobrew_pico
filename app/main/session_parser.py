@@ -1,5 +1,4 @@
-import json, uuid
-from pathlib import Path
+import json
 
 from .config import brew_active_sessions_path
 from .model import PicoBrewSession
@@ -182,12 +181,12 @@ def restore_active_sessions():
             session.created_at = brew_session['date']
             session.name = brew_session['name']
             session.type = brew_session['type']
-            session.session = brew_session['session']   # session guid
-            session.id = -1                             # session id (interger)
-            
+            session.session = brew_session['session']           # session guid
+            session.id = -1                                     # session id (interger)
+
             if 'recovery' in brew_session:
-                session.recovery = brew_session['recovery'] # find last step name
-            
+                session.recovery = brew_session['recovery']     # find last step name
+
             # session.remaining_time = None
             session.is_pico = brew_session['is_pico']
             session.data = brew_session['data']

@@ -1,15 +1,11 @@
-import json, uuid
+import json
 from datetime import datetime
-from pathlib import Path
-from time import mktime
-from flask import current_app, request
-from flask_socketio import emit
 from webargs import fields
 from webargs.flaskparser import use_args, FlaskParser
 
 from . import main
 from .. import socketio
-from .config import ferm_active_sessions_path, ferm_archive_sessions_path
+from .config import ferm_active_sessions_path
 from .model import PicoFermSession
 from .session_parser import active_ferm_sessions
 
@@ -69,7 +65,7 @@ def process_log_ferm_dataset(args):
         create_new_session(uid)
     data = json.loads(args['data'])
     time_delta = args['rate'] * 60 * 1000
-    time = ((datetime.utcnow()-datetime(1970, 1, 1)).total_seconds() * 1000) - (time_delta * (len(data) - 1))
+    time = ((datetime.utcnow() - datetime(1970, 1, 1)).total_seconds() * 1000) - (time_delta * (len(data) - 1))
     session_data = []
     log_data = ''
     for d in data:

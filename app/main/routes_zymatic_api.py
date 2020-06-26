@@ -1,9 +1,7 @@
-import json, uuid, os
+import json
+import uuid
+import os
 from datetime import datetime
-from pathlib import Path
-from time import mktime
-from flask import current_app, request
-from flask_socketio import emit
 from webargs import fields
 from webargs.flaskparser import use_args, FlaskParser
 
@@ -148,7 +146,7 @@ def process_log_session(args):
         session = args['session']
         uid = get_machine_by_session(session)
         temps = [int(temp[2:]) for temp in args['data'].split('|')]
-        session_data = {'time': ((datetime.utcnow()-datetime(1970, 1, 1)).total_seconds() * 1000),
+        session_data = {'time': ((datetime.utcnow() - datetime(1970, 1, 1)).total_seconds() * 1000),
                         'heat1': temps[0],
                         'wort': temps[1],
                         'board': temps[2],
