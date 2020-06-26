@@ -1,6 +1,7 @@
-import json, uuid
+import json
+import uuid
 
-from .config import zymatic_recipe_path, zseries_recipe_path, pico_recipe_path
+from .config import zymatic_recipe_path, pico_recipe_path
 from .model import PICO_LOCATION, ZYMATIC_LOCATION, ZSERIES_LOCATION
 
 

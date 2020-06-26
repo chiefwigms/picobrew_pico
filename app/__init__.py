@@ -3,7 +3,6 @@ from flask_cors import CORS
 from flask_socketio import SocketIO
 from pathlib import Path
 import yaml
-import os
 
 BASE_PATH = Path(__file__).parents[1]
 
@@ -21,7 +20,6 @@ def create_app(debug=False):
     socketio.init_app(app)
 
     # these imports required to be after socketio initialization
-    from .main.config import brew_active_sessions_path
     from .main.model import PicoFermSession, PicoBrewSession
     from .main.routes_frontend import initialize_data
     from .main.session_parser import restore_active_sessions, active_brew_sessions, active_ferm_sessions

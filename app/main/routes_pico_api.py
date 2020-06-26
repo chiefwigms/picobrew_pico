@@ -1,9 +1,6 @@
-import json, uuid
+import json
+import uuid
 from datetime import datetime
-from pathlib import Path
-from time import mktime
-from flask import current_app
-from flask_socketio import emit
 from webargs import fields
 from webargs.flaskparser import use_args, FlaskParser
 
@@ -157,7 +154,7 @@ def process_log(args):
     uid = args['uid']
     if uid not in active_brew_sessions or active_brew_sessions[uid].name == 'Waiting To Brew':
         create_new_session(uid, args['sesId'], args['sesType'])
-    session_data = {'time': ((datetime.utcnow()-datetime(1970, 1, 1)).total_seconds() * 1000),
+    session_data = {'time': ((datetime.utcnow() - datetime(1970, 1, 1)).total_seconds() * 1000),
                     'timeLeft': args['timeLeft'],
                     'step': args['step'],
                     'wort': args['wort'],

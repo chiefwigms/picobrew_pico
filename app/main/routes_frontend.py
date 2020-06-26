@@ -2,12 +2,11 @@ import json
 import requests
 import uuid
 from flask import render_template, request
-from pathlib import Path
 
 from . import main
 from .recipe_parser import PicoBrewRecipe, PicoBrewRecipeImport, ZymaticRecipe, ZymaticRecipeImport, ZSeriesRecipe
 from .session_parser import load_ferm_session, get_ferm_graph_data, get_brew_graph_data, load_brew_session, active_brew_sessions, active_ferm_sessions
-from .config import zymatic_recipe_path, zseries_recipe_path, pico_recipe_path, ferm_archive_sessions_path, brew_active_sessions_path, brew_archive_sessions_path
+from .config import zymatic_recipe_path, zseries_recipe_path, pico_recipe_path, ferm_archive_sessions_path, brew_archive_sessions_path
 
 
 # -------- Routes --------
@@ -92,7 +91,7 @@ def get_zymatic_recipes():
 
 
 @main.route('/zseries_recipes')
-def zseries_recipes():
+def _zseries_recipes():
     global zseries_recipes
     zseries_recipes = load_zseries_recipes()
     return render_template('zseries_recipes.html', recipes=zseries_recipes)

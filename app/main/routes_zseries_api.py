@@ -1,9 +1,8 @@
-import json, uuid, os
+import json
+import uuid
+import os
 from datetime import datetime
-from pathlib import Path
-from time import mktime
-from flask import current_app, request
-from flask_socketio import emit
+from flask import current_app, request, Response, abort
 from webargs import fields
 from webargs.flaskparser import use_args, FlaskParser
 from enum import Enum
@@ -11,7 +10,7 @@ from random import seed, randint
 
 from .. import socketio
 from . import main
-from .config import brew_active_sessions_path, brew_archive_sessions_path
+from .config import brew_active_sessions_path
 from .model import PicoBrewSession
 from .routes_frontend import get_zseries_recipes, load_brew_sessions
 from .session_parser import active_brew_sessions
@@ -389,7 +388,7 @@ def update_session_log(token, body):
     active_session.step = body['StepName']
     log_time = datetime.utcnow()
     session_data = {
-        'time': ((log_time-datetime(1970, 1, 1)).total_seconds() * 1000),
+        'time': ((log_time - datetime(1970, 1, 1)).total_seconds() * 1000),
         'timeStr': log_time.isoformat(),
         'timeLeft': body['SecondsRemaining'],
         'step': body['StepName'],
@@ -405,7 +404,7 @@ def update_session_log(token, body):
     event = None
     if active_session in events and len(events[active_session]) > 0:
         if len(events[active_session]) > 1:
-            current_app.logger.debug('DEBUG: ZSeries events > 1 - size = {}'.format(len(events[session])))
+            current_app.logger.debug('DEBUG: ZSeries events > 1 - size = {}'.format(len(events[active_session])))
         event = events[active_session].pop(0)
         session_data.update({'event': event})
 
