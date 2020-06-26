@@ -184,7 +184,10 @@ def restore_active_sessions():
             session.type = brew_session['type']
             session.session = brew_session['session']   # session guid
             session.id = -1                             # session id (interger)
-            session.recovery = brew_session['recovery'] # find last step name
+            
+            if 'recovery' in brew_session:
+                session.recovery = brew_session['recovery'] # find last step name
+            
             # session.remaining_time = None
             session.is_pico = brew_session['is_pico']
             session.data = brew_session['data']
