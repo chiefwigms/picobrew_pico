@@ -5,8 +5,6 @@ from pathlib import Path
 import yaml
 import os
 
-    
-
 BASE_PATH = Path(__file__).parents[1]
 
 server_cfg = {}
@@ -19,6 +17,7 @@ def create_app(debug=False):
     app = Flask(__name__)
     CORS(app)
 
+    socketio.cors_allowed_origins = "*"
     socketio.init_app(app)
 
     # these imports required to be after socketio initialization
