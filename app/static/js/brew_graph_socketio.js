@@ -9,7 +9,7 @@ Highcharts.chart(graph_data.chart_id, {
     events: {
       load: function () {
         var self = this
-        var socket = io.connect('http://' + document.domain + ':' + location.port)
+        var socket = io.connect('//' + document.domain + ':' + location.port)
         var event_name = 'brew_session_update|' + graph_data.chart_id
         socket.on(event_name, function (event)
         {

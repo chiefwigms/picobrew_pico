@@ -1,14 +1,11 @@
-from flask import *
+from flask import Flask
 from flask_cors import CORS
 from flask_socketio import SocketIO
 from pathlib import Path
 import yaml
 import os
 
-from .main.model import PicoFermSession, PicoBrewSession
-from .main.config import brew_active_sessions_path
-from .main.session_parser import restore_active_sessions, active_brew_sessions, active_ferm_sessions
-from .main.routes_frontend import initialize_data
+    
 
 BASE_PATH = Path(__file__).parents[1]
 
@@ -22,11 +19,18 @@ def create_app(debug=False):
     app = Flask(__name__)
     CORS(app)
 
+    socketio.init_app(app)
+
+    # these imports required to be after socketio initialization
+    from .main.config import brew_active_sessions_path
+    from .main.model import PicoFermSession, PicoBrewSession
+    from .main.routes_frontend import initialize_data
+    from .main.session_parser import restore_active_sessions, active_brew_sessions, active_ferm_sessions
+
     from .main import main as main_blueprint
 
     # ----- Routes ----------
     app.register_blueprint(main_blueprint)
-    socketio.init_app(app)
 
     cfg_file = BASE_PATH.joinpath('config.yaml')
     with open(cfg_file, 'r') as f:
@@ -36,7 +40,7 @@ def create_app(debug=False):
         SECRET_KEY='bosco',
         CORS_HEADERS='Content-Type',
         RECIPES_PATH=BASE_PATH.joinpath('app/recipes'),
-        SESSIONS_PATH=BASE_PATH.joinpath('app/sessions'),
+        SESSIONS_PATH=BASE_PATH.joinpath('app/sessions')
     )
 
     with app.app_context():
