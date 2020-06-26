@@ -11,7 +11,7 @@ if len(sys.argv) != 1 and len(sys.argv) != 3:
 
 if len(sys.argv) == 3:
     HOST=sys.argv[1]
-    PORT=sys.argv[2]
+    PORT=int(sys.argv[2])
 
 app = create_app(debug=True)
 

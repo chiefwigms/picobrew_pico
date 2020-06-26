@@ -3,7 +3,6 @@ from pathlib import Path
 
 from .config import brew_active_sessions_path
 from .model import PicoBrewSession
-from .. import *
 
 active_brew_sessions = {}
 active_ferm_sessions = {}
@@ -44,6 +43,8 @@ def load_brew_session(file):
         'data': json_data,
         'graph': get_brew_graph_data(chart_id, name, step, json_data)
     }
+    if len(json_data) > 0:
+        session['recovery'] = json_data[-1]['recovery']
     return (session)
 
 
@@ -183,7 +184,7 @@ def restore_active_sessions():
             session.type = brew_session['type']
             session.session = brew_session['session']   # session guid
             session.id = -1                             # session id (interger)
-            # session.recovery = ''                     # find last step name
+            session.recovery = brew_session['recovery'] # find last step name
             # session.remaining_time = None
             session.is_pico = brew_session['is_pico']
             session.data = brew_session['data']

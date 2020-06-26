@@ -1,7 +1,7 @@
 import json
 import requests
 import uuid
-from flask import *
+from flask import render_template, request
 from pathlib import Path
 
 from . import main

@@ -55,7 +55,7 @@ apt -y update
 #apt -y upgrade
 apt -y --autoremove purge ifupdown dhcpcd5 isc-dhcp-client isc-dhcp-common rsyslog avahi-daemon
 apt-mark hold ifupdown dhcpcd5 isc-dhcp-client isc-dhcp-common rsyslog raspberrypi-net-mods openresolv avahi-daemon libnss-mdns
-apt -y install libnss-resolve hostapd dnsmasq samba git python3 python3-pip nginx openssh-server
+apt -y install libnss-resolve hostapd dnsmasq dnsutils samba git python3 python3-pip nginx openssh-server
 
 # Install Picobrew server
 cd /
@@ -220,17 +220,26 @@ cat /certs/server.crt /certs/domain.crt > /certs/bundle.crt
 cat > /etc/nginx/sites-available/picobrew.com.conf <<EOF
 server {
     listen 80;
-    server_name picobrew.com;
+    server_name www.picobrew.com picobrew.com;
     
     location / {
         proxy_set_header    Host \$http_host;
         proxy_pass          http://localhost:8080;
     }
+
+    location /socket.io {
+        include proxy_params;
+        proxy_http_version 1.1;
+        proxy_buffering off;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "Upgrade";
+        proxy_pass http://localhosts:8080/socket.io;
+    }
 }
 
 server {
     listen 443 ssl;
-    server_name picobrew.com;
+    server_name www.picobrew.com picobrew.com;
     ssl_certificate             /certs/bundle.crt;
     ssl_certificate_key         /certs/server.key;
     access_log                  /var/log/nginx/picobrew.access.log;
@@ -242,6 +251,15 @@ server {
         proxy_set_header    X-Forwarded-For \$proxy_add_x_forwarded_for;
         proxy_set_header    X-Forwarded-Proto \$scheme;
         proxy_pass          http://localhost:8080;
+    }
+
+    location /socket.io {
+        include proxy_params;
+        proxy_http_version 1.1;
+        proxy_buffering off;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "Upgrade";
+        proxy_pass http://localhost:8080/socket.io;
     }
   }
 EOF

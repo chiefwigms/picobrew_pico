@@ -2,15 +2,16 @@ import json, uuid
 from datetime import datetime
 from pathlib import Path
 from time import mktime
-from flask import *
+from flask import current_app, request
 from flask_socketio import emit
 from webargs import fields
 from webargs.flaskparser import use_args, FlaskParser
+
+from . import main
+from .. import socketio
 from .config import ferm_active_sessions_path, ferm_archive_sessions_path
 from .model import PicoFermSession
 from .session_parser import active_ferm_sessions
-from . import main
-from .. import *
 
 arg_parser = FlaskParser()
 

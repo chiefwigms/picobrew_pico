@@ -9,7 +9,7 @@ chart: {
   events: {
     load: function () {
       var self = this
-      var socket = io.connect('http://' + document.domain + ':' + location.port)
+      var socket = io.connect('//' + document.domain + ':' + location.port)
       var event_name = 'ferm_session_update|' + graph_data.chart_id
       socket.on(event_name, function (event)
       {
