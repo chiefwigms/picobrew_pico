@@ -75,7 +75,8 @@ def process_get_actions_needed(args):
 # Response: '\r\n'
 error_args = {
     'uid': fields.Str(required=True),       # 32 character alpha-numeric serial number
-    'rfid': fields.Str(required=True),      # 14 character alpha-numeric PicoPak RFID (could be blank)
+    'code': fields.Str(required=True),       # Integer error number
+    'rfid': fields.Str(required=False),      # 14 character alpha-numeric PicoPak RFID (could be blank)
 }
 @main.route('/API/pico/error')
 @use_args(error_args, location='querystring')

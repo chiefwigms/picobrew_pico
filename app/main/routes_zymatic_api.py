@@ -16,6 +16,31 @@ from .session_parser import active_brew_sessions
 arg_parser = FlaskParser()
 events = {}
 
+# usersetup: /API/usersetup?machine={}&admin=0
+#             Response: '\r\n#{0}/{1}|#' where {0} : Profile GUID, {1} = User Name
+user_setup_args = {
+    'machine': fields.Str(required=True),       # 12 character alpha-numeric Product ID
+    'admin': fields.Int(required=True),         # Always 0
+}
+@main.route('/API/usersetup')
+@use_args(user_setup_args, location='querystring')
+def process_user_setup(args):
+    profile_guid = uuid.uuid4().hex[:32]
+    user_name = "DefaultUser"  # TODO: Config parameter?
+    return '\r\n#{}/{}|#'.format(profile_guid, user_name)
+
+
+# firstSetup: /API/firstSetup?machine={}|1W_ADDR,1/1W_ADDR,2/1W_ADDR,3/1W_ADDR,4&admin=0
+#             Response: '\r\n'
+first_setup_args = {
+    'machine': fields.Str(required=True),       # 12 character alpha-numeric Product ID (1W_ADDR = 16 character alpha-numeric OneWire Address, i.e. 28b0123456789abc)
+    'admin': fields.Int(required=True),         # Always 0
+}
+@main.route('/API/firstSetup')
+@use_args(first_setup_args, location='querystring')
+def process_first_setup(args):
+    return '\r\n'
+
 
 # zymaticFirmwareCheck: /API/zymaticFirmwareCheck?machine={}&ver={}&maj={}&min={}
 #             Response: '\r\n#{0}#\r\n' where {0} : T/F if newer firmware available
