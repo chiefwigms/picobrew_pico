@@ -58,6 +58,7 @@ apt-mark hold ifupdown dhcpcd5 isc-dhcp-client isc-dhcp-common rsyslog raspberry
 apt -y install libnss-resolve hostapd dnsmasq dnsutils samba git python3 python3-pip nginx openssh-server
 
 # Install Picobrew server
+echo 'Installing Picobrew Server...'
 cd /
 git clone https://github.com/chiefwigms/picobrew_pico.git
 cd /picobrew_pico
@@ -178,12 +179,21 @@ EOF
 sed -i 's/.*DNSStubListener=.*/DNSStubListener=no/g' /etc/systemd/resolved.conf
 sed -i 's/.*IGNORE_RESOLVCONF.*/IGNORE_RESOLVCONF=yes/g' /etc/default/dnsmasq
 
+# maybe disable ipv6
+# cat >> /etc/sysctl.conf <<EOF
+# net.ipv6.conf.all.disable_ipv6=1
+# net.ipv6.conf.default.disable_ipv6=1
+# net.ipv6.conf.lo.disable_ipv6=1
+# net.ipv6.conf.eth0.disable_ipv6 = 1
+# EOF
+
 # Setup dnsmasq
 cat >> /etc/dnsmasq.conf <<EOF
 address=/picobrew.com/${AP_IP}
 address=/www.picobrew.com/${AP_IP}
 server=8.8.8.8
 server=8.8.4.4
+server=1.1.1.1
 EOF
 
 # Add picobrew to /etc/hosts
@@ -223,11 +233,14 @@ server {
     server_name www.picobrew.com picobrew.com;
     
     location / {
+        aio threads;
         proxy_set_header    Host \$http_host;
         proxy_pass          http://localhost:8080;
     }
 
     location /socket.io {
+        aio threads;
+        
         include proxy_params;
         proxy_http_version 1.1;
         proxy_buffering off;
@@ -252,7 +265,7 @@ server {
         proxy_set_header    X-Forwarded-Proto \$scheme;
         proxy_pass          http://localhost:8080;
     }
-
+    
     location /socket.io {
         include proxy_params;
         proxy_http_version 1.1;
@@ -261,9 +274,14 @@ server {
         proxy_set_header Connection "Upgrade";
         proxy_pass http://localhost:8080/socket.io;
     }
-  }
+}
 EOF
+
+sudo sed -i 's/sendfile on;/client_max_body_size;\ \ 10m\n\tsendfile on;/g' /etc/nginx/nginx.conf
+
 ln -s /etc/nginx/sites-available/picobrew.com.conf /etc/nginx/sites-enabled/picobrew.com.conf
+rm /etc/nginx/sites-enabled/default
+
 systemctl stop nginx
 systemctl start nginx
 
@@ -310,15 +328,31 @@ service smbd restart
 # Startup Script
 sed -i 's/exit 0//g' /etc/rc.local
 cat >> /etc/rc.local <<EOF
+
+# reload systemd manager configuration to recreate entire dependency tree
+systemctl daemon-reload
+
+# toggle off WiFi power management on wireless interfaces (wlan0 and ap0)
+iw wlan0 set power_save off
+iw ap0 set power_save off
+
 if [ -d "/picobrew_pico" ]
 then
   echo 'Updating Picobrew Server...'
   cd /picobrew_pico
   git pull
-  pip3 install -r requirements.txt
-  echo 'Starting Picobrew Server...'
-  python3 server.py 0.0.0.0 8080 &
+else
+  echo 'Installing Picobrew Server...'
+  cd /
+  git clone https://github.com/chiefwigms/picobrew_pico.git
+  cd /picobrew_pico
+  git update-index --assume-unchanged config.yaml
 fi
+
+# install dependencies and start server
+pip3 install -r requirements.txt
+echo 'Starting Picobrew Server...'
+python3 server.py 0.0.0.0 8080 &
 
 exit 0
 EOF
