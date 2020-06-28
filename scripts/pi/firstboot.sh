@@ -244,7 +244,7 @@ server {
         include proxy_params;
         proxy_http_version 1.1;
         proxy_buffering off;
-        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Upgrade \$http_upgrade;
         proxy_set_header Connection "Upgrade";
         proxy_pass http://localhost:8080/socket.io;
     }
@@ -270,14 +270,14 @@ server {
         include proxy_params;
         proxy_http_version 1.1;
         proxy_buffering off;
-        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Upgrade \$http_upgrade;
         proxy_set_header Connection "Upgrade";
         proxy_pass http://localhost:8080/socket.io;
     }
 }
 EOF
 
-sudo sed -i 's/sendfile on;/client_max_body_size;\ \ 10m\n\tsendfile on;/g' /etc/nginx/nginx.conf
+sudo sed -i 's/sendfile on;/client_max_body_size\ 10m;\n\tsendfile on;/g' /etc/nginx/nginx.conf
 
 ln -s /etc/nginx/sites-available/picobrew.com.conf /etc/nginx/sites-enabled/picobrew.com.conf
 rm /etc/nginx/sites-enabled/default
