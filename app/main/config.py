@@ -1,6 +1,11 @@
 from flask import current_app
 
 
+# base path
+def base_path():
+    return current_app.config['BASE_PATH']
+
+
 # recipe paths
 def zymatic_recipe_path():
     return current_app.config['RECIPES_PATH'].joinpath('zymatic')

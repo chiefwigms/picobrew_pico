@@ -55,6 +55,10 @@ apt -y update
 #apt -y upgrade
 apt -y --autoremove purge ifupdown dhcpcd5 isc-dhcp-client isc-dhcp-common rsyslog avahi-daemon
 apt-mark hold ifupdown dhcpcd5 isc-dhcp-client isc-dhcp-common rsyslog raspberrypi-net-mods openresolv avahi-daemon libnss-mdns
+if [ -d "/boot/offline/deb" ]; then
+  # Speed up install with pre-packaged debs
+  dpkg -i /boot/offline/deb/*.deb
+fi
 apt -y install libnss-resolve hostapd dnsmasq dnsutils samba git python3 python3-pip nginx openssh-server
 
 # Install Picobrew server
@@ -63,6 +67,10 @@ cd /
 git clone https://github.com/chiefwigms/picobrew_pico.git
 cd /picobrew_pico
 git update-index --assume-unchanged config.yaml
+if [ -d "/boot/offline/pip" ]; then
+  # Speed up install with pre-packaged wheels
+  pip3 install /boot/offline/pip/*.whl
+fi
 pip3 install -r requirements.txt
 cd /
 

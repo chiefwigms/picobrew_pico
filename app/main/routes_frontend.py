@@ -1,12 +1,16 @@
 import json
+import os
 import requests
+import sys
 import uuid
-from flask import render_template, request
+from flask import render_template, request, redirect
+from threading import Thread
+from time import sleep
 
 from . import main
 from .recipe_parser import PicoBrewRecipe, PicoBrewRecipeImport, ZymaticRecipe, ZymaticRecipeImport, ZSeriesRecipe
 from .session_parser import load_ferm_session, get_ferm_graph_data, get_brew_graph_data, load_brew_session, active_brew_sessions, active_ferm_sessions
-from .config import zymatic_recipe_path, zseries_recipe_path, pico_recipe_path, ferm_archive_sessions_path, brew_archive_sessions_path
+from .config import base_path, zymatic_recipe_path, zseries_recipe_path, pico_recipe_path, ferm_archive_sessions_path, brew_archive_sessions_path
 
 
 # -------- Routes --------
@@ -14,6 +18,34 @@ from .config import zymatic_recipe_path, zseries_recipe_path, pico_recipe_path, 
 def index():
     return render_template('index.html', brew_sessions=load_active_brew_sessions(),
                            ferm_sessions=load_active_ferm_sessions())
+
+
+@main.route('/restart_server')
+def restart_server():
+    # git pull & install any updated requirements
+    os.system('cd {0};git pull;pip3 install -r requirements.txt'.format(base_path()))
+    # TODO: Close file handles for open sessions?
+
+    def restart():
+        sleep(2)
+        os.execl(sys.executable, *([sys.executable]+sys.argv))
+    thread = Thread(target=restart, daemon=True)
+    thread.start()
+    return redirect('/')
+
+
+@main.route('/restart_system')
+def restart_system():
+    os.system('shutdown -r now')
+    # TODO: redirect to a page with alert of restart
+    return redirect('/')
+
+
+@main.route('/shutdown_system')
+def shutdown_system():
+    os.system('shutdown -h now')
+    # TODO: redirect to a page with alert of shutdown
+    return redirect('/')
 
 
 @main.route('/brew_history')

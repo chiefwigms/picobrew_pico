@@ -16,4 +16,4 @@ if len(sys.argv) == 3:
 app = create_app(debug=True)
 
 if __name__ == '__main__':
-    socketio.run(app, host=HOST, port=PORT)
+    socketio.run(app, host=HOST, port=PORT, use_reloader=False)

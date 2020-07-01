@@ -3,6 +3,11 @@ Download lastest Lite image from https://www.raspberrypi.org/downloads/raspberry
 Download firstboot.service from https://github.com/nmcclain/raspberian-firstboot
 (Remove ExecStartPost from firstboot.service - script will rename itself)
 Extract img from zip
+Optional:
+  For offline-ish install (vanilla image on sd card):
+    apt-get -y install --print-uris <packages> | cut -d\' -f2 | grep http:// > debs2dl
+    wget -i debs2dl
+    dpkg -i *.deb
 
 mkdir mnt boot
 losetup -P /dev/loop0 <image>

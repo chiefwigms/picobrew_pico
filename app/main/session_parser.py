@@ -42,8 +42,8 @@ def load_brew_session(file):
         'data': json_data,
         'graph': get_brew_graph_data(chart_id, name, step, json_data)
     }
-    if len(json_data) > 0:
-        session['recovery'] = json_data[-1]['recovery']
+    if len(json_data) > 0 and 'recovery' in json_data[-1]:
+        session.update({'recovery': json_data[-1]['recovery']})
     return (session)
 
 

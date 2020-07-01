@@ -36,6 +36,7 @@ def create_app(debug=False):
     app.config.update(
         SECRET_KEY='bosco',
         CORS_HEADERS='Content-Type',
+        BASE_PATH=BASE_PATH,
         RECIPES_PATH=BASE_PATH.joinpath('app/recipes'),
         SESSIONS_PATH=BASE_PATH.joinpath('app/sessions')
     )
