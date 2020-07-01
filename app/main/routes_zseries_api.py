@@ -2,7 +2,7 @@ import json
 import uuid
 import os
 from datetime import datetime
-from flask import current_app, request, Response, abort
+from flask import current_app, request, Response, abort, send_from_directory
 from webargs import fields
 from webargs.flaskparser import use_args, FlaskParser
 from enum import Enum
@@ -10,7 +10,7 @@ from random import seed, randint
 
 from .. import socketio
 from . import main
-from .config import brew_active_sessions_path
+from .config import brew_active_sessions_path, zseries_firmware_path
 from .model import PicoBrewSession
 from .routes_frontend import get_zseries_recipes, load_brew_sessions
 from .session_parser import active_brew_sessions
@@ -23,7 +23,7 @@ events = {}
 
 latest_firmware = {
     "version": "0.0.119",
-    "source": "https://picobrewcontent.blob.core.windows.net/firmware/zseries/zseries_0_0_119.bin"
+    "source": "https://picobrew.com/firmware/zseries/zseries_0_0_119.bin"
 }
 
 
@@ -48,6 +48,14 @@ class ZProgramId(int, Enum):
     CLEAN = 12
     BEER_OR_COFFEE = 24
     CHILL = 27
+
+
+# Get Firmware: /firmware/zseries/<version>
+#     Response: RAW Bin File
+@main.route('/firmware/zseries/<file>', methods=['GET'])
+def process_zseries_firmware(file):
+    current_app.logger.debug('DEBUG: ZSeries fetch firmware file={}'.format(file))
+    return send_from_directory(zseries_firmware_path(), file)
 
 
 # ZState: PUT /Vendors/input.cshtml?type=ZState&token={}
