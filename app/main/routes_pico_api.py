@@ -50,13 +50,17 @@ def process_check_firmware(args):
 
 # Get Firmware: /API/pico/getFirmware?uid={UID}
 #     Response: RAW Bin File
-# get_firmware_args = {
-#     'uid': fields.Str(required=True),       # 32 character alpha-numeric serial number
-# }
-# @main.route('/API/pico/getFirmware')
-# @use_args(get_firmware_args, location='querystring')
-# def process_get_firmware(args):
-#     pass
+get_firmware_args = {
+    'uid': fields.Str(required=True),       # 32 character alpha-numeric serial number
+}
+@main.route('/API/pico/getFirmware')
+@use_args(get_firmware_args, location='querystring')
+def process_get_firmware(args):
+    # TODO setup config to select firmware version, add latest symlink
+    f = open('./firmware/pico/firmware_0.1.34')
+    fw = f.read()
+    f.close
+    return '{}'.format(fw)
 
 
 # Actions Needed: /API/pico/getActionsNeeded?uid={UID}
