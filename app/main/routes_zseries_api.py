@@ -22,8 +22,8 @@ seed(1)
 events = {}
 
 latest_firmware = {
-    "version": "0.0.119",
-    "source": "https://picobrew.com/firmware/zseries/zseries_0_0_119.bin"
+    "version": "0.0.116",
+    "source": "https://picobrew.com/firmware/zseries/zseries_0_0_116.bin"
 }
 
 
