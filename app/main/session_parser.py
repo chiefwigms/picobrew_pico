@@ -163,7 +163,7 @@ def get_ferm_graph_data(chart_id, voltage, session_data):
 def restore_active_sessions():
     # initialize active sessions during start up
     if active_brew_sessions == {}:
-        print('DEBUG: restore_active_sessions() fetching abandoned server active sessions')
+        # print('DEBUG: restore_active_sessions() fetching abandoned server active sessions')
 
         active_brew_session_files = list(brew_active_sessions_path().glob("*.json"))
         for file in active_brew_session_files:

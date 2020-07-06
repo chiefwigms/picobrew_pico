@@ -38,7 +38,8 @@ def create_app(debug=False):
         CORS_HEADERS='Content-Type',
         BASE_PATH=BASE_PATH,
         RECIPES_PATH=BASE_PATH.joinpath('app/recipes'),
-        SESSIONS_PATH=BASE_PATH.joinpath('app/sessions')
+        SESSIONS_PATH=BASE_PATH.joinpath('app/sessions'),
+        FIRMWARE_PATH=BASE_PATH.joinpath('app/firmware')
     )
 
     with app.app_context():
