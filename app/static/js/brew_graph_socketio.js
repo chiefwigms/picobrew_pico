@@ -34,7 +34,7 @@ Highcharts.chart(graph_data.chart_id, {
     enabled: false
   },
 
-  colors: ['#39F', '#F0F', '#FF6', '#F00', '#000'],
+  colors: ['#39F', '#F0F', '#FF6', '#F00', '#6C5', '#000'],
 
   plotOptions: {
     spline: {
