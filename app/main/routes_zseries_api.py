@@ -50,6 +50,13 @@ class ZProgramId(int, Enum):
     CHILL = 27
 
 
+def convertTemp(temp: float, units: str):
+    if units.upper() == 'F':
+        return (temp * 9/5) + 32 # convert celcius to fahrenheit
+    
+    return (temp - 32) * 5/9 # convert fahrenheit to celcius
+
+
 # Get Firmware: /firmware/zseries/<version>
 #     Response: RAW Bin File
 @main.route('/firmware/zseries/<file>', methods=['GET'])
@@ -400,11 +407,12 @@ def update_session_log(token, body):
         'timeStr': log_time.isoformat(),
         'timeLeft': body['SecondsRemaining'],
         'step': body['StepName'],
-        'target': body['TargetTemp'],
-        'ambient': body['AmbientTemp'],
-        'drain': body['DrainTemp'],
-        'wort': body['WortTemp'],
-        'therm': body['ThermoBlockTemp'],
+        # temperatures from Z are in celsius vs prior device series
+        'target': convertTemp(body['TargetTemp'], 'F'),
+        'ambient': convertTemp(body['AmbientTemp'], 'F'),
+        'drain': convertTemp(body['DrainTemp'], 'F'),
+        'wort': convertTemp(body['WortTemp'], 'F'),
+        'therm': convertTemp(body['ThermoBlockTemp'], 'F'),
         'recovery': body['StepName'],
         'position': body['ValvePosition']
     }
