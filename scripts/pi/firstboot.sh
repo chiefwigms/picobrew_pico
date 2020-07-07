@@ -51,6 +51,7 @@ echo "samba-common samba-common/do_debconf boolean true" | debconf-set-selection
 
 # Remove classic networking & setup/enable systemd-resolved/networkd
 # https://raspberrypi.stackexchange.com/questions/89803/access-point-as-wifi-router-repeater-optional-with-bridge
+# https://raspberrypi.stackexchange.com/revisions/89804/26
 apt -y update
 #apt -y upgrade
 apt -y --autoremove purge ifupdown dhcpcd5 isc-dhcp-client isc-dhcp-common rsyslog avahi-daemon
@@ -109,7 +110,6 @@ cat > /etc/systemd/system/hostapd.service.d/override.conf <<EOF
 Wants=wpa_supplicant@wlan0.service
 
 [Service]
-Restart=no
 ExecStartPre=/sbin/iw dev wlan0 interface add ap0 type __ap
 ExecStopPost=-/sbin/iw dev ap0 del
 EOF
@@ -131,6 +131,8 @@ Wants=ap-bring-up.service
 Before=ap-bring-up.service
 
 [Service]
+ExecStartPost=/sbin/iptables -t nat -A POSTROUTING -o wlan0 -j MASQUERADE
+ExecStopPost=-/sbin/iptables -t nat -D POSTROUTING -o wlan0 -j MASQUERADE
 ExecStopPost=-/bin/ip link set ap0 up
 EOF
 
@@ -144,7 +146,6 @@ Requisite=hostapd.service
 Type=oneshot
 ExecStart=/lib/systemd/systemd-networkd-wait-online --interface=wlan0 --timeout=60 --quiet
 ExecStartPost=/bin/ip link set ap0 up
-ExecStartPost=/usr/bin/resolvectl dnssec ap0 no
 EOF
 
 # Setup br0
@@ -159,7 +160,6 @@ cat > /etc/systemd/network/04-eth0.network <<EOF
 [Match]
 Name=eth0
 [Network]
-DNSSEC=no
 Bridge=br0
 ConfigureWithoutCarrier=yes
 EOF
@@ -169,7 +169,7 @@ cat > /etc/systemd/network/08-wlan0.network <<EOF
 [Match]
 Name=wlan0
 [Network]
-DNSSEC=no
+IPForward=yes
 DHCP=yes
 EOF
 
@@ -177,12 +177,8 @@ cat > /etc/systemd/network/16-br0_up.network <<EOF
 [Match]
 Name=br0
 [Network]
-DNSSEC=no
 IPMasquerade=yes
 Address=${AP_IP}/24
-DHCPServer=yes
-[DHCPServer]
-DNS=${AP_IP}
 EOF
 
 # Disable resolved DNS stub listener & point to localhost (dnsmasq) 
@@ -204,6 +200,8 @@ address=/www.picobrew.com/${AP_IP}
 server=8.8.8.8
 server=8.8.4.4
 server=1.1.1.1
+interface=br0
+  dhcp-range=192.168.72.100,192.168.72.200,255.255.255.0,24h
 EOF
 
 # Add picobrew to /etc/hosts
