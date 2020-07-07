@@ -100,6 +100,7 @@ chmod 600 /etc/hostapd/hostapd.conf
 
 cp /lib/systemd/system/hostapd.service /etc/systemd/system/hostapd.service
 sed -i 's/After=/#After=/g' /etc/systemd/system/hostapd.service
+sed -i 's/.*DAEMON_CONF=.*/DAEMON_CONF="\/etc\/hostapd\/hostapd.conf"/' /etc/default/hostapd
 
 #SYSTEMD_EDITOR=tee systemctl edit hostapd.service <<EOF
 mkdir -p /etc/systemd/system/hostapd.service.d
@@ -160,6 +161,7 @@ Name=eth0
 [Network]
 DNSSEC=no
 Bridge=br0
+ConfigureWithoutCarrier=yes
 EOF
 
 # Setup wlan0
@@ -239,9 +241,13 @@ cat > /etc/nginx/sites-available/picobrew.com.conf <<EOF
 server {
     listen 80;
     server_name www.picobrew.com picobrew.com;
+
+    access_log                  /var/log/nginx/picobrew.access.log;
+    error_log                   /var/log/nginx/picobrew.error.log;
     
     location / {
         aio threads;
+
         proxy_set_header    Host \$http_host;
         proxy_pass          http://localhost:8080;
     }
@@ -261,12 +267,16 @@ server {
 server {
     listen 443 ssl;
     server_name www.picobrew.com picobrew.com;
+
     ssl_certificate             /certs/bundle.crt;
     ssl_certificate_key         /certs/server.key;
+    
     access_log                  /var/log/nginx/picobrew.access.log;
     error_log                   /var/log/nginx/picobrew.error.log;
     
     location / {
+        aio threads;
+
         proxy_set_header    Host \$http_host;
         proxy_set_header    X-Real-IP \$remote_addr;
         proxy_set_header    X-Forwarded-For \$proxy_add_x_forwarded_for;
@@ -275,6 +285,8 @@ server {
     }
     
     location /socket.io {
+        aio threads;
+        
         include proxy_params;
         proxy_http_version 1.1;
         proxy_buffering off;
@@ -284,8 +296,6 @@ server {
     }
 }
 EOF
-
-sudo sed -i 's/sendfile on;/client_max_body_size\ 10m;\n\tsendfile on;/g' /etc/nginx/nginx.conf
 
 ln -s /etc/nginx/sites-available/picobrew.com.conf /etc/nginx/sites-enabled/picobrew.com.conf
 rm /etc/nginx/sites-enabled/default

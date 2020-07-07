@@ -15,6 +15,7 @@ mount /dev/loop0p2 ./mnt
 cp <firstboot.service> ./mnt/lib/systemd/system/
 cd ./mnt/etc/systemd/system/multi-user.target.wants
 ln -s /lib/systemd/system/firstboot.service .
+chmod 0644 /lib/systemd/system/firstboot.service
 cd ..
 umount mnt
 mount /dev/loop0p1 ./boot
