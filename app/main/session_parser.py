@@ -182,7 +182,7 @@ def restore_active_sessions():
             session.name = brew_session['name']
             session.type = brew_session['type']
             session.session = brew_session['session']           # session guid
-            session.id = -1                                     # session id (interger)
+            session.id = -1                                     # session id (integer)
 
             if 'recovery' in brew_session:
                 session.recovery = brew_session['recovery']     # find last step name

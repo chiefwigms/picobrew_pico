@@ -157,7 +157,7 @@ def process_log_session(args):
         active_brew_sessions[uid].name = get_recipe_name_by_id(args['recipe'])
         active_brew_sessions[uid].filepath = brew_active_sessions_path().joinpath('{0}#{1}#{2}#{3}.json'.format(datetime.now().strftime('%Y%m%d_%H%M%S'), uid, active_brew_sessions[uid].session, active_brew_sessions[uid].name.replace(' ', '_')))
         active_brew_sessions[uid].file = open(active_brew_sessions[uid].filepath, 'w')
-        active_brew_sessions[uid].file.write('[\n')
+        active_brew_sessions[uid].file.write('[')
         active_brew_sessions[uid].file.flush()
         ret = '\r\n#{0}#'.format(active_brew_sessions[uid].session)
     elif args['code'] == 1:
@@ -195,13 +195,13 @@ def process_log_session(args):
                                    'event': event,
                                    })
         socketio.emit('brew_session_update|{}'.format(uid), graph_update)
-        active_brew_sessions[uid].file.write('\t{},\n'.format(json.dumps(session_data)))
+        active_brew_sessions[uid].file.write('\n\t{},'.format(json.dumps(session_data)))
         active_brew_sessions[uid].file.flush()
     else:
         session = args['session']
         uid = get_machine_by_session(session)
         active_brew_sessions[uid].file.seek(0, os.SEEK_END)
-        active_brew_sessions[uid].file.seek(active_brew_sessions[uid].file.tell() - 2, os.SEEK_SET)  # Remove trailing , from last data set
+        active_brew_sessions[uid].file.seek(active_brew_sessions[uid].file.tell() - 1, os.SEEK_SET)  # Remove trailing , from last data set
         active_brew_sessions[uid].file.write('\n]')
         active_brew_sessions[uid].cleanup()
     return ret

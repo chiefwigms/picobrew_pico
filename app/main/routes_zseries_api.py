@@ -330,7 +330,7 @@ def create_session(token, body):
         events[session_id] = []
 
     active_brew_sessions[uid].file = open(active_brew_sessions[uid].filepath, 'w')
-    active_brew_sessions[uid].file.write('[\n')
+    active_brew_sessions[uid].file.write('[')
     active_brew_sessions[uid].file.flush()
 
     ret = {
@@ -435,7 +435,7 @@ def update_session_log(token, body):
                                'event': event,
                                })
     socketio.emit('brew_session_update|{}'.format(uid), graph_update)
-    active_brew_sessions[uid].file.write('\t{},\n'.format(json.dumps(session_data)))
+    active_brew_sessions[uid].file.write('\n\t{},'.format(json.dumps(session_data)))
     active_brew_sessions[uid].file.flush()
 
     ret = {
@@ -483,7 +483,7 @@ def close_session(uid, session_id, body):
         })
 
     active_brew_sessions[uid].file.seek(0, os.SEEK_END)
-    active_brew_sessions[uid].file.seek(active_brew_sessions[uid].file.tell() - 2, os.SEEK_SET)  # Remove trailing , from last data set
+    active_brew_sessions[uid].file.seek(active_brew_sessions[uid].file.tell() - 1, os.SEEK_SET)  # Remove trailing , from last data set
     active_brew_sessions[uid].file.write('\n]')
     active_brew_sessions[uid].cleanup()
 

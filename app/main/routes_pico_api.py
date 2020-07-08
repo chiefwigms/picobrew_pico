@@ -1,4 +1,5 @@
 import json
+import os
 import uuid
 from datetime import datetime
 from webargs import fields
@@ -64,7 +65,7 @@ def process_get_firmware(args):
     # TODO setup config to select firmware version, add latest symlink
     f = open(pico_firmware_path().joinpath(latest_firmware['filepath']))
     fw = f.read()
-    f.close
+    f.close()
     return '{}'.format(fw)
 
 
@@ -103,6 +104,7 @@ get_session_args = {
 @main.route('/API/pico/getSession')
 @use_args(get_session_args, location='querystring')
 def process_get_session(args):
+    cleanup_old_session(args['uid'])
     return '#{0}#\r\n'.format(uuid.uuid4().hex[:20])
 
 
@@ -126,6 +128,7 @@ associated_paks_args = {
 @main.route('/API/pico/getAssociatedPaks')
 @use_args(associated_paks_args, location='querystring')
 def process_associated_paks(args):
+    cleanup_old_session(args['uid'])
     return '\r\n#{0}#\r\n\r\n'.format(get_recipe_list())
 
 
@@ -184,10 +187,10 @@ def process_log(args):
                                })
     socketio.emit('brew_session_update|{}'.format(uid), graph_update)
     if 'complete' in active_brew_sessions[uid].step.lower():
-        active_brew_sessions[uid].file.write('\t{}\n]'.format(json.dumps(session_data)))
+        active_brew_sessions[uid].file.write('\n\t{}\n]'.format(json.dumps(session_data)))
         active_brew_sessions[uid].cleanup()
     else:
-        active_brew_sessions[uid].file.write('\t{},\n'.format(json.dumps(session_data)))
+        active_brew_sessions[uid].file.write('\n\t{},'.format(json.dumps(session_data)))
         active_brew_sessions[uid].file.flush()
     return '\r\n\r\n'
 
@@ -221,4 +224,12 @@ def create_new_session(uid, sesId, sesType):
         active_brew_sessions[uid].name = 'Unknown Session ({})'.format(sesType)
     active_brew_sessions[uid].filepath = brew_active_sessions_path().joinpath('{0}#{1}#{2}#{3}.json'.format(datetime.now().strftime('%Y%m%d_%H%M%S'), uid, sesId, active_brew_sessions[uid].name.replace(' ', '_')))
     active_brew_sessions[uid].file = open(active_brew_sessions[uid].filepath, 'w')
-    active_brew_sessions[uid].file.write('[\n')
+    active_brew_sessions[uid].file.write('[')
+
+
+def cleanup_old_session(uid):
+    if uid in active_brew_sessions and active_brew_sessions[uid].file:
+        active_brew_sessions[uid].file.seek(0, os.SEEK_END)
+        active_brew_sessions[uid].file.seek(active_brew_sessions[uid].file.tell() - 1, os.SEEK_SET)  # Remove trailing , from last data set
+        active_brew_sessions[uid].file.write('\n]')
+        active_brew_sessions[uid].cleanup()
