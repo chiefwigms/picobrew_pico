@@ -4,30 +4,30 @@ var plusIcon = function(cell, formatterParams){
 var minusIcon = function(cell, formatterParams){
     return "<i class='far fa-minus-square fa-lg'></i>";
 }
-var table = new Tabulator("#recipe-table", {
-    data:[{name:"Heat Mash", location:"PassThru", temperature:"152", step_time:"0", drain_time:"0"},
-          {name:"Mash", location:"Mash", temperature:"152", step_time:"90", drain_time:"8"},
-          {name:"Heat to Mash Out", location:"PassThru", temperature:"175", step_time:"0", drain_time:"0"},
-          {name:"Mash Out", location:"Mash", temperature:"175", step_time:"15", drain_time:"8"},
-          {name:"Heat to Boil", location:"PassThru", temperature:"207", step_time:"0", drain_time:"0"},
-          {name:"Pre-hop Boil", location:"PassThru", temperature:"207", step_time:"45", drain_time:"0"},
-          {name:"Hops 1", location:"Adjunct1", temperature:"207", step_time:"10", drain_time:"0"},
-          {name:"Hops 2", location:"Adjunct2", temperature:"207", step_time:"5", drain_time:"0"},
-          {name:"Hops 3", location:"Adjunct3", temperature:"207", step_time:"8", drain_time:"0"},
-          {name:"Balance Temps", location:"PassThru", temperature:"0", step_time:"1", drain_time:"8"},
-          {name:"Cool to Whirlpool", location:"PassThru", temperature:"175", step_time:"0", drain_time:"0"},
-          {name:"Whirlpool", location:"Adjunct4", temperature:"175", step_time:"20", drain_time:"5"},
-          {name:"Connect Chiller", location:"Pause", temperature:"0", step_time:"0", drain_time:"0"}, 
-          {name:"Chill", location:"PassThru", temperature:"66", step_time:"10", drain_time:"10"},
-    ],
+var default_data = [{name:"Heat Mash", location:"PassThru", temperature:"152", step_time:"0", drain_time:"0"},
+                    {name:"Mash", location:"Mash", temperature:"152", step_time:"90", drain_time:"8"},
+                    {name:"Heat to Mash Out", location:"PassThru", temperature:"175", step_time:"0", drain_time:"0"},
+                    {name:"Mash Out", location:"Mash", temperature:"175", step_time:"15", drain_time:"8"},
+                    {name:"Heat to Boil", location:"PassThru", temperature:"207", step_time:"0", drain_time:"0"},
+                    {name:"Pre-hop Boil", location:"PassThru", temperature:"207", step_time:"45", drain_time:"0"},
+                    {name:"Hops 1", location:"Adjunct1", temperature:"207", step_time:"10", drain_time:"0"},
+                    {name:"Hops 2", location:"Adjunct2", temperature:"207", step_time:"5", drain_time:"0"},
+                    {name:"Hops 3", location:"Adjunct3", temperature:"207", step_time:"8", drain_time:"0"},
+                    {name:"Balance Temps", location:"PassThru", temperature:"0", step_time:"1", drain_time:"8"},
+                    {name:"Cool to Whirlpool", location:"PassThru", temperature:"175", step_time:"0", drain_time:"0"},
+                    {name:"Whirlpool", location:"Adjunct4", temperature:"175", step_time:"20", drain_time:"5"},
+                    {name:"Connect Chiller", location:"Pause", temperature:"0", step_time:"0", drain_time:"0"}, 
+                    {name:"Chill", location:"PassThru", temperature:"66", step_time:"10", drain_time:"10"},
+                    ];
+var recipe_table = {
     movableRows:true,
     headerSort:false,
     layout:"fitDataFill",
     resizableColumns:false,
     tooltipGenerationMode:"hover",
     columns:[
-        {rowHandle:true, formatter:"handle", headerSort:false, frozen:true, minWidth:50},
-        {title:"Step #", formatter:"rownum", hozAlign:"center", minWidth:60},
+        {rowHandle:true, formatter:"handle", headerSort:false, frozen:true, width:50},
+        {title:"Step #", formatter:"rownum", hozAlign:"center", width:60},
         {title:"Name", field:"name", width:200, validator:["required", "minLength:1", "maxLength:19", "string"], editor:"input"},
         {title:"Location", field:"location", width:120, hozAlign:"center", tooltip:false, validator:["required", "string"], editor:"select", editorParams:{
             values:[
@@ -79,12 +79,12 @@ var table = new Tabulator("#recipe-table", {
         }
         return tip;
     },
-});
+};
 $(document).ready(function(){
-	$('button').click(function(){
+	$('#b_new_recipe').click(function(){
         var recipe = {}
         recipe.id = ''
-        recipe.name = document.getElementById('recipe_header').elements['recipe_name'].value;
+        recipe.name = document.getElementById('f_new_recipe').elements['recipe_name'].value;
         recipe.steps = table.getData();
 		$.ajax({
 			url: 'new_zymatic_recipe',

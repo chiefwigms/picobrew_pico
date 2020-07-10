@@ -62,7 +62,8 @@ def ferm_history():
 def _zymatic_recipes():
     global zymatic_recipes
     zymatic_recipes = load_zymatic_recipes()
-    return render_template('zymatic_recipes.html', recipes=zymatic_recipes)
+    recipes_dict = [json.loads(json.dumps(recipe, default=lambda r: r.__dict__)) for recipe in zymatic_recipes]
+    return render_template('zymatic_recipes.html', recipes=recipes_dict)
 
 
 @main.route('/new_zymatic_recipe', methods=['GET', 'POST'])
@@ -126,7 +127,8 @@ def get_zymatic_recipes():
 def _zseries_recipes():
     global zseries_recipes
     zseries_recipes = load_zseries_recipes()
-    return render_template('zseries_recipes.html', recipes=zseries_recipes)
+    recipes_dict = [json.loads(json.dumps(recipe, default=lambda r: r.__dict__)) for recipe in zseries_recipes]
+    return render_template('zseries_recipes.html', recipes=recipes_dict)
 
 
 @main.route('/new_zseries_recipe')
@@ -169,7 +171,8 @@ def get_zseries_recipes():
 def _pico_recipes():
     global pico_recipes
     pico_recipes = load_pico_recipes()
-    return render_template('pico_recipes.html', recipes=pico_recipes)
+    recipes_dict = [json.loads(json.dumps(recipe, default=lambda r: r.__dict__)) for recipe in pico_recipes]
+    return render_template('pico_recipes.html', recipes=recipes_dict)
 
 
 @main.route('/new_pico_recipe', methods=['GET', 'POST'])

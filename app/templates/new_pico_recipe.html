@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% block content %}
-  <form id="recipe_header">
+  <script src="static/js/pico_recipe.js"></script>
+  <form id="f_new_recipe">
     <div class="form-row">
       <div class="form-group col-sm-3">
         <input type="text" class="form-control form-control-sm" id="recipe_name" placeholder="Recipe Name">
@@ -13,8 +14,8 @@
       </div>
     </div>
   </form>
-  <div class="w-75 table-sm table-striped table-bordered table-light" id="recipe-table"></div>
-  <div><button class="w-75 btn btn-sm btn-secondary btn-block" type="button">Save</button></div>
+  <div class="table-sm table-striped table-bordered table-light" style="width: 830px;" id="t_new_recipe"></div>
+  <script>var table = new Tabulator("#t_new_recipe", recipe_table); table.setData(default_data);</script>
+  <div><button class="w-75 btn btn-sm btn-secondary btn-block" type="button" id="b_new_recipe">Save</button></div>
   <div id=alert class='hide'></div>
-  <script src="static/js/new_pico_recipe.js"></script>
 {% endblock %}

@@ -18,7 +18,7 @@ class ZymaticRecipeStep():
             self.name,
             self.temperature,
             self.step_time,
-            self.location,
+            ZYMATIC_LOCATION[self.location],
             self.drain_time
         )
 
@@ -43,7 +43,7 @@ class ZymaticRecipe():
                 step.name = recipe_step.get('name', 'Empty Step') or 'Empty Step'
                 step.temperature = recipe_step.get('temperature', 70) or 70
                 step.step_time = recipe_step.get('step_time', 0) or 0
-                step.location = ZYMATIC_LOCATION[recipe_step.get('location', 'PassThru') or 'PassThru']
+                step.location = recipe_step.get('location', 'PassThru') or 'PassThru'
                 step.drain_time = recipe_step.get('drain_time', 0) or 0
                 self.steps.append(step)
 
@@ -91,7 +91,7 @@ class ZSeriesRecipeStep():
             self.name,
             self.temperature,
             self.step_time,
-            self.location,
+            ZSERIES_LOCATION[self.location],
             self.drain_time
         )
 
@@ -121,7 +121,7 @@ class ZSeriesRecipe():
                 step.name = recipe_step.get('name', 'Empty Step') or 'Empty Step'
                 step.temperature = recipe_step.get('temperature', 70) or 70
                 step.step_time = recipe_step.get('step_time', 0) or 0
-                step.location = ZSERIES_LOCATION[recipe_step.get('location', 'PassThru') or 'PassThru']
+                step.location = recipe_step.get('location', 'PassThru') or 'PassThru'
                 step.drain_time = recipe_step.get('drain_time', 0) or 0
                 self.steps.append(step)
 
@@ -155,7 +155,7 @@ class PicoBrewRecipeStep():
             self.temperature,
             self.step_time,
             self.drain_time,
-            self.location,
+            PICO_LOCATION[self.location],
             self.name
         )
 
@@ -188,7 +188,7 @@ class PicoBrewRecipe():
             for recipe_step in recipe['steps']:
                 step = PicoBrewRecipeStep()
                 step.name = recipe_step.get('name', 'Empty Step') or 'Empty Step'
-                step.location = PICO_LOCATION[recipe_step.get('location', 'PassThru') or 'PassThru']
+                step.location = recipe_step.get('location', 'PassThru') or 'PassThru'
                 step.temperature = recipe_step.get('temperature', 70) or 70
                 step.step_time = recipe_step.get('step_time', 0) or 0
                 step.drain_time = recipe_step.get('drain_time', 0) or 0
