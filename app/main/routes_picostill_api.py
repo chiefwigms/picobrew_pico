@@ -36,7 +36,7 @@ def process_picostill_firmware(file):
 
 
 # Check Firmware: /API/PicoStill/getFirmwareAddress?uid={UID}&version={VERSION}
-#       Response: '#{0}#' where {0} : T = Update Available, F = No Updates
+#       Response: '#{0}#' where {0} : {URL} = Url of firmware, F = No Updates
 check_firmware_args = {
     'uid': fields.Str(required=True),       # 32 character alpha-numeric serial number
     'version': fields.Str(required=True),   # Current firmware version - i.e. 0.0.30
