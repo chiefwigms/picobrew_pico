@@ -7,12 +7,23 @@
       <h5 class="card-header" id="h_{{recipe['id']}}">
         <a class="collapsed" role="button" data-toggle="collapse" href="#c_{{recipe['id']}}" data-parent="#accordion" aria-expanded="false" aria-controls="c_{{recipe['id']}}">
           {{recipe['name']}}
+          <button class="btn btn-sm btn-danger float-right mr-5" type="button" id="bd_{{recipe['id']}}" onclick="event.stopPropagation();event.preventDefault();delete_recipe('{{recipe['id']}}');"><i class="fas fa-trash"></i></button>
+          <button class="btn btn-sm btn-success float-right mr-3" type="button" id="bs_{{recipe['id']}}" onclick="event.stopPropagation();event.preventDefault();update_recipe('{{recipe['id']}}');" style="display:none;"><i class="far fa-save fa-lg"></i></button>
         </a>
       </h5>
       <div id="c_{{recipe['id']}}" class="collapse" aria-labelledby="h_{{recipe['id']}}">
         <div class="card-body">
           <div class="table-sm table-striped table-bordered table-light" style="width: 830px;" id="t_{{recipe['id']}}"></div>
-          <script>var table = new Tabulator("#t_{{recipe['id']}}", recipe_table); table.setData({{recipe['steps']|tojson}});</script>
+          <script>
+            recipe_table['dataEdited']=function(data){ 
+              document.getElementById("bs_{{recipe['id']}}").style.display = "block";
+            }
+            recipe_table['rowMoved']=function(row){ 
+              document.getElementById("bs_{{recipe['id']}}").style.display = "block";
+            }
+            var table = new Tabulator("#t_{{recipe['id']}}", recipe_table);
+            table.setData({{recipe['steps']|tojson}});
+          </script>
         </div>
       </div>
     </div>

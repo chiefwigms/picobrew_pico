@@ -55,6 +55,21 @@ class ZymaticRecipe():
             ''.join(steps)
         )
 
+    def update_steps(self, file, steps):
+        self.steps = []
+        for s in steps:
+            step = ZymaticRecipeStep()
+            step.name = s.get('name', 'Empty Step') or 'Empty Step'
+            step.temperature = s.get('temperature', 70) or 70
+            step.step_time = s.get('step_time', 0) or 0
+            step.location = s.get('location', 'PassThru') or 'PassThru'
+            step.drain_time = s.get('drain_time', 0) or 0
+            self.steps.append(step)
+        updated_recipe = json.loads(json.dumps(self, default=lambda r: r.__dict__))
+        del updated_recipe['name_']
+        with open(file, 'w') as f:
+            json.dump(updated_recipe, f, indent=4, sort_keys=True)
+
 
 def ZymaticRecipeImport(recipes):
     for recipe in recipes.strip('#|').split('|'):
@@ -100,6 +115,7 @@ class ZSeriesRecipe():
     def __init__(self):
         self.id = None
         self.name = None
+        self.name_ = None
         self.start_water = 13.1
         self.kind_code = 0
         self.type_code = None
@@ -140,6 +156,23 @@ class ZSeriesRecipe():
             s['Drain'] = step.drain_time
             r['Steps'].append(s)
         return r
+
+    def update_steps(self, file, steps):
+        self.steps = []
+        for s in steps:
+            step = ZSeriesRecipeStep()
+            step.name = s.get('name', 'Empty Step') or 'Empty Step'
+            step.temperature = s.get('temperature', 70) or 70
+            step.step_time = s.get('step_time', 0) or 0
+            step.location = s.get('location', 'PassThru') or 'PassThru'
+            step.drain_time = s.get('drain_time', 0) or 0
+            self.steps.append(step)
+        updated_recipe = json.loads(json.dumps(self, default=lambda r: r.__dict__))
+        del updated_recipe['name_']
+        del updated_recipe['kind_code']
+        del updated_recipe['type_code']
+        with open(file, 'w') as f:
+            json.dump(updated_recipe, f, indent=4, sort_keys=True)
 
 
 class PicoBrewRecipeStep():
@@ -205,6 +238,21 @@ class PicoBrewRecipe():
             ''.join(steps),
             self.image
         )
+
+    def update_steps(self, file, steps):
+        self.steps = []
+        for s in steps:
+            step = PicoBrewRecipeStep()
+            step.name = s.get('name', 'Empty Step') or 'Empty Step'
+            step.location = s.get('location', 'PassThru') or 'PassThru'
+            step.temperature = s.get('temperature', 70) or 70
+            step.step_time = s.get('step_time', 0) or 0
+            step.drain_time = s.get('drain_time', 0) or 0
+            self.steps.append(step)
+        updated_recipe = json.loads(json.dumps(self, default=lambda r: r.__dict__))
+        del updated_recipe['name_']
+        with open(file, 'w') as f:
+            json.dump(updated_recipe, f, indent=4, sort_keys=True)
 
 
 def PicoBrewRecipeImport(recipe, rfid=None):

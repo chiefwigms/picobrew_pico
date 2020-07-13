@@ -106,6 +106,29 @@ def import_zymatic_recipe():
         return render_template('import_zymatic_recipe.html')
 
 
+@main.route('/update_zymatic_recipe', methods=['POST'])
+def update_zymatic_recipe():
+    update = request.get_json()
+    files = list(zymatic_recipe_path().glob("*.json"))
+    for filename in files:
+        recipe = load_zymatic_recipe(filename)
+        if recipe.id == update['id']:
+            recipe.update_steps(filename, update['steps'])
+    return '', 204
+
+
+@main.route('/delete_zymatic_recipe', methods=['GET', 'POST'])
+def delete_zymatic_recipe():
+    recipe_id = request.get_json()
+    files = list(zymatic_recipe_path().glob("*.json"))
+    for filename in files:
+        recipe = load_zymatic_recipe(filename)
+        if recipe.id == recipe_id:
+            os.remove(filename)
+            return '', 204
+    return 'Delete Recipe: Failed to find recipe id \"' + recipe_id + '\"', 418
+
+
 def load_zymatic_recipes():
     files = list(zymatic_recipe_path().glob("*.json"))
     recipes = [load_zymatic_recipe(file) for file in files]
@@ -148,6 +171,29 @@ def new_zseries_recipe_save():
         return '', 204
     else:
         return 'Recipe Exists!', 418
+
+
+@main.route('/update_zseries_recipe', methods=['POST'])
+def update_zseries_recipe():
+    update = request.get_json()
+    files = list(zseries_recipe_path().glob("*.json"))
+    for filename in files:
+        recipe = load_zseries_recipe(filename)
+        if str(recipe.id) == update['id']:
+            recipe.update_steps(filename, update['steps'])
+    return '', 204
+
+
+@main.route('/delete_zseries_recipe', methods=['GET', 'POST'])
+def delete_zseries_recipe():
+    recipe_id = request.get_json()
+    files = list(zseries_recipe_path().glob("*.json"))
+    for filename in files:
+        recipe = load_zseries_recipe(filename)
+        if str(recipe.id) == recipe_id:
+            os.remove(filename)
+            return '', 204
+    return 'Delete Recipe: Failed to find recipe id \"' + recipe_id + '\"', 418
 
 
 def load_zseries_recipes():
@@ -215,6 +261,29 @@ def import_pico_recipe():
             return 'Import Failed: \"' + recipe + '\"', 418
     else:
         return render_template('import_pico_recipe.html')
+
+
+@main.route('/update_pico_recipe', methods=['POST'])
+def update_pico_recipe():
+    update = request.get_json()
+    files = list(pico_recipe_path().glob("*.json"))
+    for filename in files:
+        recipe = load_pico_recipe(filename)
+        if recipe.id == update['id']:
+            recipe.update_steps(filename, update['steps'])
+    return '', 204
+
+
+@main.route('/delete_pico_recipe', methods=['GET', 'POST'])
+def delete_pico_recipe():
+    recipe_id = request.get_json()
+    files = list(pico_recipe_path().glob("*.json"))
+    for filename in files:
+        recipe = load_pico_recipe(filename)
+        if recipe.id == recipe_id:
+            os.remove(filename)
+            return '', 204
+    return 'Delete Recipe: Failed to find recipe id \"' + recipe_id + '\"', 418
 
 
 def load_pico_recipes():

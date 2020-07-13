@@ -52,9 +52,8 @@ class ZProgramId(int, Enum):
 
 def convertTemp(temp: float, units: str):
     if units.upper() == 'F':
-        return (temp * 9/5) + 32 # convert celcius to fahrenheit
-    
-    return (temp - 32) * 5/9 # convert fahrenheit to celcius
+        return (temp * 9/5) + 32  # convert celcius to fahrenheit
+    return (temp - 32) * 5/9  # convert fahrenheit to celcius
 
 
 # Get Firmware: /firmware/zseries/<version>

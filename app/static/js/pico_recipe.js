@@ -52,7 +52,7 @@ var recipe_table = {
             max:10,
         }},
         {formatter:plusIcon, width:49, hozAlign:"center", cellClick:function(e, cell){
-            table.addRow({}, false, cell.getRow());
+            cell.getTable().addRow({}, false, cell.getRow());
         }},
         {formatter:minusIcon, width:49, hozAlign:"center", cellClick:function(e, cell){
             cell.getRow().delete();
@@ -109,3 +109,47 @@ $(document).ready(function(){
         $('#alert').show();
     }
 });
+function update_recipe(recipe_id){
+    var table = Tabulator.prototype.findTable("#t_"+recipe_id)[0];
+    if (table){
+        var recipe = {};
+        recipe.id = recipe_id
+        recipe.steps = table.getData();
+        $.ajax({
+			url: 'update_pico_recipe',
+			type: 'POST',
+            data: JSON.stringify(recipe),
+            dataType: "json",
+            processData: false,
+            contentType: "application/json; charset=UTF-8",
+            success: function(data) {
+                //showAlert("Success!", "success");
+                setTimeout(function () { window.location.href = "pico_recipes";}, 2000);
+            },
+            error: function(request, status, error) {
+                //showAlert("Error: " + request.responseText, "danger");
+                //setTimeout(function () { window.location.href = "pico_recipes";}, 2000);
+            },
+		});
+    }
+};
+function delete_recipe(recipe_id){
+    if (confirm("Are you sure?")){
+		$.ajax({
+			url: 'delete_pico_recipe',
+			type: 'POST',
+            data: JSON.stringify(recipe_id),
+            dataType: "json",
+            processData: false,
+            contentType: "application/json; charset=UTF-8",
+            success: function(data) {
+                //showAlert("Success!", "success");
+                setTimeout(function () { window.location.href = "pico_recipes";}, 2000);
+            },
+            error: function(request, status, error) {
+                //showAlert("Error: " + request.responseText, "danger");
+                //setTimeout(function () { window.location.href = "pico_recipes";}, 2000);
+            },
+		});
+    }
+};
