@@ -25,6 +25,7 @@ class ZymaticRecipeStep():
 
 class ZymaticRecipe():
     def __init__(self):
+        self.clean = False
         self.id = None
         self.name = None
         self.name_ = None
@@ -34,6 +35,7 @@ class ZymaticRecipe():
         recipe = None
         with open(file) as f:
             recipe = json.load(f)
+        self.clean = recipe.get('clean', False) or False
         self.id = recipe.get('id', 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX') or 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX'
         self.name = recipe.get('name', 'Empty Recipe') or 'Empty Recipe'
         self.name_ = self.name.replace(" ", "_").replace("\'", "")
@@ -76,6 +78,7 @@ def ZymaticRecipeImport(recipes):
         r = {}
         steps = list(filter(None, recipe.split('/')))
         r['name'] = steps.pop(0)
+        r['clean'] = False
         r['id'] = steps.pop(0)
         r['steps'] = []
         for step in steps:
