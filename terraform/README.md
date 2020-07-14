@@ -8,7 +8,7 @@ Use Terraform to provision the picobrew server in AWS, rather than running it lo
 
 * Internet Gateway
 * VPC with a single, public subnet
-* EFS file system with a mount in the public subnet
+* EFS file system with a mount in the public subnet, so sessions and recipes will persist between task deployments
 * Fargate task and service running the picobrew server, with the EFS file system mounted
 * Security groups to securely restrict access, and, optionally, whitelist specific IPs for access to the picobrew server
 * Cloudwatch log group and IAM role to store container logs for 24 hours
@@ -23,3 +23,12 @@ To provision these resources, install the [latest version of Terraform](https://
 6. Run the `get_public_ip.sh` script to option the public IP address of the Fargate service. You can now access the picobrew server via that address.
 
 Note that containers are ephemeral, so AWS could kill the container and create a new one. If this happens, the public IP address will change, so you'll have to get the new IP address and update your local DNS to use it for picobrew.com.
+
+### Whitelisting Access
+
+Access to the server is controlled via an AWS security group, which limits access to the CIDR blocks defined in the `cidr_access` variable in the `variables.tf` file. By default, this security group allows all outside access (`0.0.0.0/0`). However, if you would like to limit access to only a single IP or range of IPs, replace this value with the CIDR block(s) to which access will be restricted.
+
+For the typical user, this will just be the external IP address of your home network. Follow these steps, to restrict access to requests from your home network:
+
+1. Determine the external IP of your home network. This is the IP address provided by your Internet Service Provider. The easiest way to find this is to open a web browser to [https://www.whatismyip.com/](https://www.whatismyip.com/).
+2. Replace `0.0.0.0/0` in the `cidr_access` variable with the IP address from step 1, with the added suffix `/32`. For example, if your home IP address is `1.2.3.4`, then you would set this variable as `1.2.3.4/32`.
