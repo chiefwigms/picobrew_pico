@@ -35,6 +35,6 @@ For the typical user, this will just be the external IP address of your home net
 1. Determine the external IP of your home network. This is the IP address provided by your Internet Service Provider. The easiest way to find this is to open a web browser to [https://www.whatismyip.com/](https://www.whatismyip.com/).
 2. Replace `0.0.0.0/0` in the `cidr_access` variable with the IP address from step 1, with the added suffix `/32`. For example, if your home IP address is `1.2.3.4`, then you would set this variable as `1.2.3.4/32`.
 
-## Routing Picobrew Request to AWS Deployment
+## Routing Picobrew Requests to AWS
 
 Unfortunately, due to the vast array of routers out there, detailed instructions as to how to update your router to route requests for `picobrew.com` to the IP of your AWS deployment are outside the scope of this README. But, I can add steps for various common brands, if users want to submit them. Solutions will typically involve using dnsmasq on your router, which will most likely require opening a telnet session into the router to manually create the appropriate settings.
