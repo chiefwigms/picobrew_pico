@@ -10,3 +10,7 @@ app/sessions/brew/active/*
 app/sessions/brew/archive/*
 app/sessions/ferm/active/*
 app/sessions/ferm/archive/*
+
+# terraform
+terraform/.terraform
+terraform/*.tfstate*
