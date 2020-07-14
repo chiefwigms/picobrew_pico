@@ -6,7 +6,7 @@
     <div class="card bg-dark text-white-50">
       <h5 class="card-header" id="h_{{recipe['id']}}">
         <a class="collapsed" role="button" data-toggle="collapse" href="#c_{{recipe['id']}}" data-parent="#accordion" aria-expanded="false" aria-controls="c_{{recipe['id']}}">
-          {{recipe['name']}} (ABV = {{recipe['abv'] }}, IBU = {{recipe['abv']}})
+          {{recipe['name']}} (ABV = {{recipe['abv'] }}, IBU = {{recipe['ibu']}})
           <button class="btn btn-sm btn-danger float-right mr-5" type="button" id="bd_{{recipe['id']}}" onclick="event.stopPropagation();event.preventDefault();delete_recipe('{{recipe['id']}}');"><i class="fas fa-trash"></i></button>
           <button class="btn btn-sm btn-success float-right mr-3" type="button" id="bs_{{recipe['id']}}" onclick="event.stopPropagation();event.preventDefault();update_recipe('{{recipe['id']}}');" style="display:none;"><i class="far fa-save fa-lg"></i></button>
         </a>
