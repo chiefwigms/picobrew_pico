@@ -41,9 +41,9 @@ picostill_check_firmware_args = {
     'uid': fields.Str(required=True),       # 32 character alpha-numeric serial number
     'version': fields.Str(required=True),   # Current firmware version - i.e. 0.0.30
 }
-@main.route('/API/PicoStill/getFirmwareAddress')
+@main.route('/API/PicoStill/getFirmwareAddress', methods=['GET'])
 @use_args(picostill_check_firmware_args, location='querystring')
 def process_picostill_check_firmware(args):
-    if args.version != latest_firmware['version']:
+    if args['version'] != latest_firmware['version']:
         return '#{}#'.format(latest_firmware['source'])
     return '#F#'
