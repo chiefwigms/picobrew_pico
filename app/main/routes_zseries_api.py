@@ -11,6 +11,7 @@ from random import seed, randint
 from .. import socketio
 from . import main
 from .config import brew_active_sessions_path, zseries_firmware_path
+from .firmware import MachineType, firmware_filename, firmware_upgrade_required, minimum_firmware
 from .model import PicoBrewSession
 from .routes_frontend import get_zseries_recipes, load_brew_sessions
 from .session_parser import active_brew_sessions
@@ -20,11 +21,6 @@ arg_parser = FlaskParser()
 seed(1)
 
 events = {}
-
-latest_firmware = {
-    "version": "0.0.116",
-    "source": "https://picobrew.com/firmware/zseries/zseries_0_0_116.bin"
-}
 
 
 class SessionType(int, Enum):
@@ -170,7 +166,8 @@ def process_recipe_request(recipe_id):
 #               }
 def process_zstate(args):
     json = request.json
-    update_required = json['CurrentFirmware'] != latest_firmware['version']
+    update_required = firmware_upgrade_required(MachineType.ZSERIES, json['CurrentFirmware'])
+    firmware_source = "https://picobrew.com/firmware/zseries/{}".format(firmware_filename(MachineType.ZSERIES, minimum_firmware(MachineType.ZSERIES)))
     uid = request.args['token']
 
     returnVal = {
@@ -185,7 +182,7 @@ def process_zstate(args):
             "LastSessionType": last_session_type(uid),
             "ResumableSessionID": resumable_session_id(uid)
         },
-        "UpdateAddress": latest_firmware['source'] if update_required else "-1",
+        "UpdateAddress": firmware_source if update_required else "-1",
         "UpdateToFirmware": None,
         "ZBackendError": 0
     }
