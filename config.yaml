@@ -14,3 +14,4 @@ firmware: # specify minimum firmware versions to push to your devices (binaries 
   # ZSeries: 0.0.119
   # PicoBrew: 0.1.34
   # PicoStill: 0.0.35
+  
