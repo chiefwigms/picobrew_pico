@@ -228,7 +228,7 @@ def resumable_session_id(uid):
 def zseries_alias(uid):
     if uid not in active_brew_sessions:
         return "ZSeries"
-    return active_brew_sessions[uid].alias
+    return active_brew_sessions[uid].alias or "ZSeries"
 
 
 def create_or_close_session(args):
