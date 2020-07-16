@@ -67,7 +67,7 @@ def create_app(debug=False):
             if mtype in aliases and aliases[mtype] is not None:
                 for uid in aliases[mtype]:
                     if uid in aliases[mtype] and uid != "uid":
-                        if mtype == MachineType.PicoFerm:
+                        if mtype == MachineType.PICOFERM:
                             active_ferm_sessions[uid] = PicoFermSession()
                             active_ferm_sessions[uid].alias = aliases[mtype][uid]
                         else:
