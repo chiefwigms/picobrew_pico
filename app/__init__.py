@@ -3,6 +3,7 @@ from flask_cors import CORS
 from flask_socketio import SocketIO
 from pathlib import Path
 import yaml
+import pathlib
 
 BASE_PATH = Path(__file__).parents[1]
 
@@ -10,6 +11,9 @@ server_cfg = {}
 
 socketio = SocketIO()
 
+def create_dir(dir_path):
+    # create the directory and any missing parent directories, if it doesn't already exist
+    pathlib.Path(dir_path).mkdir(parents=True, exist_ok=True) 
 
 def create_app(debug=False):
     """Create an application."""
@@ -43,6 +47,14 @@ def create_app(debug=False):
         FIRMWARE_PATH=BASE_PATH.joinpath('app/firmware'),
         SERVER_CONFIG=server_cfg
     )
+    
+    # create subdirectories if they don't already exist
+    create_dir(app.config['RECIPES_PATH'].joinpath('pico'))
+    create_dir(app.config['RECIPES_PATH'].joinpath('zymatic'))
+    create_dir(app.config['SESSIONS_PATH'].joinpath('brew/active'))
+    create_dir(app.config['SESSIONS_PATH'].joinpath('brew/archive'))
+    create_dir(app.config['SESSIONS_PATH'].joinpath('ferm/active'))
+    create_dir(app.config['SESSIONS_PATH'].joinpath('ferm/archive'))
 
     with app.app_context():
         restore_active_sessions()
