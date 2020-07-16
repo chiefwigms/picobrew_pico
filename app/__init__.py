@@ -7,8 +7,6 @@ import pathlib
 
 BASE_PATH = Path(__file__).parents[1]
 
-server_cfg = {}
-
 socketio = SocketIO()
 
 def create_dir(dir_path):
@@ -34,9 +32,26 @@ def create_app(debug=False):
     # ----- Routes ----------
     app.register_blueprint(main_blueprint)
 
+    server_cfg = {}
     cfg_file = BASE_PATH.joinpath('config.yaml')
-    with open(cfg_file, 'r') as f:
-        server_cfg = yaml.safe_load(f)
+    if pathlib.Path(cfg_file).exists():
+        with open(cfg_file, 'r') as f:
+            server_cfg = yaml.safe_load(f)
+
+        if 'aliases' in server_cfg:
+            machine_types = [MachineType.ZSERIES, MachineType.ZYMATIC, MachineType.PICOBREW, MachineType.PICOFERM, MachineType.PICOSTILL]
+            for mtype in machine_types:
+                aliases = server_cfg['aliases']
+                if mtype in aliases and aliases[mtype] is not None:
+                    for uid in aliases[mtype]:
+                        if uid in aliases[mtype] and uid != "uid":
+                            if mtype == MachineType.PICOFERM:
+                                active_ferm_sessions[uid] = PicoFermSession()
+                                active_ferm_sessions[uid].alias = aliases[mtype][uid]
+                            else:
+                                active_brew_sessions[uid] = PicoBrewSession()
+                                active_brew_sessions[uid].alias = aliases[mtype][uid]
+                                active_brew_sessions[uid].is_pico = True if mtype == MachineType.PICOBREW else False
 
     app.config.update(
         SECRET_KEY='bosco',
@@ -59,20 +74,5 @@ def create_app(debug=False):
     with app.app_context():
         restore_active_sessions()
         initialize_data()
-
-    if 'aliases' in server_cfg:
-        machine_types = [MachineType.ZSERIES, MachineType.ZYMATIC, MachineType.PICOBREW, MachineType.PICOFERM, MachineType.PICOSTILL]
-        for mtype in machine_types:
-            aliases = server_cfg['aliases']
-            if mtype in aliases and aliases[mtype] is not None:
-                for uid in aliases[mtype]:
-                    if uid in aliases[mtype] and uid != "uid":
-                        if mtype == MachineType.PICOFERM:
-                            active_ferm_sessions[uid] = PicoFermSession()
-                            active_ferm_sessions[uid].alias = aliases[mtype][uid]
-                        else:
-                            active_brew_sessions[uid] = PicoBrewSession()
-                            active_brew_sessions[uid].alias = aliases[mtype][uid]
-                            active_brew_sessions[uid].is_pico = True if mtype == MachineType.PICOBREW else False
-
+    
     return app
