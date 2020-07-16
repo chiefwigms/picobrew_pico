@@ -20,6 +20,7 @@ def create_app(debug=False):
     socketio.init_app(app)
 
     # these imports required to be after socketio initialization
+    from .main.config import MachineType
     from .main.model import PicoFermSession, PicoBrewSession
     from .main.routes_frontend import initialize_data
     from .main.session_parser import restore_active_sessions, active_brew_sessions, active_ferm_sessions
@@ -39,7 +40,8 @@ def create_app(debug=False):
         BASE_PATH=BASE_PATH,
         RECIPES_PATH=BASE_PATH.joinpath('app/recipes'),
         SESSIONS_PATH=BASE_PATH.joinpath('app/sessions'),
-        FIRMWARE_PATH=BASE_PATH.joinpath('app/firmware')
+        FIRMWARE_PATH=BASE_PATH.joinpath('app/firmware'),
+        SERVER_CONFIG=server_cfg
     )
 
     with app.app_context():
@@ -47,18 +49,18 @@ def create_app(debug=False):
         initialize_data()
 
     if 'aliases' in server_cfg:
-        machine_types = ["ZSeries", "Zymatic", "PicoBrew", "PicoFerm"]
+        machine_types = [MachineType.ZSERIES, MachineType.ZYMATIC, MachineType.PICOBREW, MachineType.PICOFERM, MachineType.PICOSTILL]
         for mtype in machine_types:
             aliases = server_cfg['aliases']
             if mtype in aliases and aliases[mtype] is not None:
                 for uid in aliases[mtype]:
                     if uid in aliases[mtype] and uid != "uid":
-                        if mtype == "PicoFerm":
+                        if mtype == MachineType.PicoFerm:
                             active_ferm_sessions[uid] = PicoFermSession()
                             active_ferm_sessions[uid].alias = aliases[mtype][uid]
                         else:
                             active_brew_sessions[uid] = PicoBrewSession()
                             active_brew_sessions[uid].alias = aliases[mtype][uid]
-                            active_brew_sessions[uid].is_pico = True if mtype == "PicoBrew" else False
+                            active_brew_sessions[uid].is_pico = True if mtype == MachineType.PICOBREW else False
 
     return app

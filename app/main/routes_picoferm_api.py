@@ -32,6 +32,7 @@ check_ferm_firmware_args = {
 @main.route('/API/PicoFerm/checkFirmware')
 @use_args(check_ferm_firmware_args, location='querystring')
 def process_check_ferm_firmware(args):
+    # TODO download the firmware for a picoferm and support minimum firmware versions
     return '#0#'
 
 

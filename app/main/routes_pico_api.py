@@ -7,17 +7,14 @@ from webargs.flaskparser import use_args, FlaskParser
 
 from .. import socketio
 from . import main
-from .config import brew_active_sessions_path, pico_firmware_path
+from .config import MachineType, brew_active_sessions_path, pico_firmware_path
+from .firmware import firmware_filename, minimum_firmware, firmware_upgrade_required
 from .model import PicoBrewSession, PICO_SESSION
 from .routes_frontend import get_pico_recipes
 from .session_parser import active_brew_sessions
 
 arg_parser = FlaskParser()
 
-latest_firmware = {
-    "version": "0.1.34",
-    "filepath": "pico_0_1_34.bin"
-}
 
 # Register: /API/pico/register?uid={UID}
 # Response: '#{0}#\r\n' where {0} : T = Registered, F = Not Registered
@@ -51,6 +48,8 @@ check_firmware_args = {
 @main.route('/API/pico/checkFirmware')
 @use_args(check_firmware_args, location='querystring')
 def process_check_firmware(args):
+    if firmware_upgrade_required(MachineType.PICOBREW, args['version']):
+        return '#T#'
     return '#F#'
 
 
@@ -62,8 +61,8 @@ get_firmware_args = {
 @main.route('/API/pico/getFirmware')
 @use_args(get_firmware_args, location='querystring')
 def process_get_firmware(args):
-    # TODO setup config to select firmware version, add latest symlink
-    f = open(pico_firmware_path().joinpath(latest_firmware['filepath']))
+    filename = firmware_filename(MachineType.PICOBREW, minimum_firmware(MachineType.PICOBREW))
+    f = open(pico_firmware_path().joinpath(filename))
     fw = f.read()
     f.close()
     return '{}'.format(fw)

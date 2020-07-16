@@ -11,6 +11,7 @@ from random import seed, randint
 from .. import socketio
 from . import main
 from .config import picostill_firmware_path
+from .firmware import MachineType, firmware_filename, firmware_upgrade_required, minimum_firmware
 from .model import PicoBrewSession
 from .routes_frontend import get_zseries_recipes, load_brew_sessions
 from .session_parser import active_brew_sessions
@@ -20,11 +21,6 @@ arg_parser = FlaskParser()
 seed(1)
 
 events = {}
-
-latest_firmware = {
-    "version": "0.0.30",
-    "source": "https://picobrew.com/firmware/picostill/picostill_0_0_30.bin"
-}
 
 
 # Get Firmware: /firmware/picostill/<version>
@@ -44,6 +40,7 @@ picostill_check_firmware_args = {
 @main.route('/API/PicoStill/getFirmwareAddress', methods=['GET'])
 @use_args(picostill_check_firmware_args, location='querystring')
 def process_picostill_check_firmware(args):
-    if args['version'] != latest_firmware['version']:
-        return '#{}#'.format(latest_firmware['source'])
+    if firmware_upgrade_required(MachineType.PICOSTILL, args['version']):
+        filename = firmware_filename(MachineType.PICOSTILL, minimum_firmware(MachineType.PICOSTILL))
+        return '#https://picobrew.com/firmware/picostill/{}#'.format(filename)
     return '#F#'
