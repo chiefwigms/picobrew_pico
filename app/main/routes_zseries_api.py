@@ -171,7 +171,7 @@ def process_zstate(args):
     uid = request.args['token']
 
     returnVal = {
-        "Alias": "ZSeries",
+        "Alias": zseries_alias(uid),
         "BoilerType": json['BoilerType'],       # TODO sometimes machine loses boilertype, need to resync with known state
         "IsRegistered": True,                   # likely we don't care about registration with BYOS
         "IsUpdated": False if update_required else True,
@@ -220,6 +220,12 @@ def resumable_session_id(uid):
     if uid not in active_brew_sessions:
         return -1
     return active_brew_sessions[uid].id
+
+
+def zseries_alias(uid):
+    if uid not in active_brew_sessions:
+        return "ZSeries"
+    return active_brew_sessions[uid].alias or "ZSeries"
 
 
 def create_or_close_session(args):
