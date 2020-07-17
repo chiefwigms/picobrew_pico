@@ -1,0 +1,54 @@
+#####################################################################
+#           cheifwigms/picobrew_pico configuration file             #
+#                                                                   #
+# This is a sample configuration file used to configure the         #
+# operations of the chiefwigms/picobrew_pico offline server         #
+#                                                                   #
+# Copy this file to config.yaml and edit to fit your needs.         #
+#####################################################################
+
+# Your device's ProductID can be found via the following ways:
+#   1) Via 'Settings'->'Equipment' on www.picobrew.com (proper)
+#   2) On the 'About' screen on the device (those devices with screens that is)
+#   3) Start a session and copy ProductID from the live graph or brew/ferm history on this server
+#
+# An alias is setup like the following (omitting the leading '#' which is a symbol to denote a comment):
+# aliases:
+#   Zymatic:
+#     "abc123" : "BrewskiBot"
+aliases: 
+  Zymatic:
+    #ProductID : Nickname
+  ZSeries:
+    #ProductID : Nickname
+  PicoBrew:
+    #ProductID : Nickname
+  PicoFerm:
+    #ProductID : Nickname
+  PicoStill:
+    #ProductID : Nickname
+
+# In order to force specific versions of device firmware there is a feature of the picobrew_pico
+# that will support OTA updates to the connected brewing devices which support OTA updates 
+# (sorry Zymatic owners).
+#
+# All Picobrew devices (ZSeries, Pico C/S/Pro, PicoStill, and PicoFerm) will initially request a 
+# state update request from the server. Most of these requests contain an identifier x.y.z (semantic version)
+# firmware version number. If an older firmware version is sent than what you state here an update will
+# be forced on the device upon startup.
+# 
+# To support bringing your own newer or older firmware binaries to your devices there is a folder
+# `./app/firmware/<device_type>` for each and every device type that supports firmware updates over http(s). 
+# Feel free to add to these folders other firmware binaries (custom built, newer/older picobrew released) however,
+# the formatting of the filename is very important (use at your own risk):
+#         `./app/firmware/<device_type>/<device_type>_x_y_z.bin`
+#
+# Defaults as used by the server are simply mentioned below in comments to show structure of the configuration values.
+#
+# These defaults are the production OTA releases made and released by Picobrew. Some newer versions have
+# been sent to the pico brewing community for early beta testing and are bundled with this server.
+firmware:
+  # ZSeries: 0.0.116
+  # PicoBrew: 0.1.34
+  # PicoStill: 0.0.30
+  

@@ -2,12 +2,11 @@ from flask import Flask
 from flask_cors import CORS
 from flask_socketio import SocketIO
 from pathlib import Path
+from shutil import copyfile
 import yaml
 import pathlib
 
 BASE_PATH = Path(__file__).parents[1]
-
-server_cfg = {}
 
 socketio = SocketIO()
 
@@ -34,7 +33,13 @@ def create_app(debug=False):
     # ----- Routes ----------
     app.register_blueprint(main_blueprint)
 
+    server_cfg = {}
     cfg_file = BASE_PATH.joinpath('config.yaml')
+    if not pathlib.Path(cfg_file).exists():
+        # copy config.example.yaml -> config.yaml if config.yaml doesn't exist
+        example_cfg_file = BASE_PATH.joinpath('config.example.yaml')
+        copyfile(example_cfg_file, cfg_file)
+    
     with open(cfg_file, 'r') as f:
         server_cfg = yaml.safe_load(f)
 
@@ -59,7 +64,6 @@ def create_app(debug=False):
     with app.app_context():
         restore_active_sessions()
         initialize_data()
-
     if 'aliases' in server_cfg:
         machine_types = [MachineType.ZSERIES, MachineType.ZYMATIC, MachineType.PICOBREW, MachineType.PICOFERM, MachineType.PICOSTILL]
         for mtype in machine_types:

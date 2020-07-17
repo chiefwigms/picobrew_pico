@@ -22,7 +22,10 @@ def minimum_firmware(device: MachineType):
         raise Exception('invalid device type {}'.format(device))
 
     if 'firmware' in server_config():
-        firmware = server_config()['firmware']
-        return firmware.get(device, default_firmware[device])
+        firmware = server_config()['firmware'] or {}
+        if firmware:
+            return firmware.get(device, default_firmware[device])
+        else:
+            return default_firmware[device]
     else:
         return default_firmware[device]

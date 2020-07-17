@@ -2,6 +2,7 @@
 **/__pycache__
 
 # project specific ignores
+config.yaml
 app/recipes/pico/*
 app/recipes/zymatic/*
 app/recipes/zseries/*
