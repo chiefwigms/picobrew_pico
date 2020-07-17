@@ -64,7 +64,6 @@ def create_app(debug=False):
     with app.app_context():
         restore_active_sessions()
         initialize_data()
-    
     if 'aliases' in server_cfg:
         machine_types = [MachineType.ZSERIES, MachineType.ZYMATIC, MachineType.PICOBREW, MachineType.PICOFERM, MachineType.PICOSTILL]
         for mtype in machine_types:
