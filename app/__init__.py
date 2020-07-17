@@ -2,6 +2,7 @@ from flask import Flask
 from flask_cors import CORS
 from flask_socketio import SocketIO
 from pathlib import Path
+from shutil import copyfile
 import yaml
 import pathlib
 
@@ -34,24 +35,13 @@ def create_app(debug=False):
 
     server_cfg = {}
     cfg_file = BASE_PATH.joinpath('config.yaml')
-    if pathlib.Path(cfg_file).exists():
-        with open(cfg_file, 'r') as f:
-            server_cfg = yaml.safe_load(f)
-
-        if 'aliases' in server_cfg:
-            machine_types = [MachineType.ZSERIES, MachineType.ZYMATIC, MachineType.PICOBREW, MachineType.PICOFERM, MachineType.PICOSTILL]
-            for mtype in machine_types:
-                aliases = server_cfg['aliases']
-                if mtype in aliases and aliases[mtype] is not None:
-                    for uid in aliases[mtype]:
-                        if uid in aliases[mtype] and uid != "uid":
-                            if mtype == MachineType.PICOFERM:
-                                active_ferm_sessions[uid] = PicoFermSession()
-                                active_ferm_sessions[uid].alias = aliases[mtype][uid]
-                            else:
-                                active_brew_sessions[uid] = PicoBrewSession()
-                                active_brew_sessions[uid].alias = aliases[mtype][uid]
-                                active_brew_sessions[uid].is_pico = True if mtype == MachineType.PICOBREW else False
+    if not pathlib.Path(cfg_file).exists():
+        # copy config.example.yaml -> config.yaml if config.yaml doesn't exist
+        example_cfg_file = BASE_PATH.joinpath('config.example.yaml')
+        copyfile(example_cfg_file, cfg_file)
+    
+    with open(cfg_file, 'r') as f:
+        server_cfg = yaml.safe_load(f)
 
     app.config.update(
         SECRET_KEY='bosco',
@@ -75,4 +65,19 @@ def create_app(debug=False):
         restore_active_sessions()
         initialize_data()
     
+    if 'aliases' in server_cfg:
+        machine_types = [MachineType.ZSERIES, MachineType.ZYMATIC, MachineType.PICOBREW, MachineType.PICOFERM, MachineType.PICOSTILL]
+        for mtype in machine_types:
+            aliases = server_cfg['aliases']
+            if mtype in aliases and aliases[mtype] is not None:
+                for uid in aliases[mtype]:
+                    if uid in aliases[mtype] and uid != "uid":
+                        if mtype == MachineType.PICOFERM:
+                            active_ferm_sessions[uid] = PicoFermSession()
+                            active_ferm_sessions[uid].alias = aliases[mtype][uid]
+                        else:
+                            active_brew_sessions[uid] = PicoBrewSession()
+                            active_brew_sessions[uid].alias = aliases[mtype][uid]
+                            active_brew_sessions[uid].is_pico = True if mtype == MachineType.PICOBREW else False
+
     return app
