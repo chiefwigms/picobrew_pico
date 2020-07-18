@@ -105,13 +105,13 @@ class ZSeriesRecipeStep():
         self.drain_time = None
 
     def serialize(self):
-        return '{0},{1},{2},{3},{4}/'.format(
-            self.name,
-            self.temperature,
-            self.step_time,
-            ZSERIES_LOCATION[self.location],
-            self.drain_time
-        )
+        step = {}
+        step['Name'] = self.name
+        step['Location'] = int(ZSERIES_LOCATION[self.location])
+        step['Temp'] = int(self.temperature)
+        step['Time'] = int(self.step_time)
+        step['Drain'] = int(self.drain_time)
+        return step
 
 
 class ZSeriesRecipe():
@@ -151,13 +151,7 @@ class ZSeriesRecipe():
         r['StartWater'] = self.start_water
         r['Steps'] = []
         for step in self.steps:
-            s = {}
-            s['Name'] = step.name
-            s['Location'] = step.location
-            s['Temp'] = step.temperature
-            s['Time'] = step.step_time
-            s['Drain'] = step.drain_time
-            r['Steps'].append(s)
+            r['Steps'].append(step.serialize())
         return r
 
     def update_steps(self, file, steps):
