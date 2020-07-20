@@ -21,6 +21,11 @@ AP_PASS="PICOBREW"
 # Enable root login
 #sed -i 's/.*PermitRootLogin.*/PermitRootLogin yes/g' /etc/ssh/sshd_config
 
+# Have Name Service Switch use DNS
+# On Boot:
+# hosts:          files mdns4_minimal [NOTFOUND=return] dns
+sed -i 's/\(.*hosts:.*\) \[.*\]\(.*\)/\1\2/' /etc/nsswitch.conf
+
 # Enable ssh
 touch /boot/ssh
 
@@ -340,6 +345,11 @@ writable = yes
 read only = no
 EOF
 service smbd restart
+
+# Have Name Service Switch use DNS
+# After resolve install:
+# hosts:          files resolve [!UNAVAIL=return] dns
+sed -i 's/\(.*hosts:.*\) \[.*\]\(.*\)/\1\2/' /etc/nsswitch.conf
 
 # Startup Script
 sed -i 's/exit 0//g' /etc/rc.local
