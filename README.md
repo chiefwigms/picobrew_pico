@@ -74,25 +74,22 @@ For Pico S/C/Pro Only: DO NOT EDIT or MOVE Rows 1-3 (Preparing to Brew/Heating/D
 Supported Devices:
 * Pico S/C/Pro: fully featured
 * Zymatic: fully featured
-* ZSeries (Beta)
-  * Working (not tested)
-    * boot up sequence
-    * firmware updating / sideloading
-    * recipe summary
-    * session create
-    * session reporting
-    * close session
-    * resumable session
+* ZSeries: fully featured
 * PicoFerm (Beta - Currently terminates fermentation after 14 days)
+* PicoStill (Beta)
+  * Firmware versions 0.0.30 - 0.0.35 (selectable)
+  * Pico S/C/Pro distillation (no session logging - limitation of firmware)
+  * ZSeries (full session logging as included in Z firmware)
 
 Device Aliasing  
-Brew Sessions
+Brew Sessions:
 * Live Graphing
 * Historical Graphing
 
-Recipe Library
+Recipe Library:
 * View Previously Created
 * Create New Recipes
+* Import from PicoBrew Servers (Pico C/S/Pro and Zymatic)
 
 ## Disclaimer
 Except as represented in this agreement, all work product by Developer is provided ​“AS IS”. Other than as provided in this agreement, Developer makes no other warranties, express or implied, and hereby disclaims all implied warranties, including any warranty of merchantability and warranty of fitness for a particular purpose.
