@@ -13,6 +13,9 @@ from .session_parser import load_ferm_session, get_ferm_graph_data, get_brew_gra
 from .config import base_path, zymatic_recipe_path, zseries_recipe_path, pico_recipe_path, ferm_archive_sessions_path, brew_archive_sessions_path
 
 
+file_glob_pattern = "[!._]*.json"
+
+
 # -------- Routes --------
 @main.route('/')
 def index():
@@ -109,7 +112,7 @@ def import_zymatic_recipe():
 @main.route('/update_zymatic_recipe', methods=['POST'])
 def update_zymatic_recipe():
     update = request.get_json()
-    files = list(zymatic_recipe_path().glob("*.json"))
+    files = list(zymatic_recipe_path().glob(file_glob_pattern))
     for filename in files:
         recipe = load_zymatic_recipe(filename)
         if recipe.id == update['id']:
@@ -120,7 +123,7 @@ def update_zymatic_recipe():
 @main.route('/delete_zymatic_recipe', methods=['GET', 'POST'])
 def delete_zymatic_recipe():
     recipe_id = request.get_json()
-    files = list(zymatic_recipe_path().glob("*.json"))
+    files = list(zymatic_recipe_path().glob(file_glob_pattern))
     for filename in files:
         recipe = load_zymatic_recipe(filename)
         if recipe.id == recipe_id:
@@ -130,7 +133,7 @@ def delete_zymatic_recipe():
 
 
 def load_zymatic_recipes():
-    files = list(zymatic_recipe_path().glob("*.json"))
+    files = list(zymatic_recipe_path().glob(file_glob_pattern))
     recipes = [load_zymatic_recipe(file) for file in files]
     return recipes
 
@@ -176,7 +179,7 @@ def new_zseries_recipe_save():
 @main.route('/update_zseries_recipe', methods=['POST'])
 def update_zseries_recipe():
     update = request.get_json()
-    files = list(zseries_recipe_path().glob("*.json"))
+    files = list(zseries_recipe_path().glob(file_glob_pattern))
     for filename in files:
         recipe = load_zseries_recipe(filename)
         if str(recipe.id) == update['id']:
@@ -187,7 +190,7 @@ def update_zseries_recipe():
 @main.route('/delete_zseries_recipe', methods=['GET', 'POST'])
 def delete_zseries_recipe():
     recipe_id = request.get_json()
-    files = list(zseries_recipe_path().glob("*.json"))
+    files = list(zseries_recipe_path().glob(file_glob_pattern))
     for filename in files:
         recipe = load_zseries_recipe(filename)
         if str(recipe.id) == recipe_id:
@@ -197,7 +200,7 @@ def delete_zseries_recipe():
 
 
 def load_zseries_recipes():
-    files = list(zseries_recipe_path().glob("*.json"))
+    files = list(zseries_recipe_path().glob(file_glob_pattern))
     recipes = [load_zseries_recipe(file) for file in files]
     return recipes
 
@@ -266,7 +269,7 @@ def import_pico_recipe():
 @main.route('/update_pico_recipe', methods=['POST'])
 def update_pico_recipe():
     update = request.get_json()
-    files = list(pico_recipe_path().glob("*.json"))
+    files = list(pico_recipe_path().glob(file_glob_pattern))
     for filename in files:
         recipe = load_pico_recipe(filename)
         if recipe.id == update['id']:
@@ -277,7 +280,7 @@ def update_pico_recipe():
 @main.route('/delete_pico_recipe', methods=['GET', 'POST'])
 def delete_pico_recipe():
     recipe_id = request.get_json()
-    files = list(pico_recipe_path().glob("*.json"))
+    files = list(pico_recipe_path().glob(file_glob_pattern))
     for filename in files:
         recipe = load_pico_recipe(filename)
         if recipe.id == recipe_id:
@@ -287,7 +290,7 @@ def delete_pico_recipe():
 
 
 def load_pico_recipes():
-    files = list(pico_recipe_path().glob("*.json"))
+    files = list(pico_recipe_path().glob(file_glob_pattern))
     recipes = [load_pico_recipe(file) for file in files]
     return recipes
 
@@ -319,9 +322,9 @@ def load_active_brew_sessions():
 def load_brew_sessions(uid=None):
     files = []
     if uid:
-        files = list(brew_archive_sessions_path().glob("*#{}*.json".format(uid)))
+        files = list(brew_archive_sessions_path().glob("[^_.]*#{}*.json".format(uid)))
     else:
-        files = list(brew_archive_sessions_path().glob("*.json"))
+        files = list(brew_archive_sessions_path().glob(file_glob_pattern))
     brew_sessions = [load_brew_session(file) for file in files]
     return brew_sessions
 
@@ -336,7 +339,7 @@ def load_active_ferm_sessions():
 
 
 def load_ferm_sessions():
-    files = list(ferm_archive_sessions_path().glob("*.json"))
+    files = list(ferm_archive_sessions_path().glob(file_glob_pattern))
     ferm_sessions = [load_ferm_session(file) for file in files]
     return ferm_sessions
 

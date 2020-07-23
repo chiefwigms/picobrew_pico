@@ -3,6 +3,8 @@ import json
 from .config import brew_active_sessions_path
 from .model import PicoBrewSession
 
+file_glob_pattern = "[!._]*.json"
+
 active_brew_sessions = {}
 active_ferm_sessions = {}
 
@@ -165,7 +167,7 @@ def restore_active_sessions():
     if active_brew_sessions == {}:
         # print('DEBUG: restore_active_sessions() fetching abandoned server active sessions')
 
-        active_brew_session_files = list(brew_active_sessions_path().glob("*.json"))
+        active_brew_session_files = list(brew_active_sessions_path().glob(file_glob_pattern))
         for file in active_brew_session_files:
             # print('DEBUG: restore_active_sessions() found {} as an active session'.format(file))
             brew_session = load_brew_session(file)
