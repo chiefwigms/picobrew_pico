@@ -352,7 +352,7 @@ zseries_recipes = []
 
 def initialize_data():
     global pico_recipes, zymatic_recipes, zseries_recipes
-    global brew_sessions
+    global brew_sessions, ferm_sessions
 
     # Read initial recipe list on load
     pico_recipes = load_pico_recipes()
@@ -361,8 +361,7 @@ def initialize_data():
 
     # load all archive brew sessions
     brew_sessions = load_active_brew_sessions()
-
-    # todo: if anything in ferm/active folder, load data in since the server probably crashed?
+    ferm_sessions = load_active_ferm_sessions()
 
 
 # utilities
