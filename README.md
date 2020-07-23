@@ -17,19 +17,18 @@ Allows for full control of the PicoBrew Pico S/C/Pro & Zymatic models.  Shout ou
 * PicoFerm (Beta - Currently terminates fermentation after 14 days)
 
 ## Features 
-Device Aliasing  
-Brew Sessions
-* Live Graphing
-* Historical Graphing
+* Device Aliasing  
+* Brew Sessions
+ * Live Graphing
+ * Historical Graphing
 
-Recipe Library
-* View Previously Created
-* Create New Recipes
+* Recipe Library
+ * View Previously Created
+ * Create New Recipes
 
-**Manual Recipe Editing**
-The table for adding/removing/editing recipe steps has several validation checks in it, but there is always the possiblity of ruining your Pico.  
-  
-For Pico S/C/Pro Only: DO NOT EDIT or MOVE Rows 1-3 (Preparing to Brew/Heating/Dough In).  Drain times should all be 0 except for Mash Out (2 minutes) and the last hop addition (5 minutes) (for example, if you only have Hops 1 & 2, set the drain time on Hops 2 to 5, and remove the Hops 3 and 4 rows)
+* Manual Recipe Editing
+ * **Note** The table for adding/removing/editing recipe steps has several validation checks in it, but there is always the possiblity of ruining your Pico.  
+ * *For Pico S/C/Pro Only*: DO NOT EDIT or MOVE Rows 1-3 (Preparing to Brew/Heating/Dough In).  Drain times should all be 0 except for Mash Out (2 minutes) and the last hop addition (5 minutes) (for example, if you only have Hops 1 & 2, set the drain time on Hops 2 to 5, and remove the Hops 3 and 4 rows)
 
 ## Installation
 
