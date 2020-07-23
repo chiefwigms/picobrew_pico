@@ -2,11 +2,48 @@
 Allows for full control of the PicoBrew Pico S/C/Pro & Zymatic models.  Shout out to [@hotzenklotz](https://github.com/hotzenklotz/picobrew-server), Brian Moineau for PicoFerm API, @tmack8001 for Z series support & updates.  
 [Demo Server](http://ec2-3-136-112-93.us-east-2.compute.amazonaws.com/)
 
+## Supported Devices
+* Pico S/C/Pro: fully featured
+* Zymatic: fully featured
+* ZSeries (Beta, with additional development requirements for SSL support)
+  * Working (with limited testing)
+    * boot up sequence
+    * firmware updating / sideloading
+    * recipe summary
+    * session create
+    * session reporting
+    * close session
+    * resumable session
+* PicoFerm (Beta - Currently terminates fermentation after 14 days)
+
+## Features 
+Device Aliasing  
+Brew Sessions
+* Live Graphing
+* Historical Graphing
+
+Recipe Library
+* View Previously Created
+* Create New Recipes
+
+**Manual Recipe Editing**
+The table for adding/removing/editing recipe steps has several validation checks in it, but there is always the possiblity of ruining your Pico.  
+  
+For Pico S/C/Pro Only: DO NOT EDIT or MOVE Rows 1-3 (Preparing to Brew/Heating/Dough In).  Drain times should all be 0 except for Mash Out (2 minutes) and the last hop addition (5 minutes) (for example, if you only have Hops 1 & 2, set the drain time on Hops 2 to 5, and remove the Hops 3 and 4 rows)
+
+## Installation
+
+Refer to the [Releases Page](https://github.com/chiefwigms/picobrew_pico/releases) for steps to get up and running with your own Pico server. 
+
+The remainder of this guide oriented around creating a development environment 
+
+# Development Setup
+
 ## Requirements
 
 DNS Forwarding (either through a router, RaspberryPi etc)  
   - Have a Raspberry Pi Zero W : https://albeec13.github.io/2017/09/26/raspberry-pi-zero-w-simultaneous-ap-and-managed-mode-wifi/
-  - DD-WRT/Open-WRT etc : Add addional dnsmasq options `address=/picobrew.com/<Server IP running this code>`
+  - DD-WRT/Open-WRT etc : Add addional option added to dnsmasq.conf: `address=/picobrew.com/<Server IP running this code>`
 
 ### Option 1: Running pre packaged server via Docker
 Docker v19.x (https://docs.docker.com/get-docker/)
@@ -64,35 +101,6 @@ Python >= 3.6.9
 Clone this repo, then run  
 `sudo pip3 install -r requirements.txt` on *nix or `pip3 install -r requirements.txt` as an Administrator in windows  
 `sudo python3 server.py` on *nix or `python3 server.py` as an Administrator in windows (default host interface is `0.0.0.0` and port `80`, but these can be specified via command-line arguments like so `python3 server.py <interface> <port>`)
-
-## Manual Recipe Editing
-The table for adding/removing/editing recipe steps has several validation checks in it, but there is always the possiblity of ruining your Pico.  
-  
-For Pico S/C/Pro Only: DO NOT EDIT or MOVE Rows 1-3 (Preparing to Brew/Heating/Dough In).  Drain times should all be 0 except for Mash Out (2 minutes) and the last hop addition (5 minutes) (for example, if you only have Hops 1 & 2, set the drain time on Hops 2 to 5, and remove the Hops 3 and 4 rows)
-
-## Features
-Supported Devices:
-* Pico S/C/Pro: fully featured
-* Zymatic: fully featured
-* ZSeries (Beta)
-  * Working (not tested)
-    * boot up sequence
-    * firmware updating / sideloading
-    * recipe summary
-    * session create
-    * session reporting
-    * close session
-    * resumable session
-* PicoFerm (Beta - Currently terminates fermentation after 14 days)
-
-Device Aliasing  
-Brew Sessions
-* Live Graphing
-* Historical Graphing
-
-Recipe Library
-* View Previously Created
-* Create New Recipes
 
 ## Disclaimer
 Except as represented in this agreement, all work product by Developer is provided ​“AS IS”. Other than as provided in this agreement, Developer makes no other warranties, express or implied, and hereby disclaims all implied warranties, including any warranty of merchantability and warranty of fitness for a particular purpose.
