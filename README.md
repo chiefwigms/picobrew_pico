@@ -5,7 +5,7 @@ Allows for full control of the PicoBrew Pico S/C/Pro & Zymatic models.  Shout ou
 ## Supported Devices
 * Pico S/C/Pro: fully featured
 * Zymatic: fully featured
-* ZSeries (Beta, with additional development requirements for SSL support)
+* ZSeries (Beta)
   * Working (with limited testing)
     * boot up sequence
     * firmware updating / sideloading
