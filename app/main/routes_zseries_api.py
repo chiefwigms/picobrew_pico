@@ -553,7 +553,7 @@ def close_session(uid, session_id, body):
         "SecondsRemaining": 0,
         "SessionLogs": [],
         "SessionType": body['SessionType'],
-        "StillUID": body['StillUid'],
+        "StillUID": body['StillUID'],
         "StillVer": body['StillVer'],
         "ZProgramId": body['ZProgramId'],
         "ZSeriesID": uid
