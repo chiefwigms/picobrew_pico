@@ -2,13 +2,17 @@
 Allows for full control of the PicoBrew Pico S/C/Pro & Zymatic models.  Shout out to [@hotzenklotz](https://github.com/hotzenklotz/picobrew-server), Brian Moineau for PicoFerm API, @tmack8001 for Z series support & updates.  
 [Demo Server](http://ec2-3-136-112-93.us-east-2.compute.amazonaws.com/)
 
-## Supported Devices
+## Supported Devices:
 * Pico S/C/Pro: fully featured
 * Zymatic: fully featured
-* ZSeries (Beta)
+* ZSeries: fully featured
 * PicoFerm (Beta - Currently terminates fermentation after 14 days)
+* PicoStill (Beta)
+  * Firmware versions 0.0.30 - 0.0.35 (selectable)
+  * Pico S/C/Pro distillation (no session logging - limitation of firmware)
+  * ZSeries (full session logging as included in Z firmware)
 
-## Features 
+## Features
 * Device Aliasing
 * Brew Sessions
   * Live Graphing
@@ -16,6 +20,7 @@ Allows for full control of the PicoBrew Pico S/C/Pro & Zymatic models.  Shout ou
 * Recipe Library
   * View Previously Created
   * Create New Recipes
+  * Import from PicoBrew Servers (Pico C/S/Pro and Zymatic)
 * Manual Recipe Editing
   * **Note** The table for adding/removing/editing recipe steps has several validation checks in it, but there is always the possiblity of ruining your Pico.  
   * *For Pico S/C/Pro Only*: DO NOT EDIT or MOVE Rows 1-3 (Preparing to Brew/Heating/Dough In).  Drain times should all be 0 except for Mash Out (2 minutes) and the last hop addition (5 minutes) (for example, if you only have Hops 1 & 2, set the drain time on Hops 2 to 5, and remove the Hops 3 and 4 rows)

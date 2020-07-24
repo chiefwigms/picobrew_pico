@@ -31,6 +31,7 @@ class SessionType(int, Enum):
     CIRCULATE = 4
     SOUS_VIDE = 5
     BEER = 6
+    STILL = 11
     COFFEE = 12
     CHILL = 13
 
@@ -43,6 +44,7 @@ class ZProgramId(int, Enum):
     SOUS_VIDE = 6
     CLEAN = 12
     BEER_OR_COFFEE = 24
+    STILL = 26
     CHILL = 27
 
 
@@ -61,7 +63,7 @@ def process_zseries_firmware(file):
 
 
 # ZState: PUT /Vendors/input.cshtml?type=ZState&token={}
-#             Response: '\r\n\r\n#{0}#' where {0} : Machine State Response (firmware, boilertype, session stats, reg token)
+#             Response: Machine State Response (firmware, boilertype, session stats, reg token)
 zseries_query_args = {
     'type': fields.Str(required=False),          # API request type identifier
     'token': fields.Str(required=True),         # alpha-numeric unique identifier for Z
@@ -70,12 +72,14 @@ zseries_query_args = {
 }
 
 
-# ZFetchRecipeSummary: POST /Vendors/input.cshtml?ctl=RecipeRefListController&token={}
-#                           Response: '\r\n\r\n#{0}#' where {0} : Recipes Response
-# ZSessionUpdate:      POST /Vendors/input.cshtml?type=ZSessionLog&token={}
-#                      Response: '\r\n\r\n#{0}#' where {0} : Echo Session Log Request with ID and Date
-# ZSession: POST /Vendors/input.cshtml?type=ZSession&token={}&id={}  // id == session_id is only present on "complete session" request
-#               Response: '\r\n\r\n#{0}#' where {0} : Machine State Response (firmware, boilertype, session stats, reg token)
+# ZFetchRecipeSummary:  POST /Vendors/input.cshtml?ctl=RecipeRefListController&token={}
+#                            Response: Recipes Response
+# ZSessionUpdate:       POST /Vendors/input.cshtml?type=ZSessionLog&token={}
+#                            Response: Echo Session Log Request with ID and Date
+# ZSession:             POST /Vendors/input.cshtml?type=ZSession&token={}&id={}  // id == session_id is only present on "complete session" request
+#                            Response: Machine State Response (firmware, boilertype, session stats, reg token)
+# StillRequest:         POST /Vendors/input.cshtml?type=StillRequest&token={}
+#                            Response: Still Machine State Response (clean acknowlegement, current firmware, update firmware, user registration)
 @main.route('/Vendors/input.cshtml', methods=['POST'])
 @use_args(zseries_query_args, location='querystring')
 def process_zseries_post_request(args):
@@ -97,14 +101,16 @@ def process_zseries_post_request(args):
         return update_session_log(request.args.get('token'), request.json)
     elif type == 'ZSession':
         return create_or_close_session(request)
+    elif type == 'StillRequest':
+        return register_picostill(request.json)
     else:
         abort(404)
 
 
 # ZState:   PUT /Vendors/input.cshtml?type=ZState&token={}
-#               Response: '\r\n\r\n#{0}#' where {0} : Machine State Response (firmware, boilertype, session stats, reg token)
+#               Response: Machine State Response (firmware, boilertype, session stats, reg token)
 # ZSession: PUT /Vendors/input.cshtml?type=ZSession&token={}&id={}  // id == session_id is only present on "complete session" request
-#               Response: '\r\n\r\n#{0}#' where {0} : Machine State Response (firmware, boilertype, session stats, reg token)
+#               Response: Machine State Response (firmware, boilertype, session stats, reg token)
 @main.route('/Vendors/input.cshtml', methods=['PUT'])
 @use_args(zseries_query_args, location='querystring')
 def process_zseries_put_request(args):
@@ -118,9 +124,9 @@ def process_zseries_put_request(args):
 
 
 # ZRecipeDetails:   GET /Vendors/input.cshtml?type=Recipe&token={}&id={} // id == recipe_id
-#                       Response: '\r\n\r\n#{0}#' where {0} : Remaining Recipe Steps (based on last session update from machine)
+#                       Response: Remaining Recipe Steps (based on last session update from machine)
 # ZResumeSession:   GET /Vendors/input.cshtml?type=ResumableSession&token={}&id={} // id == session_id
-#                       Response: '\r\n\r\n#{0}#' where {0} : Remaining Recipe Steps (based on last session update from machine)
+#                       Response: Remaining Recipe Steps (based on last session update from machine)
 @main.route('/Vendors/input.cshtml', methods=['GET'])
 @use_args(zseries_query_args, location='querystring')
 def process_zseries_get_request(args):
@@ -143,9 +149,9 @@ def process_recipe_request(recipe_id):
     return recipe.serialize()
 
 
-# checksync: /Vendors/input.cshtml?type=ZState&token=<token>
-#  Request:    { "BoilerType": 1|2, "CurrentFirmware": "1.2.3" }
-#  Response (example):
+# Request: /Vendors/input.cshtml?type=ZState&token=<token>
+#              { "BoilerType": 1|2, "CurrentFirmware": "1.2.3" }
+# Response (example):
 #              {
 #                   "Alias": "ZSeries",
 #                   "BoilerType": 1,
@@ -237,8 +243,52 @@ def create_or_close_session(args):
         return create_session(request.args.get('token'), request.json)
 
 
-# checksync: /Vendors/input.cshtml?type=ZSession&token=<token>&id=<session_id>
-#  Request (example - beer session):
+# Request: /Vendor/input.cshtml?type=StillRequest&token=<>
+#          { "HasCleanedAck": false, "MachineType": 2, "MachineUID": "240ac41d9ae4", "PicoStillUID": "30aea46e6a40" }
+# Response:
+#           {
+#               "HasCleanedAck": false,
+#               "MachineType": 2,
+#               "MachineUID": "240ac41d9ae4",
+#               "PicoStill": {
+#                   "CleanedAckDate": null,
+#                   "CreationDate": "2018-07-06T15:05:56.57",
+#                   "CurrentFirmware": "0.0.30",
+#                   "FactoryFlashVersion": null,
+#                   "ID": 638,
+#                   "LastCommunication": "2020-07-11T00:09:51.17",
+#                   "Notes": null,
+#                   "ProfileID": 28341,
+#                   "SerialNumber": "ST180706080552",
+#                   "UID": "30aea46e6a40",
+#                   "UpdateToFirmware": null
+#               },
+#               "PicoStillUID": "30aea46e6a40"
+#           }
+def register_picostill(args):
+    return {
+        "HasCleanedAck": args.get('HasCleanedAck'),
+        "MachineType": args.get('MachineType'),
+        "MachineUID": args.get('MachineUID'),
+        "PicoStill": {
+            "CleanedAckDate": datetime.utcnow().isoformat() if args.get('HasCleanedAck') else None,    # date of last cleaning
+            "CreationDate": "2018-07-06T15:05:56.57",           # date of manufacturing? (never sent to server)
+            "CurrentFirmware": "0.0.30",
+            "FactoryFlashVersion": None,
+            "ID": 1234,                                         # auto incremented picostill number? (never sent to server)
+            "LastCommunication": datetime.utcnow().isoformat(),
+            "Notes": None,
+            "ProfileID": 28341,                                 # how to get the userId?
+            "SerialNumber": "ST123456780123",                   # device serial number (never sent to server)
+            "UID": args.get('PicoStillUID'),
+            "UpdateToFirmware": None
+        },
+        "PicoStillUID": args.get('PicoStillUID'),
+    }
+
+
+# Request: /Vendors/input.cshtml?type=ZSession&token=<token>&id=<session_id>
+#              (example - beer session):
 #              {
 #                   "DurationSec": 11251,
 #                   "FirmwareVersion": "0.0.119",
@@ -259,8 +309,8 @@ def create_or_close_session(args):
 #                   "SessionType": 6,           # see options in SessionType
 #                   "ZProgramId": 24            # see options in ZProgram
 #               }
-# #  Response (example - begin session):
-#              {
+# Response      (example - begin session):
+#               {
 #                   "Active": false,
 #                   "CityLat": xx.xxxxxx,
 #                   "CityLng": -yyy.yyyyyy,
@@ -299,8 +349,34 @@ def create_or_close_session(args):
 #                   "ZProgramId": 1,
 #                   "ZSeriesID": www
 #               }
+# Request           (start still session)
+#               {
+#                    "DurationSec": 14,
+#                    "FirmwareVersion": "0.0.119",
+#                    "GroupSession": true,
+#                    "MaxTemp": 97.71027899,
+#                    "MaxTempAddedSec": 0,
+#                    "Name": "PICOSTILL",
+#                    "PressurePa": 100490.6641,
+#                    "ProgramParams": {
+#                        "Abv": -1,
+#                        "Duration": 0,
+#                        "Ibu": -1,
+#                        "Intensity": 0,
+#                        "Temperature": 0,
+#                        "Water": 0
+#                    },
+#                    "RecipeID": -1,
+#                    "SessionType": 11,
+#                    "StillUID": "30aea46e6a40",
+#                    "StillVer": "0.0.30",
+#                    "ZProgramId": 26
+#                }
+#
 def create_session(token, body):
-    uid = token                # token uniquely identifies the machine
+    uid = token                     # token uniquely identifies the machine
+    still_uid = body['StillUID']    # token uniquely identifying the still (req: for still sessions)
+
     recipe = get_recipe_by_name(body['Name'])
 
     # error out if recipe isn't known where session is beer type (ie 6)
@@ -319,44 +395,52 @@ def create_session(token, body):
     session_guid = uuid.uuid4().hex[:32]
     session_id = increment_session_id(uid)
 
-    active_brew_sessions[uid].session = session_guid
-    active_brew_sessions[uid].id = session_id
-    active_brew_sessions[uid].created_at = datetime.utcnow().isoformat()
-    active_brew_sessions[uid].name = recipe.name if recipe else body['Name']
-    active_brew_sessions[uid].type = body['SessionType']
-    active_brew_sessions[uid].filepath = brew_active_sessions_path().joinpath('{0}#{1}#{2}#{3}#{4}.json'.format(datetime.now().strftime('%Y%m%d_%H%M%S'), uid, active_brew_sessions[uid].session, active_brew_sessions[uid].name.replace(' ', '_'), active_brew_sessions[uid].type))
+    active_session = active_brew_sessions[uid]
 
-    current_app.logger.debug('ZSeries - session file created {}'.format(active_brew_sessions[uid].filepath))
+    active_session.session = session_guid
+    active_session.id = session_id
+    active_session.created_at = datetime.utcnow().isoformat()
+    active_session.name = recipe.name if recipe else body['Name']
+    active_session.type = body['SessionType']
+    filename = '{0}#{1}#{2}#{3}#{4}.json'.format(
+        datetime.now().strftime('%Y%m%d_%H%M%S'),
+        uid,
+        active_session.session,
+        active_session.name.replace(' ', '_'),
+        active_session.type)
+    active_session.filepath = brew_active_sessions_path().joinpath(filename)
+
+    current_app.logger.debug('ZSeries - session file created {}'.format(active_session.filepath))
 
     if session_id not in events:
         events[session_id] = []
 
-    active_brew_sessions[uid].file = open(active_brew_sessions[uid].filepath, 'w')
-    active_brew_sessions[uid].file.write('[')
-    active_brew_sessions[uid].file.flush()
+    active_session.file = open(active_session.filepath, 'w')
+    active_session.file.write('[')
+    active_session.file.flush()
 
     ret = {
         "Active": False,
         "ClosingDate": None,
-        "CreationDate": active_brew_sessions[uid].created_at,
+        "CreationDate": active_session.created_at,
         "Deleted": False,
         "DurationSec": body['DurationSec'],
         "FirmwareVersion": body['FirmwareVersion'],
-        "GroupSession": False,      # need to capture traffic from a Z2+ setup for group brewing
-        "GUID": active_brew_sessions[uid].session,
-        "ID": active_brew_sessions[uid].id,
-        "LastLogID": active_brew_sessions[uid].id,
+        "GroupSession": body['GroupSession'] or False,      # Z2 or Z+PicoStill Session
+        "GUID": active_session.session,
+        "ID": active_session.id,
+        "LastLogID": active_session.id,
         "MaxTemp": body['MaxTemp'],
         "MaxTempAddedSec": body['MaxTempAddedSec'],
-        "Name": active_brew_sessions[uid].name,
+        "Name": active_session.name,
         "Notes": None,
-        "Pressure": 0,              # is this related to an attached picostill?
+        "Pressure": body['PressurePa'],                     # related to an attached picostill
         "ProfileID": 28341,         # how to get the userId
         "SecondsRemaining": 0,
         "SessionLogs": [],
-        "SessionType": active_brew_sessions[uid].type,
-        "StillUID": None,
-        "StillVer": None,
+        "SessionType": active_session.type,
+        "StillUID": still_uid,
+        "StillVer": body['StillVer'],
         "ZProgramId": body['ZProgramId'],
         "ZSeriesID": uid
     }
@@ -399,7 +483,7 @@ def update_session_log(token, body):
     if active_session not in events:
         events[active_session] = []
 
-    if active_brew_sessions[uid].recovery != body['StepName']:
+    if active_session.recovery != body['StepName']:
         events[active_session].append(body['StepName'])
 
     active_session.step = body['StepName']
@@ -426,19 +510,19 @@ def update_session_log(token, body):
         event = events[active_session].pop(0)
         session_data.update({'event': event})
 
-    active_brew_sessions[uid].data.append(session_data)
-    active_brew_sessions[uid].recovery = body['StepName']
-    active_brew_sessions[uid].remaining_time = body['SecondsRemaining']
+    active_session.data.append(session_data)
+    active_session.recovery = body['StepName']
+    active_session.remaining_time = body['SecondsRemaining']
     # for Z graphs we have more data available: wort, hex/therm, target, drain, ambient
     graph_update = json.dumps({'time': session_data['time'],
                                'data': [session_data['target'], session_data['wort'], session_data['therm'], session_data['drain'], session_data['ambient']],
-                               'session': active_brew_sessions[uid].name,
-                               'step': active_brew_sessions[uid].step,
+                               'session': active_session.name,
+                               'step': active_session.step,
                                'event': event,
                                })
     socketio.emit('brew_session_update|{}'.format(uid), graph_update)
-    active_brew_sessions[uid].file.write('\n\t{},'.format(json.dumps(session_data)))
-    active_brew_sessions[uid].file.flush()
+    active_session.file.write('\n\t{},'.format(json.dumps(session_data)))
+    active_session.file.flush()
 
     ret = {
         "ID": randint(0, 10000),
@@ -449,27 +533,28 @@ def update_session_log(token, body):
 
 
 def close_session(uid, session_id, body):
+    active_session = active_brew_sessions[uid]
     ret = {
         "Active": False,
         "ClosingDate": datetime.utcnow().isoformat(),
-        "CreationDate": active_brew_sessions[uid].created_at,
+        "CreationDate": active_session.created_at,
         "Deleted": False,
         "DurationSec": body['DurationSec'],
         "FirmwareVersion": body['FirmwareVersion'],
-        "GUID": active_brew_sessions[uid].session,
-        "ID": active_brew_sessions[uid].id,
-        "LastLogID": active_brew_sessions[uid].id,
+        "GUID": active_session.session,
+        "ID": active_session.id,
+        "LastLogID": active_session.id,
         "MaxTemp": body['MaxTemp'],
         "MaxTempAddedSec": body['MaxTempAddedSec'],
-        "Name": active_brew_sessions[uid].name,
+        "Name": active_session.name,
         "Notes": None,
         "Pressure": 0,              # is this related to an attached picostill?
         "ProfileID": 28341,         # how to get the userId
         "SecondsRemaining": 0,
         "SessionLogs": [],
         "SessionType": body['SessionType'],
-        "StillUID": None,
-        "StillVer": None,
+        "StillUID": body['StillUID'],
+        "StillVer": body['StillVer'],
         "ZProgramId": body['ZProgramId'],
         "ZSeriesID": uid
     }
@@ -484,10 +569,10 @@ def close_session(uid, session_id, body):
             "RecipeID": body['RecipeID']
         })
 
-    active_brew_sessions[uid].file.seek(0, os.SEEK_END)
-    active_brew_sessions[uid].file.seek(active_brew_sessions[uid].file.tell() - 1, os.SEEK_SET)  # Remove trailing , from last data set
-    active_brew_sessions[uid].file.write('\n]')
-    active_brew_sessions[uid].cleanup()
+    active_session.file.seek(0, os.SEEK_END)
+    active_session.file.seek(active_session.file.tell() - 1, os.SEEK_SET)  # Remove trailing , from last data set
+    active_session.file.write('\n]')
+    active_session.cleanup()
 
     return ret
 
