@@ -6,14 +6,6 @@ Allows for full control of the PicoBrew Pico S/C/Pro & Zymatic models.  Shout ou
 * Pico S/C/Pro: fully featured
 * Zymatic: fully featured
 * ZSeries (Beta)
-  * Working (with limited testing)
-    * boot up sequence
-    * firmware updating / sideloading
-    * recipe summary
-    * session create
-    * session reporting
-    * close session
-    * resumable session
 * PicoFerm (Beta - Currently terminates fermentation after 14 days)
 
 ## Features 
