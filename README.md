@@ -32,7 +32,7 @@ The remainder of this guide oriented around creating a development environment
 
 DNS Forwarding (either through a router, RaspberryPi etc)  
   - Have a Raspberry Pi Zero W : https://albeec13.github.io/2017/09/26/raspberry-pi-zero-w-simultaneous-ap-and-managed-mode-wifi/
-  - DD-WRT/Open-WRT etc : Add addional option added to dnsmasq.conf: `address=/picobrew.com/<Server IP running this code>`
+  - DD-WRT/Open-WRT etc : Add additional option added to dnsmasq.conf: `address=/picobrew.com/<Server IP running this code>`
 
 ### Option 1: Running pre packaged server via Docker
 Docker v19.x (https://docs.docker.com/get-docker/)
