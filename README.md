@@ -39,7 +39,7 @@ DNS Forwarding (either through a router, RaspberryPi etc)
   - Have a Raspberry Pi Zero W : https://albeec13.github.io/2017/09/26/raspberry-pi-zero-w-simultaneous-ap-and-managed-mode-wifi/
   - DD-WRT/Open-WRT etc : Add additional option added to dnsmasq.conf: `address=/picobrew.com/<Server IP running this code>`
 
-### Option 1: Running pre packaged server via Docker
+### Option 1: Running pre packaged server via Docker or Docker-Compose
 Docker v19.x (https://docs.docker.com/get-docker/)
 
 #### Setup/Run
@@ -58,14 +58,14 @@ sessions/
     archive/
 ```
 
-Run server volume mounting the above directory structure
+Run server volume mounting the above directory structure.
 
-Either provide all variables to docker command directly.
+Either provide all variables to docker command directly or use the repository's docker-compose.yml (which can include a working SSL enabled nginx configuration given you have setup certificates correctly with `./scripts/docker/nginx/ssl_certificates.sh`)
 
 ```
 docker run -d -it -p 80:80 \
-  --mount type=bind,source=<absolute-path-to-recipes>,target=/picobrew/app/recipes \
-  --mount type=bind,source=<absolute-path-to-sessions>,target=/picobrew/app/sessions \
+  --mount type=bind,source=<absolute-path-to-recipes>,target=/picobrew_pico/app/recipes \
+  --mount type=bind,source=<absolute-path-to-sessions>,target=/picobrew_pico/app/sessions \
   chiefwigms/picobrew_pico
 ```
 
@@ -88,7 +88,25 @@ WebSocket transport not available. Install eventlet or gevent and gevent-websock
  * Running on http://0.0.0.0:80/ (Press CTRL+C to quit)
 ```
 
-### Option 2: Running server via Python directly
+or 
+
+```
+docker-compose up --build
+```
+
+or to start the servers in the background
+
+```
+docker-compose up --build -d
+```
+
+To view logs use the aliases service name `app` to view logs via the docker-compose command.
+
+```
+docker-compose logs -f app
+```
+
+### Option 2: Running server via Python directly (optionally terminating ssl elsewhere manually)
 Python >= 3.6.9  
 
 #### Setup/Run
