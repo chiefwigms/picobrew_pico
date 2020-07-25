@@ -364,19 +364,23 @@ iw ap0 set power_save off
 
 if [ -d "/picobrew_pico" ]
 then
-  echo 'Updating Picobrew Server...'
   cd /picobrew_pico
-  git pull
+  if grep -q "update_boot:\s*[tT]rue" config.yaml
+  then
+    echo 'Updating Picobrew Server...'
+    git pull
+    # install dependencies and start server
+    pip3 install -r requirements.txt
+  fi
 else
   echo 'Installing Picobrew Server...'
   cd /
   git clone https://github.com/chiefwigms/picobrew_pico.git
   cd /picobrew_pico
-  git update-index --assume-unchanged config.yaml
+  # install dependencies and start server
+  pip3 install -r requirements.txt
 fi
 
-# install dependencies and start server
-pip3 install -r requirements.txt
 echo 'Starting Picobrew Server...'
 python3 server.py 0.0.0.0 8080 &
 
