@@ -375,7 +375,7 @@ def register_picostill(args):
 #
 def create_session(token, body):
     uid = token                     # token uniquely identifies the machine
-    still_uid = body['StillUID']    # token uniquely identifying the still (req: for still sessions)
+    still_uid = body.get('StillUID')    # token uniquely identifying the still (req: for still sessions)
 
     recipe = get_recipe_by_name(body['Name'])
 
@@ -440,7 +440,7 @@ def create_session(token, body):
         "SessionLogs": [],
         "SessionType": active_session.type,
         "StillUID": still_uid,
-        "StillVer": body['StillVer'],
+        "StillVer": body.get('StillVer'),
         "ZProgramId": body['ZProgramId'],
         "ZSeriesID": uid
     }
@@ -553,8 +553,8 @@ def close_session(uid, session_id, body):
         "SecondsRemaining": 0,
         "SessionLogs": [],
         "SessionType": body['SessionType'],
-        "StillUID": body['StillUID'],
-        "StillVer": body['StillVer'],
+        "StillUID": body.get('StillUID'),
+        "StillVer": body.get('StillVer'),
         "ZProgramId": body['ZProgramId'],
         "ZSeriesID": uid
     }
