@@ -4,13 +4,14 @@ import requests
 import sys
 import uuid
 from flask import render_template, request, redirect
+from pathlib import Path
 from threading import Thread
 from time import sleep
 
 from . import main
 from .recipe_parser import PicoBrewRecipe, PicoBrewRecipeImport, ZymaticRecipe, ZymaticRecipeImport, ZSeriesRecipe
 from .session_parser import load_ferm_session, get_ferm_graph_data, get_brew_graph_data, load_brew_session, active_brew_sessions, active_ferm_sessions
-from .config import base_path, zymatic_recipe_path, zseries_recipe_path, pico_recipe_path, ferm_archive_sessions_path, brew_archive_sessions_path
+from .config import base_path, zymatic_recipe_path, zseries_recipe_path, pico_recipe_path, ferm_archive_sessions_path, brew_archive_sessions_path, MachineType
 
 
 file_glob_pattern = "[!._]*.json"
@@ -66,7 +67,7 @@ def _zymatic_recipes():
     global zymatic_recipes
     zymatic_recipes = load_zymatic_recipes()
     recipes_dict = [json.loads(json.dumps(recipe, default=lambda r: r.__dict__)) for recipe in zymatic_recipes]
-    return render_template('zymatic_recipes.html', recipes=recipes_dict)
+    return render_template('zymatic_recipes.html', recipes=recipes_dict, invalid=invalid_recipes.get(MachineType.ZYMATIC, set()))
 
 
 @main.route('/new_zymatic_recipe', methods=['GET', 'POST'])
@@ -135,12 +136,12 @@ def delete_zymatic_recipe():
 def load_zymatic_recipes():
     files = list(zymatic_recipe_path().glob(file_glob_pattern))
     recipes = [load_zymatic_recipe(file) for file in files]
-    return recipes
+    return filter(lambda x: x.name != None, recipes)
 
 
 def load_zymatic_recipe(file):
     recipe = ZymaticRecipe()
-    recipe.parse(file)
+    parse_recipe(MachineType.ZYMATIC, recipe, file)
     return recipe
 
 
@@ -151,10 +152,10 @@ def get_zymatic_recipes():
 
 @main.route('/zseries_recipes')
 def _zseries_recipes():
-    global zseries_recipes
+    global zseries_recipes, invalid_recipes
     zseries_recipes = load_zseries_recipes()
     recipes_dict = [json.loads(json.dumps(recipe, default=lambda r: r.__dict__)) for recipe in zseries_recipes]
-    return render_template('zseries_recipes.html', recipes=recipes_dict)
+    return render_template('zseries_recipes.html', recipes=recipes_dict, invalid=invalid_recipes.get(MachineType.ZSERIES, set()))
 
 
 @main.route('/new_zseries_recipe')
@@ -202,13 +203,21 @@ def delete_zseries_recipe():
 def load_zseries_recipes():
     files = list(zseries_recipe_path().glob(file_glob_pattern))
     recipes = [load_zseries_recipe(file) for file in files]
-    return recipes
+    return filter(lambda x: x.name != None, recipes)
 
 
 def load_zseries_recipe(file):
     recipe = ZSeriesRecipe()
-    recipe.parse(file)
+    parse_recipe(MachineType.ZSERIES, recipe, file)
     return recipe
+
+
+def parse_recipe(machineType, recipe, file):
+    try:
+        recipe.parse(file)
+    except:
+        print("An exception occurred parsing {}".format(file))
+        add_invalid_recipe(machineType, file)
 
 
 def get_zseries_recipes():
@@ -216,12 +225,36 @@ def get_zseries_recipes():
     return zseries_recipes
 
 
+def get_invalid_recipes():
+    global invalid_recipes
+    return invalid_recipes
+
+
+def add_invalid_recipe(deviceType, file):
+    global invalid_recipes
+    if deviceType not in invalid_recipes:
+        invalid_recipes[deviceType] = set()
+    invalid_recipes.get(deviceType).add(file)
+
+
+@main.route('/delete_recipe_filename', methods=['POST'])
+def delete_recipe_filename():
+    filename = request.get_json()
+    for device in invalid_recipes:
+        if Path(filename) in invalid_recipes[device]:
+            os.remove(filename)
+            invalid_recipes[device].remove(Path(filename))
+            return '', 204
+    print("failed to delete {}".format(filename))
+    return 'Delete Filename: Failed to find invalid recipe file \"' + filename + '\"', 418
+
+
 @main.route('/pico_recipes')
 def _pico_recipes():
     global pico_recipes
     pico_recipes = load_pico_recipes()
     recipes_dict = [json.loads(json.dumps(recipe, default=lambda r: r.__dict__)) for recipe in pico_recipes]
-    return render_template('pico_recipes.html', recipes=recipes_dict)
+    return render_template('pico_recipes.html', recipes=recipes_dict, invalid=invalid_recipes.get(MachineType.PICOBREW, set()))
 
 
 @main.route('/new_pico_recipe', methods=['GET', 'POST'])
@@ -292,12 +325,12 @@ def delete_pico_recipe():
 def load_pico_recipes():
     files = list(pico_recipe_path().glob(file_glob_pattern))
     recipes = [load_pico_recipe(file) for file in files]
-    return recipes
+    return filter(lambda x: x.name != None, recipes)
 
 
 def load_pico_recipe(file):
     recipe = PicoBrewRecipe()
-    recipe.parse(file)
+    parse_recipe(MachineType.PICOBREW, recipe, file)
     return recipe
 
 
@@ -348,10 +381,11 @@ def load_ferm_sessions():
 pico_recipes = []
 zymatic_recipes = []
 zseries_recipes = []
+invalid_recipes = {}
 
 
 def initialize_data():
-    global pico_recipes, zymatic_recipes, zseries_recipes
+    global pico_recipes, zymatic_recipes, zseries_recipes, invalid_recipes
     global brew_sessions, ferm_sessions
 
     # Read initial recipe list on load

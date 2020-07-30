@@ -153,3 +153,23 @@ function delete_recipe(recipe_id){
 		});
     }
 };
+function delete_file(filename){
+    if (confirm("Are you sure?")){
+		$.ajax({
+			url: 'delete_recipe_filename',
+			type: 'POST',
+            data: JSON.stringify(filename),
+            dataType: "json",
+            processData: false,
+            contentType: "application/json; charset=UTF-8",
+            success: function(data) {
+                //showAlert("Success!", "success");
+                setTimeout(function () { window.location.href = "zseries_recipes";}, 2000);
+            },
+            error: function(request, status, error) {
+                //showAlert("Error: " + request.responseText, "danger");
+                //setTimeout(function () { window.location.href = "zseries_recipes";}, 2000);
+            },
+		});
+    }
+};
