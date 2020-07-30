@@ -216,7 +216,7 @@ def parse_recipe(machineType, recipe, file):
     try:
         recipe.parse(file)
     except:
-        print("An exception occurred parsing {}".format(file))
+        print("ERROR: An exception occurred parsing {}".format(file))
         add_invalid_recipe(machineType, file)
 
 
@@ -245,7 +245,7 @@ def delete_recipe_filename():
             os.remove(filename)
             invalid_recipes[device].remove(Path(filename))
             return '', 204
-    print("failed to delete {}".format(filename))
+    print("ERROR: failed to delete recipe file {}".format(filename))
     return 'Delete Filename: Failed to find invalid recipe file \"' + filename + '\"', 418
 
 
