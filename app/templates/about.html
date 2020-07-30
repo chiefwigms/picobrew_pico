@@ -2,7 +2,7 @@
 {% block content %}
 <form id="f_about">
   <div class="row">
-    <div class="group col-sm-5">
+    <div class="group col-sm-8">
       <div class="card bg-dark text-white">
         <h2>Python Server Version</h2>
         <p>local version: {{git_version}}</p>
@@ -31,7 +31,7 @@
     </div>
   </div>
   <div class="row">
-    <div class="group col-sm-5">
+    <div class="group col-sm-8">
       <div class="card bg-dark text-white">
         <h2>OS Release Info</h2>
         <pre class="text-white">
@@ -39,8 +39,10 @@
         </pre>
 
         {% if raspberrypi_info %}
-          <h2>Raspberry PI Info</h2>
-          <p>{{raspberrypi_info}}</p>
+          <h3>Raspberry PI Info</h2>
+          <pre class="text-white">
+            <code class="float-left">{{raspberrypi_info}}</code>
+          </pre>
         {% endif %}
       </div>
     </div>
