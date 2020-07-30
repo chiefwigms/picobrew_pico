@@ -1,6 +1,7 @@
 import json
 import os
 import requests
+import subprocess
 import sys
 import uuid
 from flask import render_template, request, redirect
@@ -287,6 +288,80 @@ def delete_pico_recipe():
             os.remove(filename)
             return '', 204
     return 'Delete Recipe: Failed to find recipe id \"' + recipe_id + '\"', 418
+
+
+@main.route('/setup', methods=['GET', 'POST'])
+def setup():
+    if request.method == 'POST':
+        wireless = request.get_json()
+
+        # change wireless configuration (wpa_supplicant-wlan0.conf and wpa_supplicant.conf)
+        # sudo sed -i -e"s/^ssid=.*/ssid=\"$SSID\"/" /etc/wpa_supplicant/wpa_supplicant.conf
+        # sudo sed -i -e"s/^psk=.*/psk=\"$WIFIPASS\"/" /etc/wpa_supplicant/wpa_supplicant.conf
+        # sudo systemctl disable wpa_supplicant.service
+        # sudo systemctl enable wpa_supplicant@wlan0.service
+        
+        try:
+            # set ssid in wpa_supplicant files
+            subprocess.check_output('sudo sed -i -e"s/^ssid=.*/ssid=\"${wireless.ssid}\"/" /etc/wpa_supplicant/wpa_supplicant.conf /etc/wpa_supplicant/wpa_supplicant-wlan0.conf', shell=True)
+            
+            # set bssid (if set by user) in wpa_supplicant files
+            if wireless.bssid:
+                subprocess.check_output('sudo sed -i -e"s/^bssid=.*/bssid=\"${wireless.bssid}\"/" /etc/wpa_supplicant/wpa_supplicant.conf /etc/wpa_supplicant/wpa_supplicant-wlan0.conf', shell=True)
+                
+            # set credentials (if set by user) in wpa_supplicant files
+            subprocess.check_output('sudo sed -i -e"s/^psk=.*/psk=\"${wireless.password}\"/" /etc/wpa_supplicant/wpa_supplicant.conf', shell=True)
+            
+            # restart wireless services
+            subprocess.check_output('sudo systemctl restart wpa_supplicant@wlan0.service', shell=True)
+
+            # TODO: redirect to a page with alert of success or failure of wireless service reset
+        except:
+            return 'Wireless Setup Failed!', 418
+    else:
+        return render_template('setup.html')
+
+
+@main.route('/about', methods=['GET'])
+def about():
+    # query local git short sha
+    gitSha = subprocess.check_output("cd {0}; git rev-parse --short HEAD", shell=True)
+    gitSha = gitSha.decode("utf-8")
+
+    # query latest git remote sha
+    try:
+        latestMasterSha = subprocess.check_output("cd {0}; git fetch origin && git rev-parse --short origin/master", shell=True)
+        latestMasterSha = latestMasterSha.decode("utf-8")
+    except:
+        latestMasterSha = "unavailable (check network)"
+
+    # query for local file changes
+    try:
+        localChanges = subprocess.check_output("cd {0}; git fetch origin; git --no-pager diff --name-only", shell=True)
+        localChanges = localChanges.decode("utf-8").strip()
+    except:
+        localChanges = "unavailable (check network)"
+
+    # capture os version information
+    # proc = subprocess.Popen(["cat", "/etc/os-release"], stdout=subprocess.PIPE, shell=True)
+    # (osRelease, err) = proc.communicate()
+    try:
+        osReleaseInfo = subprocess.check_output("cat /etc/os-release || sw_vers || systeminfo | findstr /C:'OS'", shell=True)
+        osReleaseInfo = osReleaseInfo.decode("utf-8")
+    except:
+        osReleaseInfo = "Not Supported on this Device"
+
+    # # capture raspbian pinout
+    # proc = subprocess.Popen(["pinout"], stdout=subprocess.PIPE, shell=True)
+    # (pinout, err) = proc.communicate()
+    try:
+        pinout = subprocess.check_output("pinout", shell=True)
+        pinout = pinout.decode("utf-8")
+    except:
+        pinout = None
+    
+    return render_template('about.html', git_version=gitSha, latest_git_sha=latestMasterSha, local_changes=localChanges,
+                           os_release=osReleaseInfo, raspberrypi_info=pinout)
 
 
 def load_pico_recipes():
