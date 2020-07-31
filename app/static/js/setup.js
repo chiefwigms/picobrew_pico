@@ -6,7 +6,7 @@ $(document).ready(function(){
         wireless.password = document.getElementById('f_wireless_setup').elements['wifi_credentials'].value;
         
 		$.ajax({
-			url: 'wireless',
+			url: 'setup',
 			type: 'POST',
             data: JSON.stringify(wireless),
             dataType: "json",
@@ -27,3 +27,11 @@ $(document).ready(function(){
         $('#alert').show();
     }
 });
+function showPassword() {
+    var x = document.getElementById("wifi_credentials");
+    if (x.type === "password") {
+        x.type = "text";
+    } else {
+        x.type = "password";
+    }
+}

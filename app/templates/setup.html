@@ -4,20 +4,27 @@
   <form id="f_wireless_setup">
     <div class="form-row">
       <div class="form-group col-sm-5">
-        <input type="text" class="form-control form-control-sm" id="wifi_bssid" placeholder="BSSID (optional - to force 2.4ghz)">
+
+        <input type="text" class="form-control form-control-sm" id="wifi_bssid" value="{{wireless_credentials.bssid}}" placeholder="BSSID (optional - to force 2.4ghz)">
         <small id="wifi_bssid_HelpBlock" class="form-text text-muted">
           Unique MAC address identifing a 2.4ghz wireless network (optional)
         </small>
         <br/>
-        <input type="text" class="form-control form-control-sm" id="wifi_ssid" placeholder="SSID">
+        <input type="text" class="form-control form-control-sm" id="wifi_ssid" value="{{wireless_credentials.ssid}}" placeholder="SSID">
         <small id="wifi_ssid_HelpBlock" class="form-text text-muted">
           Name of Wi-Fi network
         </small>
         <br/>
-        <input type="password" class="form-control form-control-sm" id="wifi_credentials" placeholder="Credentials (WPA-PSK)">
+        <input type="password" class="form-control form-control-sm" id="wifi_credentials" value="{{wireless_credentials.psk}}" placeholder="Credentials (WPA-PSK)">
+        <span class="form-inline text-white float-right">
+          <input type="checkbox" id="show-password" onclick="showPassword()">
+          <label for="show-password" style="padding-left: 0.4em;">Show Password</label>
+        </span>
         <small id="wifi_ssid_HelpBlock" class="form-text text-muted">
           Credentials for Wi-Fi (WPA-PSK)
         </small>
+        
+
         <br/>
         <button class="w-75 btn btn-sm btn-secondary btn-block" type="button" id="b_save_wireless_setup">Save</button>
       </div>

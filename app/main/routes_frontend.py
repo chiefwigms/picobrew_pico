@@ -3,6 +3,7 @@ import os
 import requests
 import subprocess
 import sys
+import traceback
 import uuid
 from flask import render_template, request, redirect
 from threading import Thread
@@ -295,6 +296,8 @@ def setup():
     if request.method == 'POST':
         wireless = request.get_json()
 
+        print(wireless)
+
         # change wireless configuration (wpa_supplicant-wlan0.conf and wpa_supplicant.conf)
         # sudo sed -i -e"s/^ssid=.*/ssid=\"$SSID\"/" /etc/wpa_supplicant/wpa_supplicant.conf
         # sudo sed -i -e"s/^psk=.*/psk=\"$WIFIPASS\"/" /etc/wpa_supplicant/wpa_supplicant.conf
@@ -302,24 +305,48 @@ def setup():
         # sudo systemctl enable wpa_supplicant@wlan0.service
         
         try:
+            wpa_files = "/etc/wpa_supplicant/wpa_supplicant.conf"
+
             # set ssid in wpa_supplicant files
-            subprocess.check_output('sudo sed -i -e"s/^ssid=.*/ssid=\"${wireless.ssid}\"/" /etc/wpa_supplicant/wpa_supplicant.conf /etc/wpa_supplicant/wpa_supplicant-wlan0.conf', shell=True)
+            ssid = wireless['ssid']
+            subprocess.check_output('sed -i ".conf" -e "s/ssid=.*/ssid=\"{}\"/" {}'.format(ssid, wpa_files), shell=True)
             
             # set bssid (if set by user) in wpa_supplicant files
-            if wireless.bssid:
-                subprocess.check_output('sudo sed -i -e"s/^bssid=.*/bssid=\"${wireless.bssid}\"/" /etc/wpa_supplicant/wpa_supplicant.conf /etc/wpa_supplicant/wpa_supplicant-wlan0.conf', shell=True)
+            if 'bssid' in wireless and wireless['bssid']:
+                bssid = wireless['bssid']
+                subprocess.check_output('sed -i ".conf" -e "s/bssid=.*/bssid=\"{}\"/" {}'.format(bssid, wpa_files), shell=True)
                 
             # set credentials (if set by user) in wpa_supplicant files
-            subprocess.check_output('sudo sed -i -e"s/^psk=.*/psk=\"${wireless.password}\"/" /etc/wpa_supplicant/wpa_supplicant.conf', shell=True)
+            if 'password' in wireless and wireless['password']:
+                psk = wireless['password']
+                subprocess.check_output('sed -i ".conf" -e "s/psk=.*/psk=\"{}\"/" {}'.format(psk, wpa_files), shell=True)
             
             # restart wireless services
-            subprocess.check_output('sudo systemctl restart wpa_supplicant@wlan0.service', shell=True)
+            subprocess.check_output('systemctl status wpa_supplicant@wlan0.service', shell=True)
 
             # TODO: redirect to a page with alert of success or failure of wireless service reset
-        except:
+        except Exception:
+            print("Error: error occured in wireless setup:", sys.exc_info()[2])
+            print(traceback.format_exc())
             return 'Wireless Setup Failed!', 418
     else:
-        return render_template('setup.html')
+        return render_template('setup.html', wireless_credentials=wireless_credentials())
+
+
+def wireless_credentials():
+    ssid = subprocess.check_output('more ~/wpa_supplicant-wlan0.conf | grep ssid | awk -F "=" \'{print $2}\'', shell=True)
+    psk = subprocess.check_output('more ~/wpa_supplicant-wlan0.conf | grep psk | awk -F "=" \'{print $2}\'', shell=True)
+    
+    try:
+        bssid = subprocess.check_output('mmore ~/wpa_supplicant-wlan0.conf | grep bssid | awk -F "=" \'{print $2}\'', shell=True)
+    except:
+        bssid = None
+    
+    return { 
+        'ssid': ssid.decode("utf-8").strip().strip('"'),
+        'psk': psk.decode("utf-8").strip().strip('"'),
+        'bssid': bssid.decode("utf-8").strip().strip('"')
+    }
 
 
 @main.route('/about', methods=['GET'])
