@@ -656,7 +656,7 @@ def get_zseries_recipe_metadata_list():
 
 
 def get_recipe_by_id(recipe_id):
-    recipe = next((r for r in get_zseries_recipes() if r.id == int(recipe_id)), None)
+    recipe = next((r for r in get_zseries_recipes() if str(r.id) == str(recipe_id)), None)
     return recipe
 
 
