@@ -136,7 +136,7 @@ def delete_zymatic_recipe():
 def load_zymatic_recipes():
     files = list(zymatic_recipe_path().glob(file_glob_pattern))
     recipes = [load_zymatic_recipe(file) for file in files]
-    return filter(lambda x: x.name != None, recipes)
+    return list(filter(lambda x: x.name != None, recipes))
 
 
 def load_zymatic_recipe(file):
@@ -203,7 +203,7 @@ def delete_zseries_recipe():
 def load_zseries_recipes():
     files = list(zseries_recipe_path().glob(file_glob_pattern))
     recipes = [load_zseries_recipe(file) for file in files]
-    return filter(lambda x: x.name != None, recipes)
+    return list(filter(lambda x: x.name != None, recipes))
 
 
 def load_zseries_recipe(file):
@@ -325,7 +325,7 @@ def delete_pico_recipe():
 def load_pico_recipes():
     files = list(pico_recipe_path().glob(file_glob_pattern))
     recipes = [load_pico_recipe(file) for file in files]
-    return filter(lambda x: x.name != None, recipes)
+    return list(filter(lambda x: x.name != None, recipes))
 
 
 def load_pico_recipe(file):
