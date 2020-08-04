@@ -293,7 +293,7 @@ def delete_pico_recipe():
 
 @main.route('/wifi_scan', methods=['GET'])
 def wifi_scan():
-    wifi_list = subprocess.check_output('./scripts/docker/pi/wifi_scan.sh', shell=True)
+    wifi_list = subprocess.check_output('./scripts/pi/wifi_scan.sh', shell=True)
     networks = []
     for network in wifi_list:
         network_parts = network.split(' ')
