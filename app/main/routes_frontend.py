@@ -291,6 +291,21 @@ def delete_pico_recipe():
     return 'Delete Recipe: Failed to find recipe id \"' + recipe_id + '\"', 418
 
 
+@main.route('/wifi_scan', methods=['GET'])
+def wifi_scan():
+    wifi_list = subprocess.check_output('./scripts/docker/pi/wifi_scan.sh', shell=True)
+    networks = []
+    for network in wifi_list:
+        network_parts = network.split(' ')
+        network.append({
+            "bssid": network_parts[0],
+            "ssid": network_parts[1],
+            "signal": network_parts[2],
+            "encryption": network_parts[3]
+        })
+    return scan_results
+
+
 @main.route('/setup', methods=['GET', 'POST'])
 def setup():
     if request.method == 'POST':
