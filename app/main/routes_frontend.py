@@ -1,6 +1,7 @@
 import json
 import os
 import requests
+import shlex
 import subprocess
 import sys
 import traceback
@@ -291,27 +292,28 @@ def delete_pico_recipe():
     return 'Delete Recipe: Failed to find recipe id \"' + recipe_id + '\"', 418
 
 
-@main.route('/wifi_scan', methods=['GET'])
-def wifi_scan():
+def available_networks():
     wifi_list = subprocess.check_output('./scripts/pi/wifi_scan.sh', shell=True)
     networks = []
-    for network in wifi_list:
-        network_parts = network.split(' ')
-        network.append({
-            "bssid": network_parts[0],
-            "ssid": network_parts[1],
-            "signal": network_parts[2],
-            "encryption": network_parts[3]
-        })
-    return scan_results
+    for network in wifi_list.split(b'\n'):
+        network_parts = shlex.split(network.decode())
+        if len(network_parts) == 6:
+            print(network_parts)
+            networks.append({
+                "bssid": network_parts[0],
+                "ssid": network_parts[1],
+                "frequency": network_parts[2],
+                "channel": network_parts[3],
+                "signal": network_parts[4],
+                "encryption": network_parts[5]
+            })
+    return networks
 
 
 @main.route('/setup', methods=['GET', 'POST'])
 def setup():
     if request.method == 'POST':
         wireless = request.get_json()
-
-        print(wireless)
 
         # change wireless configuration (wpa_supplicant-wlan0.conf and wpa_supplicant.conf)
         # sudo sed -i -e"s/^ssid=.*/ssid=\"$SSID\"/" /etc/wpa_supplicant/wpa_supplicant.conf
@@ -343,7 +345,7 @@ def setup():
             print(traceback.format_exc())
             return 'Wireless Setup Failed!', 418
     else:
-        return render_template('setup.html', wireless_credentials=wireless_credentials())
+        return render_template('setup.html', wireless_credentials=wireless_credentials(), available_networks=available_networks())
 
 
 def wireless_credentials():

@@ -1,13 +1,24 @@
 $(document).ready(function(){
-	$('#b_save_wireless_setup').click(function(){
+    var select = document.querySelector('#wifi_selector'),
+    wifi_bssid = document.querySelector('#wifi_bssid'),
+    wifi_ssid = document.querySelector('#wifi_ssid'),
+    wifi_credentials = document.querySelector('#wifi_credentials');
+    select.addEventListener('change',function(){
+        var selected = $(this).find('option:selected');
+        wifi_bssid.value = selected.data('bssid')
+        wifi_ssid.value = selected.data('ssid')
+        wifi_credentials.value = ''
+    });
+
+    $('#b_save_wireless_setup').click(function(){
         var wireless = {}
-        wireless.bssid = document.getElementById('f_wireless_setup').elements['wifi_bssid'].value;
-        wireless.ssid = document.getElementById('f_wireless_setup').elements['wifi_ssid'].value;
-        wireless.password = document.getElementById('f_wireless_setup').elements['wifi_credentials'].value;
-        
-		$.ajax({
-			url: 'setup',
-			type: 'POST',
+        wireless.bssid = $('#f_wireless_setup').find('#wifi_bssid').val();
+        wireless.ssid = $('#f_wireless_setup').find('#wifi_ssid').val();
+        wireless.password = $('#f_wireless_setup').find('#wifi_credentials').val();
+
+        $.ajax({
+            url: 'setup',
+            type: 'POST',
             data: JSON.stringify(wireless),
             dataType: "json",
             processData: false,
@@ -20,7 +31,7 @@ $(document).ready(function(){
                 showAlert("Error: " + request.responseText, "danger");
                 //setTimeout(function () { window.location.href = "pico_recipes";}, 2000);
             },
-		});
+        });
     });
     function showAlert(msg, type){
         $('#alert').html("<div class='w-75 alert text-center alert-" + type + "'>" + msg + "</div>");
