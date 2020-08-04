@@ -54,12 +54,12 @@ def shutdown_system():
 
 @main.route('/brew_history')
 def brew_history():
-    return render_template('brew_history.html', sessions=load_brew_sessions())
+    return render_template('brew_history.html', sessions=load_brew_sessions(), invalid=get_invalid_sessions('brew'))
 
 
 @main.route('/ferm_history')
 def ferm_history():
-    return render_template('ferm_history.html', sessions=load_ferm_sessions())
+    return render_template('ferm_history.html', sessions=load_ferm_sessions(), invalid=get_invalid_sessions('ferm'))
 
 
 @main.route('/zymatic_recipes')
@@ -216,9 +216,9 @@ def parse_recipe(machineType, recipe, file):
     try:
         recipe.parse(file)
     except:
-        print("ERROR: An exception occurred parsing {}".format(file))
+        print("ERROR: An exception occurred parsing recipe {}".format(file))
         add_invalid_recipe(machineType, file)
-
+    
 
 def get_zseries_recipes():
     global zseries_recipes
@@ -237,16 +237,27 @@ def add_invalid_recipe(deviceType, file):
     invalid_recipes.get(deviceType).add(file)
 
 
-@main.route('/delete_recipe_filename', methods=['POST'])
-def delete_recipe_filename():
-    filename = request.get_json()
-    for device in invalid_recipes:
-        if Path(filename) in invalid_recipes[device]:
+@main.route('/delete_file', methods=['POST'])
+def delete_file():
+    body = request.get_json()
+    filename = body['filename']
+    if body['type'] == "recipe":
+        for device in invalid_recipes:
+            if Path(filename) in invalid_recipes[device]:
+                os.remove(filename)
+                invalid_recipes[device].remove(Path(filename))
+                return '', 204
+        print("ERROR: failed to delete recipe file {}".format(filename))
+        return "Delete Filename: Failed to find invalid recipe file {}".format(filename), 418
+    elif body['type'] in invalid_sessions:
+        if Path(filename) in invalid_sessions[body['type']]:
             os.remove(filename)
-            invalid_recipes[device].remove(Path(filename))
+            invalid_sessions[body['type']].remove(Path(filename))
             return '', 204
-    print("ERROR: failed to delete recipe file {}".format(filename))
-    return 'Delete Filename: Failed to find invalid recipe file \"' + filename + '\"', 418
+        print("ERROR: failed to delete {} session file {}".format(body['type'], filename))
+        return "Delete Filename: Failed to find invalid {} session file".format(body['type'], filename), 418
+    
+    return 'Delete Filename: Unsupported file type specified {}'.format(body['type']), 418
 
 
 @main.route('/pico_recipes')
@@ -339,6 +350,26 @@ def get_pico_recipes():
     return pico_recipes
 
 
+def parse_brew_session(file):
+    try:
+        return load_brew_session(file)
+    except:
+        print("ERROR: An exception occurred parsing {}".format(file))
+        add_invalid_session("brew", file)
+
+
+def get_invalid_sessions(sessionType):
+    global invalid_sessions
+    return invalid_sessions.get(sessionType, set())
+
+
+def add_invalid_session(sessionType, file):
+    global invalid_sessions
+    if sessionType not in invalid_sessions:
+        invalid_sessions[sessionType] = set()
+    invalid_sessions.get(sessionType).add(file)
+
+
 def load_active_brew_sessions():
     brew_sessions = []
 
@@ -358,9 +389,17 @@ def load_brew_sessions(uid=None):
         files = list(brew_archive_sessions_path().glob("[^_.]*#{}*.json".format(uid)))
     else:
         files = list(brew_archive_sessions_path().glob(file_glob_pattern))
-    brew_sessions = [load_brew_session(file) for file in files]
-    return brew_sessions
+    brew_sessions = [parse_brew_session(file) for file in files]
+    return list(filter(lambda x: x != None, brew_sessions))
 
+
+def parse_ferm_session(file):
+    try:
+        return load_ferm_session(file)
+    except:
+        print("ERROR: An exception occurred parsing {}".format(file))
+        add_invalid_session("ferm", file)
+    
 
 def load_active_ferm_sessions():
     ferm_sessions = []
@@ -373,15 +412,19 @@ def load_active_ferm_sessions():
 
 def load_ferm_sessions():
     files = list(ferm_archive_sessions_path().glob(file_glob_pattern))
-    ferm_sessions = [load_ferm_session(file) for file in files]
-    return ferm_sessions
+    ferm_sessions = [parse_ferm_session(file) for file in files]
+    return list(filter(lambda x: x != None, ferm_sessions))
 
 
 # Read initial recipe list on load
 pico_recipes = []
 zymatic_recipes = []
 zseries_recipes = []
+
+brew_sessions = []
+
 invalid_recipes = {}
+invalid_sessions = {}
 
 
 def initialize_data():
