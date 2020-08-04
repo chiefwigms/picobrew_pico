@@ -2,19 +2,7 @@
 {% block content %}
   <script src="static/js/server_management.js"></script>
   <script src="static/js/zseries_recipe.js"></script>
-  <div id="invalid">
-    {% for file in invalid %}
-    <div class="card bg-dark text-white-50">
-      <h5 class="card-header" id="h_{{file}}">
-        <span class="text-warning"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i></span>
-        {{file}}
-        <span class="text-warning"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i></span>
-        <button class="btn btn-sm btn-danger float-right mr-5" type="button" id="bd_{{file}}" onclick="event.stopPropagation();event.preventDefault();delete_file('{{file}}');"><i class="fas fa-trash"></i></button>
-        </a>
-      </h5>
-    </div>
-    {% endfor %}
-  </div>
+  {% include "invalid_file.html" %}
   <div id="accordion">
     {% for recipe in recipes %}
     <div class="card bg-dark text-white-50">
