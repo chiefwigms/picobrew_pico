@@ -12,6 +12,7 @@ subjectAltName = @alt_names
 [alt_names]
 DNS.1 = picobrew.com
 DNS.2 = www.picobrew.com
+DNS.3 = localhost
 EOF
 
 openssl req -x509 -sha256 -newkey rsa:2048 -nodes -keyout ${DIR}/certs/domain.key \

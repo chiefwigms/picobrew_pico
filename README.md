@@ -68,6 +68,12 @@ If you are looking to support a ZSeries device which requires HTTP+SSL communica
 ./scripts/doccker/nginx/ssl_certificates.sh
 ```
 
+On MacOS you can add permenant trust for the Certificate Authority (yourself) if you use Chrome and/or Safari this makes it so that the authority of the certificate generaated above is trusted. Only these browsers check keychain access to get a list of CAs whereas Firefox stores its own list of trusted CAs in the browser.
+
+```
+sudo security add-trusted-cert -d -r trustAsRoot -k /Library/Keychains/System.keychain $(pwd)/scripts/docker/nginx/certs/bundle.crt
+```
+
 ##### Step 2: Run Flask Server (optionally with `docker run` or with `docker-compose`)
 
 Either provide all variables to docker command directly or use the repository's docker-compose.yml (which will also include a working SSL enabled nginx configuration given you have setup certificates correctly with `./scripts/docker/nginx/ssl_certificates.sh`)
