@@ -330,7 +330,7 @@ def setup():
             if 'bssid' in wireless and wireless['bssid']:
                 bssid = wireless['bssid']
                 subprocess.check_output(
-                    """sed -i -e 's/bssid=.*/bssid="{}"/' {}""".format(bssid, wpa_files), shell=True)
+                    """sed -i -e 's/bssid=.*/bssid={}/' {}""".format(bssid, wpa_files), shell=True)
                 
             # set credentials (if set by user) in wpa_supplicant files
             if 'password' in wireless and wireless['password']:
@@ -338,9 +338,17 @@ def setup():
                 subprocess.check_output(
                     """sed -i -e 's/psk=.*/psk="{}"/' {}""".format(psk, wpa_files), shell=True)
             
-            # restart wireless services
-            subprocess.check_output('systemctl status wpa_supplicant@wlan0.service', shell=True)
+            def restart_wireless():
+                import subprocess
+                import time
+                time.sleep(2)
+                subprocess.check_output('systemctl restart wpa_supplicant@wlan0.service', shell=True)
 
+            # async restart wireless service
+            thread = Thread(target=restart_wireless)
+            thread.start()
+
+            return '', 204
             # TODO: redirect to a page with alert of success or failure of wireless service reset
         except Exception:
             print("Error: error occured in wireless setup:", sys.exc_info()[2])
