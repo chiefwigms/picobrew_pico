@@ -4,11 +4,10 @@
   <form id="f_wireless_setup">
     <div class="form-row">
       <div class="form-group col-sm-5">
-        
         <select id="wifi_selector" class="form-control form-control-sm">
           <option selected>Select Available WiFi Network</option>
           {% for network in available_networks %}
-            <option value="{{network.bssid}}" data-bssid="{{network.bssid}}" data-ssid="{{network.ssid}}">{{network.ssid}} ({{network.bssid}} - {{network.frequency}} Ghz - Channel {{network.channel}})</option>
+            <option value="{{network.bssid}}" data-bssid="{{network.bssid}}" data-ssid="{{network.ssid}}" >{{network.ssid}} ({{network.bssid}} - {{network.frequency}} Ghz - Channel {{network.channel}})</option>
           {% endfor %}
         </select>
         <br/>

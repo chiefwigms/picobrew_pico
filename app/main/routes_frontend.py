@@ -298,7 +298,6 @@ def available_networks():
     for network in wifi_list.split(b'\n'):
         network_parts = shlex.split(network.decode())
         if len(network_parts) == 6:
-            print(network_parts)
             networks.append({
                 "bssid": network_parts[0],
                 "ssid": network_parts[1],
@@ -324,17 +323,20 @@ def setup():
 
             # set ssid in wpa_supplicant files
             ssid = wireless['ssid']
-            subprocess.check_output('sed -i -e "s/ssid=.*/ssid=\"{}\"/" {}'.format(ssid, wpa_files), shell=True)
+            subprocess.check_output(
+                """sed -i -e 's/ssid=.*/ssid="{}"/' {}""".format(ssid, wpa_files), shell=True)
             
             # set bssid (if set by user) in wpa_supplicant files
             if 'bssid' in wireless and wireless['bssid']:
                 bssid = wireless['bssid']
-                subprocess.check_output('sed -i -e "s/bssid=.*/bssid=\"{}\"/" {}'.format(bssid, wpa_files), shell=True)
+                subprocess.check_output(
+                    """sed -i -e 's/bssid=.*/bssid="{}"/' {}""".format(bssid, wpa_files), shell=True)
                 
             # set credentials (if set by user) in wpa_supplicant files
             if 'password' in wireless and wireless['password']:
                 psk = wireless['password']
-                subprocess.check_output('sed -i -e "s/psk=.*/psk=\"{}\"/" {}'.format(psk, wpa_files), shell=True)
+                subprocess.check_output(
+                    """sed -i -e 's/psk=.*/psk="{}"/' {}""".format(psk, wpa_files), shell=True)
             
             # restart wireless services
             subprocess.check_output('systemctl status wpa_supplicant@wlan0.service', shell=True)
@@ -349,11 +351,11 @@ def setup():
 
 
 def wireless_credentials():
-    ssid = subprocess.check_output('more /etc/wpa_supplicant/wpa_supplicant-wlan0.conf | grep ssid | awk -F "=" \'{print $2}\'', shell=True)
-    psk = subprocess.check_output('more /etc/wpa_supplicant/wpa_supplicant-wlan0.conf | grep psk | awk -F "=" \'{print $2}\'', shell=True)
+    ssid = subprocess.check_output('more /etc/wpa_supplicant/wpa_supplicant-wlan0.conf | grep -w ssid | awk -F "=" \'{print $2}\'', shell=True)
+    psk = subprocess.check_output('more /etc/wpa_supplicant/wpa_supplicant-wlan0.conf | grep -w psk | awk -F "=" \'{print $2}\'', shell=True)
     
     try:
-        bssid = subprocess.check_output('more /etc/wpa_supplicant/wpa_supplicant-wlan0.conf | grep bssid | awk -F "=" \'{print $2}\'', shell=True)
+        bssid = subprocess.check_output('more /etc/wpa_supplicant/wpa_supplicant-wlan0.conf | grep -w bssid | awk -F "=" \'{print $2}\'', shell=True)
     except:
         bssid = None
     
