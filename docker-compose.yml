@@ -5,7 +5,7 @@ services:
     restart: unless-stopped
     command: "/bin/sh -c 'while :; do sleep 6h & wait $${!}; nginx -s reload; done & nginx -g \"daemon off;\"'"
     volumes:
-      - ./scripts/docker/nginx:/etc/nginx/conf.d
+      - ./scripts/docker/nginx/conf:/etc/nginx/conf.d
       - ./scripts/docker/nginx/certs:/certs
     ports:
       - 80:80

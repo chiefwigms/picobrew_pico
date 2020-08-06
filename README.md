@@ -60,12 +60,27 @@ sessions/
 
 Run server volume mounting the above directory structure.
 
-Either provide all variables to docker command directly or use the repository's docker-compose.yml (which can include a working SSL enabled nginx configuration given you have setup certificates correctly with `./scripts/docker/nginx/ssl_certificates.sh`)
+##### (Optional) Step 1: Generate SSL Certs
+
+If you are looking to support a ZSeries device which requires HTTP+SSL communication we need to generatae some self-signed certificates to place in front of the flask app. These will be used when running nginx to terminate SSL connection before sending the requests for processing by flask.
 
 ```
-docker run -d -it -p 80:80 \
+./scripts/doccker/nginx/ssl_certificates.sh
+```
+
+##### Step 2: Run Flask Server (optionally with `docker run` or with `docker-compose`)
+
+Either provide all variables to docker command directly or use the repository's docker-compose.yml (which will also include a working SSL enabled nginx configuration given you have setup certificates correctly with `./scripts/docker/nginx/ssl_certificates.sh`)
+
+###### Option 1: Docker Run (without SSL support or external SSL termination)
+
+Running straight with docker is useful for easy setups which don't require SSL connections (aka non ZSeries brew setups) and/or for those that leveraging another existing system to handle the SSL connections (ie. mitmproxy, nginx, etc).
+
+```
+docker run -d -it -p 80:80 --name picobrew_pico \
   --mount type=bind,source=<absolute-path-to-recipes>,target=/picobrew_pico/app/recipes \
   --mount type=bind,source=<absolute-path-to-sessions>,target=/picobrew_pico/app/sessions \
+  --mount type=bind,source=<absolute-path-to-source>,target=/picobrew_pico/ \
   chiefwigms/picobrew_pico
 ```
 
@@ -74,7 +89,7 @@ To view logs check the running docker containers and tail the specific instance'
 ```
 docker ps
 CONTAINER ID        IMAGE                     COMMAND                  CREATED             STATUS              PORTS                NAMES
-3cfda85cd90c        chiefwigms/picobrew_pico   "/bin/sh -c 'python3…"   45 seconds ago      Up 45 seconds       0.0.0.0:80->80/tcp   relaxed_rhodes
+3cfda85cd90c        chiefwigms/picobrew_pico   "/bin/sh -c 'python3…"   45 seconds ago      Up 45 seconds       0.0.0.0:80->80/tcp   picobrew_pico
 ```
 
 ```
@@ -88,7 +103,9 @@ WebSocket transport not available. Install eventlet or gevent and gevent-websock
  * Running on http://0.0.0.0:80/ (Press CTRL+C to quit)
 ```
 
-or 
+###### Option 2: Docker Compose (with SSL support via a dedicated nginx container)
+
+To run a setup with http and https and want to have the ssl termination handled by the included nginx `docker-compose` is the easiest configuration to go with.
 
 ```
 docker-compose up --build
