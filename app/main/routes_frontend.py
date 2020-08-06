@@ -331,13 +331,13 @@ def setup():
                 bssid = wireless['bssid']
                 # remove comment for bssid line (if present)
                 subprocess.check_output(
-                    """sudo sed -i '/bssid/s/#//g' {}""".format(wpa_files), shell=True)
+                    """sudo sed -i '/bssid/s/# *//g' {}""".format(wpa_files), shell=True)
                 subprocess.check_output(
                     """sed -i -e 's/bssid=.*/bssid={}/' {}""".format(bssid, wpa_files), shell=True)
             else:
                 # add comment for bssid line (if present)
                 subprocess.check_output(
-                    """sudo sed -i '/bssid/s/bssid/#bssid/g' {}""".format(wpa_files), shell=True)
+                    """sudo sed -i '/bssid/s/bssid/# bssid/g' {}""".format(wpa_files), shell=True)
             
             # set credentials (if set by user) in wpa_supplicant files
             if 'password' in wireless and wireless['password']:
