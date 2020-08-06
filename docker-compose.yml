@@ -30,5 +30,8 @@ services:
       - type: bind
         source: ./app/firmware
         target: /picobrew_pico/app/firmware
+      - type: bind
+        source: ./
+        target: /picobrew_pico
     ports:
       - 8080:8080
