@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block content %}
+<form id="f_about">
+  <div class="row">
+    <div class="group col-sm-8">
+      <div class="card bg-dark text-white">
+        <h2>Python Server Version</h2>
+        <p>local version: {{git_version}}</p>
+        {% if git_version != latest_git_sha %}
+          <span class="text-warning">
+            <i class="fa fa-sync" aria-hidden="true"></i>
+            <a href="/restart_server">Update/Restart Server</a>
+            <p>latest version: {{latest_git_sha}}</p>
+          </span>  
+        {% else %}
+          <span class="text-success">
+            <i class="fa fa-check-circle" aria-hidden="true"></i>
+            no update available
+          </span>
+        {% endif %}
+        {% if local_changes %}
+          <span class="text-danger">
+            <i class="fa fa-exclamation-triangle" aria-hidden="true"></i>
+            Files with Local Conflicting Changes
+            <pre class="text-white">
+              <code class="float-left">{{local_changes}}</code>
+            </pre>
+          </span>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="group col-sm-8">
+      <div class="card bg-dark text-white">
+        <h2>OS Release Info</h2>
+        <pre class="text-white">
+          <code class="float-left">{{os_release}}</code>
+        </pre>
+
+        {% if raspberrypi_info %}
+          <h3>Raspberry PI Info</h2>
+          <pre class="text-white">
+            <code class="float-left">{{raspberrypi_info}}</code>
+          </pre>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="group col-sm-5">
+      
+    </div>
+  </div>
+</form>
+{% endblock %}

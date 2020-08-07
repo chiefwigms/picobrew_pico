@@ -1,7 +1,10 @@
 import json
 import os
 import requests
+import shlex
+import subprocess
 import sys
+import traceback
 import uuid
 from flask import render_template, request, redirect
 from pathlib import Path
@@ -331,6 +334,137 @@ def delete_pico_recipe():
             os.remove(filename)
             return '', 204
     return 'Delete Recipe: Failed to find recipe id \"' + recipe_id + '\"', 418
+
+
+def available_networks():
+    wifi_list = subprocess.check_output('./scripts/pi/wifi_scan.sh', shell=True)
+    networks = []
+    for network in wifi_list.split(b'\n'):
+        network_parts = shlex.split(network.decode())
+        if len(network_parts) == 6:
+            networks.append({
+                "bssid": network_parts[0],
+                "ssid": network_parts[1],
+                "frequency": network_parts[2],
+                "channel": network_parts[3],
+                "signal": network_parts[4],
+                "encryption": network_parts[5]
+            })
+    return networks
+
+
+@main.route('/setup', methods=['GET', 'POST'])
+def setup():
+    if request.method == 'POST':
+        wireless = request.get_json()
+
+        # change wireless configuration (wpa_supplicant-wlan0.conf and wpa_supplicant.conf)
+        # sudo sed -i -e"s/^ssid=.*/ssid=\"$SSID\"/" /etc/wpa_supplicant/wpa_supplicant.conf
+        # sudo sed -i -e"s/^psk=.*/psk=\"$WIFIPASS\"/" /etc/wpa_supplicant/wpa_supplicant.conf
+        
+        try:
+            wpa_files = "/etc/wpa_supplicant/wpa_supplicant.conf /etc/wpa_supplicant/wpa_supplicant-wlan0.conf"
+
+            # set ssid in wpa_supplicant files
+            ssid = wireless['ssid']
+            subprocess.check_output(
+                """sed -i -e 's/ssid=.*/ssid="{}"/' {}""".format(ssid, wpa_files), shell=True)
+            
+            # set bssid (if set by user) in wpa_supplicant files
+            if 'bssid' in wireless and wireless['bssid']:
+                bssid = wireless['bssid']
+                # remove comment for bssid line (if present)
+                subprocess.check_output(
+                    """sudo sed -i '/bssid/s/# *//g' {}""".format(wpa_files), shell=True)
+                subprocess.check_output(
+                    """sed -i -e 's/bssid=.*/bssid={}/' {}""".format(bssid, wpa_files), shell=True)
+            else:
+                # add comment for bssid line (if present)
+                subprocess.check_output(
+                    """sudo sed -i '/bssid/s/bssid/# bssid/g' {}""".format(wpa_files), shell=True)
+            
+            # set credentials (if set by user) in wpa_supplicant files
+            if 'password' in wireless and wireless['password']:
+                psk = wireless['password']
+                subprocess.check_output(
+                    """sed -i -e 's/psk=.*/psk="{}"/' {}""".format(psk, wpa_files), shell=True)
+            
+            def restart_wireless():
+                import subprocess
+                import time
+                time.sleep(2)
+                subprocess.check_output('systemctl restart wpa_supplicant@wlan0.service', shell=True)
+
+            # async restart wireless service
+            thread = Thread(target=restart_wireless)
+            thread.start()
+
+            return '', 204
+            # TODO: redirect to a page with alert of success or failure of wireless service reset
+        except Exception:
+            print("Error: error occured in wireless setup:", sys.exc_info()[2])
+            print(traceback.format_exc())
+            return 'Wireless Setup Failed!', 418
+    else:
+        return render_template('setup.html', wireless_credentials=wireless_credentials(), available_networks=available_networks())
+
+
+def wireless_credentials():
+    ssid = subprocess.check_output('more /etc/wpa_supplicant/wpa_supplicant-wlan0.conf | grep -w ssid | awk -F "=" \'{print $2}\'', shell=True)
+    psk = subprocess.check_output('more /etc/wpa_supplicant/wpa_supplicant-wlan0.conf | grep -w psk | awk -F "=" \'{print $2}\'', shell=True)
+    
+    try:
+        bssid = subprocess.check_output('more /etc/wpa_supplicant/wpa_supplicant-wlan0.conf | grep -w bssid | awk -F "=" \'{print $2}\'', shell=True)
+    except:
+        bssid = None
+    
+    return { 
+        'ssid': ssid.decode("utf-8").strip().strip('"'),
+        'psk': psk.decode("utf-8").strip().strip('"'),
+        'bssid': bssid.decode("utf-8").strip().strip('"')
+    }
+
+
+@main.route('/about', methods=['GET'])
+def about():
+    # query local git short sha
+    gitSha = subprocess.check_output("cd {0}; git rev-parse --short HEAD", shell=True)
+    gitSha = gitSha.decode("utf-8")
+
+    # query latest git remote sha
+    try:
+        latestMasterSha = subprocess.check_output("cd {0}; git fetch origin && git rev-parse --short origin/master", shell=True)
+        latestMasterSha = latestMasterSha.decode("utf-8")
+    except:
+        latestMasterSha = "unavailable (check network)"
+
+    # query for local file changes
+    try:
+        localChanges = subprocess.check_output("cd {0}; git fetch origin; git --no-pager diff --name-only", shell=True)
+        localChanges = localChanges.decode("utf-8").strip()
+    except:
+        localChanges = "unavailable (check network)"
+
+    # capture os version information
+    # proc = subprocess.Popen(["cat", "/etc/os-release"], stdout=subprocess.PIPE, shell=True)
+    # (osRelease, err) = proc.communicate()
+    try:
+        osReleaseInfo = subprocess.check_output("cat /etc/os-release || sw_vers || systeminfo | findstr /C:'OS'", shell=True)
+        osReleaseInfo = osReleaseInfo.decode("utf-8")
+    except:
+        osReleaseInfo = "Not Supported on this Device"
+
+    # # capture raspbian pinout
+    # proc = subprocess.Popen(["pinout"], stdout=subprocess.PIPE, shell=True)
+    # (pinout, err) = proc.communicate()
+    try:
+        pinout = subprocess.check_output("pinout", shell=True)
+        pinout = pinout.decode("utf-8")
+    except:
+        pinout = None
+    
+    return render_template('about.html', git_version=gitSha, latest_git_sha=latestMasterSha, local_changes=localChanges,
+                           os_release=osReleaseInfo, raspberrypi_info=pinout)
 
 
 def load_pico_recipes():
