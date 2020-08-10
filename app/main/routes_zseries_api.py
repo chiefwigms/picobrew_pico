@@ -458,15 +458,7 @@ def create_session(token, body):
 
 def update_session_log(token, body):
     session_id = body['ZSessionID']
-    uid = get_machine_by_session(session_id)
-
-    if uid is None:
-        error = {
-            'error': 'machine_id {} session {} does not have a matching active session log'.format(token, session_id)
-        }
-        return Response(json.dumps(error), status=400, mimetype='application/json')
-
-    active_session = active_brew_sessions[uid]
+    active_session = active_brew_sessions[token]
 
     if active_session.id == -1:
         # update reference to corrupted active_session
@@ -520,7 +512,7 @@ def update_session_log(token, body):
                                'step': active_session.step,
                                'event': event,
                                })
-    socketio.emit('brew_session_update|{}'.format(uid), graph_update)
+    socketio.emit('brew_session_update|{}'.format(token), graph_update)
     active_session.file.write('\n\t{},'.format(json.dumps(session_data)))
     active_session.file.flush()
 
