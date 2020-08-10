@@ -5,7 +5,8 @@ from webargs.flaskparser import use_args, FlaskParser
 
 from . import main
 from .. import socketio
-from .config import ferm_active_sessions_path
+from .config import ferm_active_sessions_path, MachineType
+from .firmware import firmware_filename, minimum_firmware, firmware_upgrade_required
 from .model import PicoFermSession
 from .session_parser import active_ferm_sessions
 
@@ -32,7 +33,8 @@ check_ferm_firmware_args = {
 @main.route('/API/PicoFerm/checkFirmware')
 @use_args(check_ferm_firmware_args, location='querystring')
 def process_check_ferm_firmware(args):
-    # TODO download the firmware for a picoferm and support minimum firmware versions
+    if firmware_upgrade_required(MachineType.PICOFERM, args['version']):
+        return '#1#'
     return '#0#'
 
 
