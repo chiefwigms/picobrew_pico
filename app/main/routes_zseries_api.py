@@ -512,7 +512,7 @@ def update_session_log(token, body):
                                'step': active_session.step,
                                'event': event,
                                })
-    socketio.emit('brew_session_update|{}'.format(uid), graph_update)
+    socketio.emit('brew_session_update|{}'.format(token), graph_update)
     active_session.file.write('\n\t{},'.format(json.dumps(session_data)))
     active_session.file.flush()
 
