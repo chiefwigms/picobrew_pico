@@ -33,6 +33,10 @@ def picostill_firmware_path():
     return current_app.config['FIRMWARE_PATH'].joinpath('picostill')
 
 
+def picoferm_firmware_path():
+    return current_app.config['FIRMWARE_PATH'].joinpath('picoferm')
+
+
 # recipe paths
 def zymatic_recipe_path():
     return current_app.config['RECIPES_PATH'].joinpath('zymatic')

@@ -15,7 +15,8 @@ def minimum_firmware(device: MachineType):
     default_firmware = {
         MachineType.ZSERIES: '0.0.116',
         MachineType.PICOBREW: '0.1.34',
-        MachineType.PICOSTILL: '0.0.30'
+        MachineType.PICOSTILL: '0.0.30',
+        MachineType.PICOFERM: '0.2.6'
     }
 
     if device not in default_firmware:
