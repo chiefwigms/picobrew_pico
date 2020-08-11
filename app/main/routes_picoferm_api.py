@@ -48,7 +48,7 @@ get_firmware_args = {
 @use_args(get_firmware_args, location='querystring')
 def process_get_firmware_address(args):
     filename = firmware_filename(MachineType.PICOFERM, minimum_firmware(MachineType.PICOFERM))
-    return '#https://picobrew.com/firmware/picoferm/{}#'.format(filename)
+    return '#http://picobrew.com/firmware/picoferm/{}#'.format(filename)
 
 
 # Get Firmware: /firmware/picoferm/<version>

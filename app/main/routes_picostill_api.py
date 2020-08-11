@@ -42,5 +42,5 @@ picostill_check_firmware_args = {
 def process_picostill_check_firmware(args):
     if firmware_upgrade_required(MachineType.PICOSTILL, args['version']):
         filename = firmware_filename(MachineType.PICOSTILL, minimum_firmware(MachineType.PICOSTILL))
-        return '#https://picobrew.com/firmware/picostill/{}#'.format(filename)
+        return '#http://picobrew.com/firmware/picostill/{}#'.format(filename)
     return '#-1#'
