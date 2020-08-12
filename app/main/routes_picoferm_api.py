@@ -1,11 +1,13 @@
 import json
 from datetime import datetime
+from flask import current_app, send_from_directory
 from webargs import fields
 from webargs.flaskparser import use_args, FlaskParser
 
 from . import main
 from .. import socketio
-from .config import ferm_active_sessions_path
+from .config import ferm_active_sessions_path, picoferm_firmware_path, MachineType
+from .firmware import firmware_filename, minimum_firmware, firmware_upgrade_required
 from .model import PicoFermSession
 from .session_parser import active_ferm_sessions
 
@@ -32,8 +34,29 @@ check_ferm_firmware_args = {
 @main.route('/API/PicoFerm/checkFirmware')
 @use_args(check_ferm_firmware_args, location='querystring')
 def process_check_ferm_firmware(args):
-    # TODO download the firmware for a picoferm and support minimum firmware versions
+    if firmware_upgrade_required(MachineType.PICOFERM, args['version']):
+        return '#1#'
     return '#0#'
+
+
+# Get Firmware: /API/pico/getFirmware?uid={UID}
+#     Response: RAW Bin File Contents
+get_firmware_args = {
+    'uid': fields.Str(required=True),       # 12 character alpha-numeric serial number
+}
+@main.route('/API/PicoFerm/getFirmwareAddress')
+@use_args(get_firmware_args, location='querystring')
+def process_get_firmware_address(args):
+    filename = firmware_filename(MachineType.PICOFERM, minimum_firmware(MachineType.PICOFERM))
+    return '#http://picobrew.com/firmware/picoferm/{}#'.format(filename)
+
+
+# Get Firmware: /firmware/picoferm/<version>
+#     Response: RAW Bin File
+@main.route('/firmware/picoferm/<file>', methods=['GET'])
+def process_picoferm_firmware(file):
+    current_app.logger.debug('DEBUG: PicoFerm fetch firmware file={}'.format(file))
+    return send_from_directory(picoferm_firmware_path(), file)
 
 
 # Get State: /API/PicoFerm/getState?uid={UID}
