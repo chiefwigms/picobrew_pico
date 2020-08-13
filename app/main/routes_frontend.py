@@ -6,7 +6,7 @@ import subprocess
 import sys
 import traceback
 import uuid
-from flask import render_template, request, redirect
+from flask import current_app, render_template, request, redirect
 from pathlib import Path
 from threading import Thread
 from time import sleep
@@ -30,7 +30,7 @@ def index():
 @main.route('/restart_server')
 def restart_server():
     # git pull & install any updated requirements
-    os.system('cd {0};git pull;pip3 install -r requirements.txt'.format(base_path()))
+    os.system('cd {0}; git pull; pip3 install -r requirements.txt'.format(base_path()))
     # TODO: Close file handles for open sessions?
 
     def restart():
@@ -98,12 +98,12 @@ def import_zymatic_recipe():
         machine = next((uid for uid in active_brew_sessions if not active_brew_sessions[uid].is_pico), None)
         try:
             sync_user_uri = 'http://137.117.17.70/API/SyncUSer?user={}&machine={}'.format(guid, machine)
-            print('DEBUG: import_zymatic_recipe - {}'.format(sync_user_uri))
+            current_app.logger.debug('DEBUG: import_zymatic_recipe - {}'.format(sync_user_uri))
             r = requests.get(sync_user_uri, headers={'host': 'picobrew.com'})
             recipes = r.text.strip()
         except:
             pass
-        print('DEBUG: Zymatic Recipes Dumped: \"{}\"'.format(recipes))
+        current_app.logger.debug('DEBUG: Zymatic Recipes Dumped: \"{}\"'.format(recipes))
         if len(recipes) > 2 and recipes[0] == '#' and recipes[-1] == '#':
             ZymaticRecipeImport(recipes)
             return '', 204
@@ -219,7 +219,7 @@ def parse_recipe(machineType, recipe, file):
     try:
         recipe.parse(file)
     except:
-        print("ERROR: An exception occurred parsing recipe {}".format(file))
+        current_app.logger.error("ERROR: An exception occurred parsing recipe {}".format(file))
         add_invalid_recipe(machineType, file)
     
 
@@ -250,14 +250,14 @@ def delete_file():
                 os.remove(filename)
                 invalid_recipes[device].remove(Path(filename))
                 return '', 204
-        print("ERROR: failed to delete recipe file {}".format(filename))
+        current_app.logger.error("ERROR: failed to delete recipe file {}".format(filename))
         return "Delete Filename: Failed to find invalid recipe file {}".format(filename), 418
     elif body['type'] in invalid_sessions:
         if Path(filename) in invalid_sessions[body['type']]:
             os.remove(filename)
             invalid_sessions[body['type']].remove(Path(filename))
             return '', 204
-        print("ERROR: failed to delete {} session file {}".format(body['type'], filename))
+        current_app.logger.error("ERROR: failed to delete {} session file {}".format(body['type'], filename))
         return "Delete Filename: Failed to find invalid {} session file".format(body['type'], filename), 418
     
     return 'Delete Filename: Unsupported file type specified {}'.format(body['type']), 418
@@ -298,12 +298,12 @@ def import_pico_recipe():
         uid = next((uid for uid in active_brew_sessions if active_brew_sessions[uid].is_pico), None)
         try:
             get_recipes_uri = 'http://137.117.17.70/API/pico/getRecipe?uid={}&rfid={}&ibu=-1&abv=-1.0'.format(uid, rfid)
-            print('DEBUG: import_pico_recipe - {}'.format(get_recipes_uri))
+            current_app.logger.debug('DEBUG: import_pico_recipe - {}'.format(get_recipes_uri))
             r = requests.get(get_recipes_uri, headers={'host': 'picobrew.com'})
             recipe = r.text.strip()
         except:
             pass
-        print('DEBUG: Pico Recipe Dumped: \"{}\"'.format(recipe))
+        current_app.logger.debug('DEBUG: Pico Recipe Dumped: \"{}\"'.format(recipe))
         if len(recipe) > 2 and recipe[0] == '#' and recipe[-1] == '#' and recipe != '#Invalid|#':
             PicoBrewRecipeImport(recipe, rfid)
             return '', 204
@@ -402,8 +402,8 @@ def setup():
             return '', 204
             # TODO: redirect to a page with alert of success or failure of wireless service reset
         except Exception:
-            print("Error: error occured in wireless setup:", sys.exc_info()[2])
-            print(traceback.format_exc())
+            current_app.logger.error("Error: error occured in wireless setup:", sys.exc_info()[2])
+            current_app.logger.error(traceback.format_exc())
             return 'Wireless Setup Failed!', 418
     else:
         return render_template('setup.html', wireless_credentials=wireless_credentials(), available_networks=available_networks())
@@ -428,19 +428,19 @@ def wireless_credentials():
 @main.route('/about', methods=['GET'])
 def about():
     # query local git short sha
-    gitSha = subprocess.check_output("cd {0}; git rev-parse --short HEAD", shell=True)
+    gitSha = subprocess.check_output("cd {0}; git rev-parse --short HEAD".format(base_path()), shell=True)
     gitSha = gitSha.decode("utf-8")
 
     # query latest git remote sha
     try:
-        latestMasterSha = subprocess.check_output("cd {0}; git fetch origin && git rev-parse --short origin/master", shell=True)
+        latestMasterSha = subprocess.check_output("cd {0}; git fetch origin && git rev-parse --short origin/master".format(base_path()), shell=True)
         latestMasterSha = latestMasterSha.decode("utf-8")
     except:
         latestMasterSha = "unavailable (check network)"
 
     # query for local file changes
     try:
-        localChanges = subprocess.check_output("cd {0}; git fetch origin; git --no-pager diff --name-only", shell=True)
+        localChanges = subprocess.check_output("cd {0}; git fetch origin; git --no-pager diff --name-only".format(base_path()), shell=True)
         localChanges = localChanges.decode("utf-8").strip()
     except:
         localChanges = "unavailable (check network)"
@@ -488,7 +488,7 @@ def parse_brew_session(file):
     try:
         return load_brew_session(file)
     except:
-        print("ERROR: An exception occurred parsing {}".format(file))
+        current_app.logger.error("ERROR: An exception occurred parsing {}".format(file))
         add_invalid_session("brew", file)
 
 
@@ -531,7 +531,7 @@ def parse_ferm_session(file):
     try:
         return load_ferm_session(file)
     except:
-        print("ERROR: An exception occurred parsing {}".format(file))
+        current_app.logger.error("ERROR: An exception occurred parsing {}".format(file))
         add_invalid_session("ferm", file)
     
 

@@ -86,7 +86,6 @@ Running straight with docker is useful for easy setups which don't require SSL c
 docker run -d -it -p 80:80 --name picobrew_pico \
   --mount type=bind,source=<absolute-path-to-recipes>,target=/picobrew_pico/app/recipes \
   --mount type=bind,source=<absolute-path-to-sessions>,target=/picobrew_pico/app/sessions \
-  --mount type=bind,source=<absolute-path-to-source>,target=/picobrew_pico/ \
   chiefwigms/picobrew_pico
 ```
 
