@@ -337,6 +337,8 @@ def delete_pico_recipe():
 
 
 def available_networks():
+    # TODO: properly handle failures by hiding settings in /setup or showing error
+
     wifi_list = subprocess.check_output('./scripts/pi/wifi_scan.sh', shell=True)
     networks = []
     for network in wifi_list.split(b'\n'):
@@ -362,54 +364,109 @@ def setup():
         # sudo sed -i -e"s/^ssid=.*/ssid=\"$SSID\"/" /etc/wpa_supplicant/wpa_supplicant.conf
         # sudo sed -i -e"s/^psk=.*/psk=\"$WIFIPASS\"/" /etc/wpa_supplicant/wpa_supplicant.conf
         
-        try:
-            wpa_files = "/etc/wpa_supplicant/wpa_supplicant.conf /etc/wpa_supplicant/wpa_supplicant-wlan0.conf"
+        if wireless['interface'] == 'wlan0':
+            try:
+                wpa_files = "/etc/wpa_supplicant/wpa_supplicant.conf /etc/wpa_supplicant/wpa_supplicant-wlan0.conf"
 
-            # set ssid in wpa_supplicant files
-            ssid = wireless['ssid']
-            subprocess.check_output(
-                """sed -i -e 's/ssid=.*/ssid="{}"/' {}""".format(ssid, wpa_files), shell=True)
-            
-            # set bssid (if set by user) in wpa_supplicant files
-            if 'bssid' in wireless and wireless['bssid']:
-                bssid = wireless['bssid']
-                # remove comment for bssid line (if present)
+                # set ssid in wpa_supplicant files
+                ssid = wireless['ssid']
                 subprocess.check_output(
-                    """sudo sed -i '/bssid/s/# *//g' {}""".format(wpa_files), shell=True)
-                subprocess.check_output(
-                    """sed -i -e 's/bssid=.*/bssid={}/' {}""".format(bssid, wpa_files), shell=True)
-            else:
-                # add comment for bssid line (if present)
-                subprocess.check_output(
-                    """sudo sed -i '/bssid/s/bssid/# bssid/g' {}""".format(wpa_files), shell=True)
-            
-            # set credentials (if set by user) in wpa_supplicant files
-            if 'password' in wireless and wireless['password']:
-                psk = wireless['password']
-                subprocess.check_output(
-                    """sed -i -e 's/psk=.*/psk="{}"/' {}""".format(psk, wpa_files), shell=True)
-            
-            def restart_wireless():
-                import subprocess
-                import time
-                time.sleep(2)
-                subprocess.check_output('systemctl restart wpa_supplicant@wlan0.service', shell=True)
+                    """sed -i -e 's/ssid=.*/ssid="{}"/' {}""".format(ssid, wpa_files), shell=True)
+                
+                # set bssid (if set by user) in wpa_supplicant files
+                if 'bssid' in wireless and wireless['bssid']:
+                    bssid = wireless['bssid']
+                    # remove comment for bssid line (if present)
+                    subprocess.check_output(
+                        """sudo sed -i '/bssid/s/# *//g' {}""".format(wpa_files), shell=True)
+                    subprocess.check_output(
+                        """sed -i -e 's/bssid=.*/bssid={}/' {}""".format(bssid, wpa_files), shell=True)
+                else:
+                    # add comment for bssid line (if present)
+                    subprocess.check_output(
+                        """sudo sed -i '/bssid/s/bssid/# bssid/g' {}""".format(wpa_files), shell=True)
+                
+                # set credentials (if set by user) in wpa_supplicant files
+                if 'password' in wireless and wireless['password']:
+                    psk = wireless['password']
+                    subprocess.check_output(
+                        """sed -i -e 's/psk=.*/psk="{}"/' {}""".format(psk, wpa_files), shell=True)
+                
+                def restart_wireless():
+                    import subprocess
+                    import time
+                    time.sleep(2)
+                    subprocess.check_output('systemctl restart wpa_supplicant@wlan0.service', shell=True)
 
-            # async restart wireless service
-            thread = Thread(target=restart_wireless)
-            thread.start()
+                # async restart wireless service
+                thread = Thread(target=restart_wireless)
+                thread.start()
 
-            return '', 204
-            # TODO: redirect to a page with alert of success or failure of wireless service reset
-        except Exception:
-            current_app.logger.error("Error: error occured in wireless setup:", sys.exc_info()[2])
-            current_app.logger.error(traceback.format_exc())
-            return 'Wireless Setup Failed!', 418
+                return '', 204
+                # TODO: redirect to a page with alert of success or failure of wireless service reset
+            except Exception:
+                current_app.logger.error("ERROR: error occured in wireless setup:", sys.exc_info()[2])
+                current_app.logger.error(traceback.format_exc())
+                return 'Wireless Setup Failed!', 418
+        elif wireless['interface'] == 'ap0':
+            try:
+                hostapd_file = "/etc/hostapd/hostapd.conf"
+
+                # set ssid in hostapd file
+                ssid = wireless['ssid']
+                subprocess.check_output(
+                    """sed -i -e 's/ssid=.*/ssid="{}"/' {}""".format(ssid, hostapd_file), shell=True)
+                
+                # set credentials (if set by user) in hostapd file
+                if 'password' in wireless and wireless['password']:
+                    psk = wireless['password']
+                    subprocess.check_output(
+                        """sed -i -e 's/wpa_passphrase=.*/wpa_passphrase="{}"/' {}""".format(psk, hostapd_file), shell=True)
+
+                def restart_ap0_interface():
+                    import subprocess
+                    import time
+                    time.sleep(2)
+                    subprocess.check_output('systemctl restart hostapd.service', shell=True)
+
+                # async restart hostapd service
+                thread = Thread(target=restart_ap0_interface)
+                thread.start()
+
+                return '', 204
+            except Exception:
+                current_app.logger.error("ERROR: error occured in wireless setup:", sys.exc_info()[2])
+                current_app.logger.error(traceback.format_exc())
+                return 'Wireless Setup Failed!', 418
+        else:
+            current_app.logger.error("ERROR: invalid interface provided %s".format(wireless['interface']))
+            return 'Invalid Wireless Interface Provided - Setup Failed!', 418
     else:
-        return render_template('setup.html', wireless_credentials=wireless_credentials(), available_networks=available_networks())
+        return render_template('setup.html',
+            ap0=accesspoint_credentials(),
+            wireless_credentials=wireless_credentials(),
+            available_networks=available_networks())
+
+
+def accesspoint_credentials():
+    # TODO: properly handle No such file or directory by hiding settings in /setup or showing error
+    try:
+        ssid = subprocess.check_output('more /etc/hostapd/hostapd.conf | grep -w ^ssid | awk -F "=" \'{print $2}\'', shell=True)
+        psk = subprocess.check_output('more /etc/hostapd/hostapd.conf | grep -w ^wpa_passphrase | awk -F "=" \'{print $2}\'', shell=True)
+        
+        return {
+            'ssid': ssid.decode("utf-8").strip().strip('"'),
+            'psk': psk.decode("utf-8").strip().strip('"'),
+        }
+    except:
+        current_app.logger.warn("WARN: failed to retrieve access point information from hostapd")
+        
+    return {}
 
 
 def wireless_credentials():
+    # TODO: properly handle No such file or directory by hiding settings in /setup or showing error
+
     ssid = subprocess.check_output('more /etc/wpa_supplicant/wpa_supplicant-wlan0.conf | grep -w ssid | awk -F "=" \'{print $2}\'', shell=True)
     psk = subprocess.check_output('more /etc/wpa_supplicant/wpa_supplicant-wlan0.conf | grep -w psk | awk -F "=" \'{print $2}\'', shell=True)
     
