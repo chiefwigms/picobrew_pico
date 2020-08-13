@@ -1,14 +1,9 @@
-__pycache__/
+**/.DS_Store
+
+**/__pycache__/
 .git/
-.github/
 .idea/
 .pytest_cache/
 .venv/
 .env/
 .vscode/
-
-Dockerfile
-docker-compose.yml
-Procfile
-./terraform
-./scripts
