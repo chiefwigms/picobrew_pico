@@ -4,7 +4,7 @@
   <form id="f_wireless_setup">
     <div class="text-white">
       <h4>Setup Wireless Interface</h4>
-      <p>The upstream wireless interface (ie. wlan0 on raspberrypi setups) is used for connecting to you local home network. Features included that rely on this connect include: importing from picobrew.com and updating source code.</p>
+      <p>The upstream wireless interface (ie. interface wlan0 on raspberrypi setups) is used for connecting to you local home network. Some features included may be negatively impacted by not having a value upstream wireless connection to your home network and public internet. Specific features that will be broken include, but aren't limited to: importing from picobrew.com and updating source code.</p>
     </div>
     <div class="form-row">
       <div class="form-group col-sm-5">
@@ -48,7 +48,7 @@
   <form id="f_ap0_setup">
     <div class="text-white">
       <h4>Setup Access Point Interface</h4>
-      <p>This access point (ie. ap0) is used to broadcast the network for your Picobrew devices to connect to.</p>
+      <p>This access point (ie. interface ap0 on raspberrypi setups) is used to broadcast the network for your Picobrew devices to connect to.</p>
     </div>
     <div class="form-row">
       <div class="form-group col-sm-5">
@@ -67,6 +67,32 @@
         </small>
         <br/>
         <button class="w-75 btn btn-sm btn-secondary btn-block" type="button" id="b_save_ap0_setup">Save</button>
+      </div>
+    </div>
+  </form>
+  {% endif %}
+
+  {% if hostname %}
+  <br/>
+  <hr/>
+  <br/>
+  <form id="f_hostname_setup">
+    <div class="text-white">
+      <h4>Setup Hostname</h4>
+      <p>If you want to have a custom hostname for your server you can customize this below. This is useful if you have multiple raspberrypi devices and/or want to have a more memoriable or meaningful hostname for your configuration.</p>
+    </div>
+    <div class="form-row">
+      <div class="form-group col-sm-5">
+        <input type="text" class="form-control form-control-sm" id="hostname" value="{{hostname}}" placeholder="Hostname">
+        <small id="hostname_HelpBlock" class="form-text text-muted">
+          Name of device on the network
+        </small>
+        <br/>
+        <button class="w-75 btn btn-sm btn-secondary btn-block" type="button" id="b_save_hostname_setup">Save</button>
+        <small id="b_save_hostname_setup_HelpBlock" class="form-text text-warning">
+          Changing hostname will restart the RaspberryPi and will be unavailable for a small period of time.
+        </small>
+        
       </div>
     </div>
   </form>

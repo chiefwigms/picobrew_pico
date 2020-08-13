@@ -222,6 +222,7 @@ cat > /certs/req.cnf <<EOF
 keyUsage = critical, digitalSignature, keyAgreement
 extendedKeyUsage = serverAuth
 subjectAltName = @alt_names
+subjectAltName = @alt_names
 [alt_names]
 DNS.1 = picobrew.com
 DNS.2 = www.picobrew.com
