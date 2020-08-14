@@ -376,8 +376,8 @@ def setup():
             subprocess.check_output(
                 """sed -i -e 's/{}/{}/' /etc/hosts""".format(hostname(), new_hostname), shell=True)
 
-            # restart
-            # os.system('shutdown -r now')
+            # restart for new host settings to take effect
+            os.system('shutdown -r now')
 
             return '', 204
         elif 'interface' in payload:

@@ -72,7 +72,7 @@ $(document).ready(function(){
             contentType: "application/json; charset=UTF-8",
             success: function(data) {
                 showAlert("Success!", "success");
-                setTimeout(function () { window.location.href = "/";}, 2000);
+                setTimeout(function () { window.location.href = `//${payload.hostname}/`;}, 2000);
             },
             error: function(request, status, error) {
                 showAlert("Error: " + request.responseText, "danger");
