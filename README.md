@@ -27,9 +27,23 @@ Allows for full control of the PicoBrew Pico S/C/Pro & Zymatic models.  Shout ou
 
 ## Installation
 
-Refer to the [Releases Page](https://github.com/chiefwigms/picobrew_pico/releases) for steps to get up and running with your own Pico server. 
+Refer to the [Releases Page](https://github.com/chiefwigms/picobrew_pico/releases) for steps to get up and running with your own Pico server with a Raspberry Pi device (recommended models include: Raspberry Pi Zero-W or Raspberry Pi 4).
 
-The remainder of this guide oriented around creating a development environment 
+By default the hostname of the RaspberryPi device will be "raspberrypi" and is discoverable on your local network along with the "samba" (or network shares) for sessions and recipes. You can use these to view the files created by the server during interactions with the user and connected devices.
+
+### Debugging Issues
+
+There are two primary ways to help get additional details of errors that occur.
+
+First is to see what is happening in your local browser. Most modern browsers have "development tools" that are included (in Chrome "Settings > More Tools > Developer Tools") and from these there are usually a console log as well as a "Network" tab that shows all the network requests made by the existing experience/page.
+
+Second is to view the application logs from the included python server over an ssh or local keyboard+screen session.
+
+```
+sudo systemctl status rc.local -n <num-log-lines>
+```
+
+The remainder of this guide is oriented around creating a development environment for contributors.
 
 # Development Setup
 

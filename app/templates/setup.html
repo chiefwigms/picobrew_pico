@@ -2,6 +2,10 @@
 {% block content %}
   <script src="static/js/setup.js"></script>
   <form id="f_wireless_setup">
+    <div class="text-white">
+      <h4>Setup Wireless Interface</h4>
+      <p>The upstream wireless interface (ie. interface wlan0 on raspberrypi setups) is used for connecting to you local home network. Some features included may be negatively impacted by not having a value upstream wireless connection to your home network and public internet. Specific features that will be broken include, but aren't limited to: importing from picobrew.com and updating source code.</p>
+    </div>
     <div class="form-row">
       <div class="form-group col-sm-5">
         <select id="wifi_selector" class="form-control form-control-sm">
@@ -25,10 +29,10 @@
         <br/>
         <input type="password" class="form-control form-control-sm" id="wifi_credentials" value="{{wireless_credentials.psk}}" placeholder="Credentials (WPA-PSK)">
         <span class="form-inline text-white float-right">
-          <input type="checkbox" id="show-password" onclick="showPassword()">
-          <label for="show-password" style="padding-left: 0.4em;">Show Password</label>
+          <input type="checkbox" id="show-wifi-password" onclick="showPassword('wifi_credentials')">
+          <label for="show-wifi-password" style="padding-left: 0.4em;">Show Password</label>
         </span>
-        <small id="wifi_ssid_HelpBlock" class="form-text text-muted">
+        <small id="wifi_credentials_HelpBlock" class="form-text text-muted">
           Credentials for Wi-Fi (WPA-PSK)
         </small>
         <br/>
@@ -36,6 +40,63 @@
       </div>
     </div>
   </form>
+
+  {% if ap0 %}
+  <br/>
+  <hr/>
+  <br/>
+  <form id="f_ap0_setup">
+    <div class="text-white">
+      <h4>Setup Access Point Interface</h4>
+      <p>This access point (ie. interface ap0 on raspberrypi setups) is used to broadcast the network for your Picobrew devices to connect to.</p>
+    </div>
+    <div class="form-row">
+      <div class="form-group col-sm-5">
+        <input type="text" class="form-control form-control-sm" id="ap0_ssid" value="{{ap0.ssid}}" placeholder="SSID">
+        <small id="wifi_ssid_HelpBlock" class="form-text text-muted">
+          Name of AP network
+        </small>
+        <br/>
+        <input type="password" class="form-control form-control-sm" id="ap0_credentials" value="{{ap0.psk}}" placeholder="Credentials (WPA-PSK)">
+        <span class="form-inline text-white float-right">
+          <input type="checkbox" id="show-ap0-password" onclick="showPassword('ap0_credentials')">
+          <label for="show-ap0-password" style="padding-left: 0.4em;">Show Password</label>
+        </span>
+        <small id="ap0_credentials_HelpBlock" class="form-text text-muted">
+          Credentials for AP (WPA-PSK)
+        </small>
+        <br/>
+        <button class="w-75 btn btn-sm btn-secondary btn-block" type="button" id="b_save_ap0_setup">Save</button>
+      </div>
+    </div>
+  </form>
+  {% endif %}
+
+  {% if hostname %}
+  <br/>
+  <hr/>
+  <br/>
+  <form id="f_hostname_setup">
+    <div class="text-white">
+      <h4>Setup Hostname</h4>
+      <p>If you want to have a custom hostname for your server you can customize this below. This is useful if you have multiple raspberrypi devices and/or want to have a more memoriable or meaningful hostname for your configuration.</p>
+    </div>
+    <div class="form-row">
+      <div class="form-group col-sm-5">
+        <input type="text" class="form-control form-control-sm" id="hostname" value="{{hostname}}" placeholder="Hostname">
+        <small id="hostname_HelpBlock" class="form-text text-muted">
+          Name of device on the network
+        </small>
+        <br/>
+        <button class="w-75 btn btn-sm btn-secondary btn-block" type="button" id="b_save_hostname_setup">Save</button>
+        <small id="b_save_hostname_setup_HelpBlock" class="form-text text-warning">
+          Changing hostname will restart the RaspberryPi and will be unavailable for a small period of time.
+        </small>
+        
+      </div>
+    </div>
+  </form>
+  {% endif %}
   
   <br/>
   <div class="table-sm table-striped table-bordered table-light" style="width: 830px;" id="t_configuration"></div>
