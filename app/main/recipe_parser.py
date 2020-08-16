@@ -91,7 +91,7 @@ def ZymaticRecipeImport(recipes):
             s['location'] = next(k for k, v in ZYMATIC_LOCATION.items() if v == values[3])
             s['drain_time'] = values[4]
             r['steps'].append(s)
-        filename = zseries_recipe_path().joinpath('{}.json'.format(r['name'].replace(' ', '_')))
+        filename = zymatic_recipe_path().joinpath('{}.json'.format(r['name'].replace(' ', '_')))
         if not filename.exists():
             with open(filename, "w") as file:
                 json.dump(r, file, indent=4, sort_keys=True)
