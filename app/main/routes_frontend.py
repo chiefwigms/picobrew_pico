@@ -14,6 +14,7 @@ from threading import Thread
 from time import sleep
 
 from . import main
+from .recipe_import import import_recipes
 from .recipe_parser import PicoBrewRecipe, PicoBrewRecipeImport, ZymaticRecipe, ZymaticRecipeImport, ZSeriesRecipe
 from .session_parser import load_iSpindel_session, get_iSpindel_graph_data, load_ferm_session, get_ferm_graph_data, get_brew_graph_data, load_brew_session, active_brew_sessions, active_ferm_sessions, active_iSpindel_sessions
 from .config import base_path, zymatic_recipe_path, zseries_recipe_path, pico_recipe_path, ferm_archive_sessions_path, brew_archive_sessions_path, iSpindel_archive_sessions_path, MachineType
@@ -223,8 +224,6 @@ def download_recipe(machine_type, rid, name):
     return 'Download Recipe: Failed to find recipe id \"' + id + '\"', 418
 
 
-
-
 @main.route('/delete_zseries_recipe', methods=['GET', 'POST'])
 def delete_zseries_recipe():
     recipe_id = request.get_json()
@@ -235,6 +234,20 @@ def delete_zseries_recipe():
             os.remove(filename)
             return '', 204
     return 'Delete Recipe: Failed to find recipe id \"' + recipe_id + '\"', 418
+
+
+@main.route('/import_zseries_recipe', methods=['GET', 'POST'])
+def import_zseries_recipe():
+    if request.method == 'POST':
+        current_app.logger.debug('Importing Z recipes')
+        data = request.get_json()
+        uid = data['uid']
+        if import_recipes(uid, None, MachineType.ZSERIES):
+            return '', 204
+        else:
+            return 'failed to import Z recipes', 500
+    else:
+        return render_template('import_zymatic_recipe.html')
 
 
 def load_zseries_recipes():

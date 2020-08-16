@@ -1,9 +1,10 @@
 import json
 import uuid
 
-from .config import zymatic_recipe_path, pico_recipe_path
+from .config import zymatic_recipe_path, pico_recipe_path, zseries_recipe_path
 from .model import PICO_LOCATION, ZYMATIC_LOCATION, ZSERIES_LOCATION
 
+from flask import current_app
 
 class ZymaticRecipeStep():
     def __init__(self):
@@ -90,7 +91,7 @@ def ZymaticRecipeImport(recipes):
             s['location'] = next(k for k, v in ZYMATIC_LOCATION.items() if v == values[3])
             s['drain_time'] = int(values[4])
             r['steps'].append(s)
-        filename = zymatic_recipe_path().joinpath('{}.json'.format(r['name'].replace(' ', '_')))
+        filename = zseries_recipe_path().joinpath('{}.json'.format(r['name'].replace(' ', '_')))
         if not filename.exists():
             with open(filename, "w") as file:
                 json.dump(r, file, indent=4, sort_keys=True)
@@ -174,6 +175,29 @@ class ZSeriesRecipe():
         del updated_recipe['type_code']
         with open(file, 'w') as f:
             json.dump(updated_recipe, f, indent=4, sort_keys=True)
+
+def ZSeriesRecipeImport(recipe):
+    r = {}
+    r['name'] = recipe['Name']
+    name = recipe['Name']
+    current_app.logger.debug(f'DEBUG: saving recipe {name}')
+    r['clean'] = False
+    r['id'] = recipe['ID']
+    r['start_water'] = recipe['StartWater']
+    r['steps'] = []
+    for step in recipe['Steps']:
+        s = {}
+        s['name'] = step['Name']
+        s['temperature'] = step['Temp']
+        s['step_time'] = step['Time']
+        s['location'] = step['Location']
+        s['drain_time'] = step['Drain']
+        r['steps'].append(s)
+    filename = zseries_recipe_path().joinpath('{}.json'.format(r['name'].replace(' ', '_')))
+    if not filename.exists():
+        with open(filename, "w") as file:
+            json.dump(r, file, indent=4, sort_keys=True)
+
 
 
 class PicoBrewRecipeStep():
