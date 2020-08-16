@@ -17,7 +17,8 @@ from . import main
 from .recipe_parser import PicoBrewRecipe, PicoBrewRecipeImport, ZymaticRecipe, ZymaticRecipeImport, ZSeriesRecipe
 from .session_parser import load_ferm_session, get_ferm_graph_data, get_brew_graph_data, load_brew_session, active_brew_sessions, active_ferm_sessions
 from .config import base_path, zymatic_recipe_path, zseries_recipe_path, pico_recipe_path, ferm_archive_sessions_path, brew_archive_sessions_path, MachineType
-
+from .recipe_import import import_recipes
+from .config import MachineType
 
 file_glob_pattern = "[!._]*.json"
 
@@ -203,6 +204,19 @@ def delete_zseries_recipe():
             os.remove(filename)
             return '', 204
     return 'Delete Recipe: Failed to find recipe id \"' + recipe_id + '\"', 418
+
+
+@main.route('/import_zseries_recipe', methods=['GET', 'POST'])
+def import_zseries_recipe():
+    if request.method == 'POST':
+        current_app.logger.debug('Importing Z recipes')
+        data = request.get_json()
+        guid = data['guid']
+        import_recipes(guid, '', MachineType.ZSERIES)
+        current_app.logger.debug('DEBUG: did z import')
+        return '', 204
+    else:
+        return render_template('import_zymatic_recipe.html')
 
 
 def load_zseries_recipes():
