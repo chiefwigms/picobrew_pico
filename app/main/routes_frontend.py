@@ -212,9 +212,12 @@ def import_zseries_recipe():
         current_app.logger.debug('Importing Z recipes')
         data = request.get_json()
         guid = data['guid']
-        import_recipes(guid, '', MachineType.ZSERIES)
+        ok = import_recipes(guid, '', MachineType.ZSERIES)
         current_app.logger.debug('DEBUG: did z import')
-        return '', 204
+        if ok:
+            return '', 204
+        else:
+            return '', 500
     else:
         return render_template('import_zymatic_recipe.html')
 
