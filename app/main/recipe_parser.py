@@ -43,10 +43,10 @@ class ZymaticRecipe():
             for recipe_step in recipe['steps']:
                 step = ZymaticRecipeStep()
                 step.name = recipe_step.get('name', 'Empty Step') or 'Empty Step'
-                step.temperature = recipe_step.get('temperature', 70) or 70
-                step.step_time = recipe_step.get('step_time', 0) or 0
+                step.temperature = 70 if 'temperature' not in recipe_step else int(recipe_step['temperature'])
+                step.step_time = 0 if 'step_time' not in recipe_step else int(recipe_step['step_time'])
                 step.location = recipe_step.get('location', 'PassThru') or 'PassThru'
-                step.drain_time = recipe_step.get('drain_time', 0) or 0
+                step.drain_time = 0 if 'drain_time' not in recipe_step else int(recipe_step['drain_time'])
                 self.steps.append(step)
 
     def serialize(self):
@@ -62,10 +62,10 @@ class ZymaticRecipe():
         for s in steps:
             step = ZymaticRecipeStep()
             step.name = s.get('name', 'Empty Step') or 'Empty Step'
-            step.temperature = s.get('temperature', 70) or 70
-            step.step_time = s.get('step_time', 0) or 0
+            step.temperature = 70 if 'temperature' not in s else int(s['temperature'])
+            step.step_time = 0 if 'step_time' not in s else int(s['step_time'])
             step.location = s.get('location', 'PassThru') or 'PassThru'
-            step.drain_time = s.get('drain_time', 0) or 0
+            step.drain_time = 0 if 'drain_time' not in s else int(s['drain_time'])
             self.steps.append(step)
         updated_recipe = json.loads(json.dumps(self, default=lambda r: r.__dict__))
         del updated_recipe['name_']
@@ -85,10 +85,10 @@ def ZymaticRecipeImport(recipes):
             values = step.split(',')
             s = {}
             s['name'] = values[0]
-            s['temperature'] = values[1]
-            s['step_time'] = values[2]
+            s['temperature'] = int(values[1])
+            s['step_time'] = int(values[2])
             s['location'] = next(k for k, v in ZYMATIC_LOCATION.items() if v == values[3])
-            s['drain_time'] = values[4]
+            s['drain_time'] = int(values[4])
             r['steps'].append(s)
         filename = zymatic_recipe_path().joinpath('{}.json'.format(r['name'].replace(' ', '_')))
         if not filename.exists():
@@ -138,10 +138,10 @@ class ZSeriesRecipe():
             for recipe_step in recipe['steps']:
                 step = ZSeriesRecipeStep()
                 step.name = recipe_step.get('name', 'Empty Step') or 'Empty Step'
-                step.temperature = recipe_step.get('temperature', 70) or 70
-                step.step_time = recipe_step.get('step_time', 0) or 0
+                step.temperature = 70 if 'temperature' not in recipe_step else int(recipe_step['temperature'])
+                step.step_time = 0 if 'step_time' not in recipe_step else int(recipe_step['step_time'])
                 step.location = recipe_step.get('location', 'PassThru') or 'PassThru'
-                step.drain_time = recipe_step.get('drain_time', 0) or 0
+                step.drain_time = 0 if 'drain_time' not in recipe_step else int(recipe_step['drain_time'])
                 self.steps.append(step)
 
     def serialize(self):
@@ -159,10 +159,10 @@ class ZSeriesRecipe():
         for s in steps:
             step = ZSeriesRecipeStep()
             step.name = s.get('name', 'Empty Step') or 'Empty Step'
-            step.temperature = s.get('temperature', 70) or 70
-            step.step_time = s.get('step_time', 0) or 0
+            step.temperature = 70 if 'temperature' not in s else int(s['temperature'])
+            step.step_time = 0 if 'step_time' not in s else int(s['step_time'])
             step.location = s.get('location', 'PassThru') or 'PassThru'
-            step.drain_time = s.get('drain_time', 0) or 0
+            step.drain_time = 0 if 'drain_time' not in s else int(s['drain_time'])
             self.steps.append(step)
         updated_recipe = json.loads(json.dumps(self, default=lambda r: r.__dict__))
         del updated_recipe['name_']
@@ -249,9 +249,9 @@ class PicoBrewRecipe():
                 step = PicoBrewRecipeStep()
                 step.name = recipe_step.get('name', 'Empty Step') or 'Empty Step'
                 step.location = recipe_step.get('location', 'PassThru') or 'PassThru'
-                step.temperature = recipe_step.get('temperature', 70) or 70
-                step.step_time = recipe_step.get('step_time', 0) or 0
-                step.drain_time = recipe_step.get('drain_time', 0) or 0
+                step.temperature = 70 if 'temperature' not in recipe_step else int(recipe_step['temperature'])
+                step.step_time = 0 if 'step_time' not in recipe_step else int(recipe_step['step_time'])
+                step.drain_time = 0 if 'drain_time' not in recipe_step else int(recipe_step['drain_time'])
                 self.steps.append(step)
 
     def serialize(self):
@@ -272,9 +272,9 @@ class PicoBrewRecipe():
             step = PicoBrewRecipeStep()
             step.name = s.get('name', 'Empty Step') or 'Empty Step'
             step.location = s.get('location', 'PassThru') or 'PassThru'
-            step.temperature = s.get('temperature', 70) or 70
-            step.step_time = s.get('step_time', 0) or 0
-            step.drain_time = s.get('drain_time', 0) or 0
+            step.temperature = 70 if 'temperature' not in s else int(s['temperature'])
+            step.step_time = 0 if 'step_time' not in s else int(s['step_time'])
+            step.drain_time = 0 if 'drain_time' not in s else int(s['drain_time'])
             self.steps.append(step)
         updated_recipe = json.loads(json.dumps(self, default=lambda r: r.__dict__))
         del updated_recipe['name_']
@@ -298,9 +298,9 @@ def PicoBrewRecipeImport(recipe, rfid=None):
     r['steps'] = []
     for step in [steps[i:i + 5] for i in range(0, len(steps), 5)]:
         s = {}
-        s['temperature'] = step[0]
-        s['step_time'] = step[1]
-        s['drain_time'] = step[2]
+        s['temperature'] = int(step[0])
+        s['step_time'] = int(step[1])
+        s['drain_time'] = int(step[2])
         s['location'] = next(k for k, v in PICO_LOCATION.items() if v == step[3])
         s['name'] = step[4]
         r['steps'].append(s)

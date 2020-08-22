@@ -7,16 +7,16 @@ var minusIcon = function(cell, formatterParams){
 var editCheck = function(cell){
     return !(["Preparing To Brew", "Heating"].includes(cell.getRow().getCell("name").getValue()));
 }
-var default_data = [{name:"Preparing To Brew", location:"Prime", temperature:"0", step_time:"3", drain_time:"0"},
-                    {name:"Heating", location:"PassThru", temperature:"110", step_time:"0", drain_time:"0"},
-                    {name:"Dough In", location:"Mash", temperature:"110", step_time:"7", drain_time:"0"},
-                    {name:"Mash 1", location:"Mash", temperature:"148", step_time:"45", drain_time:"0"},
-                    {name:"Mash 2", location:"Mash", temperature:"156", step_time:"0", drain_time:"0"},
-                    {name:"Mash Out", location:"Mash", temperature:"178", step_time:"7", drain_time:"2"},
-                    {name:"Hops 1", location:"Adjunct1", temperature:"202", step_time:"10", drain_time:"0"},
-                    {name:"Hops 2", location:"Adjunct2", temperature:"202", step_time:"8", drain_time:"0"},
-                    {name:"Hops 3", location:"Adjunct3", temperature:"202", step_time:"8", drain_time:"0"},
-                    {name:"Hops 4", location:"Adjunct4", temperature:"202", step_time:"8", drain_time:"5"},
+var default_data = [{name:"Preparing To Brew", location:"Prime", temperature:0, step_time:3, drain_time:0},
+                    {name:"Heating", location:"PassThru", temperature:110, step_time:0, drain_time:0},
+                    {name:"Dough In", location:"Mash", temperature:110, step_time:7, drain_time:0},
+                    {name:"Mash 1", location:"Mash", temperature:148, step_time:45, drain_time:0},
+                    {name:"Mash 2", location:"Mash", temperature:156, step_time:0, drain_time:0},
+                    {name:"Mash Out", location:"Mash", temperature:178, step_time:7, drain_time:2},
+                    {name:"Hops 1", location:"Adjunct1", temperature:202, step_time:10, drain_time:0},
+                    {name:"Hops 2", location:"Adjunct2", temperature:202, step_time:8, drain_time:0},
+                    {name:"Hops 3", location:"Adjunct3", temperature:202, step_time:8, drain_time:0},
+                    {name:"Hops 4", location:"Adjunct4", temperature:202, step_time:8, drain_time:5},
                     ];
 var recipe_table = {
     movableRows:true,
