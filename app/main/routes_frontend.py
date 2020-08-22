@@ -211,8 +211,8 @@ def import_zseries_recipe():
     if request.method == 'POST':
         current_app.logger.debug('Importing Z recipes')
         data = request.get_json()
-        guid = data['guid']
-        ok = import_recipes(guid, '', MachineType.ZSERIES)
+        machid = data['machid']
+        ok = import_recipes(machid, None, MachineType.ZSERIES)
         current_app.logger.debug('DEBUG: did z import')
         if ok:
             return '', 204
