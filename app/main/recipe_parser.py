@@ -3,7 +3,6 @@ import uuid
 
 from .config import zymatic_recipe_path, pico_recipe_path, zseries_recipe_path
 from .model import PICO_LOCATION, ZYMATIC_LOCATION, ZSERIES_LOCATION
-
 from flask import current_app
 
 class ZymaticRecipeStep():
@@ -193,6 +192,13 @@ def ZSeriesRecipeImport(recipe):
         s['location'] = step['Location']
         s['drain_time'] = step['Drain']
         r['steps'].append(s)
+    # This will cause a circular import
+    # Perhaps re-factor "live state" out into its own module?
+    #existing = load_zseries_recipes()
+    #conflict = [old.id for old in existing if old.id == r['id']]
+    #if conflict:
+    #    current_app.logger.error(f'Conflicting Z-series recipe IDs: {conflicts}')
+    #    return None
     filename = zseries_recipe_path().joinpath('{}.json'.format(r['name'].replace(' ', '_')))
     if not filename.exists():
         with open(filename, "w") as file:
