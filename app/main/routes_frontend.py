@@ -436,13 +436,13 @@ def setup():
                     # set ssid in hostapd file
                     ssid = payload['ssid']
                     subprocess.check_output(
-                        """sed -i -e 's/ssid=.*/ssid="{}"/' {}""".format(ssid, hostapd_file), shell=True)
+                        """sed -i -e 's/ssid=.*/ssid={}/' {}""".format(ssid, hostapd_file), shell=True)
                     
                     # set credentials (if set by user) in hostapd file
                     if 'password' in payload and payload['password']:
                         psk = payload['password']
                         subprocess.check_output(
-                            """sed -i -e 's/wpa_passphrase=.*/wpa_passphrase="{}"/' {}""".format(psk, hostapd_file), shell=True)
+                            """sed -i -e 's/wpa_passphrase=.*/wpa_passphrase={}/' {}""".format(psk, hostapd_file), shell=True)
 
                     def restart_ap0_interface():
                         import subprocess
