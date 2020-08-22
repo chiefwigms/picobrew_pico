@@ -4,3 +4,4 @@ webargs==6.0.0
 Flask==1.1.2
 PyYAML==5.3.1
 requests==2.23.0
+pytest-mock=3.3.0
