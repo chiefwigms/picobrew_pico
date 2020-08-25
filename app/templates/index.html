@@ -6,6 +6,7 @@
   <script src="static/js/highcharts/exporting.js"></script>
   <script src="static/js/highcharts/dark-unica.js"></script>
   <script src="static/js/socketio/socket.io.slim.js"></script>
+  <script>var socket = io.connect('//' + document.domain + ':' + location.port);</script>
   <div id="accordion">
     {% for brew_session in brew_sessions %}
     <div class="card bg-dark text-white-50">
