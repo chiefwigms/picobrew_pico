@@ -1,6 +1,7 @@
 import json
+from datetime import datetime
 
-from .config import brew_active_sessions_path
+from .config import brew_active_sessions_path, display_temperature
 from .model import PicoBrewSession
 
 file_glob_pattern = "[!._]*.json"
@@ -32,9 +33,10 @@ def load_brew_session(file):
     session_type = None
     if len(info) > 4:
         session_type = int(info[4])
-
+    #Pretty print the brew date
+    date_time_obj = datetime.strptime(info[0], '%Y%m%d_%H%M%S')
     session = {
-        'date': info[0],
+        'date': date_time_obj.strftime("%Y-%m-%d, %H:%M:%S"),
         'name': name,
         'uid': info[1],
         'session': info[2],
@@ -66,8 +68,8 @@ def get_brew_graph_data(chart_id, session_name, session_step, session_data, is_p
     events = []
     for data in session_data:
         if all(k in data for k in ('therm', 'wort')):  # Pico and ZSeries
-            wort_data.append([data['time'], int(data['wort'])])
-            block_data.append([data['time'], int(data['therm'])])
+            wort_data.append([data['time'], calcDisplayTemp(int(data['wort']))])
+            block_data.append([data['time'], calcDisplayTemp(int(data['therm']))])
 
         if all(k in data for k in ('target', 'drain', 'ambient', 'position')):  # ZSeries
             target_data.append([data['time'], int(data['target'])])
@@ -88,11 +90,17 @@ def get_brew_graph_data(chart_id, session_name, session_step, session_data, is_p
                            'label': {'text': data['event'], 'style': {'color': 'white', 'fontWeight': 'bold'},
                                      'verticalAlign': 'top', 'x': -15, 'y': 0}})
 
+    if display_temperature() == 'C':
+        displayTempLabel = "Temperature (C)"
+    else:
+        displayTempLabel = "Temperature (F)"
+        
     graph_data = {
         'chart_id': chart_id,
         'title': {'text': session_name},
         'subtitle': {'text': session_step},
-        'xaplotlines': events
+        'xaplotlines': events,
+        'label': displayTempLabel #send the label for Y axis
     }
     if len(ambient_data) > 0:
         graph_data.update({'series': [
@@ -193,3 +201,9 @@ def restore_active_sessions():
             session.is_pico = brew_session['is_pico']
             session.data = brew_session['data']
             active_brew_sessions[brew_session['uid']] = session
+
+def calcDisplayTemp(f_value):
+    if display_temperature() == 'C':
+        return round( (f_value - 32) / 1.8 )
+    else: 
+        return f_value

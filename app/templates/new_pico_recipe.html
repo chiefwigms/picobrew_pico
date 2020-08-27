@@ -15,7 +15,15 @@
     </div>
   </form>
   <div class="table-sm table-striped table-bordered table-light" style="width: 830px;" id="t_new_recipe"></div>
-  <script>var table = new Tabulator("#t_new_recipe", recipe_table); table.setData(default_data);</script>
+  <script>
+  {% if display_temp == "C"%}
+        var table = new Tabulator("#t_new_recipe", recipe_table_c); 
+         table.setData(default_data_c);
+  {% else %}
+        var table = new Tabulator("#t_new_recipe", recipe_table); 
+         table.setData(default_data);
+  {% endif %}
+  </script>
   <div><button class="w-75 btn btn-sm btn-secondary btn-block" type="button" id="b_new_recipe">Save</button></div>
   <div id=alert class='hide'></div>
 {% endblock %}

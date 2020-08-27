@@ -16,7 +16,7 @@ from time import sleep
 from . import main
 from .recipe_parser import PicoBrewRecipe, PicoBrewRecipeImport, ZymaticRecipe, ZymaticRecipeImport, ZSeriesRecipe
 from .session_parser import load_ferm_session, get_ferm_graph_data, get_brew_graph_data, load_brew_session, active_brew_sessions, active_ferm_sessions
-from .config import base_path, zymatic_recipe_path, zseries_recipe_path, pico_recipe_path, ferm_archive_sessions_path, brew_archive_sessions_path, MachineType
+from .config import base_path, zymatic_recipe_path, zseries_recipe_path, pico_recipe_path, ferm_archive_sessions_path, brew_archive_sessions_path, MachineType, display_temperature
 
 
 file_glob_pattern = "[!._]*.json"
@@ -59,7 +59,7 @@ def shutdown_system():
 
 @main.route('/brew_history')
 def brew_history():
-    return render_template('brew_history.html', sessions=load_brew_sessions(), invalid=get_invalid_sessions('brew'))
+    return render_template('brew_history.html', sessions=load_brew_sessions(), invalid=get_invalid_sessions('brew'), displayTemperature=display_temperature())
 
 
 @main.route('/ferm_history')
@@ -270,7 +270,11 @@ def _pico_recipes():
     global pico_recipes
     pico_recipes = load_pico_recipes()
     recipes_dict = [json.loads(json.dumps(recipe, default=lambda r: r.__dict__)) for recipe in pico_recipes]
-    return render_template('pico_recipes.html', recipes=recipes_dict, invalid=invalid_recipes.get(MachineType.PICOBREW, set()))
+    if display_temperature() == 'C':
+        for recipe in recipes_dict:
+            for step in recipe['steps']:
+                step['temperature'] = calcDisplayTemp(step['temperature'])              
+    return render_template('pico_recipes.html', recipes=recipes_dict, invalid=invalid_recipes.get(MachineType.PICOBREW, set()), display_temp=display_temperature())
 
 
 @main.route('/new_pico_recipe', methods=['GET', 'POST'])
@@ -280,6 +284,10 @@ def new_pico_recipe():
         recipe['id'] = uuid.uuid4().hex[:14]
         recipe[
             'image'] = '000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000fffe000ffc01ffffc0000000000000003fff0003f601ff7ff0000000000000000fe7c00dff003de7f8000800030000000ff3e000ff801ff7f80078001fe000000dfbe000ff801feff80070001fe0000009c37000de000dffc0007803ffe0000021c070001c000cbf80007803ffe000000dcbf800dc0002ff0000780ffff000000fc9f800fc0003fe00007a3ffff800003fc1f800fc0000dc00007ffffff000003fc3f801dc0000fc00007f1f8bf000002bcb7800dc0000dc00007f0f9fffc00003c278001c00021c00007f079ff0600023c0f8021c00021c00007fe10fe0200003c1f8001c00021c00007e000ff00000c1c3f00c1c000c1c00007e080ff00000000fe0080600000600007e010ff00000ffffc00fff000fff00007e001ff00000ffff800fff800fff80007e001ff000007ffe0007ff8003ff80007f000fe00000000000000000000000007f001fe00fffe03fff003fffcfffbff87f001fe001fffc0ffff03fffcffffffc7e0007e00cfff633c3f807e3e1cfdede7e0017e006fffb13f9fc03f9f3dfdefe7e0017e000ffff8bfefc03fdf3cffe7e7e0017e0007eef8b7ffe037df1cfdf787f0017e0001e6bc87a7e0073f18f8ff07f0017e0005cc3c841bf02fbf1aefff07f8dffe02070d7c3c3ff030df1e4ece07fdffff8c24067c303fe0ffe00e0e4e07fdffff003df778f79bc0ffe00f1f0e07fddffe010dff30bfcdf0afec0f1f0e07fc08ff7015fd38afedb82fce0f1e1e07fffffe0001e4388f21bc8f0f061e1c07fffffc0001e03c8f203c0f4f061e1c07e0017c0061f07f07003d078f063e1c07c0003e000000fe01987c000f033f1c03e0007c00ffffffffcfffffff03fff800ff9ff000fffffbffeffbffff03fbf800000000007fffe1ffe3f1ffff00f9f800000000001fff00ffc0c0fffe007070000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000'
+        if display_temperature() == 'C': #do conversion C to F
+            for step in recipe['steps']:
+                if step['temperature'] != 0:
+                    step['temperature'] = round(step['temperature'] * (9/5) + 32)
         filename = pico_recipe_path().joinpath('{}.json'.format(recipe['name'].replace(' ', '_')))
         if not filename.exists():
             with open(filename, "w") as file:
@@ -288,7 +296,7 @@ def new_pico_recipe():
         else:
             return 'Recipe Exists!', 418
     else:
-        return render_template('new_pico_recipe.html')
+        return render_template('new_pico_recipe.html', display_temp=display_temperature())
 
 
 @main.route('/import_pico_recipe', methods=['GET', 'POST'])
@@ -318,6 +326,10 @@ def import_pico_recipe():
 @main.route('/update_pico_recipe', methods=['POST'])
 def update_pico_recipe():
     update = request.get_json()
+    if display_temperature() == "C": #Convert C values to F
+        for step in update['steps']:
+            if step['temperature'] != 0:
+                step['temperature'] = round(step['temperature'] * (9/5) + 32)
     files = list(pico_recipe_path().glob(file_glob_pattern))
     for filename in files:
         recipe = load_pico_recipe(filename)
@@ -676,3 +688,13 @@ def increment_zseries_recipe_id():
             recipe_id = r.id
 
     return recipe_id + 1
+
+def calcDisplayTemp(f_value):
+    if display_temperature() == 'C':
+        if f_value == 0:
+            return 0
+        else:
+            #Convert F to C
+            return round( (f_value - 32) / 1.8 )
+    else: 
+        return f_value

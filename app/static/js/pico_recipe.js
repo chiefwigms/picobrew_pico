@@ -18,6 +18,17 @@ var default_data = [{name:"Preparing To Brew", location:"Prime", temperature:0, 
                     {name:"Hops 3", location:"Adjunct3", temperature:202, step_time:8, drain_time:0},
                     {name:"Hops 4", location:"Adjunct4", temperature:202, step_time:8, drain_time:5},
                     ];
+var default_data_c = [{name:"Preparing To Brew", location:"Prime", temperature:0, step_time:3, drain_time:0},
+                    {name:"Heating", location:"PassThru", temperature:43, step_time:0, drain_time:0},
+                    {name:"Dough In", location:"Mash", temperature:43, step_time:7, drain_time:0},
+                    {name:"Mash 1", location:"Mash", temperature:64, step_time:45, drain_time:0},
+                    {name:"Mash 2", location:"Mash", temperature:68, step_time:0, drain_time:0},
+                    {name:"Mash Out", location:"Mash", temperature:81, step_time:7, drain_time:2},
+                    {name:"Hops 1", location:"Adjunct1", temperature:94, step_time:10, drain_time:0},
+                    {name:"Hops 2", location:"Adjunct2", temperature:94, step_time:8, drain_time:0},
+                    {name:"Hops 3", location:"Adjunct3", temperature:94, step_time:8, drain_time:0},
+                    {name:"Hops 4", location:"Adjunct4", temperature:94, step_time:8, drain_time:5},
+                    ];
 var recipe_table = {
     movableRows:true,
     headerSort:false,
@@ -63,6 +74,64 @@ var recipe_table = {
         switch (column.getField()) {
             case "temperature":
                 tip = "[0 - 208]";
+                break;
+            case "step_time":
+                tip = "[0 - 180]";
+                break;
+            case "drain_time":
+                tip = "[0 - 10]";
+                break;
+            default:
+                break;
+        }
+        return tip;
+    },
+};
+var recipe_table_c = {
+    movableRows:true,
+    headerSort:false,
+    layout:"fitDataFill",
+    resizableColumns:false,
+    tooltipGenerationMode:"hover",
+    columns:[
+        {rowHandle:true, formatter:"handle", headerSort:false, frozen:true, width:50},
+        {title:"Step #", formatter:"rownum", hozAlign:"center", width:60},
+        {title:"Name", field:"name", width:200, tooltip:false, validator:["required", "string"], editable:editCheck, editor:"input"},
+        {title:"Location", field:"location", width:120, hozAlign:"center", tooltip:false, validator:["required", "string"], editable:editCheck, editor:"select", editorParams:{
+            values:[
+              //"Prime",
+                "Mash",
+                "PassThru",
+                "Adjunct1",
+                "Adjunct2",
+                "Adjunct3",
+                "Adjunct4",
+            ]
+        }},
+        {title:"Temp (°C)", field:"temperature", width:100, hozAlign:"center", validator:["required", "min:0", "max:98", "numeric"], editable:editCheck, editor:"number", editorParams:{
+            min:0,
+            max:208,
+        }},
+        {title:"Time (min)", field:"step_time", width:100, hozAlign:"center", validator:["required", "min:0", "max:180", "numeric"], editable:editCheck, editor:"number", editorParams:{
+            min:0,
+            max:180,
+        }},
+        {title:"Drain (min)", field:"drain_time", width:100, hozAlign:"center", validator:["required", "min:0", "max:10", "numeric"], editable:editCheck, editor:"number", editorParams:{
+            min:0,
+            max:10,
+        }},
+        {formatter:plusIcon, width:49, hozAlign:"center", cellClick:function(e, cell){
+            cell.getTable().addRow({}, false, cell.getRow());
+        }},
+        {formatter:minusIcon, width:49, hozAlign:"center", cellClick:function(e, cell){
+            cell.getRow().delete();
+        }},
+    ],
+    tooltips:function(column){
+        var tip = ""
+        switch (column.getField()) {
+            case "temperature":
+                tip = "[0 - 98]";
                 break;
             case "step_time":
                 tip = "[0 - 180]";

@@ -65,3 +65,10 @@ def ferm_active_sessions_path():
 
 def ferm_archive_sessions_path():
     return current_app.config['SESSIONS_PATH'].joinpath('ferm/archive')
+    
+#Display Temperature
+def display_temperature():
+    if 'temperature' in current_app.config['SERVER_CONFIG']:
+        return current_app.config['SERVER_CONFIG']['temperature']
+    else:
+        return 'F'
