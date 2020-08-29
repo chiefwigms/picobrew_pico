@@ -7,7 +7,7 @@ from webargs.flaskparser import use_args, FlaskParser
 
 from .. import socketio
 from . import main
-from .config import MachineType, brew_active_sessions_path, pico_firmware_path
+from .config import MachineType, brew_active_sessions_path, pico_firmware_path, display_temperature
 from .firmware import firmware_filename, minimum_firmware, firmware_upgrade_required
 from .model import PicoBrewSession, PICO_SESSION
 from .routes_frontend import get_pico_recipes
@@ -179,7 +179,7 @@ def process_log(args):
     active_brew_sessions[uid].step = args['step']
     active_brew_sessions[uid].data.append(session_data)
     graph_update = json.dumps({'time': session_data['time'],
-                               'data': [session_data['wort'], session_data['therm']],
+                               'data': [calcDisplayTemp(session_data['wort']), calcDisplayTemp(session_data['therm'])],
                                'session': active_brew_sessions[uid].name,
                                'step': active_brew_sessions[uid].step,
                                'event': event,
@@ -262,3 +262,9 @@ def cleanup_old_session(uid):
         active_brew_sessions[uid].file.seek(active_brew_sessions[uid].file.tell() - 1, os.SEEK_SET)  # Remove trailing , from last data set
         active_brew_sessions[uid].file.write('\n]')
         active_brew_sessions[uid].cleanup()
+
+def calcDisplayTemp(f_value):
+    if display_temperature() == 'C':
+        return round( (f_value - 32) / 1.8 )
+    else: 
+        return f_value
