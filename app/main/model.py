@@ -13,7 +13,7 @@ ZYMATIC_LOCATION = {
 }
 
 ZSERIES_LOCATION = {
-    'PassThrough': '0',
+    'PassThru': '0',
     'Mash': '1',
     'Adjunct1': '2',
     'Adjunct2': '3',

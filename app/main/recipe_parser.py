@@ -140,7 +140,9 @@ class ZSeriesRecipe():
                 step.name = recipe_step.get('name', 'Empty Step') or 'Empty Step'
                 step.temperature = 70 if 'temperature' not in recipe_step else int(recipe_step['temperature'])
                 step.step_time = 0 if 'step_time' not in recipe_step else int(recipe_step['step_time'])
-                step.location = recipe_step.get('location', 'PassThrough') or 'PassThrough'
+                step.location = recipe_step.get('location', 'PassThru') or 'PassThru'
+                if step.location == 'PassThrough':
+                    step.location = 'PassThru' 
                 step.drain_time = 0 if 'drain_time' not in recipe_step else int(recipe_step['drain_time'])
                 self.steps.append(step)
 
@@ -161,7 +163,9 @@ class ZSeriesRecipe():
             step.name = s.get('name', 'Empty Step') or 'Empty Step'
             step.temperature = 70 if 'temperature' not in s else int(s['temperature'])
             step.step_time = 0 if 'step_time' not in s else int(s['step_time'])
-            step.location = s.get('location', 'PassThrough') or 'PassThrough'
+            step.location = s.get('location', 'PassThru') or 'PassThru'
+            if step.location == 'PassThrough':
+                step.location = 'PassThru'
             step.drain_time = 0 if 'drain_time' not in s else int(s['drain_time'])
             self.steps.append(step)
         updated_recipe = json.loads(json.dumps(self, default=lambda r: r.__dict__))

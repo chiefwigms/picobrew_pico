@@ -5,7 +5,7 @@ var minusIcon = function (cell, formatterParams) {
     return "<i class='far fa-minus-square fa-lg'></i>";
 }
 // provide selector for default mash profiles (single infusion w/ mashout, single infusion w/o mashout, high efficiency multi-step, etc)
-var default_data = [{ name: "Heat Water", location: "PassThrough", temperature: 104, step_time: 0, drain_time: 0 },
+var default_data = [{ name: "Heat Water", location: "PassThru", temperature: 104, step_time: 0, drain_time: 0 },
                     { name: "Dough In", location: "Mash", temperature: 104, step_time: 20, drain_time: 4 },
                     { name: "Heat to Mash 1", location: "Mash", temperature: 145, step_time: 0, drain_time: 4 },
                     { name: "Mash 1", location: "Mash", temperature: 145, step_time: 40, drain_time: 4 },
@@ -13,16 +13,16 @@ var default_data = [{ name: "Heat Water", location: "PassThrough", temperature: 
                     { name: "Mash 2", location: "Mash", temperature: 161, step_time: 80, drain_time: 4 },
                     { name: "Heat to Mash Out", location: "Mash", temperature: 175, step_time: 0, drain_time: 4 },
                     { name: "Mash Out", location: "Mash", temperature: 175, step_time: 15, drain_time: 8 },
-                    { name: "Heat to Boil", location: "PassThrough", temperature: 207, step_time: 0, drain_time: 0 },
-                    { name: "Pre-hop Boil", location: "PassThrough", temperature: 207, step_time: 45, drain_time: 0 },
+                    { name: "Heat to Boil", location: "PassThru", temperature: 207, step_time: 0, drain_time: 0 },
+                    { name: "Pre-hop Boil", location: "PassThru", temperature: 207, step_time: 45, drain_time: 0 },
                     { name: "Hops 1", location: "Adjunct1", temperature: 207, step_time: 10, drain_time: 0 },
                     { name: "Hops 2", location: "Adjunct2", temperature: 207, step_time: 5, drain_time: 0 },
                     { name: "Hops 3", location: "Adjunct3", temperature: 207, step_time: 8, drain_time: 0 },
-                    { name: "Balance Temps", location: "PassThrough", temperature: 0, step_time: 1, drain_time: 8 },
-                    { name: "Cool to Whirlpool", location: "PassThrough", temperature: 175, step_time: 0, drain_time: 0 },
+                    { name: "Balance Temps", location: "PassThru", temperature: 0, step_time: 1, drain_time: 8 },
+                    { name: "Cool to Whirlpool", location: "PassThru", temperature: 175, step_time: 0, drain_time: 0 },
                     { name: "Whirlpool", location: "Adjunct4", temperature: 175, step_time: 20, drain_time: 5 },
                     { name: "Connect Chiller", location: "Pause", temperature: 0, step_time: 0, drain_time: 0 },
-                    { name: "Chill", location: "PassThrough", temperature: 66, step_time: 10, drain_time: 10 },
+                    { name: "Chill", location: "PassThru", temperature: 66, step_time: 10, drain_time: 10 },
                     ];
 var recipe_table = {
     movableRows: true,
@@ -37,7 +37,7 @@ var recipe_table = {
         {
             title: "Location", field: "location", width: 120, hozAlign: "center", tooltip: false, validator: ["required", "string"], editor: "select", editorParams: {
                 values: [
-                    "PassThrough",
+                    "PassThru",
                     "Mash",
                     "Adjunct1",
                     "Adjunct2",
