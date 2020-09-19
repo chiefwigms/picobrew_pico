@@ -1,3 +1,7 @@
+#options {
+  margin-bottom: 25px;
+  text-align: right;
+}
 .card-header > a {
   display: block;
   position: relative;
