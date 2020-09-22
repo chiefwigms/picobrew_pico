@@ -171,8 +171,8 @@ def process_log_session(args):
         uid = get_machine_by_session(session)
         temps = [int(temp[2:]) for temp in args['data'].split('|')]
         session_data = {'time': ((datetime.utcnow() - datetime(1970, 1, 1)).total_seconds() * 1000),
-                        'heat1': temps[0],
-                        'wort': temps[1],
+                        'wort': temps[0],
+                        'heat1': temps[1],
                         'board': temps[2],
                         'heat2': temps[3],
                         'step': active_brew_sessions[uid].step,
