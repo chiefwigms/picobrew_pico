@@ -111,7 +111,7 @@ def get_brew_graph_data(chart_id, session_name, session_step, session_data, is_p
         graph_data.update({'series': [
             {'name': 'Wort', 'data': wort_data},
             {'name': 'Heat Loop', 'data': heat1_data},
-	    {'name': 'Board', 'data': board_data},
+            {'name': 'Board', 'data': board_data},
             {'name': 'Heat Loop 2', 'data': heat2_data}
         ]})
     return graph_data
