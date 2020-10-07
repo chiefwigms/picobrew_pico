@@ -9,6 +9,9 @@
   <script>var socket = io.connect('//' + document.domain + ':' + location.port);</script>
   <div id="accordion">
     {% for brew_session in brew_sessions %}
+    <script>var graph_data={{brew_session.graph|tojson}};</script>
+    <script src="static/js/brew_graph_socketio.js"></script>
+    <script src="static/js/brew_table.js"></script>
     <div class="card bg-dark text-white-50">
       <h5 class="card-header" id="h_{{brew_session.graph.chart_id}}">
         <a class="collapsed" role="button" data-toggle="collapse" href="#c_{{brew_session.graph.chart_id}}" data-parent="#accordion" aria-expanded="false" aria-controls="c_{{brew_session.graph.chart_id}}">
@@ -18,10 +21,19 @@
       <div id="c_{{brew_session.graph.chart_id}}" class="collapse show" aria-labelledby="h_{{brew_session.graph.chart_id}}">
         <div class="card-body">
           <div id="{{brew_session.graph.chart_id}}" style="min-width: 320px; height: 400px; margin: 0 auto"></div>
-          <script>var graph_data={{brew_session.graph|tojson}};</script>
-          <script src="static/js/brew_graph_socketio.js"></script>
         </div>
       </div>
+    </div>
+    <div id="brew_session_data">
+      <table>
+        <tr id="table_head">
+          <th>Time</th>
+          <th>Wort</th>
+          <th>Heat Loop 1</th>
+          <th>Board</th>
+          <th>Heat Loop 2</th>
+        </tr>
+      </table>
     </div>
     {% endfor %}
   </div>
