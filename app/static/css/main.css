@@ -12,3 +12,6 @@
 .card-header > a[aria-expanded="true"]:after {
   content: "\f077"; /* fa-chevron-up */
 }
+.navbar-collapse {
+  align-items: start;
+}
