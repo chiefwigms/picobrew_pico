@@ -14,6 +14,7 @@
 }
 .navbar-collapse {
   align-items: flex-end;
+  flex-grow: unset;
 }
 .nav-link {
   text-align: right;
