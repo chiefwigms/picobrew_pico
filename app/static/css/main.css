@@ -12,3 +12,14 @@
 .card-header > a[aria-expanded="true"]:after {
   content: "\f077"; /* fa-chevron-up */
 }
+.navbar-collapse {
+  align-items: flex-end;
+  flex-grow: unset;
+}
+.nav-link {
+  text-align: right;
+}
+.navbar-nav .dropdown-menu {
+  padding: 0.5rem;
+  min-width: 0px;
+}
