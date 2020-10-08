@@ -13,5 +13,5 @@
   content: "\f077"; /* fa-chevron-up */
 }
 .navbar-collapse {
-  align-items: start;
+  align-items: flex-end;
 }
