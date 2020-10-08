@@ -15,3 +15,10 @@
 .navbar-collapse {
   align-items: flex-end;
 }
+.nav-link {
+  text-align: right;
+}
+.navbar-nav .dropdown-menu {
+  padding: 0.5rem;
+  min-width: 0px;
+}
