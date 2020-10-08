@@ -6,22 +6,40 @@ function convert_temperature(temp, units) {
     return (temp - 32) * 5/9  // convert fahrenheit to celcius
 }
 
+function temperature_editor(cell, onRendered, success, cancel, editorParams){
+    //cell - the cell component for the editable cell
+    //onRendered - function to call when the editor has been rendered
+    //success - function to call to pass the successfuly updated value to Tabulator
+    //cancel - function to call to abort the edit and return to a normal cell
+    //editorParams - params object passed into the editorParams column definition property
+
+    //create and style editor
+    var editor = document.createElement("input");
+
+    let selected_units = $("#unit_selector > label.active > input")[0].id;  
+
+    // Set value of editor to the current value of the cell (converting if display is C)
+    editor.value = selected_units == "imperial" ? cell.getValue() : convert_temperature(cell.getValue(), "metric");
+
+    //set focus on the select box when the editor is selected (timeout allows for editor to be added to DOM)
+    onRendered(function(){
+        editor.focus();
+        editor.style.css = "100%";
+    });
+
+    //when the value has been set, trigger the cell to update (converting to F if display is C)
+    function successFunc(){
+        success(selected_units == "imperial" ? editor.value : convert_temperature(editor.value, "imperial"));
+    }
+
+    editor.addEventListener("change", successFunc);
+    editor.addEventListener("blur", successFunc);
+
+    //return the editor element
+    return editor;
+}
+
 // TODO: expanding and then collapsing the values don't update (and can't force redraw?)
-
-// tabulator formatter, formats temperature to correct units for display based on selected units
-function mutate_temperature(value, formatterParams, onRendered) {
-    let selected_units = $("#unit_selector > label.active > input")[0].id;    
-    // convert if C as server stores F
-    return selected_units == "imperial" ? value : convert_temperature(value, selected_units);
-}
-
-// if set to c -> convert to F
-// if set to f -> keep
-function mutator_edit_temperature(value, formatterParams, onRendered) {
-    let selected_units = $("#unit_selector > label.active > input")[0].id;    
-    // convert to F if C as server stores F
-    return selected_units == "imperial" ? value : convert_temperature(value, "imperial");
-}
 
 // tabulator formatter, formats temperature to correct units for display based on selected units
 function format_temperature(cell, formatterParams, onRendered) {
@@ -48,25 +66,14 @@ function convert_units(units) {
 
     let temp_units = units == "metric" ? "C" : "F";
     
-    // <div class="tabulator-col" role="columnheader" aria-sort="none" tabulator-field="temperature" title="" style="min-width: 40px; width: 100px;">
-    //   <div class="tabulator-col-content">
-    //     <div class="tabulator-col-title">Temp (°F)</div>
-    //   </div>
-    // </div>
     let temp_header_ref = ".tabulator-col[tabulator-field='temperature'] > div.tabulator-col-content > div.tabulator-col-title";
     $(temp_header_ref).text("Temp (°" + temp_units + ")");
     
-    // <div class="tabulator-cell" role="gridcell" tabulator-field="temperature" tabindex="0" title="[0 - 208]" style="width: 100px; text-align: center; height: 29px;">104</div>
     let temp_cells_ref = ".tabulator-cell[tabulator-field='temperature']";
     $(temp_cells_ref).each(function(index, elem) {
         let current_temp = elem.textContent;
         elem.innerText = convert_temperature(current_temp, units);
     }); 
-    
-    // let re = new RegExp('\[(\d+)\ \-\ (\d)+\]');
-    // matches = re.
-    // temp_range = $(".tabulator-cell tabulator-field='temperature'").title;
-    // temp_range.
 }
 
 $(function() {

@@ -1,6 +1,9 @@
 {% extends "base.html" %}
 {% block content %}
+  <script src="static/js/convert_units.js"></script>
   <script src="static/js/pico_recipe.js"></script>
+  <script>var tables = {};</script>
+  {% include "units_selector.html" %}
   <form id="f_new_recipe">
     <div class="form-row">
       <div class="form-group col-sm-3">
@@ -15,7 +18,11 @@
     </div>
   </form>
   <div class="table-sm table-striped table-bordered table-light" style="width: 830px;" id="t_new_recipe"></div>
-  <script>var table = new Tabulator("#t_new_recipe", recipe_table); table.setData(default_data);</script>
+  <script>
+    var table = new Tabulator("#t_new_recipe", recipe_table);
+    table.setData(default_data);
+    tables["new_recipe"] = table;
+  </script>
   <div><button class="w-75 btn btn-sm btn-secondary btn-block" type="button" id="b_new_recipe">Save</button></div>
   <div id=alert class='hide'></div>
 {% endblock %}

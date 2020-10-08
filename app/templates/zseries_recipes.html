@@ -3,19 +3,8 @@
 <script src="static/js/server_management.js"></script>
 <script src="static/js/convert_units.js"></script>
 <script src="static/js/zseries_recipe.js"></script>
-<script>var tables = {}</script>
-<div id="options">
-  <div id="unit_selector" class="btn-group btn-group-toggle" data-toggle="buttons">
-    <label class="btn btn-secondary">
-      <input type="radio" name="options" id="imperial" autocomplete="off"
-      onclick="convert_units('imperial');">Imperial (fahrenheit)</input>
-    </label>
-    <label class="btn btn-secondary">
-      <input type="radio" name="options" id="metric" autocomplete="off"
-      onclick="convert_units('metric');"> Metric (celcius)</input>
-    </label>
-  </div>
-</div>
+<script>var tables = {};</script>
+{% include "units_selector.html" %}
 {% include "invalid_file.html" %}
 <div id="accordion">
   {% for recipe in recipes %}
@@ -42,15 +31,6 @@
           }
           recipe_table['rowMoved'] = function (row) {
             document.getElementById("bs_{{recipe['id']}}").style.display = "block";
-          }
-          recipe_table['scrollVertical'] = function(top) {
-            console.log("scroll showed up");
-          }
-          recipe_table['dataLoading'] = function(data) {
-            console.log("data loading");
-          }
-          recipe_table['dataLoaded'] = function(data) {
-            console.log("data loaded");
           }
           
           tables["{{recipe['id']}}"] = new Tabulator("#t_{{recipe['id']}}", recipe_table);
