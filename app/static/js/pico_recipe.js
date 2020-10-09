@@ -39,10 +39,17 @@ var recipe_table = {
                 "Adjunct4",
             ]
         }},
-        {title:"Temp (°F)", field:"temperature", width:100, hozAlign:"center", validator:["required", "min:0", "max:208", "numeric"], editable:editCheck, editor:"number", editorParams:{
-            min:0,
-            max:208,
-        }},
+        {
+            title: "Temp (°F)", field: "temperature", width: 100, hozAlign: "center",
+            validator: ["required", "min:0", "max:208", "numeric"],
+            editable: editCheck,
+            editorParams: {
+                min: 0,     // -18 C
+                max: 208,   // 98 C
+            },
+            editor: temperature_editor,
+            formatter: format_temperature
+        },
         {title:"Time (min)", field:"step_time", width:100, hozAlign:"center", validator:["required", "min:0", "max:180", "numeric"], editable:editCheck, editor:"number", editorParams:{
             min:0,
             max:180,
