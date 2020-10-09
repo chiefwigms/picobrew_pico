@@ -135,7 +135,6 @@ function update_recipe(recipe_id){
         var recipe = {};
         recipe.id = recipe_id
         recipe.steps = table.getData();
-        // convert temperatures to F
         $.ajax({
 			url: 'update_zseries_recipe',
 			type: 'POST',
