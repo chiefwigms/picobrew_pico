@@ -7,12 +7,12 @@ class MachineType(str, Enum):
     PICOFERM = 'PicoFerm'
     PICOSTILL = 'PicoStill'
     ZSERIES = 'ZSeries'
-    ZYMATIC = 'ZYMATIC'
+    ZYMATIC = 'Zymatic'
     ISPINDEL = 'iSpindel'
 
 # server config
 def server_config():
-    return current_app.config['BASE_PATH']
+    return current_app.config['SERVER_CONFIG']
 
     
 # base path

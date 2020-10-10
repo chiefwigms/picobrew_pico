@@ -35,6 +35,11 @@ def create_app(debug=False):
 
     server_cfg = {}
     cfg_file = BASE_PATH.joinpath('config.yaml')
+    if not pathlib.Path(cfg_file).exists():
+        # copy config.examle.yaml > config.yaml if config.yaml doesn't exist
+        example_cfg_file = BASE>PATH.joinpath('config.example.yaml')
+        copyfile(example_cfg_file, cfg_file)
+        
     with open(cfg_file, 'r') as f:
         server_cfg = yaml.safe_load(f)
 

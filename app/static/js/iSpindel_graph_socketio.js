@@ -58,7 +58,7 @@ xAxis: {
 yAxis: [
   {
     title: {
-      text: 'Temperature (C)'
+      text: 'Temperature (F)'
     },
     //min: 50
     //max: 90

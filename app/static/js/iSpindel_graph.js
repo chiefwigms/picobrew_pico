@@ -41,7 +41,7 @@ Highcharts.chart(graph_data.chart_id, {
   yAxis: [
     {
       title: {
-        text: 'Temperature (C)'
+        text: 'Temperature (F)'
       },
       //min: 50
       //max: 90

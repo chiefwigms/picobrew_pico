@@ -1,9 +1,10 @@
 import json
-# Todd here
 from datetime import datetime
 
 from .config import brew_active_sessions_path
 from .model import PicoBrewSession
+
+file_glob_pattern = "[!._]*.json"
 
 active_brew_sessions = {}
 active_ferm_sessions = {}
@@ -110,8 +111,8 @@ def get_brew_graph_data(chart_id, session_name, session_step, session_data, is_p
         ]})
     else:
         graph_data.update({'series': [
-            {'name': 'Heat Loop', 'data': heat1_data},
             {'name': 'Wort', 'data': wort_data},
+            {'name': 'Heat Loop', 'data': heat1_data},
             {'name': 'Board', 'data': board_data},
             {'name': 'Heat Loop 2', 'data': heat2_data}
         ]})
@@ -158,9 +159,6 @@ def get_ferm_graph_data(chart_id, voltage, session_data):
             }
         ],
     }
-    
-    #print('DEBUG: get_ferm_graph_data() here ' + str(graph_data))
-    
     if voltage:
         graph_data.update({'subtitle': {'text': 'Voltage: ' + voltage}})
     return graph_data
@@ -216,7 +214,7 @@ def restore_active_sessions():
     if active_brew_sessions == {}:
         # print('DEBUG: restore_active_sessions() fetching abandoned server active sessions')
 
-        active_brew_session_files = list(brew_active_sessions_path().glob("*.json"))
+        active_brew_session_files = list(brew_active_sessions_path().glob(file_glob_pattern))
         for file in active_brew_session_files:
             # print('DEBUG: restore_active_sessions() found {} as an active session'.format(file))
             brew_session = load_brew_session(file)
