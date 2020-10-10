@@ -10,7 +10,6 @@ chart: {
     load: function () {
       var self = this
       var event_name = 'iSpindel_session_update|' + graph_data.chart_id
-      var socket = io.connect('//' + document.domain + ':' + location.port)
       socket.on(event_name, function (event)
       {
           var data = JSON.parse(event);
