@@ -6,7 +6,6 @@
   <script src="static/js/highcharts/exporting.js"></script>
   <script src="static/js/highcharts/dark-unica.js"></script>
   <script src="static/js/socketio/socket.io.slim.js"></script>
-  <script>var socket = io.connect('//' + document.domain + ':' + location.port);</script>
   <div id="accordion">
     {% for brew_session in brew_sessions %}
     <div class="card bg-dark text-white-50">
@@ -38,6 +37,24 @@
           <div id="{{ferm_session.graph.chart_id}}" style="min-width: 320px; height: 400px; margin: 0 auto"></div>
           <script>var graph_data={{ferm_session.graph|tojson}};</script>
           <script src="static/js/ferm_graph_socketio.js"></script>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  <div id="accordion">
+    {% for iSpindel_session in iSpindel_sessions %}
+    <div class="card bg-dark text-white-50">
+      <h5 class="card-header" id="h_{{iSpindel_session.graph.chart_id}}">
+        <a class="collapsed" role="button" data-toggle="collapse" href="#c_{{iSpindel_session.graph.chart_id}}" data-parent="#accordion" aria-expanded="false" aria-controls="c_{{iSpindel_session.graph.chart_id}}">
+          {% if iSpindel_session.alias is defined and iSpindel_session.alias|length %}{{iSpindel_session.alias}}{% else %}{{iSpindel_session.graph.chart_id}}{% endif %}
+        </a>
+      </h5>
+      <div id="c_{{iSpindel_session.graph.chart_id}}" class="collapse show" aria-labelledby="h_{{iSpindel_session.graph.chart_id}}">
+        <div class="card-body">
+          <div id="{{iSpindel_session.graph.chart_id}}" style="min-width: 320px; height: 400px; margin: 0 auto"></div>
+          <script>var graph_data={{iSpindel_session.graph|tojson}};</script>
+          <script src="static/js/iSpindel_graph_socketio.js"></script>
         </div>
       </div>
     </div>

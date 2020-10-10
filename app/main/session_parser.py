@@ -1,12 +1,13 @@
 import json
+# Todd here
+from datetime import datetime
 
 from .config import brew_active_sessions_path
 from .model import PicoBrewSession
 
-file_glob_pattern = "[!._]*.json"
-
 active_brew_sessions = {}
 active_ferm_sessions = {}
+active_iSpindel_sessions = {}
 
 
 def load_brew_session(file):
@@ -109,8 +110,8 @@ def get_brew_graph_data(chart_id, session_name, session_step, session_data, is_p
         ]})
     else:
         graph_data.update({'series': [
-            {'name': 'Wort', 'data': wort_data},
             {'name': 'Heat Loop', 'data': heat1_data},
+            {'name': 'Wort', 'data': wort_data},
             {'name': 'Board', 'data': board_data},
             {'name': 'Heat Loop 2', 'data': heat2_data}
         ]})
@@ -157,17 +158,65 @@ def get_ferm_graph_data(chart_id, voltage, session_data):
             }
         ],
     }
+    
+    #print('DEBUG: get_ferm_graph_data() here ' + str(graph_data))
+    
     if voltage:
         graph_data.update({'subtitle': {'text': 'Voltage: ' + voltage}})
     return graph_data
 
+def load_iSpindel_session(file):
+    info = file.stem.split('#')
+    # 0 = Date, 1 = Device UID
+    with open(file) as fp:
+        raw_data = fp.read().rstrip()
+        if raw_data.endswith(','):
+            # Recover from incomplete json data file
+            raw_data = raw_data[:-1] + '\n]'
+        json_data = json.loads(raw_data)
+    chart_id = info[0] + '_' + str(info[1])
+    name = info[1]
+    if info[1] in active_iSpindel_sessions:
+        name = active_iSpindel_sessions[info[1]].alias
+    return ({
+        'date': info[0],
+        'name': name,
+        'graph': get_iSpindel_graph_data(chart_id, None, json_data)
+    })
+
+
+def get_iSpindel_graph_data(chart_id, voltage, session_data):
+    temp_data = []
+    gravity_data = []
+    for data in session_data:
+        temp_data.append([data['time'], float(data['temp'])])
+        gravity_data.append([data['time'], float(data['gravity'])])
+    graph_data = {
+        'chart_id': str(chart_id),
+        'title': {'text': 'Fermentation'},
+        'series': [
+            {
+                'name': 'Temperature',
+                'data': temp_data
+            }, {
+                'name': 'Specific Gravity',
+                'data': gravity_data,
+                'yAxis': 1
+            }
+        ],
+    }
+    #print('DEBUG: get_iSpindel_graph_data() here ' + str(graph_data))# + ' ' + str(gravity_data) + str(voltage))
+    
+    if voltage:
+        graph_data.update({'subtitle': {'text': 'Voltage: ' + voltage}})
+    return graph_data
 
 def restore_active_sessions():
     # initialize active sessions during start up
     if active_brew_sessions == {}:
         # print('DEBUG: restore_active_sessions() fetching abandoned server active sessions')
 
-        active_brew_session_files = list(brew_active_sessions_path().glob(file_glob_pattern))
+        active_brew_session_files = list(brew_active_sessions_path().glob("*.json"))
         for file in active_brew_session_files:
             # print('DEBUG: restore_active_sessions() found {} as an active session'.format(file))
             brew_session = load_brew_session(file)

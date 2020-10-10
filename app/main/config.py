@@ -7,14 +7,14 @@ class MachineType(str, Enum):
     PICOFERM = 'PicoFerm'
     PICOSTILL = 'PicoStill'
     ZSERIES = 'ZSeries'
-    ZYMATIC = 'Zymatic'
-
+    ZYMATIC = 'ZYMATIC'
+    ISPINDEL = 'iSpindel'
 
 # server config
 def server_config():
-    return current_app.config['SERVER_CONFIG']
+    return current_app.config['BASE_PATH']
 
-
+    
 # base path
 def base_path():
     return current_app.config['BASE_PATH']
@@ -65,3 +65,11 @@ def ferm_active_sessions_path():
 
 def ferm_archive_sessions_path():
     return current_app.config['SESSIONS_PATH'].joinpath('ferm/archive')
+
+
+def iSpindel_active_sessions_path():
+    return current_app.config['SESSIONS_PATH'].joinpath('iSpindel/active')
+
+
+def iSpindel_archive_sessions_path():
+    return current_app.config['SESSIONS_PATH'].joinpath('iSpindel/archive')
