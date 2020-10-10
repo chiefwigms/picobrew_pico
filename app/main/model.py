@@ -1,5 +1,5 @@
 import shutil
-from .config import brew_archive_sessions_path, ferm_archive_sessions_path
+from .config import brew_archive_sessions_path, ferm_archive_sessions_path, iSpindel_archive_sessions_path
 
 
 ZYMATIC_LOCATION = {
@@ -88,6 +88,28 @@ class PicoFermSession():
         if self.file and self.filepath:
             self.file.close()
             shutil.move(str(self.filepath), str(ferm_archive_sessions_path()))
+        self.file = None
+        self.filepath = None
+        self.uninit = True
+        self.voltage = '-'
+        self.start_time = None
+        self.data = []
+        
+
+class iSpindelSession():
+    def __init__(self):
+        self.file = None
+        self.filepath = None
+        self.alias = ''
+        self.uninit = True
+        self.voltage = '-'
+        self.start_time = None
+        self.data = []
+
+    def cleanup(self):
+        if self.file and self.filepath:
+            self.file.close()
+            shutil.move(str(self.filepath), str(iSpindel_archive_sessions_path()))
         self.file = None
         self.filepath = None
         self.uninit = True

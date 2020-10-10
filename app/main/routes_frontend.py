@@ -15,8 +15,8 @@ from time import sleep
 
 from . import main
 from .recipe_parser import PicoBrewRecipe, PicoBrewRecipeImport, ZymaticRecipe, ZymaticRecipeImport, ZSeriesRecipe
-from .session_parser import load_ferm_session, get_ferm_graph_data, get_brew_graph_data, load_brew_session, active_brew_sessions, active_ferm_sessions
-from .config import base_path, zymatic_recipe_path, zseries_recipe_path, pico_recipe_path, ferm_archive_sessions_path, brew_archive_sessions_path, MachineType
+from .session_parser import load_iSpindel_session, get_iSpindel_graph_data, load_ferm_session, get_ferm_graph_data, get_brew_graph_data, load_brew_session, active_brew_sessions, active_ferm_sessions, active_iSpindel_sessions
+from .config import base_path, zymatic_recipe_path, zseries_recipe_path, pico_recipe_path, ferm_archive_sessions_path, brew_archive_sessions_path, iSpindel_archive_sessions_path, MachineType
 
 
 file_glob_pattern = "[!._]*.json"
@@ -26,7 +26,8 @@ file_glob_pattern = "[!._]*.json"
 @main.route('/')
 def index():
     return render_template('index.html', brew_sessions=load_active_brew_sessions(),
-                           ferm_sessions=load_active_ferm_sessions())
+                           ferm_sessions=load_active_ferm_sessions(),
+                           iSpindel_sessions=load_active_iSpindel_sessions())
 
 
 @main.route('/restart_server')
@@ -65,6 +66,11 @@ def brew_history():
 @main.route('/ferm_history')
 def ferm_history():
     return render_template('ferm_history.html', sessions=load_ferm_sessions(), invalid=get_invalid_sessions('ferm'))
+
+
+@main.route('/iSpindel_history')
+def iSpindel_history():
+    return render_template('iSpindel_history.html', sessions=load_iSpindel_sessions())
 
 
 @main.route('/zymatic_recipes')
@@ -641,6 +647,19 @@ def load_ferm_sessions():
     ferm_sessions = [parse_ferm_session(file) for file in files]
     return list(filter(lambda x: x != None, ferm_sessions))
 
+def load_active_iSpindel_sessions():
+    iSpindel_sessions = []
+    for uid in active_iSpindel_sessions:
+        iSpindel_sessions.append({'alias': active_iSpindel_sessions[uid].alias,
+                                  'graph': get_iSpindel_graph_data(uid, active_iSpindel_sessions[uid].voltage,
+                                                                   active_iSpindel_sessions[uid].data)})
+    return iSpindel_sessions
+
+
+def load_iSpindel_sessions():
+    files = list(iSpindel_archive_sessions_path().glob("*.json"))
+    iSpindel_sessions = [load_iSpindel_session(file) for file in files]
+    return iSpindel_sessions
 
 # Read initial recipe list on load
 pico_recipes = []
@@ -665,6 +684,7 @@ def initialize_data():
     # load all archive brew sessions
     brew_sessions = load_active_brew_sessions()
     ferm_sessions = load_active_ferm_sessions()
+    iSpindel_sessions = load_active_iSpindel_sessions()
 
 
 # utilities

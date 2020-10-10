@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block content %}
+  <script src="static/js/highcharts/highcharts.js"></script>
+  <script src="static/js/highcharts/annotations.js"></script>
+  <script src="static/js/highcharts/export-data.js"></script>
+  <script src="static/js/highcharts/exporting.js"></script>
+  <script src="static/js/highcharts/dark-unica.js"></script>
+  <div id="accordion">
+    {% for session in sessions %}
+    <div class="card bg-dark text-white-50">
+      <h5 class="card-header" id="h_{{session.graph.chart_id}}">
+        <a class="collapsed" role="button" data-toggle="collapse" href="#c_{{session.graph.chart_id}}" data-parent="#accordion" aria-expanded="false" aria-controls="c_{{session.graph.chart_id}}">
+          {{session.name}} on {{session.date}}
+        </a>
+      </h5>
+      <div id="c_{{session.graph.chart_id}}" class="collapse" aria-labelledby="h_{{session.graph.chart_id}}">
+        <div class="card-body">
+          <div id="{{session.graph.chart_id}}" style="min-width: 320px; height: 400px; margin: 0 auto"></div>
+          <script>var graph_data={{session.graph|tojson}};</script>
+          <script src="static/js/iSpindel_graph.js"></script>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+{% endblock %}

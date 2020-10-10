@@ -29,6 +29,8 @@ aliases:
     #ProductID : Nickname
   PicoStill:
     #ProductID : Nickname
+  iSpindel:
+    #ID        : Nickname
 
 # In order to force specific versions of device firmware there is a feature of the picobrew_pico
 # that will support OTA updates to the connected brewing devices which support OTA updates 
