@@ -1,5 +1,4 @@
 import json
-from datetime import datetime
 
 from .config import brew_active_sessions_path
 from .model import PicoBrewSession
@@ -203,7 +202,6 @@ def get_iSpindel_graph_data(chart_id, voltage, session_data):
             }
         ],
     }
-    #print('DEBUG: get_iSpindel_graph_data() here ' + str(graph_data))# + ' ' + str(gravity_data) + str(voltage))
     
     if voltage:
         graph_data.update({'subtitle': {'text': 'Voltage: ' + voltage}})

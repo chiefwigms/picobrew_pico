@@ -14,7 +14,7 @@ class MachineType(str, Enum):
 def server_config():
     return current_app.config['SERVER_CONFIG']
 
-    
+
 # base path
 def base_path():
     return current_app.config['BASE_PATH']

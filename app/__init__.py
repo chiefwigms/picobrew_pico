@@ -13,7 +13,7 @@ socketio = SocketIO()
 def create_dir(dir_path):
     # create the directory and any missing parent directories, if it doesn't already exist
     pathlib.Path(dir_path).mkdir(parents=True, exist_ok=True)
-    
+
 def create_app(debug=False):
     """Create an application."""
     app = Flask(__name__)
@@ -36,10 +36,10 @@ def create_app(debug=False):
     server_cfg = {}
     cfg_file = BASE_PATH.joinpath('config.yaml')
     if not pathlib.Path(cfg_file).exists():
-        # copy config.examle.yaml > config.yaml if config.yaml doesn't exist
-        example_cfg_file = BASE>PATH.joinpath('config.example.yaml')
+        # copy config.example.yaml > config.yaml if config.yaml doesn't exist
+        example_cfg_file = BASE_PATH.joinpath('config.example.yaml')
         copyfile(example_cfg_file, cfg_file)
-        
+
     with open(cfg_file, 'r') as f:
         server_cfg = yaml.safe_load(f)
 
