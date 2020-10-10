@@ -1,5 +1,4 @@
 import json
-# Todd here
 from datetime import datetime
 
 from .config import brew_active_sessions_path
