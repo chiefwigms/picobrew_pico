@@ -7,7 +7,7 @@ class MachineType(str, Enum):
     PICOFERM = 'PicoFerm'
     PICOSTILL = 'PicoStill'
     ZSERIES = 'ZSeries'
-    ZYMATIC = 'ZYMATIC'
+    ZYMATIC = 'Zymatic'
     ISPINDEL = 'iSpindel'
 
 # server config
