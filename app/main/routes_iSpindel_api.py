@@ -30,7 +30,7 @@ def process_iSpindel_data():
     
     data = request.get_json()
     
-    uid = data['ID']
+    uid = str(data['ID'])
     
     if uid not in active_iSpindel_sessions or active_iSpindel_sessions[uid].uninit:
         create_new_session(uid)

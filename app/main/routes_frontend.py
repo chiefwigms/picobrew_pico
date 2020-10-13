@@ -647,6 +647,14 @@ def load_ferm_sessions():
     ferm_sessions = [parse_ferm_session(file) for file in files]
     return list(filter(lambda x: x != None, ferm_sessions))
 
+
+def parse_iSpindel_session(file):
+    try:
+        return load_iSpindel_session(file)
+    except:
+        current_app.logger.error("ERROR: An exception occurred parsing {}".format(file))
+        add_invalid_session("ispindel", file)
+
 def load_active_iSpindel_sessions():
     iSpindel_sessions = []
     for uid in active_iSpindel_sessions:
@@ -657,9 +665,12 @@ def load_active_iSpindel_sessions():
 
 
 def load_iSpindel_sessions():
-    files = list(iSpindel_archive_sessions_path().glob("*.json"))
-    iSpindel_sessions = [load_iSpindel_session(file) for file in files]
-    return iSpindel_sessions
+    #files = list(iSpindel_archive_sessions_path().glob("*.json"))
+    files = list(iSpindel_archive_sessions_path().glob(file_glob_pattern))
+    iSpindel_sessions = [parse_iSpindel_session(file) for file in files]
+    return list(filter(lambda x: x != None, iSpindel_sessions))
+    #iSpindel_sessions = [load_iSpindel_session(file) for file in files]
+    #return iSpindel_sessions
 
 # Read initial recipe list on load
 pico_recipes = []
