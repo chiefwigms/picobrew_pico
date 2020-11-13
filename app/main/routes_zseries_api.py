@@ -10,8 +10,8 @@ from random import seed, randint
 
 from .. import socketio
 from . import main
-from .config import brew_active_sessions_path, zseries_firmware_path
-from .firmware import MachineType, firmware_filename, firmware_upgrade_required, minimum_firmware
+from .config import MachineType, brew_active_sessions_path, zseries_firmware_path
+from .firmware import firmware_filename, firmware_upgrade_required, minimum_firmware
 from .model import PicoBrewSession
 from .routes_frontend import get_zseries_recipes, load_brew_sessions
 from .session_parser import active_brew_sessions
@@ -390,7 +390,7 @@ def create_session(token, body):
         current_app.logger.debug('recipe for session: {}'.format(recipe.serialize()))
 
     if uid not in active_brew_sessions:
-        active_brew_sessions[uid] = PicoBrewSession()
+        active_brew_sessions[uid] = PicoBrewSession(MachineType.ZSERIES)
 
     session_guid = uuid.uuid4().hex[:32]
     session_id = increment_session_id(uid)

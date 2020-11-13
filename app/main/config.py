@@ -3,6 +3,7 @@ from flask import current_app
 
 
 class MachineType(str, Enum):
+    PICOBREW_C = 'PicoBrewC'
     PICOBREW = 'PicoBrew'
     PICOFERM = 'PicoFerm'
     PICOSTILL = 'PicoStill'
@@ -25,8 +26,11 @@ def zseries_firmware_path():
     return current_app.config['FIRMWARE_PATH'].joinpath('zseries')
 
 
-def pico_firmware_path():
-    return current_app.config['FIRMWARE_PATH'].joinpath('pico')
+def pico_firmware_path(machineType):
+    if machineType is MachineType.PICOBREW:
+        return current_app.config['FIRMWARE_PATH'].joinpath('pico')
+    else:
+        return current_app.config['FIRMWARE_PATH'].joinpath('pico_c')
 
 
 def picostill_firmware_path():

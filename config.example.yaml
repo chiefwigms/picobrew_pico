@@ -23,6 +23,8 @@ aliases:
     #ProductID : Nickname
   ZSeries:
     #ProductID : Nickname
+  PicoBrewC:
+    #ProductID : Nickname
   PicoBrew:
     #ProductID : Nickname
   PicoFerm:
@@ -53,6 +55,7 @@ aliases:
 # been sent to the pico brewing community for early beta testing and are bundled with this server.
 firmware:
   # ZSeries: 0.0.116
+  # PicoBrewC: 0.1.34
   # PicoBrew: 0.1.34
   # PicoStill: 0.0.30
   # PicoFerm: 0.2.6
