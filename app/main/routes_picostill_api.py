@@ -12,7 +12,6 @@ from .. import socketio
 from . import main
 from .config import picostill_firmware_path
 from .firmware import MachineType, firmware_filename, firmware_upgrade_required, minimum_firmware
-from .model import PicoBrewSession
 from .routes_frontend import get_zseries_recipes, load_brew_sessions
 from .session_parser import active_brew_sessions
 

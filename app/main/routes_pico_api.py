@@ -48,7 +48,8 @@ check_firmware_args = {
 @main.route('/API/pico/checkFirmware')
 @use_args(check_firmware_args, location='querystring')
 def process_check_firmware(args):
-    if firmware_upgrade_required(MachineType.PICOBREW, args['version']):
+    # only give update available if machine type is known (C firmware != S/Pro Firmware)
+    if args['uid'] in active_brew_sessions and firmware_upgrade_required(active_brew_sessions[args['uid']].machine_type, args['version']):
         return '#T#'
     return '#F#'
 
@@ -61,11 +62,16 @@ get_firmware_args = {
 @main.route('/API/pico/getFirmware')
 @use_args(get_firmware_args, location='querystring')
 def process_get_firmware(args):
-    filename = firmware_filename(MachineType.PICOBREW, minimum_firmware(MachineType.PICOBREW))
-    f = open(pico_firmware_path().joinpath(filename))
-    fw = f.read()
-    f.close()
-    return '{}'.format(fw)
+    if args['uid'] in active_brew_sessions:
+        machine_type = active_brew_sessions[args['uid']].machine_type
+        filename = firmware_filename(machine_type, minimum_firmware(machine_type))
+        f = open(pico_firmware_path(machine_type).joinpath(filename))
+        fw = f.read()
+        f.close()
+        return '{}'.format(fw)
+    else:
+        # TODO: Error Processing?
+        return '#F#'
 
 
 # Actions Needed: /API/pico/getActionsNeeded?uid={UID}
