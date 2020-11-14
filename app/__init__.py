@@ -26,7 +26,7 @@ def create_app(debug=False):
     from .main.config import MachineType
     from .main.model import PicoBrewSession, PicoFermSession, PicoStillSession, iSpindelSession
     from .main.routes_frontend import initialize_data
-    from .main.session_parser import restore_active_sessions, active_brew_sessions, active_ferm_sessions, active_iSpindel_sessions
+    from .main.session_parser import restore_active_sessions, active_brew_sessions, active_ferm_sessions, active_still_sessions, active_iSpindel_sessions
 
     from .main import main as main_blueprint
 
@@ -81,8 +81,8 @@ def create_app(debug=False):
                             active_iSpindel_sessions[uid] = iSpindelSession()
                             active_iSpindel_sessions[uid].alias = aliases[mtype][uid]
                         elif mtype == MachineType.PICOSTILL:
-                            active_iSpindel_sessions[uid] = PicoStillSession()
-                            active_iSpindel_sessions[uid].alias = aliases[mtype][uid]
+                            active_still_sessions[uid] = PicoStillSession()
+                            active_still_sessions[uid].alias = aliases[mtype][uid]
                         else:
                             active_brew_sessions[uid] = PicoBrewSession(mtype)
                             active_brew_sessions[uid].alias = aliases[mtype][uid]

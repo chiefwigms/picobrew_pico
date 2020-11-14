@@ -7,6 +7,7 @@ file_glob_pattern = "[!._]*.json"
 
 active_brew_sessions = {}
 active_ferm_sessions = {}
+active_still_sessions = {}
 active_iSpindel_sessions = {}
 
 
