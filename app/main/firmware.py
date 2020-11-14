@@ -2,9 +2,12 @@ from .config import MachineType, server_config
 from distutils.version import LooseVersion, StrictVersion
 
 def firmware_filename(device: MachineType, version: str):
+    firmware_prefix = device.lower()
     if (device == MachineType.PICOBREW):
-        return "pico_{}.bin".format(version.replace(".", "_"))
-    return "{}_{}.bin".format(device.lower(), version.replace(".", "_"))
+        firmware_prefix = "pico"
+    if (device == MachineType.PICOBREW_C):
+        firmware_prefix = "pico_c"
+    return "{}_{}.bin".format(firmware_prefix, version.replace(".", "_"))
 
 
 def firmware_upgrade_required(device: MachineType, version: str):
@@ -14,6 +17,7 @@ def firmware_upgrade_required(device: MachineType, version: str):
 def minimum_firmware(device: MachineType):
     default_firmware = {
         MachineType.ZSERIES: '0.0.116',
+        MachineType.PICOBREW_C: '0.1.34',
         MachineType.PICOBREW: '0.1.34',
         MachineType.PICOSTILL: '0.0.30',
         MachineType.PICOFERM: '0.2.6'

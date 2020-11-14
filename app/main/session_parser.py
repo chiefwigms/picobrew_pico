@@ -228,11 +228,14 @@ def restore_active_sessions():
             session.created_at = brew_session['date']
             session.name = brew_session['name']
             session.type = brew_session['type']
-            session.session = brew_session['session']           # session guid
-            session.id = -1                                     # session id (integer)
+            session.session = brew_session['session']                   # session guid
+            session.id = -1                                             # session id (integer)
+
+            if 'machine_type' in brew_session:
+                session.machine_type = brew_session['machine_type']     # keep track of machine type of uid (if known)
 
             if 'recovery' in brew_session:
-                session.recovery = brew_session['recovery']     # find last step name
+                session.recovery = brew_session['recovery']             # find last step name
 
             # session.remaining_time = None
             session.is_pico = brew_session['is_pico']

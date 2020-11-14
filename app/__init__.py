@@ -67,7 +67,7 @@ def create_app(debug=False):
         restore_active_sessions()
         initialize_data()
     if 'aliases' in server_cfg:
-        machine_types = [MachineType.ZSERIES, MachineType.ZYMATIC, MachineType.PICOBREW, MachineType.PICOFERM, MachineType.PICOSTILL, MachineType.ISPINDEL]
+        machine_types = [MachineType.ZSERIES, MachineType.ZYMATIC, MachineType.PICOBREW, MachineType.PICOBREW_C, MachineType.PICOFERM, MachineType.PICOSTILL, MachineType.ISPINDEL]
         for mtype in machine_types:
             aliases = server_cfg['aliases']
             if mtype in aliases and aliases[mtype] is not None:
@@ -80,7 +80,7 @@ def create_app(debug=False):
                             active_iSpindel_sessions[uid] = iSpindelSession()
                             active_iSpindel_sessions[uid].alias = aliases[mtype][uid]
                         else:
-                            active_brew_sessions[uid] = PicoBrewSession()
+                            active_brew_sessions[uid] = PicoBrewSession(mtype)
                             active_brew_sessions[uid].alias = aliases[mtype][uid]
                             active_brew_sessions[uid].is_pico = True if mtype == MachineType.PICOBREW else False
 

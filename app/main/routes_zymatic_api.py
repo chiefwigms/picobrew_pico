@@ -8,7 +8,7 @@ from webargs.flaskparser import use_args, FlaskParser
 from .. import socketio
 from . import main
 from .config import brew_active_sessions_path
-from .model import PicoBrewSession
+from .model import MachineType, PicoBrewSession
 from .routes_frontend import get_zymatic_recipes
 from .session_parser import active_brew_sessions
 
@@ -151,7 +151,7 @@ def process_log_session(args):
     if args['code'] == 0:
         uid = args['machine']
         if uid not in active_brew_sessions:
-            active_brew_sessions[uid] = PicoBrewSession()
+            active_brew_sessions[uid] = PicoBrewSession(MachineType.Zymatic)
         active_brew_sessions[uid].session = uuid.uuid4().hex[:32]
         active_brew_sessions[uid].name = get_recipe_name_by_id(args['recipe'])
         active_brew_sessions[uid].filepath = brew_active_sessions_path().joinpath('{0}#{1}#{2}#{3}.json'.format(datetime.now().strftime('%Y%m%d_%H%M%S'), uid, active_brew_sessions[uid].session, active_brew_sessions[uid].name.replace(' ', '_')))

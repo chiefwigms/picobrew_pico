@@ -1,5 +1,5 @@
 import shutil
-from .config import brew_archive_sessions_path, ferm_archive_sessions_path, iSpindel_archive_sessions_path
+from .config import MachineType, brew_archive_sessions_path, ferm_archive_sessions_path, iSpindel_archive_sessions_path
 
 
 ZYMATIC_LOCATION = {
@@ -41,11 +41,12 @@ PICO_SESSION = {
 }
 
 
-class PicoBrewSession():
-    def __init__(self):
+class PicoBrewSession:
+    def __init__(self, machineType=None):
         self.file = None
         self.filepath = None
         self.alias = ''
+        self.machine_type = machineType
         self.created_at = None
         self.name = 'Waiting To Brew'
         self.type = 0
@@ -74,7 +75,7 @@ class PicoBrewSession():
         self.data = []
 
 
-class PicoFermSession():
+class PicoFermSession:
     def __init__(self):
         self.file = None
         self.filepath = None
@@ -94,7 +95,6 @@ class PicoFermSession():
         self.voltage = '-'
         self.start_time = None
         self.data = []
-        
 
 class iSpindelSession():
     def __init__(self):
