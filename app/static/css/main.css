@@ -27,3 +27,11 @@
   padding: 0.5rem;
   min-width: 0px;
 }
+span.equipment-icon {
+  max-width: 60px;
+  text-align: center;
+  display: inline-block;
+}
+span.equipment-icon img {
+  width: 80%;
+}
