@@ -96,6 +96,7 @@ class PicoFermSession:
         self.start_time = None
         self.data = []
 
+
 class iSpindelSession():
     def __init__(self):
         self.file = None
