@@ -109,7 +109,8 @@ class iSpindelSession():
     def cleanup(self):
         if self.file and self.filepath:
             self.file.close()
-            shutil.move(str(self.filepath), str(iSpindel_archive_sessions_path()))
+            shutil.move(str(self.filepath), str(
+                iSpindel_archive_sessions_path()))
         self.file = None
         self.filepath = None
         self.uninit = True
