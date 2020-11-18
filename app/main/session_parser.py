@@ -230,6 +230,64 @@ def epoch_millis_converter(epoch_ms):
     return datetime_utc.astimezone(tz.tzlocal())
 
 
+def load_still_session(file):
+    info = file.stem.split('#')
+    # 0 = Date, 1 = Device UID
+    with open(file) as fp:
+        raw_data = fp.read().rstrip()
+        if raw_data.endswith(','):
+            # Recover from incomplete json data file
+            raw_data = raw_data[:-1] + '\n]'
+        json_data = json.loads(raw_data)
+    chart_id = info[0] + '_' + info[1]
+    name = info[1]
+    if info[1] in active_still_sessions:
+        name = active_still_sessions[info[1]].alias
+    return ({
+        'date': info[0],
+        'name': name,
+        'graph': get_still_graph_data(chart_id, json_data)
+    })
+
+
+def get_still_graph_data(chart_id, session_data):
+    t1_data = []
+    t2_data = []
+    t3_data = []
+    t4_data = []
+    pres_data = []
+    for data in session_data:
+        t1_data.append([data['time'], float(data['t1'])])
+        t2_data.append([data['time'], float(data['t2'])])
+        t3_data.append([data['time'], float(data['t3'])])
+        t4_data.append([data['time'], float(data['t4'])])
+        pres_data.append([data['time'], float(data['pres'])])
+    graph_data = {
+        'chart_id': chart_id,
+        'title': {'text': 'Distillation/Extraction'},
+        'series': [
+            {
+                'name': 'Coil Inlet',
+                'data': t1_data
+            }, {
+                'name': 'Coil Outlet',
+                'data': t2_data
+            }, {
+                'name': 'Pot',
+                'data': t3_data
+            }, {
+                'name': 'Ambient',
+                'data': t4_data
+            }, {
+                'name': 'Pressure',
+                'data': pres_data,
+                'yAxis': 1
+            }
+        ],
+    }
+    return graph_data
+
+
 def load_iSpindel_session(file):
     info = file.stem.split('#')
     

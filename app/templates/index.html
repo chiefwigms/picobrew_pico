@@ -73,6 +73,25 @@
     {% endfor %}
   </div>
   <div id="accordion">
+    {% for still_session in still_sessions %}
+    <div class="card bg-dark text-white-50">
+      <h5 class="card-header" id="h_{{still_session.graph.chart_id}}">
+        <a class="collapsed" role="button" data-toggle="collapse" href="#c_{{still_session.graph.chart_id}}" data-parent="#accordion" aria-expanded="false" aria-controls="c_{{still_session.graph.chart_id}}">
+          {% if still_session.alias is defined and still_session.alias|length %}{{still_session.alias}}{% else %}{{still_session.graph.chart_id}}{% endif %}
+        </a>
+      </h5>
+      <div id="c_{{still_session.graph.chart_id}}" class="collapse show" aria-labelledby="h_{{still_session.graph.chart_id}}">
+        <div class="card-body">
+          <div id="{{still_session.graph.chart_id}}" style="min-width: 320px; height: 400px; margin: 0 auto"></div>
+          <script>var graph_data={{still_session.graph|tojson}};</script>
+          <script src="static/js/still_graph_socketio.js"></script>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+    <a href="/still_manual">Begin Manual Still Session</a>
+  </div>
+  <div id="accordion">
     {% for iSpindel_session in iSpindel_sessions %}
     {% set chart_id = iSpindel_session.graph.chart_id %}
     {% set expanded = 'true' if iSpindel_session.active else 'false' %}

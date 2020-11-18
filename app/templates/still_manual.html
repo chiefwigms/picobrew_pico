@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block content %}
+<form id="f_stillmanual" method="POST" action="/still_manual">
+  <div class="row">
+    <div class="group col-sm-8">
+      <div class="card bg-dark text-white">
+        <h2>Begin Manual Still Session</h2>
+        <p>This will attempt to connect to the /data feed on a running
+        PicoStill, using the IP address you provide below.  If successful it
+        will then poll once per minute collecting data until the PicoStill
+        drops offline.  Because this can sometimes happen during operation
+        due to flaky hardware, it is tolerant to 3 missed updates (3
+        minutes) before the session will be ended on the server.</p>
+
+        <p>You must begin distillation from your PicoBrew, and the PicoStill
+        must be running, before you begin a new session here.  Please note
+        that once a session is running, your PicoStill will DHCP an address
+        on the same network as the controlling PicoBrew.  You need to know
+        <i>that</i> IP address, either by scanning your network or looking
+        up the assigned address in your DHCP Server -- <b>not</b> the
+        192.168.4.1 address that the PicoStill defaults to when running its
+        own setup WiFi network.</p>
+
+        <b>PicoStill Device: </b>
+        <select name="stilluid" id="stilluid" class="form-control">
+        {% for still_session in still_sessions %}
+          <option value="{{still_session.uid}}">{{still_session.uid}}{% if still_session.alias is defined and still_session.alias|length %} - {{still_session.alias}}{% endif %}</option>
+        {% endfor %}
+        </select><br />
+        <b>PicoStill IP Address: <b>
+        <input type="text" name="stillipaddress" class="form-control" id="stillipaddress" placeholder="0.0.0.0"><br />
+        <input type="submit" value="Begin Session">
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="group col-sm-5">
+      
+    </div>
+  </div>
+</form>
+{% endblock %}

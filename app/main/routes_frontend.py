@@ -17,8 +17,12 @@ from .frontend_common import render_template_with_defaults
 from .model import PicoBrewSession, PicoFermSession, PicoStillSession, iSpindelSession, TiltSession
 from .recipe_import import import_recipes
 from .recipe_parser import PicoBrewRecipe, PicoBrewRecipeImport, ZymaticRecipe, ZymaticRecipeImport, ZSeriesRecipe
-from .session_parser import load_iSpindel_session, get_iSpindel_graph_data, load_ferm_session, get_ferm_graph_data, get_brew_graph_data, load_brew_session, active_brew_sessions, active_ferm_sessions, active_iSpindel_sessions, active_still_sessions, load_tilt_session, get_tilt_graph_data, active_tilt_sessions
-from .config import base_path, zymatic_recipe_path, zseries_recipe_path, pico_recipe_path, ferm_archive_sessions_path, brew_archive_sessions_path, iSpindel_archive_sessions_path, tilt_archive_sessions_path, MachineType
+from .session_parser import (load_brew_session, load_ferm_session, load_still_session, load_iSpindel_session, load_tilt_session,
+                                get_brew_graph_data, get_ferm_graph_data, get_still_graph_data, get_iSpindel_graph_data, get_tilt_graph_data,
+                                active_brew_sessions, active_ferm_sessions, active_still_sessions, active_iSpindel_sessions, active_tilt_sessions)
+from .config import (base_path, MachineType,
+                        zymatic_recipe_path, zseries_recipe_path, pico_recipe_path, 
+                        brew_archive_sessions_path, ferm_archive_sessions_path, still_archive_sessions_path, iSpindel_archive_sessions_path, tilt_archive_sessions_path)
 
 
 file_glob_pattern = "[!._]*.json"
@@ -30,9 +34,9 @@ yaml = YAML()
 def index():
     return render_template_with_defaults('index.html', brew_sessions=load_active_brew_sessions(),
                            ferm_sessions=load_active_ferm_sessions(),
-                           iSpindel_sessions=load_active_iSpindel_sessions(),
-                           tilt_sessions=load_active_tilt_sessions())
-
+                           still_sessions=load_active_still_sessions(),
+                           tilt_sessions=load_active_tilt_sessions(),
+                           iSpindel_sessions=load_active_iSpindel_sessions())
 
 
 @main.route('/brew_history')
@@ -43,6 +47,11 @@ def brew_history():
 @main.route('/ferm_history')
 def ferm_history():
     return render_template_with_defaults('ferm_history.html', sessions=load_ferm_sessions(), invalid=get_invalid_sessions('ferm'))
+
+
+@main.route('/still_history')
+def still_history():
+    return render_template('still_history.html', sessions=load_still_sessions(), invalid=get_invalid_sessions('still'))
 
 
 @main.route('/iSpindel_history')
@@ -337,6 +346,44 @@ def import_zseries_recipe():
         return render_template_with_defaults('import_brewhouse_recipe.html', user_required=False, machine_ids=machine_ids)
 
 
+@main.route('/still_manual', methods=['GET', 'POST'])
+def still_manual():
+    if request.method == 'POST':
+      # FIXME - Placeholder for still testing...
+      if 'stillipaddress' in request.form:
+        still_ip = request.form['stillipaddress']
+        device_id = request.form['stilluid']
+        
+        connect_failure = False
+        try:
+            still_data_uri = 'http://{}/data'.format(still_ip)
+            current_app.logger.debug('DEBUG: Retrieve PicoStill Data - {}'.format(still_data_uri))
+            r = requests.get(still_data_uri)
+            datastring = r.text.strip()
+        except:
+            datastring      = None
+            connect_failure = True
+        
+        if not datastring or datastring[0] != '#':
+            connect_failure = True
+        
+        if connect_failure:
+            return 'Connect PicoStill: Failed to connect to PicoStill on address \"' + still_ip + '\"', 418
+
+        from .still_polling import new_still_session
+        from .still_polling import FlaskThread
+        
+        thread = FlaskThread(target=new_still_session,
+                             args=(still_ip, device_id),
+                             daemon=True)
+        thread.start()
+
+        return redirect('/')
+    else:
+      return render_template('still_manual.html',
+                             still_sessions=load_active_still_sessions())
+
+
 def load_zseries_recipes():
     files = list(zseries_recipe_path().glob(file_glob_pattern))
     recipes = [load_zseries_recipe(file) for file in files]
@@ -561,11 +608,30 @@ def load_ferm_sessions():
 
 
 def parse_iSpindel_session(file):
+    add_invalid_session("iSpindel", file)
+
+
+def parse_still_session(file):
     try:
-        return load_iSpindel_session(file)
+        return load_still_session(file)
     except:
         current_app.logger.error("ERROR: An exception occurred parsing {}".format(file))
-        add_invalid_session("iSpindel", file)
+        add_invalid_session("still", file)
+    
+
+def load_active_still_sessions():
+    still_sessions = []
+    for uid in active_still_sessions:
+        still_sessions.append({'alias': active_still_sessions[uid].alias,
+                              'graph': get_still_graph_data(uid, active_still_sessions[uid].data),
+                              'uid' : uid})
+    return still_sessions
+
+
+def load_still_sessions():
+    files = list(still_archive_sessions_path().glob(file_glob_pattern))
+    still_sessions = [parse_still_session(file) for file in files]
+    return list(filter(lambda x: x != None, still_sessions))
 
 
 def load_active_iSpindel_sessions():
@@ -616,6 +682,8 @@ zseries_recipes = []
 
 brew_sessions = []
 ferm_sessions = []
+still_sessions = []
+iSpindel_sessions = []
 
 invalid_recipes = {}
 invalid_sessions = {}
@@ -623,7 +691,7 @@ invalid_sessions = {}
 
 def initialize_data():
     global pico_recipes, zymatic_recipes, zseries_recipes, invalid_recipes
-    global brew_sessions, ferm_sessions, iSpindel_sessions, tilt_sessions
+    global brew_sessions, ferm_sessions, still_sessions, iSpindel_sessions, tilt_sessions
 
     # Read initial recipe list on load
     pico_recipes = load_pico_recipes()
@@ -633,6 +701,7 @@ def initialize_data():
     # load all archive brew sessions
     brew_sessions = load_active_brew_sessions()
     ferm_sessions = load_active_ferm_sessions()
+    still_sessions = load_active_still_sessions()
     iSpindel_sessions = load_active_iSpindel_sessions()
     tilt_sessions = load_active_tilt_sessions()
 
