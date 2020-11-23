@@ -429,7 +429,7 @@ def setup():
                         bssid = payload['bssid']
                         # remove comment for bssid line (if present)
                         subprocess.check_output(
-                            """sudo sed -i '/bssid/s/# *//g' {}""".format(wpa_ffiles), shell=True)
+                            """sudo sed -i '/bssid/s/# *//g' {}""".format(wpa_files), shell=True)
                         subprocess.check_output(
                             """sed -i -e 's/bssid=.*/bssid={}/' {}""".format(bssid, wpa_files), shell=True)
                     else:
