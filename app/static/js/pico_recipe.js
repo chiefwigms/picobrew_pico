@@ -14,10 +14,10 @@ var default_data = [
     { name: "Mash 1", location: "Mash", temperature: 148, step_time: 45, drain_time: 0 },
     { name: "Mash 2", location: "Mash", temperature: 156, step_time: 0, drain_time: 0 },
     { name: "Mash Out", location: "Mash", temperature: 178, step_time: 7, drain_time: 2 },
-    { name: "Hops 1", location: "Adjunct1", temperature: 202, step_time: 10, drain_time: 0 },
-    { name: "Hops 2", location: "Adjunct2", temperature: 202, step_time: 8, drain_time: 0 },
-    { name: "Hops 3", location: "Adjunct3", temperature: 202, step_time: 8, drain_time: 0 },
-    { name: "Hops 4", location: "Adjunct4", temperature: 202, step_time: 8, drain_time: 5 },
+    { name: "Hops 1", location: "Adjunct1", temperature: 202, step_time: 10, hop_time: 34, drain_time: 0 },
+    { name: "Hops 2", location: "Adjunct2", temperature: 202, step_time: 8, hop_time: 24, drain_time: 0 },
+    { name: "Hops 3", location: "Adjunct3", temperature: 202, step_time: 8, hop_time: 16, drain_time: 0 },
+    { name: "Hops 4", location: "Adjunct4", temperature: 202, step_time: 8, hop_time: 8, drain_time: 5 },
 ];
 var tables_loaded = [];
 var recipe_table = {
@@ -40,10 +40,10 @@ var recipe_table = {
             editor: "input"
         },
         {
-            title: "Location", field: "location", width: 120, hozAlign: "center", tooltip: false, 
-            validator: ["required", "string"], 
-            editable: editCheck, 
-            editor: "select", 
+            title: "Location", field: "location", width: 120, hozAlign: "center", tooltip: false,
+            validator: ["required", "string"],
+            editable: editCheck,
+            editor: "select",
             editorParams: {
                 values: [
                     //"Prime",
@@ -164,23 +164,23 @@ function calculate_hop_timing(data, table = undefined) {
         if (table == undefined) {
             recently_loaded = Object.keys(tables).filter(key => tables_loaded.indexOf(key) == -1)
 
-            console.log("data is loaded into table " + recently_loaded + " with " + data.length + " steps");
             // type is always data (field isn't editable)
             // table data is being filled in and not completely available, build up global reference for each recipe
-            table = tables[recently_loaded[0]]
-            tables_loaded.push(recently_loaded[0])
+            if (recently_loaded.length != 0) {
+                table = tables[recently_loaded[0]]
+                tables_loaded.push(recently_loaded[0])
+
+                var rows = table.getRows();
+                var adjunctSteps = rows.filter(row => row.getData().location.indexOf("Adjunct") == 0);
+
+                var cumulative_hop_time = 0;
+                adjunctSteps.slice().reverse().forEach(adjunctRow => {
+                    var row_data = adjunctRow.getData();
+                    cumulative_hop_time += row_data.step_time;
+                    adjunctRow.update({ "hop_time": cumulative_hop_time });
+                });
+            }
         }
-
-    var rows = table.getRows();
-    var adjunctSteps = rows.filter(row => row.getData().location.indexOf("Adjunct") == 0);
-
-    var cumulative_hop_time = 0;
-    adjunctSteps.slice().reverse().forEach(adjunctRow => {
-        var row_data = adjunctRow.getData();
-        cumulative_hop_time += row_data.step_time;
-        console.log("set " + row_data.name + " hop_time to " + cumulative_hop_time);
-        adjunctRow.update({ "hop_time": cumulative_hop_time });
-    });
 }
 
 $(document).ready(function () {
