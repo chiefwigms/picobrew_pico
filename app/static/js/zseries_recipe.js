@@ -159,32 +159,36 @@ function data_loaded(data) {
     calculate_hop_timing(data)
 }
 
-function calculate_hop_timing(data, table = undefined) {
+function calculate_hop_timing(data, provided_table = undefined) {
     //data - all data loaded into the table
-    if (data.length == 0)
+    if (data.length == 0) {
         return;
-    else
+    } else {
         // called outside cell edit
-        if (table == undefined) {
+        if (provided_table == undefined) {
             recently_loaded = Object.keys(tables).filter(key => tables_loaded.indexOf(key) == -1)
 
-            console.log("data is loaded into table " + recently_loaded + " with " + data.length + " steps");
             // type is always data (field isn't editable)
             // table data is being filled in and not completely available, build up global reference for each recipe
-            table = tables[recently_loaded[0]]
-            tables_loaded.push(recently_loaded[0])
+            if (recently_loaded.length != 0) {
+                provided_table = tables[recently_loaded[0]]
+                tables_loaded.push(recently_loaded[0])
+            } else {
+                // create experience
+                provided_table = table;
+            }
         }
+        
+        var rows = provided_table.getRows();
+        var adjunctSteps = rows.filter(row => row.getData().location.indexOf("Adjunct") == 0);
 
-    var rows = table.getRows();
-    var adjunctSteps = rows.filter(row => row.getData().location.indexOf("Adjunct") == 0);
-
-    var cumulative_hop_time = 0;
-    adjunctSteps.slice().reverse().forEach(adjunctRow => {
-        var row_data = adjunctRow.getData();
-        cumulative_hop_time += row_data.step_time;
-        console.log("set " + row_data.name + " hop_time to " + cumulative_hop_time);
-        adjunctRow.update({ "hop_time": cumulative_hop_time });
-    });
+        var cumulative_hop_time = 0;
+        adjunctSteps.slice().reverse().forEach(adjunctRow => {
+            var row_data = adjunctRow.getData();
+            cumulative_hop_time += row_data.step_time;
+            adjunctRow.update({ "hop_time": cumulative_hop_time });
+        });
+    }
 }
 
 $(document).ready(function () {
@@ -234,7 +238,7 @@ function update_recipe(recipe_id) {
                 setTimeout(function () { window.location.href = "zseries_recipes"; }, 2000);
             },
             error: function (request, status, error) {
-                //showAlert("Error: " + request.responseText, "danger");
+                showAlert("Error: " + request.responseText, "danger");
                 //setTimeout(function () { window.location.href = "zseries_recipes";}, 2000);
             },
         });
@@ -255,7 +259,7 @@ function delete_recipe(recipe_id) {
                 setTimeout(function () { window.location.href = "zseries_recipes"; }, 2000);
             },
             error: function (request, status, error) {
-                //showAlert("Error: " + request.responseText, "danger");
+                showAlert("Error: " + request.responseText, "danger");
                 //setTimeout(function () { window.location.href = "zseries_recipes";}, 2000);
             },
         });

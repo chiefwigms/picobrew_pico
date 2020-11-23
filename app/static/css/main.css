@@ -35,6 +35,9 @@ span.equipment-icon {
 span.equipment-icon img {
   width: 80%;
 }
+form#f_new_recipe {
+  width: 930px
+}
 .table-recipe {
   width: 930px
 }
