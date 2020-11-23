@@ -16,12 +16,12 @@ var default_data = [
     { name: "Mash Out", location: "Mash", temperature: 175, step_time: 15, drain_time: 8 },
     { name: "Heat to Boil", location: "PassThru", temperature: 207, step_time: 0, drain_time: 0 },
     { name: "Pre-hop Boil", location: "PassThru", temperature: 207, step_time: 45, drain_time: 0 },
-    { name: "Hops 1", location: "Adjunct1", temperature: 207, step_time: 10, hop_time: 43, drain_time: 0 },
-    { name: "Hops 2", location: "Adjunct2", temperature: 207, step_time: 5, hop_time: 33, drain_time: 0 },
-    { name: "Hops 3", location: "Adjunct3", temperature: 207, step_time: 8, hop_time: 28, drain_time: 0 },
+    { name: "Hops 1", location: "Adjunct1", temperature: 207, step_time: 10, drain_time: 0 },
+    { name: "Hops 2", location: "Adjunct2", temperature: 207, step_time: 5, drain_time: 0 },
+    { name: "Hops 3", location: "Adjunct3", temperature: 207, step_time: 8, drain_time: 0 },
     { name: "Balance Temps", location: "PassThru", temperature: 0, step_time: 1, drain_time: 8 },
     { name: "Cool to Whirlpool", location: "PassThru", temperature: 175, step_time: 0, drain_time: 0 },
-    { name: "Whirlpool", location: "Adjunct4", temperature: 175, step_time: 20, hop_time: 20, drain_time: 5 },
+    { name: "Whirlpool", location: "Adjunct4", temperature: 175, step_time: 20, drain_time: 5 },
     { name: "Connect Chiller", location: "Pause", temperature: 0, step_time: 0, drain_time: 0 },
     { name: "Chill", location: "PassThru", temperature: 66, step_time: 10, drain_time: 10 },
 ];
@@ -159,31 +159,36 @@ function data_loaded(data) {
     calculate_hop_timing(data)
 }
 
-function calculate_hop_timing(data, table = undefined) {
+function calculate_hop_timing(data, provided_table = undefined) {
     //data - all data loaded into the table
-    if (data.length == 0)
+    if (data.length == 0) {
         return;
-    else
+    } else {
         // called outside cell edit
-        if (table == undefined) {
+        if (provided_table == undefined) {
             recently_loaded = Object.keys(tables).filter(key => tables_loaded.indexOf(key) == -1)
 
             // type is always data (field isn't editable)
             // table data is being filled in and not completely available, build up global reference for each recipe
             if (recently_loaded.length != 0) {
-                table = tables[recently_loaded[0]]
+                provided_table = tables[recently_loaded[0]]
                 tables_loaded.push(recently_loaded[0])
-                var rows = table.getRows();
-                var adjunctSteps = rows.filter(row => row.getData().location.indexOf("Adjunct") == 0);
-
-                var cumulative_hop_time = 0;
-                adjunctSteps.slice().reverse().forEach(adjunctRow => {
-                    var row_data = adjunctRow.getData();
-                    cumulative_hop_time += row_data.step_time;
-                    adjunctRow.update({ "hop_time": cumulative_hop_time });
-                });
+            } else {
+                // create experience
+                provided_table = table;
             }
         }
+        
+        var rows = provided_table.getRows();
+        var adjunctSteps = rows.filter(row => row.getData().location.indexOf("Adjunct") == 0);
+
+        var cumulative_hop_time = 0;
+        adjunctSteps.slice().reverse().forEach(adjunctRow => {
+            var row_data = adjunctRow.getData();
+            cumulative_hop_time += row_data.step_time;
+            adjunctRow.update({ "hop_time": cumulative_hop_time });
+        });
+    }
 }
 
 $(document).ready(function () {
