@@ -8,7 +8,7 @@ import subprocess
 import sys
 import traceback
 import uuid
-from flask import current_app, render_template, request, redirect
+from flask import current_app, make_response, render_template, request, redirect, send_file
 from pathlib import Path
 from threading import Thread
 from time import sleep
@@ -197,6 +197,30 @@ def update_zseries_recipe():
         if str(recipe.id) == update['id']:
             recipe.update_steps(filename, update['steps'])
     return '', 204
+
+
+@main.route('/recipes/<machine_type>/<rid>/<name>.json', methods=['GET'])
+def download_recipe(machine_type, rid, name):
+    recipe_dirpath = ""
+    if machine_type == "picobrew":
+        recipe_dirpath = pico_recipe_path()
+    elif machine_type == "zymatic":
+        recipe_dirpath = zymatic_recipe_path()
+    elif machine_type == "zseries":
+        recipe_dirpath = zseries_recipe_path()
+    else:
+        return 'Invalid machine type provided \"' + machine_type + '\"', 418
+
+    files = list(recipe_dirpath.glob(file_glob_pattern))
+    
+    for filename in files:
+        recipe = load_zseries_recipe(filename)
+        if str(recipe.id) == str(rid) and str(recipe.name) == name:
+            response = make_response(send_file(filename))
+            # custom content-type will force a download vs rendering with window.location
+            response.headers['Content-Type'] = 'application/octet-stream'
+            return response
+    return 'Download Recipe: Failed to find recipe id \"' + id + '\"', 418
 
 
 @main.route('/delete_zseries_recipe', methods=['GET', 'POST'])

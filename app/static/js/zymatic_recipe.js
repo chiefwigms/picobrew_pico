@@ -240,6 +240,13 @@ function update_recipe(recipe_id) {
     }
 };
 
+function download_recipe(recipe_id, recipe_name) {
+    var table = Tabulator.prototype.findTable("#t_" + recipe_id)[0];
+    if (table) {
+        window.location = '/recipes/zymatic/' + recipe_id + '/' + recipe_name + '.json';
+    }
+};
+
 function delete_recipe(recipe_id) {
     if (confirm("Are you sure?")) {
         $.ajax({
