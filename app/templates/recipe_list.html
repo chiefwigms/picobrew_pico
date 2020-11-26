@@ -12,6 +12,10 @@
                     onclick="event.stopPropagation();event.preventDefault();download_recipe('{{recipe['id']}}', '{{recipe['name']}}');">
                     <i class="fas fa-download"></i>
                 </button>
+                <button class="btn btn-sm btn-info float-right mr-3" type="button" id="bclone_{{recipe['id']}}"
+                    onclick='event.stopPropagation();event.preventDefault();clone_recipe({{recipe| tojson}});'>
+                    <i class="fas fa-copy"></i>
+                </button>
                 <button class="btn btn-sm btn-danger float-right mr-3" type="button" id="bdelete_{{recipe['id']}}"
                     onclick="event.stopPropagation();event.preventDefault();delete_recipe('{{recipe['id']}}');">
                     <i class="fas fa-trash"></i>

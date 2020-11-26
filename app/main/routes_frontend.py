@@ -75,7 +75,7 @@ def iSpindel_history():
 
 @main.route('/zymatic_recipes')
 def _zymatic_recipes():
-    global zymatic_recipes
+    global zymatic_recipes, invalid_recipes
     zymatic_recipes = load_zymatic_recipes()
     recipes_dict = [json.loads(json.dumps(recipe, default=lambda r: r.__dict__)) for recipe in zymatic_recipes]
     return render_template('zymatic_recipes.html', recipes=recipes_dict, invalid=invalid_recipes.get(MachineType.ZYMATIC, set()))
@@ -223,6 +223,8 @@ def download_recipe(machine_type, rid, name):
     return 'Download Recipe: Failed to find recipe id \"' + id + '\"', 418
 
 
+
+
 @main.route('/delete_zseries_recipe', methods=['GET', 'POST'])
 def delete_zseries_recipe():
     recipe_id = request.get_json()
@@ -297,7 +299,7 @@ def delete_file():
 
 @main.route('/pico_recipes')
 def _pico_recipes():
-    global pico_recipes
+    global pico_recipes, invalid_recipes
     pico_recipes = load_pico_recipes()
     recipes_dict = [json.loads(json.dumps(recipe, default=lambda r: r.__dict__)) for recipe in pico_recipes]
     return render_template('pico_recipes.html', recipes=recipes_dict, invalid=invalid_recipes.get(MachineType.PICOBREW, set()))

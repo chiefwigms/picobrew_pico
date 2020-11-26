@@ -4,6 +4,11 @@ var plusIcon = function (cell, formatterParams) {
 var minusIcon = function (cell, formatterParams) {
     return "<i class='far fa-minus-square fa-lg'></i>";
 }
+function showAlert(msg, type) {
+    $('#alert').html("<div class='w-100 alert text-center alert-" + type + "'>" + msg + "</div>");
+    $('#alert').show();
+}
+
 var default_data = [
     { name: "Heat Mash", location: "PassThru", temperature: 152, step_time: 0, drain_time: 0 },
     { name: "Mash", location: "Mash", temperature: 152, step_time: 90, drain_time: 8 },
@@ -209,10 +214,6 @@ $(document).ready(function () {
             },
         });
     });
-    function showAlert(msg, type) {
-        $('#alert').html("<div class='w-75 alert text-center alert-" + type + "'>" + msg + "</div>");
-        $('#alert').show();
-    }
 });
 
 function update_recipe(recipe_id) {
@@ -246,6 +247,27 @@ function download_recipe(recipe_id, recipe_name) {
         window.location = '/recipes/zymatic/' + recipe_id + '/' + recipe_name + '.json';
     }
 };
+
+function clone_recipe(recipe) {
+    recipe.id = ''
+    recipe.name = recipe.name + " (copy " + Math.floor((Math.random() * 100) + 1) + ")";
+    $.ajax({
+        url: 'new_zymatic_recipe',
+        type: 'POST',
+        data: JSON.stringify(recipe),
+        dataType: "json",
+        processData: false,
+        contentType: "application/json; charset=UTF-8",
+        success: function (data) {
+            showAlert("Success!", "success")
+            setTimeout(function () { window.location.href = "zymatic_recipes"; }, 2000);
+        },
+        error: function (request, status, error) {
+            showAlert("Error: " + request.responseText, "danger")
+            //setTimeout(function () { window.location.href = "zymatic_recipes";}, 2000);
+        },
+    });
+}
 
 function delete_recipe(recipe_id) {
     if (confirm("Are you sure?")) {

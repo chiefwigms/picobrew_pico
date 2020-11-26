@@ -4,6 +4,11 @@ var plusIcon = function (cell, formatterParams) {
 var minusIcon = function (cell, formatterParams) {
     return "<i class='far fa-minus-square fa-lg'></i>";
 }
+function showAlert(msg, type) {
+    $('#alert').html("<div class='w-100 alert text-center alert-" + type + "'>" + msg + "</div>");
+    $('#alert').show();
+}
+
 // provide selector for default mash profiles (single infusion w/ mashout, single infusion w/o mashout, high efficiency multi-step, etc)
 var default_data = [
     { name: "Heat Water", location: "PassThru", temperature: 104, step_time: 0, drain_time: 0 },
@@ -213,11 +218,6 @@ $(document).ready(function () {
             },
         });
     });
-
-    function showAlert(msg, type) {
-        $('#alert').html("<div class='w-75 alert text-center alert-" + type + "'>" + msg + "</div>");
-        $('#alert').show();
-    }
 });
 
 function update_recipe(recipe_id) {
@@ -251,6 +251,25 @@ function download_recipe(recipe_id, recipe_name) {
         window.location = '/recipes/zseries/' + recipe_id + '/' + recipe_name + '.json';
     }
 };
+
+function clone_recipe(recipe) {
+    recipe.name = recipe.name + " (copy " + Math.floor((Math.random() * 100) + 1) + ")";
+    $.ajax({
+        url: 'new_zseries_recipe_save',
+        type: 'POST',
+        data: JSON.stringify(recipe),
+        dataType: "json",
+        processData: false,
+        contentType: "application/json; charset=UTF-8",
+        success: function (data) {
+            showAlert("Success!", "success")
+            setTimeout(function () { window.location.href = "zseries_recipes"; }, 2000);
+        },
+        error: function (request, status, error) {
+            showAlert("Error: " + request.responseText, "danger")
+        },
+    });
+}
 
 function delete_recipe(recipe_id) {
     if (confirm("Are you sure?")) {

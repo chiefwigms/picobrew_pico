@@ -7,6 +7,10 @@ var minusIcon = function (cell, formatterParams) {
 var editCheck = function (cell) {
     return !(["Preparing To Brew", "Heating"].includes(cell.getRow().getCell("name").getValue()));
 }
+function showAlert(msg, type) {
+    $('#alert').html("<div class='w-100 alert text-center alert-" + type + "'>" + msg + "</div>");
+    $('#alert').show();
+}
 var default_data = [
     { name: "Preparing To Brew", location: "Prime", temperature: 0, step_time: 3, drain_time: 0 },
     { name: "Heating", location: "PassThru", temperature: 110, step_time: 0, drain_time: 0 },
@@ -252,6 +256,27 @@ function download_recipe(recipe_id, recipe_name) {
         window.location = '/recipes/picobrew/' + recipe_id + '/' + recipe_name + '.json';
     }
 };
+
+function clone_recipe(recipe) {
+    recipe.id = ''
+    recipe.name = recipe.name + " (copy " + Math.floor((Math.random() * 100) + 1) + ")";
+    $.ajax({
+        url: 'new_pico_recipe',
+        type: 'POST',
+        data: JSON.stringify(recipe),
+        dataType: "json",
+        processData: false,
+        contentType: "application/json; charset=UTF-8",
+        success: function (data) {
+            showAlert("Success!", "success")
+            setTimeout(function () { window.location.href = "pico_recipes"; }, 2000);
+        },
+        error: function (request, status, error) {
+            showAlert("Error: " + request.responseText, "danger")
+            //setTimeout(function () { window.location.href = "pico_recipes";}, 2000);
+        },
+    });
+}
 
 function delete_recipe(recipe_id) {
     if (confirm("Are you sure?")) {
