@@ -8,7 +8,7 @@ import subprocess
 import sys
 import traceback
 import uuid
-from flask import current_app, render_template, request, redirect
+from flask import current_app, make_response, render_template, request, redirect, send_file
 from pathlib import Path
 from threading import Thread
 from time import sleep
@@ -75,7 +75,7 @@ def iSpindel_history():
 
 @main.route('/zymatic_recipes')
 def _zymatic_recipes():
-    global zymatic_recipes
+    global zymatic_recipes, invalid_recipes
     zymatic_recipes = load_zymatic_recipes()
     recipes_dict = [json.loads(json.dumps(recipe, default=lambda r: r.__dict__)) for recipe in zymatic_recipes]
     return render_template('zymatic_recipes.html', recipes=recipes_dict, invalid=invalid_recipes.get(MachineType.ZYMATIC, set()))
@@ -199,6 +199,32 @@ def update_zseries_recipe():
     return '', 204
 
 
+@main.route('/recipes/<machine_type>/<rid>/<name>.json', methods=['GET'])
+def download_recipe(machine_type, rid, name):
+    recipe_dirpath = ""
+    if machine_type == "picobrew":
+        recipe_dirpath = pico_recipe_path()
+    elif machine_type == "zymatic":
+        recipe_dirpath = zymatic_recipe_path()
+    elif machine_type == "zseries":
+        recipe_dirpath = zseries_recipe_path()
+    else:
+        return 'Invalid machine type provided \"' + machine_type + '\"', 418
+
+    files = list(recipe_dirpath.glob(file_glob_pattern))
+    
+    for filename in files:
+        recipe = load_zseries_recipe(filename)
+        if str(recipe.id) == str(rid) and str(recipe.name) == name:
+            response = make_response(send_file(filename))
+            # custom content-type will force a download vs rendering with window.location
+            response.headers['Content-Type'] = 'application/octet-stream'
+            return response
+    return 'Download Recipe: Failed to find recipe id \"' + id + '\"', 418
+
+
+
+
 @main.route('/delete_zseries_recipe', methods=['GET', 'POST'])
 def delete_zseries_recipe():
     recipe_id = request.get_json()
@@ -273,7 +299,7 @@ def delete_file():
 
 @main.route('/pico_recipes')
 def _pico_recipes():
-    global pico_recipes
+    global pico_recipes, invalid_recipes
     pico_recipes = load_pico_recipes()
     recipes_dict = [json.loads(json.dumps(recipe, default=lambda r: r.__dict__)) for recipe in pico_recipes]
     return render_template('pico_recipes.html', recipes=recipes_dict, invalid=invalid_recipes.get(MachineType.PICOBREW, set()))
@@ -608,6 +634,7 @@ def load_active_brew_sessions():
     # process brew_sessions from memory
     for uid in active_brew_sessions:
         brew_sessions.append({'alias': active_brew_sessions[uid].alias,
+                              'machine_type': active_brew_sessions[uid].machine_type,
                               'graph': get_brew_graph_data(uid, active_brew_sessions[uid].name,
                                                            active_brew_sessions[uid].step,
                                                            active_brew_sessions[uid].data,
@@ -674,6 +701,7 @@ zymatic_recipes = []
 zseries_recipes = []
 
 brew_sessions = []
+ferm_sessions = []
 
 invalid_recipes = {}
 invalid_sessions = {}

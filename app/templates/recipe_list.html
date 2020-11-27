@@ -1,0 +1,49 @@
+<div id="accordion">
+    {% for recipe in recipes %}
+    <div class="card bg-dark text-white-50">
+        <h5 class="card-header" id="h_{{recipe['id']}}">
+            <a class="collapsed" role="button" data-toggle="collapse" href="#c_{{recipe['id']}}"
+                data-parent="#accordion" aria-expanded="false" aria-controls="c_{{recipe['id']}}">
+                {{recipe['name']}}
+                {% if recipe['abv'] and recipe['ibu'] %}
+                (ABV = {{recipe['abv']}}, IBU = {{recipe['ibu']}})
+                {% endif %}
+                <button class="btn btn-sm btn-primary float-right mr-5" type="button" id="bdownload_{{recipe['id']}}"
+                    onclick="event.stopPropagation();event.preventDefault();download_recipe('{{recipe['id']}}', '{{recipe['name']}}');">
+                    <i class="fas fa-download"></i>
+                </button>
+                <button class="btn btn-sm btn-info float-right mr-3" type="button" id="bclone_{{recipe['id']}}"
+                    onclick='event.stopPropagation();event.preventDefault();clone_recipe({{recipe| tojson}});'>
+                    <i class="fas fa-copy"></i>
+                </button>
+                <button class="btn btn-sm btn-danger float-right mr-3" type="button" id="bdelete_{{recipe['id']}}"
+                    onclick="event.stopPropagation();event.preventDefault();delete_recipe('{{recipe['id']}}');">
+                    <i class="fas fa-trash"></i>
+                </button>
+                <button class="btn btn-sm btn-success float-right mr-3" type="button" id="bsave_{{recipe['id']}}"
+                    onclick="event.stopPropagation();event.preventDefault();update_recipe('{{recipe['id']}}');"
+                    style="display:none;">
+                    <i class="far fa-save fa-lg"></i>
+                </button>
+            </a>
+        </h5>
+        <div id="c_{{recipe['id']}}" class="collapse" aria-labelledby="h_{{recipe['id']}}">
+            <div class="card-body">
+                <div class="table-recipe table-sm table-striped table-bordered table-light" id="t_{{recipe['id']}}">
+                </div>
+                <script>
+                    recipe_table['dataEdited'] = function (data) {
+                        document.getElementById("bsave_{{recipe['id']}}").style.display = "block";
+                    }
+                    recipe_table['rowMoved'] = function (row) {
+                        document.getElementById("bsave_{{recipe['id']}}").style.display = "block";
+                    }
+
+                    tables["{{recipe['id']}}"] = new Tabulator("#t_{{recipe['id']}}", recipe_table);
+                    tables["{{recipe['id']}}"].setData({{ recipe['steps']| tojson }});
+                </script>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>

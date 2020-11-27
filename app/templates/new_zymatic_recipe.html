@@ -9,14 +9,17 @@
       <div class="form-group col-sm-3">
         <input type="text" class="form-control form-control-sm" id="recipe_name" placeholder="Recipe Name">
       </div>
+      <div class="form-group col-sm-9">
+        <button class="btn btn-sm btn-success float-right mr-3" type="button" id="b_new_recipe">
+          <i class="far fa-save fa-lg"></i>
+        </button>
+      </div>
     </div>
   </form>
-  <div class="table-sm table-striped table-bordered table-light" style="width: 830px;" id="t_new_recipe"></div>
+  <div class="table-recipe table-sm table-striped table-bordered table-light" id="t_new_recipe"></div>
   <script>
     var table = new Tabulator("#t_new_recipe", recipe_table);
     table.setData(default_data);
     tables["new_recipe"] = table;
   </script>
-  <div><button class="w-75 btn btn-sm btn-secondary btn-block" type="button" id="b_new_recipe">Save</button></div>
-  <div id=alert class='hide'></div>
 {% endblock %}
