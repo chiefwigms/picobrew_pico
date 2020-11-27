@@ -147,7 +147,7 @@ def delete_zymatic_recipe():
 def load_zymatic_recipes():
     files = list(zymatic_recipe_path().glob(file_glob_pattern))
     recipes = [load_zymatic_recipe(file) for file in files]
-    return list(filter(lambda x: x.name != None, recipes))
+    return list(sorted(filter(lambda x: x.name != None, recipes), key=lambda x: x.name))
 
 
 def load_zymatic_recipe(file):
@@ -240,7 +240,7 @@ def delete_zseries_recipe():
 def load_zseries_recipes():
     files = list(zseries_recipe_path().glob(file_glob_pattern))
     recipes = [load_zseries_recipe(file) for file in files]
-    return list(filter(lambda x: x.name != None, recipes))
+    return list(sorted(filter(lambda x: x.name != None, recipes), key=lambda x: x.name))
 
 
 def load_zseries_recipe(file):
@@ -594,7 +594,7 @@ def about():
 def load_pico_recipes():
     files = list(pico_recipe_path().glob(file_glob_pattern))
     recipes = [load_pico_recipe(file) for file in files]
-    return list(filter(lambda x: x.name != None, recipes))
+    return list(sorted(filter(lambda x: x.name != None, recipes), key=lambda x: x.name))
 
 
 def load_pico_recipe(file):
@@ -648,7 +648,7 @@ def load_brew_sessions(uid=None):
         files = list(brew_archive_sessions_path().glob("[^_.]*#{}*.json".format(uid)))
     else:
         files = list(brew_archive_sessions_path().glob(file_glob_pattern))
-    brew_sessions = [parse_brew_session(file) for file in files]
+    brew_sessions = [parse_brew_session(file) for file in sorted(files, reverse=True)]
     return list(filter(lambda x: x != None, brew_sessions))
 
 
@@ -671,7 +671,7 @@ def load_active_ferm_sessions():
 
 def load_ferm_sessions():
     files = list(ferm_archive_sessions_path().glob(file_glob_pattern))
-    ferm_sessions = [parse_ferm_session(file) for file in files]
+    ferm_sessions = [parse_ferm_session(file) for file in sorted(files, reverse=True)]
     return list(filter(lambda x: x != None, ferm_sessions))
 
 def parse_iSpindel_session(file):
@@ -692,7 +692,7 @@ def load_active_iSpindel_sessions():
 
 def load_iSpindel_sessions():
     files = list(iSpindel_archive_sessions_path().glob(file_glob_pattern))
-    iSpindel_sessions = [parse_iSpindel_session(file) for file in files]
+    iSpindel_sessions = [parse_iSpindel_session(file) for file in sorted(files, reverse=True)]
     return list(filter(lambda x: x != None, iSpindel_sessions))
 
 # Read initial recipe list on load
