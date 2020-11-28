@@ -101,7 +101,7 @@ var recipe_table = {
             editable: false,
             mutator: (value, data, type, params, component) => {
                 // type is always data (field isn't editable)
-                if (data.location.indexOf("Adjunct") == 0)
+                if (data.location && data.location.indexOf("Adjunct") == 0)
                     return data.hop_time == undefined ? data.step_time : data.hop_time;
                 else
                     return "";
