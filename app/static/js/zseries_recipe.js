@@ -124,7 +124,9 @@ var recipe_table = {
         {
             formatter: plusIcon, width: 49, hozAlign: "center",
             cellClick: function (e, cell) {
-                cell.getTable().addRow({}, false, cell.getRow());
+                cell.getTable().addRow(Object.assign({}, cell.getRow().getData()), false, cell.getRow()).then(function(row) {
+                    row.update({name: "New Step"});
+                });
             }
         },
         {

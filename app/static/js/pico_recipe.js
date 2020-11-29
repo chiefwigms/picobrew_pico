@@ -1,11 +1,20 @@
-var plusIcon = function (cell, formatterParams) {
-    return "<i class='far fa-plus-square fa-lg'></i>";
-}
-var minusIcon = function (cell, formatterParams) {
-    return "<i class='far fa-minus-square fa-lg'></i>";
+var fixedRows = 3
+
+function rowIsEditable(cell) {
+    var pos = cell.getTable().getRowPosition(cell.getRow());
+    if (pos < fixedRows)
+       return false;
+    else
+       return true;
 }
 var editCheck = function (cell) {
-    return !(["Preparing To Brew", "Heating"].includes(cell.getRow().getCell("name").getValue()));
+    return rowIsEditable(cell);
+}
+var plusIcon = function (cell, formatterParams) {
+        return rowIsEditable(cell)?"<i class='far fa-plus-square fa-lg'></i>":"";
+}
+var minusIcon = function (cell, formatterParams) {
+        return rowIsEditable(cell)?"<i class='far fa-minus-square fa-lg'></i>":"";
 }
 function showAlert(msg, type) {
     $('#alert').html("<div class='w-100 alert text-center alert-" + type + "'>" + msg + "</div>");
@@ -122,13 +131,17 @@ var recipe_table = {
         {
             formatter: plusIcon, width: 49, hozAlign: "center",
             cellClick: function (e, cell) {
-                cell.getTable().addRow({}, false, cell.getRow());
+                if (rowIsEditable(cell))
+                    cell.getTable().addRow(Object.assign({}, cell.getRow().getData()), false, cell.getRow()).then(function(row) {
+                        row.update({name: "New Step"});
+                    });
             }
         },
         {
             formatter: minusIcon, width: 49, hozAlign: "center",
             cellClick: function (e, cell) {
-                cell.getRow().delete();
+                if (rowIsEditable(cell))
+                    cell.getRow().delete();
             }
         },
     ],
