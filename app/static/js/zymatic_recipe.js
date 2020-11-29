@@ -183,15 +183,26 @@ function calculate_hop_timing(data, provided_table = undefined) {
                 provided_table = table;
             }
         }
-
+        
         var rows = provided_table.getRows();
         var adjunctSteps = rows.filter(row => row.getData().location.indexOf("Adjunct") == 0);
 
-        var cumulative_hop_time = 0;
+        var cumulative_hop_time = {
+            "Adjunct1": 0,
+            "Adjunct2": 0,
+            "Adjunct3": 0,
+            "Adjunct4": 0
+        };
         adjunctSteps.slice().reverse().forEach(adjunctRow => {
             var row_data = adjunctRow.getData();
-            cumulative_hop_time += row_data.step_time;
-            adjunctRow.update({ "hop_time": cumulative_hop_time });
+            for (x in cumulative_hop_time) {
+                if (row_data.location <= "Adjunct" + x) {
+                    cumulative_hop_time[x] += row_data.step_time
+                }
+            }
+
+            // cumulative_hop_time += row_data.step_time;
+            adjunctRow.update({ "hop_time": cumulative_hop_time[row_data.location] });
         });
     }
 }
