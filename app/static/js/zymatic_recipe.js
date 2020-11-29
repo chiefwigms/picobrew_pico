@@ -53,6 +53,9 @@ var recipe_table = {
                     "Adjunct4",
                     "Pause",
                 ]
+            },
+            cellEdited: (cell) => {
+                calculate_hop_timing(cell.getTable().getData(), cell.getTable())
             }
         },
         {

@@ -54,6 +54,9 @@ var recipe_table = {
                     "Adjunct3",
                     "Adjunct4",
                 ]
+            },
+            cellEdited: (cell) => {
+                calculate_hop_timing(cell.getTable().getData(), cell.getTable())
             }
         },
         {
