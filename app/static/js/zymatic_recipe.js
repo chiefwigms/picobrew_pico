@@ -183,7 +183,6 @@ function calculate_hop_timing(data, provided_table = undefined) {
                 provided_table = table;
             }
         }
-        
         var rows = provided_table.getRows();
         var adjunctSteps = rows.filter(row => row.getData().location.indexOf("Adjunct") == 0);
 
