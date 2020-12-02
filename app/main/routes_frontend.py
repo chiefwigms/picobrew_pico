@@ -107,19 +107,19 @@ def import_zymatic_recipe():
         machine = next((uid for uid in active_brew_sessions if not active_brew_sessions[uid].is_pico), None)
         try:
             sync_user_uri = 'http://137.117.17.70/API/SyncUSer?user={}&machine={}'.format(guid, machine)
-            current_app.logger.debug('DEBUG: import_zymatic_recipe - {}'.format(sync_user_uri))
+            current_app.logger.debug('import_zymatic_recipe - {}'.format(sync_user_uri))
             r = requests.get(sync_user_uri, headers={'host': 'picobrew.com'})
             recipes = r.text.strip()
         except:
             pass
-        current_app.logger.debug('DEBUG: Zymatic Recipes Dumped: \"{}\"'.format(recipes))
+        current_app.logger.debug('Zymatic Recipes Dumped: \"{}\"'.format(recipes))
         if len(recipes) > 2 and recipes[0] == '#' and recipes[-1] == '#':
             ZymaticRecipeImport(recipes)
             return '', 204
         else:
             return 'Import Failed: \"' + recipes + '\"', 418
     else:
-        return render_template('import_zymatic_recipe.html')
+        return render_template('import_brewhouse_recipe.html')
 
 
 @main.route('/update_zymatic_recipe', methods=['POST'])
@@ -241,13 +241,13 @@ def import_zseries_recipe():
     if request.method == 'POST':
         current_app.logger.debug('Importing Z recipes')
         data = request.get_json()
-        uid = data['uid']
-        if import_recipes(uid, None, MachineType.ZSERIES):
+        guid = data['guid']
+        if import_recipes(guid, None, MachineType.ZSERIES):
             return '', 204
         else:
             return 'failed to import Z recipes', 500
     else:
-        return render_template('import_zymatic_recipe.html')
+        return render_template('import_brewhouse_recipe.html')
 
 
 def load_zseries_recipes():

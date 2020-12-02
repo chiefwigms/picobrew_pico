@@ -49,7 +49,7 @@ def import_recipes_classic(mach_uid, account_id, mach_type):
         raw_reply = repl.text.strip()
     except Exception as e:
         raise ImportException(f"Error fetching via http: {e}")
-    print(raw_reply)
+
     if (
         len(raw_reply) > 2
         and raw_reply.startswith("#")
@@ -60,11 +60,12 @@ def import_recipes_classic(mach_uid, account_id, mach_type):
             PicoBrewRecipeImport(recipe=raw_reply, rfid=account_id)
             return True
         elif mach_type is MachineType.ZYMATIC:
-            current_app.logger.debug("Importing Zymatic recipe")
+            current_app.logger.debug(f"Importing Zymatic recipe {raw_reply}")
             ZymaticRecipeImport(recipes=raw_reply)
             return True
         else:
             raise ImportException("Invalid machine type")
+
     # Not reached
     return False
 
@@ -83,26 +84,35 @@ def import_recipes_z(mach_uid: str):
             "Content-Type": "application/json",
         }
     )
-    repl = session.post(
-        uri, verify=False, json={"Kind": 1, "MaxCount": 20, "Offset": 0},
-    )
+
+    repl = session.post(uri, verify=False, json={"Kind": 1, "MaxCount": 20, "Offset": 0})
     if repl.status_code != 200:
-        current_app.logger.debug(f"Failed to get recipe list: {repl.text}")
+        current_app.logger.error(f"Failed to get recipe list: {repl.text}")
         return False
     recipe_list = repl.json()
-    for recipe in recipe_list["Recipes"]:
-        id = recipe["ID"]
-        name = recipe["Name"]
-        current_app.logger.debug(f"fetching recipe {name}")
-        session.headers = requests.structures.CaseInsensitiveDict(
-            {"host": "www.picobrew.com", "Authorization": Z_AUTH_TOKEN,}
-        )
 
-        uri = ZSeriesDataSyncURI(mach_uid, id)
-        repl = session.get(uri, verify=False)
-        if repl.status_code != 200:
-            current_app.logger.debug("bad fetch")
-            return False
-        recipe = repl.json()
-        ZSeriesRecipeImport(recipe)
+    current_app.logger.debug(f"raw recipe response {recipe_list}")
+    current_app.logger.debug(f"found {len(recipe_list['Recipes'])} recipes")
+
+    for recipe in recipe_list["Recipes"]:
+        rid = recipe["ID"]
+        # recipes imported from brewcrafter have no ID and have external steps
+        # Example of External Recipe Payload: {'ID': None, 'Name': 'Beekeeper Honey Brown', 'Kind': 2, 'Uri': 'https://www.brewcrafter.com/recipe/steps/4f202520-a28c-44a6-76d6-c1298652a4fb', 'Abv': -1, 'Ibu': -1} 
+        if rid != None:
+            name = recipe["Name"]
+            current_app.logger.debug(f"fetching recipe id='{rid}' and name='{name}'")
+            session.headers = requests.structures.CaseInsensitiveDict(
+                {"host": "www.picobrew.com", "Authorization": Z_AUTH_TOKEN,}
+            )
+
+            uri = ZSeriesDataSyncURI(mach_uid, rid)
+            repl = session.get(uri, verify=False)
+            if repl.status_code != 200:
+                current_app.logger.error('ZSeries Recipe Import - Failed: \"{}\"'.format(repl.json))
+                return False
+            recipe = repl.json()
+
+            current_app.logger.debug(f"import recipe {recipe}")
+            ZSeriesRecipeImport(recipe)
+
     return True
