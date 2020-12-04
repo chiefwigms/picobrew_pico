@@ -9,8 +9,8 @@ from flask import current_app
 from typing import Optional
 
 
-def PicoSyncURI(mach_uid: str, account_id: str) -> str:
-    return f"http://137.117.17.70/API/pico/getRecipe?uid={mach_uid}&rfid={account_id}&ibu=-1&abv=-1.0"
+def PicoSyncURI(mach_uid: str, rfid: str) -> str:
+    return f"http://137.117.17.70/API/pico/getRecipe?uid={mach_uid}&rfid={rfid}&ibu=-1&abv=-1.0"
 
 
 def ZymaticSyncURI(mach_uid: str, account_id: str) -> str:
@@ -29,25 +29,26 @@ class ImportException(Exception):
     pass
 
 
-# id should be the rfid of a picopack, or a user GUID
-def import_recipes(mach_uid: str, account_id: Optional[str], mach_type: MachineType):
-    if mach_type == MachineType.ZYMATIC or mach_type == MachineType.PICOBREW:
-        return import_recipes_classic(mach_uid, account_id, mach_type)
+def import_recipes(mach_uid: str, account_id: str, rfid: str, mach_type: MachineType):
+    if mach_type in [MachineType.ZYMATIC, MachineType.PICOBREW, MachineType.PICOBREW_C]:
+        import_recipes_classic(mach_uid, account_id, rfid, mach_type)
     elif mach_type == MachineType.ZSERIES:
-        return import_recipes_z(mach_uid)
+        import_recipes_z(mach_uid)
 
 
-def import_recipes_classic(mach_uid, account_id, mach_type):
+def import_recipes_classic(mach_uid, account_id, rfid, mach_type):
     try:
         if mach_type == MachineType.ZYMATIC:
             uri = ZymaticSyncURI(mach_uid, account_id)
-        elif mach_type == MachineType.PICOBREW:
-            uri = PicoSyncURI(mach_uid, account_id)
+        elif mach_type in [MachineType.PICOBREW, MachineType.PICOBREW_C]:
+            uri = PicoSyncURI(mach_uid, rfid)
         else:
+            current_app.logger.error(f"incorrect mach_type {mach_type}")
             raise Exception(f"Bad value for MachineType: {mach_type}")
         repl = requests.get(uri, headers={"host": "picobrew.com"})
         raw_reply = repl.text.strip()
     except Exception as e:
+        current_app.logger.error(f"exception occured importing recipe {e}")
         raise ImportException(f"Error fetching via http: {e}")
 
     if (
@@ -56,18 +57,20 @@ def import_recipes_classic(mach_uid, account_id, mach_type):
         and raw_reply.endswith("#")
         and raw_reply != "#Invalid|#"
     ):
-        if mach_type is MachineType.PICOBREW:
+        if mach_type in [MachineType.PICOBREW, MachineType.PICOBREW_C]:
             PicoBrewRecipeImport(recipe=raw_reply, rfid=account_id)
-            return True
         elif mach_type is MachineType.ZYMATIC:
             current_app.logger.debug(f"Importing Zymatic recipe {raw_reply}")
             ZymaticRecipeImport(recipes=raw_reply)
-            return True
         else:
+            current_app.logger.error(f"incorrect mach_type {mach_type}")
             raise ImportException("Invalid machine type")
-
-    # Not reached
-    return False
+    else:
+        current_app.logger.error(f"import failed {raw_reply}")
+        if mach_type is MachineType.ZYMATIC:
+            raise ImportException("User GUID and/or Product ID are invalid or not associated")
+        else:
+            raise ImportException("Picopak RFID expired and/or Product ID is invalid")
 
 
 # Magic string in firmware
@@ -87,8 +90,9 @@ def import_recipes_z(mach_uid: str):
 
     repl = session.post(uri, verify=False, json={"Kind": 1, "MaxCount": 20, "Offset": 0})
     if repl.status_code != 200:
-        current_app.logger.error(f"Failed to get recipe list: {repl.text}")
-        return False
+        failure_message = f"Failed to get recipe list: {repl.text}"
+        current_app.logger.error(failure_message)
+        raise ImportException(failure_message)
     recipe_list = repl.json()
 
     current_app.logger.debug(f"raw recipe response {recipe_list}")
@@ -108,11 +112,9 @@ def import_recipes_z(mach_uid: str):
             uri = ZSeriesDataSyncURI(mach_uid, rid)
             repl = session.get(uri, verify=False)
             if repl.status_code != 200:
-                current_app.logger.error('ZSeries Recipe Import - Failed: \"{}\"'.format(repl.json))
-                return False
+                current_app.logger.error('ZSeries Recipe Import - Failed: \"{}\"'.format(repl.text))
+                raise ImportException(f"Error importing: {repl.text}")
             recipe = repl.json()
 
             current_app.logger.debug(f"import recipe {recipe}")
             ZSeriesRecipeImport(recipe)
-
-    return True

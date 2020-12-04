@@ -101,25 +101,18 @@ def new_zymatic_recipe():
 @main.route('/import_zymatic_recipe', methods=['GET', 'POST'])
 def import_zymatic_recipe():
     if request.method == 'POST':
-        recipes = ''
         data = request.get_json()
-        guid = data['guid']
-        machine = next((uid for uid in active_brew_sessions if not active_brew_sessions[uid].is_pico), None)
+        guid = data['guid'] # user accountId
+        uid = data['uid'] # machine productId
         try:
-            sync_user_uri = 'http://137.117.17.70/API/SyncUSer?user={}&machine={}'.format(guid, machine)
-            current_app.logger.debug('import_zymatic_recipe - {}'.format(sync_user_uri))
-            r = requests.get(sync_user_uri, headers={'host': 'picobrew.com'})
-            recipes = r.text.strip()
-        except:
-            pass
-        current_app.logger.debug('Zymatic Recipes Dumped: \"{}\"'.format(recipes))
-        if len(recipes) > 2 and recipes[0] == '#' and recipes[-1] == '#':
-            ZymaticRecipeImport(recipes)
+            # import for picobrew and picobrew_c are the same
+            import_recipes(uid, guid, None, MachineType.ZYMATIC)
             return '', 204
-        else:
-            return 'Import Failed: \"' + recipes + '\"', 418
+        except Exception as e:
+            return getattr(e, 'message', e.args[0]), 400
     else:
-        return render_template('import_brewhouse_recipe.html')
+        machine_ids = [uid for uid in active_brew_sessions if active_brew_sessions[uid].machine_type == MachineType.ZYMATIC]
+        return render_template('import_brewhouse_recipe.html', user_required=True, machine_ids=machine_ids)
 
 
 @main.route('/update_zymatic_recipe', methods=['POST'])
@@ -239,15 +232,16 @@ def delete_zseries_recipe():
 @main.route('/import_zseries_recipe', methods=['GET', 'POST'])
 def import_zseries_recipe():
     if request.method == 'POST':
-        current_app.logger.debug('Importing Z recipes')
         data = request.get_json()
-        guid = data['guid']
-        if import_recipes(guid, None, MachineType.ZSERIES):
+        uid = data['uid'] # machine productId
+        try:
+            import_recipes(uid, None, None, MachineType.ZSERIES)
             return '', 204
-        else:
-            return 'failed to import Z recipes', 500
+        except Exception as e:
+            return getattr(e, 'message', e.args[0]), 400
     else:
-        return render_template('import_brewhouse_recipe.html')
+        machine_ids = [uid for uid in active_brew_sessions if active_brew_sessions[uid].machine_type == MachineType.ZSERIES]
+        return render_template('import_brewhouse_recipe.html', user_required=False, machine_ids=machine_ids)
 
 
 def load_zseries_recipes():
@@ -339,25 +333,18 @@ def new_pico_recipe():
 @main.route('/import_pico_recipe', methods=['GET', 'POST'])
 def import_pico_recipe():
     if request.method == 'POST':
-        recipe = ''
         data = request.get_json()
-        rfid = data['rfid']
-        uid = next((uid for uid in active_brew_sessions if active_brew_sessions[uid].is_pico), None)
+        rfid = data['rfid'] # picopak rfid
+        uid = data['uid'] # picopak rfid
         try:
-            get_recipes_uri = 'http://137.117.17.70/API/pico/getRecipe?uid={}&rfid={}&ibu=-1&abv=-1.0'.format(uid, rfid)
-            current_app.logger.debug('DEBUG: import_pico_recipe - {}'.format(get_recipes_uri))
-            r = requests.get(get_recipes_uri, headers={'host': 'picobrew.com'})
-            recipe = r.text.strip()
-        except:
-            pass
-        current_app.logger.debug('DEBUG: Pico Recipe Dumped: \"{}\"'.format(recipe))
-        if len(recipe) > 2 and recipe[0] == '#' and recipe[-1] == '#' and recipe != '#Invalid|#':
-            PicoBrewRecipeImport(recipe, rfid)
+            # import for picobrew and picobrew_c are the same
+            import_recipes(uid, None, rfid, MachineType.PICOBREW)
             return '', 204
-        else:
-            return 'Import Failed: \"' + recipe + '\"', 418
+        except Exception as e:
+            return getattr(e, 'message', e.args[0]), 400
     else:
-        return render_template('import_pico_recipe.html')
+        machine_ids = [uid for uid in active_brew_sessions if active_brew_sessions[uid].machine_type in [MachineType.PICOBREW, MachineType.PICOBREW_C]]
+        return render_template('import_brewhouse_recipe.html', rfid_required=True, machine_ids=machine_ids)
 
 
 @main.route('/update_pico_recipe', methods=['POST'])
