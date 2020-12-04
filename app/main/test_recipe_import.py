@@ -4,16 +4,7 @@ import requests
 import unittest
 import mock
 from flask import Flask
-from pytest_mock import MockerFixture
-from unittest.mock import PropertyMock
 
-
-def _mock_request(mocker: MockerFixture, body: str) -> MockerFixture:
-    m = mocker.patch('requests.get')
-    m.return_value = mocker.Mock(spec=requests.Response)
-    txt = PropertyMock(return_value=body)
-    type(m.return_value).text = txt
-    return m
 
 # This method will be used by the mock to replace requests.get
 def mocked_requests_get(*args, **kwargs):
