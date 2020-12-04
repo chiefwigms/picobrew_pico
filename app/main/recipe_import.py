@@ -58,7 +58,7 @@ def import_recipes_classic(mach_uid, account_id, rfid, mach_type):
         and raw_reply != "#Invalid|#"
     ):
         if mach_type in [MachineType.PICOBREW, MachineType.PICOBREW_C]:
-            PicoBrewRecipeImport(recipe=raw_reply, rfid=account_id)
+            PicoBrewRecipeImport(recipe=raw_reply, rfid=rfid)
         elif mach_type is MachineType.ZYMATIC:
             current_app.logger.debug(f"Importing Zymatic recipe {raw_reply}")
             ZymaticRecipeImport(recipes=raw_reply)
