@@ -109,6 +109,7 @@ def import_zymatic_recipe():
             import_recipes(uid, guid, None, MachineType.ZYMATIC)
             return '', 204
         except Exception as e:
+            current_app.logger.error(f'import of recipes failed: {e}')
             return getattr(e, 'message', e.args[0]), 400
     else:
         machine_ids = [uid for uid in active_brew_sessions if active_brew_sessions[uid].machine_type == MachineType.ZYMATIC]
@@ -238,6 +239,7 @@ def import_zseries_recipe():
             import_recipes(uid, None, None, MachineType.ZSERIES)
             return '', 204
         except Exception as e:
+            current_app.logger.error(f'import of recipes failed: {e}')
             return getattr(e, 'message', e.args[0]), 400
     else:
         machine_ids = [uid for uid in active_brew_sessions if active_brew_sessions[uid].machine_type == MachineType.ZSERIES]
@@ -341,6 +343,7 @@ def import_pico_recipe():
             import_recipes(uid, None, rfid, MachineType.PICOBREW)
             return '', 204
         except Exception as e:
+            current_app.logger.error(f'import of picopak recipe failed: {e}')
             return getattr(e, 'message', e.args[0]), 400
     else:
         machine_ids = [uid for uid in active_brew_sessions if active_brew_sessions[uid].machine_type in [MachineType.PICOBREW, MachineType.PICOBREW_C]]

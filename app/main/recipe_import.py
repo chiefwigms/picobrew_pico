@@ -43,12 +43,10 @@ def import_recipes_classic(mach_uid, account_id, rfid, mach_type):
         elif mach_type in [MachineType.PICOBREW, MachineType.PICOBREW_C]:
             uri = PicoSyncURI(mach_uid, rfid)
         else:
-            # current_app.logger.error(f"incorrect mach_type {mach_type}")
             raise Exception(f"Bad value for MachineType: {mach_type}")
         repl = requests.get(uri, headers={"host": "picobrew.com"})
         raw_reply = repl.text.strip()
     except Exception as e:
-        # current_app.logger.error(f"exception occured importing recipe {e}")
         raise ImportException(f"Error fetching via http: {e}")
 
     if (
@@ -63,10 +61,8 @@ def import_recipes_classic(mach_uid, account_id, rfid, mach_type):
             current_app.logger.debug(f"Importing Zymatic recipe {raw_reply}")
             ZymaticRecipeImport(recipes=raw_reply)
         else:
-            # current_app.logger.error(f"incorrect mach_type {mach_type}")
             raise ImportException("Invalid machine type")
     else:
-        # current_app.logger.error(f"import failed {raw_reply}")
         if mach_type is MachineType.ZYMATIC:
             raise ImportException("User GUID and/or Product ID are invalid or not associated")
         else:
@@ -91,7 +87,6 @@ def import_recipes_z(mach_uid: str):
     repl = session.post(uri, verify=False, json={"Kind": 1, "MaxCount": 20, "Offset": 0})
     if repl.status_code != 200:
         failure_message = f"Failed to get recipe list: {repl.text}"
-        # current_app.logger.error(failure_message)
         raise ImportException(failure_message)
     recipe_list = repl.json()
 
@@ -112,7 +107,6 @@ def import_recipes_z(mach_uid: str):
             uri = ZSeriesDataSyncURI(mach_uid, rid)
             repl = session.get(uri, verify=False)
             if repl.status_code != 200:
-                # current_app.logger.error('ZSeries Recipe Import - Failed: \"{}\"'.format(repl.text))
                 raise ImportException(f"Error importing: {repl.text}")
             recipe = repl.json()
 
