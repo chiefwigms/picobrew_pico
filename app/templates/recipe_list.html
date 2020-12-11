@@ -36,7 +36,8 @@
                         document.getElementById("bsave_{{recipe['id']}}").style.display = "block";
                     }
                     recipe_table['rowMoved'] = function (row) {
-                        document.getElementById("bsave_{{recipe['id']}}").style.display = "block";
+                        if (isRowMoved(row))
+                            document.getElementById("bsave_{{recipe['id']}}").style.display = "block";
                     }
 
                     tables["{{recipe['id']}}"] = new Tabulator("#t_{{recipe['id']}}", recipe_table);

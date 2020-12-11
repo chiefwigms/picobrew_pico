@@ -1,20 +1,18 @@
-var fixedRows = 3
+const fixedRows = 3;
+var isDataLoading;
 
 function rowIsEditable(cell) {
-    var pos = cell.getTable().getRowPosition(cell.getRow());
-    if (pos < fixedRows)
-       return false;
-    else
-       return true;
+    var pos = cell.getTable().getRowPosition(cell.getRow(),true);
+    return (pos < fixedRows) ? false : true;
 }
 var editCheck = function (cell) {
     return rowIsEditable(cell);
 }
 var plusIcon = function (cell, formatterParams) {
-        return rowIsEditable(cell)?"<i class='far fa-plus-square fa-lg'></i>":"";
+    return rowIsEditable(cell) ? "<i class='far fa-plus-square fa-lg'></i>" : "";
 }
 var minusIcon = function (cell, formatterParams) {
-        return rowIsEditable(cell)?"<i class='far fa-minus-square fa-lg'></i>":"";
+    return rowIsEditable(cell) ? "<i class='far fa-minus-square fa-lg'></i>" : "";
 }
 function showAlert(msg, type) {
     $('#alert').html("<div class='w-100 alert text-center alert-" + type + "'>" + msg + "</div>");
@@ -33,6 +31,9 @@ var default_data = [
     { name: "Hops 4", location: "Adjunct4", temperature: 202, step_time: 8, drain_time: 5 },
 ];
 var tables_loaded = [];
+var idMutator = function (value, data, type, params, component) {
+	return isDataLoading ? component.getTable().getRows().length : data.id;
+}
 var recipe_table = {
     movableRows: true,
     headerSort: false,
@@ -43,6 +44,9 @@ var recipe_table = {
         {
             rowHandle: true, formatter: "handle", headerSort: false, frozen: true, width: 50
         },
+        {
+			title: "ID", field:"id", visible: false, mutatorData: idMutator
+        },        
         {
             title: "Step #", formatter: "rownum", hozAlign: "center", width: 60
         },
@@ -134,20 +138,29 @@ var recipe_table = {
         {
             formatter: plusIcon, width: 49, hozAlign: "center",
             cellClick: function (e, cell) {
-                if (rowIsEditable(cell))
-                    cell.getTable().addRow(Object.assign({}, cell.getRow().getData()), false, cell.getRow()).then(function(row) {
-                        row.update({name: "New Step"});
-                    });
+                if (rowIsEditable(cell)) {
+                    var newRowData = Object.assign({}, cell.getRow().getData());
+                    newRowData.name = "New Step";
+                    newRowData.id = getMaxID(cell)+1;
+                    cell.getTable().addRow(newRowData, false, cell.getRow());
+                }
             }
         },
         {
             formatter: minusIcon, width: 49, hozAlign: "center",
             cellClick: function (e, cell) {
-                if (rowIsEditable(cell))
+                if (rowIsEditable(cell)) {
                     cell.getRow().delete();
+                    if (cell.getTable().getRows().length==fixedRows) {
+                        cell.getTable().addRow(Object.assign({},default_data[fixedRows]));
+                    }
+                }
             }
         },
     ],
+    dataLoading: function() {
+        isDataLoading=true;
+    },
     dataLoaded: data_loaded,
     tooltips: function (column) {
         var tip = ""
@@ -172,6 +185,7 @@ var recipe_table = {
 };
 
 function data_loaded(data) {
+    isDataLoading=false;
     calculate_hop_timing(data)
 }
 
@@ -216,6 +230,41 @@ function calculate_hop_timing(data, provided_table = undefined) {
             adjunctRow.update({ "hop_time": cumulative_hop_time[row_data.location] });
         });
     }
+}
+
+function getMaxID(component) {
+    var maxID=0;
+    var rows=component.getTable().getRows();
+
+    rows.forEach(function (row) {
+        rowData=row.getData();
+		if (rowData.id > maxID)
+			maxID=rowData.id;
+    });
+
+    return maxID;
+}    
+
+function isRowMoved(row){
+	var pos = row.getPosition(true);
+	var index = row.getIndex();
+	var moved = true;
+
+	if (pos < fixedRows) {
+		row.move(fixedRows-1);
+		row.getTable().redraw(true);
+	}
+
+	if (index < fixedRows) {
+		if (index == 0) 
+			row.move(1, true);
+		else 
+			row.move(index-1);
+		moved = false;
+		row.getTable().redraw(true);
+	}
+
+	return moved;
 }
 
 $(document).ready(function () {

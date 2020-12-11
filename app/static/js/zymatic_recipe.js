@@ -1,3 +1,4 @@
+const fixedRows = 0;
 var plusIcon = function (cell, formatterParams) {
     return "<i class='far fa-plus-square fa-lg'></i>";
 }
@@ -131,6 +132,9 @@ var recipe_table = {
             formatter: minusIcon, width: 49, hozAlign: "center",
             cellClick: function (e, cell) {
                 cell.getRow().delete();
+                if (cell.getTable().getRows().length==fixedRows) {
+                    cell.getTable().addRow(Object.assign({},default_data[fixedRows]));
+                }
             }
         },
     ],
@@ -162,6 +166,10 @@ var recipe_table = {
 
 function data_loaded(data) {
     calculate_hop_timing(data)
+}
+
+function isRowMoved(row){
+	return true;
 }
 
 function calculate_hop_timing(data, provided_table = undefined) {
