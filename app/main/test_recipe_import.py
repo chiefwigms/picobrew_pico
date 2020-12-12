@@ -56,9 +56,7 @@ class TestRecipeImport(unittest.TestCase):
     @mock.patch('app.main.recipe_import.PicoBrewRecipeImport')
     def test_classic_fetch_success_complete_response(self, recipe_mocker, mock_request):
         recipe_mocker.return_value = None
-        import_recipes_classic(
-            'test', 'test', 'test_rfid', MachineType.PICOBREW)
+        import_recipes_classic('test', 'test', 'test_rfid', MachineType.PICOBREW)
         mock_request.assert_called_once()
         recipe_mocker.assert_called_once()
-        recipe_mocker.assert_called_with(
-            recipe='#good stuff#', rfid='test_rfid')
+        recipe_mocker.assert_called_with(recipe='#good stuff#', rfid='test_rfid')
