@@ -1,19 +1,11 @@
-import json
-import uuid
-import os
-from datetime import datetime
-from flask import current_app, request, Response, abort, send_from_directory
+from flask import current_app, send_from_directory
 from webargs import fields
 from webargs.flaskparser import use_args, FlaskParser
-from enum import Enum
-from random import seed, randint
+from random import seed
 
-from .. import socketio
 from . import main
 from .config import picostill_firmware_path
 from .firmware import MachineType, firmware_filename, firmware_upgrade_required, minimum_firmware
-from .routes_frontend import get_zseries_recipes, load_brew_sessions
-from .session_parser import active_brew_sessions
 
 
 arg_parser = FlaskParser()

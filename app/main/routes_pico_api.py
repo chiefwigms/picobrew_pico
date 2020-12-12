@@ -205,13 +205,13 @@ pico_still_args = {
     'picoUid': fields.Str(required=True),       # 32 character alpha-numeric serial number
     'picoStillUid': fields.Str(required=True),   # 12 character alpha-numeric serial number
 }
-
 # Can Use Still: /API/pico/canUsePicoStill?picoUid={UID}&picoStillUid={UID}
 #    Response: '#{0}#\r\n' where {0} : T (or F?)
 @main.route('/API/pico/canUsePicoStill')
 @use_args(pico_still_args, location='querystring')
 def process_can_use_pico_still(args):
     return '#T#\r\n'
+
 
 # Has cleaned still: /API/pico/hasCleanedAck?picoUid={UID}&picoStillUid={UID}
 #    Response: '#{0}#\r\n' where {0} : T (or F?)
@@ -220,6 +220,7 @@ def process_can_use_pico_still(args):
 def process_is_cleaned(args):
     return '#T#\r\n'
 
+
 # Set cleaned still: /API/pico/setCleanedAck?picoUid={UID}&picoStillUid={UID}
 #    Response: '#T#\r\n'
 # Allows a user override of hasCleanedAck if unsuccessful
@@ -227,7 +228,6 @@ def process_is_cleaned(args):
 @use_args(pico_still_args, location='querystring')
 def process_set_cleaned(args):
     return '#T#\r\n'
-
 
 
 # -------- Utility --------

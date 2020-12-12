@@ -13,6 +13,7 @@ from .session_parser import active_ferm_sessions
 
 arg_parser = FlaskParser()
 
+
 # Register: /API/PicoFerm/isRegistered?uid={uid}&token={token}
 # Response: '#{0}#' where {0} : 1 = Registered, 0 = Not Registered
 ferm_registered_args = {
@@ -107,11 +108,14 @@ def process_log_ferm_dataset(args):
     if (datetime.now().date() - active_ferm_sessions[uid].start_time.date()).days > 14:
         active_ferm_sessions[uid].file.write('{}\n]'.format(log_data[:-2]))
         active_ferm_sessions[uid].cleanup()
+        # The server makes a determination when fermenting is done based on the datalog after it sends '2,4'
         return '#2,4#'
     else:
         active_ferm_sessions[uid].file.write(log_data)
         active_ferm_sessions[uid].file.flush()
-        return '#10,0#'  # Errors like '10,16' send data but mark data error.  '10,0' tells the PicoFerm to continue to send data.  The server makes a determination when fermenting is done based on the datalog after it sends '2,4'
+        # Errors like '10,16' send data but mark data error.
+        # '10,0' tells the PicoFerm to continue to send data.
+        return '#10,0#'
 
 
 # -------- Utility --------
