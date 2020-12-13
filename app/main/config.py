@@ -11,6 +11,7 @@ class MachineType(str, Enum):
     ZYMATIC = 'Zymatic'
     ISPINDEL = 'iSpindel'
 
+
 # server config
 def server_config():
     return current_app.config['SERVER_CONFIG']

@@ -6,7 +6,6 @@ from .recipe_parser import (
 )
 from .config import MachineType
 from flask import current_app
-from typing import Optional
 
 
 def PicoSyncURI(mach_uid: str, rfid: str) -> str:
@@ -96,12 +95,20 @@ def import_recipes_z(mach_uid: str):
     for recipe in recipe_list["Recipes"]:
         rid = recipe["ID"]
         # recipes imported from brewcrafter have no ID and have external steps
-        # Example of External Recipe Payload: {'ID': None, 'Name': 'Beekeeper Honey Brown', 'Kind': 2, 'Uri': 'https://www.brewcrafter.com/recipe/steps/4f202520-a28c-44a6-76d6-c1298652a4fb', 'Abv': -1, 'Ibu': -1} 
-        if rid != None:
+        # Example of External Recipe Payload:
+        # {
+        #   'ID': None,
+        #   'Name': 'Beekeeper Honey Brown',
+        #   'Kind': 2,
+        #   'Uri': 'https://www.brewcrafter.com/recipe/steps/4f202520-a28c-44a6-76d6-c1298652a4fb',
+        #   'Abv': -1,
+        #   'Ibu': -1
+        # }
+        if rid is not None:
             name = recipe["Name"]
             current_app.logger.debug(f"fetching recipe id='{rid}' and name='{name}'")
             session.headers = requests.structures.CaseInsensitiveDict(
-                {"host": "www.picobrew.com", "Authorization": Z_AUTH_TOKEN,}
+                {"host": "www.picobrew.com", "Authorization": Z_AUTH_TOKEN}
             )
 
             uri = ZSeriesDataSyncURI(mach_uid, rid)

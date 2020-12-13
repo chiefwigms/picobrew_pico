@@ -1,5 +1,6 @@
 import shutil
-from .config import MachineType, brew_archive_sessions_path, ferm_archive_sessions_path, still_archive_sessions_path, iSpindel_archive_sessions_path
+from .config import (MachineType, brew_archive_sessions_path, ferm_archive_sessions_path,
+                     still_archive_sessions_path, iSpindel_archive_sessions_path)
 
 
 ZYMATIC_LOCATION = {

@@ -173,7 +173,7 @@ def new_zseries_recipe():
 def new_zseries_recipe_save():
     recipe = request.get_json()
     recipe['id'] = increment_zseries_recipe_id()
-    recipe['start_water'] = 13.1
+    recipe['start_water'] = recipe.get('start_water', 13.1)
     filename = zseries_recipe_path().joinpath('{}.json'.format(recipe['name'].replace(' ', '_')))
     if not filename.exists():
         with open(filename, "w") as file:
@@ -728,9 +728,11 @@ def initialize_data():
 # utilities
 
 def increment_zseries_recipe_id():
-    recipe_id = -1
-    for r in get_zseries_recipes():
-        if r.id > recipe_id:
-            recipe_id = r.id
+    recipe_id = 1
+    found = False
 
-    return recipe_id + 1
+    recipe_ids = [r.id for r in get_zseries_recipes()]
+    while recipe_id in recipe_ids:
+        recipe_id += 1
+
+    return recipe_id

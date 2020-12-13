@@ -1,6 +1,5 @@
 from .recipe_import import import_recipes, import_recipes_classic, ImportException
 from .config import MachineType
-import requests
 import unittest
 import mock
 from flask import Flask
@@ -22,18 +21,15 @@ def mocked_requests_get(*args, **kwargs):
 class TestRecipeImport(unittest.TestCase):
     app = Flask('test')
 
-
     @mock.patch('app.main.recipe_import.import_recipes_classic')
     def test_calling_zymatic_import_function(self, mock_request):
         import_recipes('test', 'test', None, MachineType.ZYMATIC)
         mock_request.assert_called_once()
 
-
     @mock.patch('app.main.recipe_import.import_recipes_z')
     def test_zymatic_import_function(self, mock_request):
         import_recipes('test', 'test', None, MachineType.ZSERIES)
         mock_request.assert_called_once()
-
 
     @mock.patch('requests.get')
     def test_classic_fetch_failure_blank_response(self, mock_request):
@@ -42,7 +38,6 @@ class TestRecipeImport(unittest.TestCase):
             import_recipes_classic('test', 'test', None, MachineType.ZYMATIC)
         mock_request.assert_called_once()
 
-
     @mock.patch('requests.get')
     def test_classic_fetch_failure_invalid_response(self, mock_request):
         mock_request.text = '#Invalid|#'
@@ -50,14 +45,12 @@ class TestRecipeImport(unittest.TestCase):
             import_recipes_classic('test', 'test', None, MachineType.ZYMATIC)
         mock_request.assert_called_once()
 
-
     @mock.patch('requests.get')
     def test_classic_fetch_failure_incomplete_response(self, mock_request):
         mock_request.text = '#'
         with self.assertRaises(ImportException):
             import_recipes_classic('test', 'test', None, MachineType.ZYMATIC)
         mock_request.assert_called_once()
-
 
     @mock.patch('requests.get', side_effect=mocked_requests_get)
     @mock.patch('app.main.recipe_import.PicoBrewRecipeImport')
@@ -67,5 +60,3 @@ class TestRecipeImport(unittest.TestCase):
         mock_request.assert_called_once()
         recipe_mocker.assert_called_once()
         recipe_mocker.assert_called_with(recipe='#good stuff#', rfid='test_rfid')
-
-    

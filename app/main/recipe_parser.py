@@ -5,6 +5,7 @@ from .config import zymatic_recipe_path, pico_recipe_path, zseries_recipe_path
 from .model import PICO_LOCATION, ZYMATIC_LOCATION, ZSERIES_LOCATION
 from flask import current_app
 
+
 class ZymaticRecipeStep():
     def __init__(self):
         self.name = None
@@ -142,7 +143,7 @@ class ZSeriesRecipe():
                 step.step_time = 0 if 'step_time' not in recipe_step else int(recipe_step['step_time'])
                 step.location = recipe_step.get('location', 'PassThru') or 'PassThru'
                 if step.location == 'PassThrough':
-                    step.location = 'PassThru' 
+                    step.location = 'PassThru'
                 step.drain_time = 0 if 'drain_time' not in recipe_step else int(recipe_step['drain_time'])
                 self.steps.append(step)
 
@@ -175,6 +176,7 @@ class ZSeriesRecipe():
         with open(file, 'w') as f:
             json.dump(updated_recipe, f, indent=4, sort_keys=True)
 
+
 def ZSeriesRecipeImport(recipe):
     r = {}
     r['name'] = recipe['Name']
@@ -199,9 +201,9 @@ def ZSeriesRecipeImport(recipe):
 
     # This will cause a circular import
     # Perhaps re-factor "live state" out into its own module?
-    #existing = load_zseries_recipes()
-    #conflict = [old.id for old in existing if old.id == r['id']]
-    #if conflict:
+    # existing = load_zseries_recipes()
+    # conflict = [old.id for old in existing if old.id == r['id']]
+    # if conflict:
     #    current_app.logger.error(f'Conflicting Z-series recipe IDs: {conflicts}')
     #    return None
 
@@ -210,7 +212,6 @@ def ZSeriesRecipeImport(recipe):
     if not filename.exists():
         with open(filename, "w") as file:
             json.dump(r, file, indent=4, sort_keys=True)
-
 
 
 class PicoBrewRecipeStep():

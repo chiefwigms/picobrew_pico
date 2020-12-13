@@ -1,5 +1,6 @@
 from .config import MachineType, server_config
-from distutils.version import LooseVersion, StrictVersion
+from distutils.version import LooseVersion
+
 
 def firmware_filename(device: MachineType, version: str):
     firmware_prefix = device.lower()
