@@ -417,12 +417,14 @@ def setup():
             return '', 204
         elif 'interface' in payload:
             if payload['interface'] == 'wlan0':
-                # change wireless configuration (wpa_supplicant-wlan0.conf and wpa_supplicant.conf)
-                # sudo sed -i -e"s/^ssid=.*/ssid=\"$SSID\"/" /etc/wpa_supplicant/wpa_supplicant.conf
-                # sudo sed -i -e"s/^psk=.*/psk=\"$WIFIPASS\"/" /etc/wpa_supplicant/wpa_supplicant.conf
+                # change wireless configuration (/etc/wpa_supplicant/wpa_supplicant-wlan0.conf)
+                # sudo sed -i -e"s/^ssid=.*/ssid=\"$SSID\"/" /etc/wpa_supplicant/wpa_supplicant-wlan0.conf
+                # sudo sed -i -e"s/^psk=.*/psk=\"$WIFIPASS\"/" /etc/wpa_supplicant/wpa_supplicant-wlan0.conf
             
                 try:
-                    wpa_files = "/etc/wpa_supplicant/wpa_supplicant.conf /etc/wpa_supplicant/wpa_supplicant-wlan0.conf"
+                    # <= beta4 => /etc/wpa_supplicant/wpa_supplicant.conf
+                    # >= beta5 => /etc/wpa_supplicant/wpa_supplicant-wlan0.conf
+                    wpa_files = " ".join([_x for _x in ("/etc/wpa_supplicant/wpa_supplicant.conf", "/etc/wpa_supplicant/wpa_supplicant-wlan0.conf") if os.path.exists(_x)])
 
                     # set ssid in wpa_supplicant files
                     ssid = payload['ssid']
