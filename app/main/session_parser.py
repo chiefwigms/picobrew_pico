@@ -1,7 +1,8 @@
 import json
+from pathlib import Path
 
-from .config import brew_active_sessions_path, ferm_active_sessions_path
-from .model import PicoBrewSession, PicoFermSession
+from .config import brew_active_sessions_path, ferm_active_sessions_path, iSpindel_active_sessions_path
+from .model import PicoBrewSession, PicoFermSession, iSpindelSession
 
 file_glob_pattern = "[!._]*.json"
 
@@ -16,8 +17,8 @@ def load_brew_session(file):
 
     # 0 = Date, 1 = UID, 2 = RFID / Session GUID (guid), 3 = Session Name, 4 = Session Type (integer - z only)
     name = info[3].replace('_', ' ')
-
     step = ''
+
     with open(file) as fp:
         raw_data = fp.read().rstrip()
         if raw_data.endswith(','):
@@ -27,8 +28,8 @@ def load_brew_session(file):
             # Recover from aborted session data file
             raw_data = '[\n]'
         json_data = json.loads(raw_data)
+    
     chart_id = info[0] + '_' + info[2]
-
     alias = '' if info[1] not in active_brew_sessions else active_brew_sessions[info[1]].alias
 
     session_type = None
@@ -38,6 +39,8 @@ def load_brew_session(file):
     session = {
         'date': info[0],
         'name': name,
+        'filename': Path(file).name,
+        'filepath': Path(file),
         'uid': info[1],
         'session': info[2],
         'is_pico': len(info[1]) == 32,
@@ -136,6 +139,8 @@ def load_ferm_session(file):
 
     return ({
         'uid': info[1],
+        'filename': Path(file).name,
+        'filepath': Path(file),
         'alias': alias,
         'date': info[0],
         'name': name,  # should change to brew/user defined session name
@@ -171,6 +176,7 @@ def get_ferm_graph_data(chart_id, voltage, session_data):
 
 def load_iSpindel_session(file):
     info = file.stem.split('#')
+    
     # 0 = Date, 1 = Device UID
     with open(file) as fp:
         raw_data = fp.read().rstrip()
@@ -178,13 +184,18 @@ def load_iSpindel_session(file):
             # Recover from incomplete json data file
             raw_data = raw_data[:-1] + '\n]'
         json_data = json.loads(raw_data)
+    
     chart_id = info[0] + '_' + str(info[1])
-    name = info[1]
-    if info[1] in active_iSpindel_sessions:
-        name = active_iSpindel_sessions[info[1]].alias
+    alias = info[1] if info[1] not in active_iSpindel_sessions else active_iSpindel_sessions[info[1]].alias
+    
     return ({
+        'uid': info[1],
+        'filename': Path(file).name,
+        'filepath': Path(file),
+        'alias': alias,
         'date': info[0],
-        'name': name,
+        'name': alias,  # should change to brew/user defined session name
+        'data': json_data,
         'graph': get_iSpindel_graph_data(chart_id, None, json_data)
     })
 
@@ -270,7 +281,30 @@ def restore_active_ferm_sessions():
             active_ferm_sessions[ferm_session['uid']] = session
 
 
+def restore_active_iSpindel_sessions():
+    if active_iSpindel_sessions == {}:
+        active_iSpindel_session_files = list(iSpindel_active_sessions_path().glob(file_glob_pattern))
+        for file in active_iSpindel_session_files:
+            # print('DEBUG: restore_active_sessions() found {} as an active session'.format(file))
+            ferm_session = load_iSpindel_session(file)
+            # print('DEBUG: restore_active_sessions() {}'.format(ferm_session))
+            if ferm_session['uid'] not in active_iSpindel_sessions:
+                active_iSpindel_sessions[ferm_session['uid']] = []
+
+            session = iSpindelSession()
+            session.file = open(file, 'a')
+            session.file.flush()
+            session.filepath = file
+            session.alias = ferm_session['alias']
+            session.start_time = ferm_session['date']
+
+            session.data = ferm_session['data']
+            session.graph = ferm_session['graph']
+            active_iSpindel_sessions[ferm_session['uid']] = session
+
+
 def restore_active_sessions():
     # initialize active sessions during start up
     restore_active_brew_sessions()
     restore_active_ferm_sessions()
+    restore_active_iSpindel_sessions()

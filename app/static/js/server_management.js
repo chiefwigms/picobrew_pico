@@ -21,3 +21,7 @@ function delete_server_file(filename, type, redirectHref){
 		});
     }
 };
+
+function download_server_session(filename, type){
+    window.location = '/sessions/' + type + '/' + escape(filename);
+};
