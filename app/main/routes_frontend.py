@@ -71,7 +71,7 @@ def ferm_history():
 
 @main.route('/iSpindel_history')
 def iSpindel_history():
-    return render_template('iSpindel_history.html', sessions=load_iSpindel_sessions())
+    return render_template('iSpindel_history.html', sessions=load_iSpindel_sessions(), invalid=get_invalid_sessions('iSpindel'))
 
 
 @main.route('/zymatic_recipes')
@@ -218,6 +218,30 @@ def download_recipe(machine_type, rid, name):
     return 'Download Recipe: Failed to find recipe id \"' + id + '\"', 418
 
 
+@main.route('/sessions/<session_type>/<filename>', methods=['GET'])
+def download_session(session_type, filename):
+    session_dirpath = ""
+    if session_type == "brew":
+        session_dirpath = brew_archive_sessions_path()
+    elif session_type == "ferm":
+        session_dirpath = ferm_archive_sessions_path()
+    elif session_type == "iSpindel":
+        session_dirpath = iSpindel_archive_sessions_path()
+    else:
+        return 'Invalid session type provided \"' + session_type + '\"', 418
+
+    files = list(session_dirpath.glob(file_glob_pattern))
+    filepath = session_dirpath.joinpath(filename)
+
+    for f in files:
+        if f.name == filename:
+            response = make_response(send_file(filepath))
+            # custom content-type will force a download vs rendering with window.location
+            response.headers['Content-Type'] = 'application/octet-stream'
+            return response
+    return 'Download Session: Failed to find session with filename \"' + filename + '\"', 418
+
+
 @main.route('/delete_zseries_recipe', methods=['GET', 'POST'])
 def delete_zseries_recipe():
     recipe_id = request.get_json()
@@ -288,21 +312,26 @@ def delete_file():
     body = request.get_json()
     filename = body['filename']
     if body['type'] == "recipe":
-        for device in invalid_recipes:
-            if Path(filename) in invalid_recipes[device]:
-                os.remove(filename)
-                invalid_recipes[device].remove(Path(filename))
-                return '', 204
-        current_app.logger.error("ERROR: failed to delete recipe file {}".format(filename))
-        return "Delete Filename: Failed to find invalid recipe file {}".format(filename), 418
-    elif body['type'] in invalid_sessions:
-        if Path(filename) in invalid_sessions[body['type']]:
+        filepath = Path(filename)
+        if filepath:
             os.remove(filename)
-            invalid_sessions[body['type']].remove(Path(filename))
+            for device in invalid_recipes:
+                if filepath in invalid_recipes[device]:
+                    invalid_recipes[device].remove(Path(filename))
+            return '', 204
+        current_app.logger.error("ERROR: failed to delete recipe file {}".format(filename))
+        return "Delete Filename: Failed to find recipe file {}".format(filename), 418
+    elif body['type'] in ['brew', 'ferm', 'iSpindel', 'still']:
+        filepath = Path(filename)
+        if filepath:
+            os.remove(filename)
+            if body['type'] in invalid_sessions and filepath in invalid_sessions[body['type']]:
+                invalid_sessions[body['type']].remove(Path(filename))
             return '', 204
         current_app.logger.error("ERROR: failed to delete {} session file {}".format(body['type'], filename))
-        return "Delete Filename: Failed to find invalid {} session file".format(body['type'], filename), 418
-    
+        return "Delete Filename: Failed to find {} session file".format(body['type'], filename), 418
+    else:
+        current_app.logger.error("ERROR: failed to delete {} as the file type {} was not supported".format(filename, body['type']))
     return 'Delete Filename: Unsupported file type specified {}'.format(body['type']), 418
 
 
@@ -682,7 +711,7 @@ def parse_iSpindel_session(file):
         return load_iSpindel_session(file)
     except:
         current_app.logger.error("ERROR: An exception occurred parsing {}".format(file))
-        add_invalid_session("ispindel", file)
+        add_invalid_session("iSpindel", file)
 
 def load_active_iSpindel_sessions():
     iSpindel_sessions = []
