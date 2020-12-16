@@ -32,12 +32,16 @@
                 <div class="table-recipe table-sm table-striped table-bordered table-light" id="t_{{recipe['id']}}">
                 </div>
                 <script>
-                    recipe_table['dataEdited'] = function (data) {
+                    function displayUnsavedState(data) {
                         document.getElementById("bsave_{{recipe['id']}}").style.display = "block";
                     }
-                    recipe_table['rowMoved'] = function (row) {
+                    
+                    recipe_table['cellEdited'] = displayUnsavedState
+                    recipe_table['rowAdded'] = displayUnsavedState
+                    recipe_table['rowDeleted'] = displayUnsavedState
+                    recipe_table['rowMoved'] = function(row) {
                         if (isRowMoved(row))
-                            document.getElementById("bsave_{{recipe['id']}}").style.display = "block";
+                            displayUnsavedState(row)
                     }
 
                     tables["{{recipe['id']}}"] = new Tabulator("#t_{{recipe['id']}}", recipe_table);
