@@ -12,23 +12,36 @@ active_still_sessions = {}
 active_iSpindel_sessions = {}
 
 
+def load_session_file(file):
+    json_data = {}
+    with open(file) as fp:
+        raw_data = fp.read().rstrip()
+        session = recover_incomplete_session(raw_data)
+        json_data = json.loads(session)
+
+    return json_data
+
+
+def recover_incomplete_session(raw_data):
+    recovered_session = raw_data
+    if raw_data == None or raw_data.endswith('[') or raw_data == '':
+        # Recover from aborted session data file
+        recovered_session = '[\n]'
+    elif raw_data.endswith(','):
+        # Recover from incomplete json data file
+        recovered_session = raw_data[:-1] + '\n]'
+
+    return recovered_session
+
+
 def load_brew_session(file):
     info = file.stem.split('#')
 
     # 0 = Date, 1 = UID, 2 = RFID / Session GUID (guid), 3 = Session Name, 4 = Session Type (integer - z only)
+    json_data = load_session_file(file)
+
     name = info[3].replace('_', ' ')
     step = ''
-
-    with open(file) as fp:
-        raw_data = fp.read().rstrip()
-        if raw_data.endswith(','):
-            # Recover from incomplete session json data file
-            raw_data = raw_data[:-1] + '\n]'
-        elif raw_data.endswith('[') or raw_data == '':
-            # Recover from aborted session data file
-            raw_data = '[\n]'
-        json_data = json.loads(raw_data)
-    
     chart_id = info[0] + '_' + info[2]
     alias = '' if info[1] not in active_brew_sessions else active_brew_sessions[info[1]].alias
 
@@ -126,12 +139,7 @@ def load_ferm_session(file):
     info = file.stem.split('#')
 
     # 0 = Date, 1 = Device UID
-    with open(file) as fp:
-        raw_data = fp.read().rstrip()
-        if raw_data.endswith(','):
-            # Recover from incomplete json data file
-            raw_data = raw_data[:-1] + '\n]'
-        json_data = json.loads(raw_data)
+    json_data = load_session_file(file)
 
     chart_id = info[0] + '_' + info[1]
     name = info[1]
@@ -178,12 +186,7 @@ def load_iSpindel_session(file):
     info = file.stem.split('#')
     
     # 0 = Date, 1 = Device UID
-    with open(file) as fp:
-        raw_data = fp.read().rstrip()
-        if raw_data.endswith(','):
-            # Recover from incomplete json data file
-            raw_data = raw_data[:-1] + '\n]'
-        json_data = json.loads(raw_data)
+    json_data = load_session_file(file)
     
     chart_id = info[0] + '_' + str(info[1])
     alias = info[1] if info[1] not in active_iSpindel_sessions else active_iSpindel_sessions[info[1]].alias
