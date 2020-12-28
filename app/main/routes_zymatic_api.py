@@ -151,7 +151,7 @@ def process_log_session(args):
     if args['code'] == 0:
         uid = args['machine']
         if uid not in active_brew_sessions:
-            active_brew_sessions[uid] = PicoBrewSession(MachineType.Zymatic)
+            active_brew_sessions[uid] = PicoBrewSession(MachineType.ZYMATIC)
         active_brew_sessions[uid].session = uuid.uuid4().hex[:32]
         active_brew_sessions[uid].name = get_recipe_name_by_id(args['recipe'])
         active_brew_sessions[uid].filepath = brew_active_sessions_path().joinpath('{0}#{1}#{2}#{3}.json'.format(datetime.now().strftime('%Y%m%d_%H%M%S'), uid, active_brew_sessions[uid].session, active_brew_sessions[uid].name.replace(' ', '_')))
