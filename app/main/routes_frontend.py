@@ -19,7 +19,7 @@ from .config import MachineType, base_path, server_config
 from .model import PicoBrewSession, PicoFermSession, PicoStillSession, iSpindelSession
 from .recipe_import import import_recipes
 from .recipe_parser import PicoBrewRecipe, PicoBrewRecipeImport, ZymaticRecipe, ZymaticRecipeImport, ZSeriesRecipe
-from .session_parser import load_iSpindel_session, get_iSpindel_graph_data, load_ferm_session, get_ferm_graph_data, get_brew_graph_data, load_brew_session, active_brew_sessions, active_ferm_sessions, active_iSpindel_sessions
+from .session_parser import load_iSpindel_session, get_iSpindel_graph_data, load_ferm_session, get_ferm_graph_data, get_brew_graph_data, load_brew_session, active_brew_sessions, active_ferm_sessions, active_iSpindel_sessions, active_still_sessions
 from .config import base_path, zymatic_recipe_path, zseries_recipe_path, pico_recipe_path, ferm_archive_sessions_path, brew_archive_sessions_path, iSpindel_archive_sessions_path, MachineType
 
 
@@ -68,7 +68,8 @@ def handle_devices():
     active_sessions = {
         'brew': active_brew_sessions,
         'ferm': active_ferm_sessions,
-        'iSpindel': active_iSpindel_sessions
+        'iSpindel': active_iSpindel_sessions,
+        'still': active_still_sessions
     }
     current_app.logger.debug(server_config())
 
@@ -79,7 +80,7 @@ def handle_devices():
         alias = request.form['alias']
 
         # verify uid not already configured
-        if uid in {**active_brew_sessions, **active_ferm_sessions, **active_iSpindel_sessions}:
+        if uid in {**active_brew_sessions, **active_ferm_sessions, **active_iSpindel_sessions, **active_still_sessions}:
             error = f'Product ID {uid} already configured'
             current_app.logger.error(error)
             return render_template('devices.html', error=error,
