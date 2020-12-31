@@ -8,12 +8,15 @@ import subprocess
 import sys
 import traceback
 import uuid
+from ruamel.yaml import YAML
 from flask import current_app, make_response, render_template, request, redirect, send_file
 from pathlib import Path
 from threading import Thread
 from time import sleep
 
 from . import main
+from .config import MachineType, base_path, server_config
+from .model import PicoBrewSession, PicoFermSession, PicoStillSession, iSpindelSession
 from .recipe_import import import_recipes
 from .recipe_parser import PicoBrewRecipe, PicoBrewRecipeImport, ZymaticRecipe, ZymaticRecipeImport, ZSeriesRecipe
 from .session_parser import load_iSpindel_session, get_iSpindel_graph_data, load_ferm_session, get_ferm_graph_data, get_brew_graph_data, load_brew_session, active_brew_sessions, active_ferm_sessions, active_iSpindel_sessions
@@ -21,6 +24,7 @@ from .config import base_path, zymatic_recipe_path, zseries_recipe_path, pico_re
 
 
 file_glob_pattern = "[!._]*.json"
+yaml = YAML()
 
 
 # -------- Routes --------
@@ -57,6 +61,68 @@ def shutdown_system():
     os.system('shutdown -h now')
     # TODO: redirect to a page with alert of shutdown
     return redirect('/')
+
+
+@main.route('/devices', methods=['GET', 'POST'])
+def handle_devices():
+    active_sessions = {
+        'brew': active_brew_sessions,
+        'ferm': active_ferm_sessions,
+        'iSpindel': active_iSpindel_sessions
+    }
+    current_app.logger.debug(server_config())
+
+    # register device alias and type
+    if request.method == 'POST':
+        mtype = MachineType(request.form['machine_type'])
+        uid = request.form['uid']
+        alias = request.form['alias']
+
+        # verify uid not already configured
+        if uid in {**active_brew_sessions, **active_ferm_sessions, **active_iSpindel_sessions}:
+            error = f'Product ID {uid} already configured'
+            current_app.logger.error(error)
+            return render_template('devices.html', error=error,
+                config=server_config(), active_sessions=active_sessions)
+
+        current_app.logger.debug(f'machine_type: {mtype}; uid: {uid}; alias: {alias}')
+        
+        # add new device into config
+        cfg_file = base_path().joinpath('config.yaml')
+        with open(cfg_file, 'r') as f:
+            server_cfg = yaml.load(f)
+        try:
+            new_server_cfg = server_cfg
+            with open(cfg_file, 'w') as f:
+                if new_server_cfg['aliases'][mtype] is None:
+                    new_server_cfg['aliases'][mtype] = {}
+                new_server_cfg['aliases'][mtype][uid] = alias
+                yaml.dump(new_server_cfg, f)
+                current_app.config.update(SERVER_CONFIG=server_cfg)
+        except Exception as e:
+            with open(cfg_file, 'w') as f:
+                yaml.dump(server_cfg, f)
+            error = f'Unexpected Error Writing Configuration File: {e}'
+            current_app.logger.error(e)
+            return render_template('devices.html', error=error,
+                config=server_config(), active_sessions=active_sessions)
+        
+        # ... and into already loaded active sessions
+        if mtype is MachineType.PICOFERM:
+            active_ferm_sessions[uid] = PicoFermSession()
+            active_ferm_sessions[uid].alias = alias
+        elif mtype is MachineType.PICOSTILL:
+            active_still_sessions[uid] = PicoStillSession()
+            active_still_sessions[uid].alias = alias
+        elif mtype is MachineType.ISPINDEL:
+            active_iSpindel_sessions[uid] = iSpindelSession()
+            active_iSpindel_sessions[uid].alias = alias
+        else:
+            active_brew_sessions[uid] = PicoBrewSession(mtype)
+            active_brew_sessions[uid].is_pico = True if mtype == MachineType.PICOBREW else False
+            active_brew_sessions[uid].alias = alias
+    
+    return render_template('devices.html', config=server_config(), active_sessions=active_sessions)
 
 
 @main.route('/brew_history')
@@ -706,12 +772,14 @@ def load_ferm_sessions():
     ferm_sessions = [parse_ferm_session(file) for file in sorted(files, reverse=True)]
     return list(filter(lambda x: x != None, ferm_sessions))
 
+
 def parse_iSpindel_session(file):
     try:
         return load_iSpindel_session(file)
     except:
         current_app.logger.error("ERROR: An exception occurred parsing {}".format(file))
         add_invalid_session("iSpindel", file)
+
 
 def load_active_iSpindel_sessions():
     iSpindel_sessions = []
