@@ -87,7 +87,7 @@ def handle_devices():
                 config=server_config(), active_sessions=active_sessions)
 
         current_app.logger.debug(f'machine_type: {mtype}; uid: {uid}; alias: {alias}')
-        
+
         # add new device into config
         cfg_file = base_path().joinpath('config.yaml')
         with open(cfg_file, 'r') as f:
@@ -107,7 +107,7 @@ def handle_devices():
             current_app.logger.error(e)
             return render_template('devices.html', error=error,
                 config=server_config(), active_sessions=active_sessions)
-        
+
         # ... and into already loaded active sessions
         if mtype is MachineType.PICOFERM:
             active_ferm_sessions[uid] = PicoFermSession()
@@ -122,9 +122,67 @@ def handle_devices():
             active_brew_sessions[uid] = PicoBrewSession(mtype)
             active_brew_sessions[uid].is_pico = True if mtype == MachineType.PICOBREW else False
             active_brew_sessions[uid].alias = alias
-    
+
     return render_template('devices.html', config=server_config(), active_sessions=active_sessions)
 
+
+@main.route('/devices/<uid>', methods=['POST', 'DELETE'])
+def handle_specific_device(uid):
+    active_sessions = {
+        'brew': active_brew_sessions,
+        'ferm': active_ferm_sessions,
+        'iSpindel': active_iSpindel_sessions,
+        'still': active_still_sessions
+    }
+
+    # updated already registered device alias
+    mtype = MachineType(request.form['machine_type'])
+    alias = request.form['alias'] if 'alias' in request.form else ''
+
+    # verify uid is already configured
+    if uid not in {**active_brew_sessions, **active_ferm_sessions, **active_iSpindel_sessions, **active_still_sessions}:
+        error = f'Product ID {uid} not already configured'
+        current_app.logger.error(error)
+        return render_template('devices.html', error=error,
+            config=server_config(), active_sessions=active_sessions)
+
+    current_app.logger.debug(f'machine_type: {mtype}; uid: {uid}; alias: {alias}')
+
+    # add new device into config
+    cfg_file = base_path().joinpath('config.yaml')
+    with open(cfg_file, 'r') as f:
+        server_cfg = yaml.load(f)
+    try:
+        new_server_cfg = server_cfg
+        with open(cfg_file, 'w') as f:
+            if request.method == 'POST':
+                new_server_cfg['aliases'][mtype][uid] = alias
+            elif request.method == 'DELETE':
+                del(new_server_cfg['aliases'][mtype][uid])
+            yaml.dump(new_server_cfg, f)
+            current_app.config.update(SERVER_CONFIG=server_cfg)
+    except Exception as e:
+        with open(cfg_file, 'w') as f:
+            yaml.dump(server_cfg, f)
+        error = f'Unexpected Error Writing Configuration File: {e}'
+        current_app.logger.error(e)
+        return render_template('devices.html', error=error,
+            config=server_config(), active_sessions=active_sessions)
+
+    # ... and change existing active session references to alias
+    if mtype is MachineType.PICOFERM:    
+        active_ferm_sessions[uid].alias = alias
+    elif mtype is MachineType.PICOSTILL:
+        active_still_sessions[uid].alias = alias
+    elif mtype is MachineType.ISPINDEL:
+        active_iSpindel_sessions[uid].alias = alias
+    else:
+        active_brew_sessions[uid].alias = alias
+
+    if request.method == 'DELETE':
+        return '', 204
+    else:
+        return redirect('/devices')
 
 @main.route('/brew_history')
 def brew_history():

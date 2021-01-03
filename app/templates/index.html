@@ -1,11 +1,11 @@
 {% extends "base.html" %}
 {% block content %}
-  <script src="static/js/highcharts/highcharts.js"></script>
-  <script src="static/js/highcharts/annotations.js"></script>
-  <script src="static/js/highcharts/export-data.js"></script>
-  <script src="static/js/highcharts/exporting.js"></script>
-  <script src="static/js/highcharts/dark-unica.js"></script>
-  <script src="static/js/socketio/socket.io.slim.js"></script>
+  <script src="/static/js/highcharts/highcharts.js"></script>
+  <script src="/static/js/highcharts/annotations.js"></script>
+  <script src="/static/js/highcharts/export-data.js"></script>
+  <script src="/static/js/highcharts/exporting.js"></script>
+  <script src="/static/js/highcharts/dark-unica.js"></script>
+  <script src="/static/js/socketio/socket.io.slim.js"></script>
   <script>var socket = io.connect('//' + document.domain + ':' + location.port);</script>
   <div id="accordion">
     {% for brew_session in brew_sessions %}
@@ -28,7 +28,7 @@
         <div class="card-body">
           <div id="{{brew_session.graph.chart_id}}" style="min-width: 320px; height: 400px; margin: 0 auto"></div>
           <script>var graph_data={{brew_session.graph|tojson}};</script>
-          <script src="static/js/brew_graph_socketio.js"></script>
+          <script src="/static/js/brew_graph_socketio.js"></script>
         </div>
       </div>
     </div>
@@ -49,7 +49,7 @@
         <div class="card-body">
           <div id="{{ferm_session.graph.chart_id}}" style="min-width: 320px; height: 400px; margin: 0 auto"></div>
           <script>var graph_data={{ferm_session.graph|tojson}};</script>
-          <script src="static/js/ferm_graph_socketio.js"></script>
+          <script src="/static/js/ferm_graph_socketio.js"></script>
         </div>
       </div>
     </div>
@@ -70,7 +70,7 @@
         <div class="card-body">
           <div id="{{iSpindel_session.graph.chart_id}}" style="min-width: 320px; height: 400px; margin: 0 auto"></div>
           <script>var graph_data={{iSpindel_session.graph|tojson}};</script>
-          <script src="static/js/iSpindel_graph_socketio.js"></script>
+          <script src="/static/js/iSpindel_graph_socketio.js"></script>
         </div>
       </div>
     </div>
