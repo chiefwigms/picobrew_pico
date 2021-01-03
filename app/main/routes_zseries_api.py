@@ -566,7 +566,7 @@ def close_session(uid, session_id, body):
 
     active_session.file.seek(0, os.SEEK_END)
     active_session.file.seek(active_session.file.tell() - 1, os.SEEK_SET)  # Remove trailing , from last data set
-    active_session.file.write('\n]')
+    active_session.file.write('\n]\n')
     active_session.cleanup()
 
     return ret

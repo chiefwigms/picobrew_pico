@@ -269,5 +269,5 @@ def cleanup_old_session(uid):
     if uid in active_brew_sessions and active_brew_sessions[uid].file:
         active_brew_sessions[uid].file.seek(0, os.SEEK_END)
         active_brew_sessions[uid].file.seek(active_brew_sessions[uid].file.tell() - 1, os.SEEK_SET)  # Remove trailing , from last data set
-        active_brew_sessions[uid].file.write('\n]')
+        active_brew_sessions[uid].file.write('\n]\n')
         active_brew_sessions[uid].cleanup()
