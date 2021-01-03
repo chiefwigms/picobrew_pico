@@ -53,6 +53,10 @@ zymatic_firmware_check_args = {
 @main.route('/API/zymaticFirmwareCheck')
 @use_args(zymatic_firmware_check_args, location='querystring')
 def process_zymatic_firmware_check(args):
+    uid = args['machine']
+    if uid not in active_brew_sessions:
+        active_brew_sessions[uid] = PicoBrewSession(MachineType.ZYMATIC)
+
     return '\r\n#F#\r\n'
 
 
