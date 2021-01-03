@@ -47,7 +47,13 @@
     {% if 'aliases' in config %}
     {% for machine_type in config['aliases'] %}
     <div class="card bg-dark text-white">
+      {% if machine_type == 'PicoBrewC' %}
+      <h2 id="m_{{machine_type}}">Picobrew C</h2>
+      {% elif machine_type == 'PicoBrew' %}
+      <h2 id="m_{{machine_type}}">Picobrew S/Pro</h2>
+      {% else %}
       <h2 id="m_{{machine_type}}">{{machine_type}}</h2>
+      {% endif %}
       {% if config['aliases'][machine_type] == None %}
       <p>No devices configurated</p>
       {% else %}
