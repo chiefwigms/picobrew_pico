@@ -15,9 +15,10 @@ function start_fermentation(uid) {
         contentType: "application/json; charset=UTF-8",
         success: function (data) {
             showAlert("Success!", "success");
+
+            $("#bstart_" + uid).toggleClass('d-block d-none')
+            $("#bstop_" + uid).toggleClass('d-block d-none')
             // setTimeout(function () { window.location.href = "/"; }, 2000);
-            $("#bstart_" + uid).removeClass('d-block').addClass('d-none');
-            $("#bstop_" + uid).removeClass('d-none').addClass('d-block');
         },
         error: function (request, status, error) {
             showAlert("Error: " + request.responseText, "danger");
@@ -39,8 +40,8 @@ function start_fermentation(uid) {
         contentType: "application/json; charset=UTF-8",
         success: function (data) {
             showAlert("Success!", "success");
-            $("#bstart_" + uid).removeClass('d-none').addClass('d-block');
-            $("#bstop_" + uid).removeClass('d-block').addClass('d-none');
+            $("#bstart_" + uid).toggleClass('d-block d-none')
+            $("#bstop_" + uid).toggleClass('d-block d-none')
 
             // until socketio publishes a new "empty" state just force a refresh (which will clear the graphs)
             setTimeout(function () { window.location.href = "/"; }, 2000);

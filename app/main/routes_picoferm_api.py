@@ -117,6 +117,8 @@ def process_log_ferm_dataset(args):
     socketio.emit('ferm_session_update|{}'.format(args['uid']), graph_update)
 
     ferm_days_elapsed = (datetime.now().date() - active_ferm_sessions[uid].start_time.date()).days
+
+    # end fermentation at 14d counter or when user specifies fermentation is complete
     if ferm_days_elapsed > 14 or (active_ferm_sessions[uid].uninit == False and active_ferm_sessions[uid].active == False):
         active_ferm_sessions[uid].file.write('{}\n]'.format(log_data[:-2]))
         active_ferm_sessions[uid].cleanup()
