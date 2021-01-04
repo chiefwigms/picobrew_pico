@@ -24,6 +24,9 @@ register_args = {
 @main.route('/API/pico/register')
 @use_args(register_args, location='querystring')
 def process_register(args):
+    uid = args['uid']
+    if uid not in active_brew_sessions:
+        active_brew_sessions[uid] = PicoBrewSession()
     return '#T#\r\n'
 
 

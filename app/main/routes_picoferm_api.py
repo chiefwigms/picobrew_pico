@@ -23,6 +23,9 @@ ferm_registered_args = {
 @main.route('/API/PicoFerm/isRegistered')
 @use_args(ferm_registered_args, location='querystring')
 def process_ferm_registered(args):
+    uid = args['uid']
+    if uid not in active_ferm_sessions:
+        active_ferm_sessions[uid] = PicoFermSession()
     return '#1#'
 
 

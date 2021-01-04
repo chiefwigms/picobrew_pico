@@ -6,6 +6,8 @@ from random import seed
 from . import main
 from .config import picostill_firmware_path
 from .firmware import MachineType, firmware_filename, firmware_upgrade_required, minimum_firmware
+from .model import PicoStillSession
+from .session_parser import active_still_sessions
 
 
 arg_parser = FlaskParser()
@@ -31,6 +33,10 @@ picostill_check_firmware_args = {
 @main.route('/API/PicoStill/getFirmwareAddress', methods=['GET'])
 @use_args(picostill_check_firmware_args, location='querystring')
 def process_picostill_check_firmware(args):
+    uid = args['uid']
+    if uid not in active_still_sessions:
+        active_still_sessions[uid] = PicoStillSession()
+
     if firmware_upgrade_required(MachineType.PICOSTILL, args['version']):
         filename = firmware_filename(MachineType.PICOSTILL, minimum_firmware(MachineType.PICOSTILL))
         return '#http://picobrew.com/firmware/picostill/{}#'.format(filename)
