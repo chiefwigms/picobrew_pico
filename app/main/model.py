@@ -81,6 +81,7 @@ class PicoFermSession:
         self.file = None
         self.filepath = None
         self.alias = ''
+        self.active = False
         self.uninit = True
         self.voltage = '-'
         self.start_time = None

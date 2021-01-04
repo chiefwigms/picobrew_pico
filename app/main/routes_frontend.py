@@ -319,6 +319,31 @@ def update_zseries_recipe():
     return '', 204
 
 
+@main.route('/device/<uid>/sessions/<session_type>', methods=['PUT'])
+def update_device_session(uid, session_type):
+    update = request.get_json()
+    if session_type == 'ferm':
+        session = active_ferm_sessions[uid]
+
+        if update['active'] == False:
+            session.active = False
+            if session.file != None:
+                session.file.seek(0, os.SEEK_END)
+                if session.file.tell() > 0:
+                    session.file.seek(session.file.tell() - 1, os.SEEK_SET)  # Remove trailing , from last data set
+                    session.file.write('\n]')
+                    session.cleanup()
+                else:
+                    os.remove(session.filepath)
+        else:
+            session.active = True
+
+        return '', 204
+    else:
+        current_app.logger.error(f'invalid session type : {session_type}')
+        return 'Invalid session type provided \"' + session_type + '\"', 418
+
+
 @main.route('/recipes/<machine_type>/<rid>/<name>.json', methods=['GET'])
 def download_recipe(machine_type, rid, name):
     recipe_dirpath = ""
@@ -329,6 +354,7 @@ def download_recipe(machine_type, rid, name):
     elif machine_type == "zseries":
         recipe_dirpath = zseries_recipe_path()
     else:
+        current_app.logger.error(f'invalid machine_type : {machine_type}')
         return 'Invalid machine type provided \"' + machine_type + '\"', 418
 
     files = list(recipe_dirpath.glob(file_glob_pattern))
@@ -821,6 +847,8 @@ def load_active_ferm_sessions():
     ferm_sessions = []
     for uid in active_ferm_sessions:
         ferm_sessions.append({'alias': active_ferm_sessions[uid].alias,
+                              'uid': uid,
+                              'active': active_ferm_sessions[uid].active,
                               'graph': get_ferm_graph_data(uid, active_ferm_sessions[uid].voltage,
                                                            active_ferm_sessions[uid].data)})
     return ferm_sessions
@@ -854,6 +882,7 @@ def load_iSpindel_sessions():
     iSpindel_sessions = [parse_iSpindel_session(file) for file in sorted(files, reverse=True)]
     return list(filter(lambda x: x != None, iSpindel_sessions))
 
+
 # Read initial recipe list on load
 pico_recipes = []
 zymatic_recipes = []
@@ -882,7 +911,6 @@ def initialize_data():
 
 
 # utilities
-
 def increment_zseries_recipe_id():
     recipe_id = 1
     found = False
