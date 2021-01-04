@@ -3,13 +3,13 @@ from flask_cors import CORS
 from flask_socketio import SocketIO
 from pathlib import Path
 from shutil import copyfile
-import yaml
+from ruamel.yaml import YAML
 import pathlib
 
 BASE_PATH = Path(__file__).parents[1]
 
 socketio = SocketIO()
-
+yaml = YAML()
 
 def create_dir(dir_path):
     # create the directory and any missing parent directories, if it doesn't already exist
@@ -44,7 +44,7 @@ def create_app(debug=False):
         copyfile(example_cfg_file, cfg_file)
 
     with open(cfg_file, 'r') as f:
-        server_cfg = yaml.safe_load(f)
+        server_cfg = yaml.load(f)
 
     app.config.update(
         SECRET_KEY='bosco',

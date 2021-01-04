@@ -1,12 +1,12 @@
 {% extends "base.html" %}
 {% block content %}
-  <script src="static/js/highcharts/highcharts.js"></script>
-  <script src="static/js/highcharts/annotations.js"></script>
-  <script src="static/js/highcharts/export-data.js"></script>
-  <script src="static/js/highcharts/exporting.js"></script>
-  <script src="static/js/highcharts/dark-unica.js"></script>
-  <script src="static/js/server_management.js"></script>
-  <script src="static/js/ferm_history.js"></script>
+  <script src="/static/js/highcharts/highcharts.js"></script>
+  <script src="/static/js/highcharts/annotations.js"></script>
+  <script src="/static/js/highcharts/export-data.js"></script>
+  <script src="/static/js/highcharts/exporting.js"></script>
+  <script src="/static/js/highcharts/dark-unica.js"></script>
+  <script src="/static/js/server_management.js"></script>
+  <script src="/static/js/ferm_history.js"></script>
   {% include "invalid_file.html" %}
   <div id="accordion">
     {% for session in sessions %}
@@ -28,7 +28,7 @@
         <div class="card-body">
           <div id="{{session.graph.chart_id}}" style="min-width: 320px; height: 400px; margin: 0 auto"></div>
           <script>var graph_data={{session.graph|tojson}};</script>
-          <script src="static/js/ferm_graph.js"></script>
+          <script src="/static/js/ferm_graph.js"></script>
         </div>
       </div>
     </div>
