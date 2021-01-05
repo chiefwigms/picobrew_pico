@@ -15,7 +15,6 @@
             for (var key in data) {
                 var frameKey = key.replace(/ /g, '_')
                 var media = data[key]
-                console.log(media.split('.').pop())
                 if (media.split('.').pop() == 'pdf') {
                     getPdf('https://docs.google.com/viewer?url='+media+'&embedded=true', '#'+frameKey);
                 }
@@ -80,6 +79,8 @@
             <h4>{{key}}</h4>
             {% if segment.split('.').pop() == 'pdf' %}
                 <iframe id="{{key.replace(' ', '_')}}" style='width:100%; height:100%;' frameborder='0'></iframe>
+            {% elif segment.split('.').pop() == 'md' %}
+                <div id="{{key.replace(' ', '_')}}"><a href='{{segment}}'>{{segment}}</a></div>
             {% elif 'com' in segment.split('.').pop() %}
                 <div id="{{key.replace(' ', '_')}}"><a href='{{segment}}'>{{segment}}</a></div>
             {% endif %}
