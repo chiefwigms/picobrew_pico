@@ -2,6 +2,7 @@
 
 # python files
 **/__pycache__
+env
 
 # project specific ignores
 config.yaml

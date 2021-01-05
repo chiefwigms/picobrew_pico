@@ -13,10 +13,11 @@ from flask import current_app, make_response, render_template, request, redirect
 from pathlib import Path
 from threading import Thread
 from time import sleep
+from os import path
 
 from . import main
 from .config import MachineType, base_path, server_config
-from .model import PicoBrewSession, PicoFermSession, PicoStillSession, iSpindelSession
+from .model import PicoBrewSession, PicoFermSession, PicoStillSession, iSpindelSession, SupportObject
 from .recipe_import import import_recipes
 from .recipe_parser import PicoBrewRecipe, PicoBrewRecipeImport, ZymaticRecipe, ZymaticRecipeImport, ZSeriesRecipe
 from .session_parser import load_iSpindel_session, get_iSpindel_graph_data, load_ferm_session, get_ferm_graph_data, get_brew_graph_data, load_brew_session, active_brew_sessions, active_ferm_sessions, active_iSpindel_sessions, active_still_sessions
@@ -183,6 +184,91 @@ def handle_specific_device(uid):
         return '', 204
     else:
         return redirect('/devices')
+
+@main.route('/support_accessories')
+def support_accessories():
+    acc_support = SupportObject()
+    acc_support.name = 'Mini Kegerator'
+    acc_support.manual_url = 'https://github.com/Intecpsp/picobrew-support/raw/master/accessories/MiniKegerator_Manual.pdf'
+    return render_template('support.html', support_object=acc_support)
+
+
+@main.route('/support_pico_c')
+def support_pico_c():
+    pico_c_support = SupportObject()
+    pico_c_support.name = 'Pico C'
+    pico_c_support.manual_url = 'https://github.com/Intecpsp/picobrew-support/raw/master/pico-c/PicoC_Manual.pdf'
+    pico_c_support.faq_url = 'https://raw.githubusercontent.com/Intecpsp/picobrew-support/master/pico-c/Frequently-Asked-Questions.md'
+    pico_c_support.instructional_videos_url = 'https://raw.githubusercontent.com/Intecpsp/picobrew-support/master/pico-c/Instructional-Videos.md'
+    pico_c_support.misc_media = {
+        'DIY Cleaning Bucket' : 'https://github.com/Intecpsp/picobrew-support/raw/master/pico-c/DIY_CleaningBucket.pdf',
+        'Cold Brew' : 'https://github.com/Intecpsp/picobrew-support/raw/master/pico-c/PicoC_ColdBrew.pdf',
+        'Manual Brew' : 'https://github.com/Intecpsp/picobrew-support/raw/master/pico-c/PicoC_ManualBrew.pdf',
+        'Sous Vide' : 'https://github.com/Intecpsp/picobrew-support/raw/master/pico-c/PicoC_SousVide.pdf'
+    }
+    return render_template('support.html', support_object=pico_c_support)
+
+
+@main.route('/support_pico_pro')
+def support_pico_pro():
+    pico_pro_support = SupportObject()
+    pico_pro_support.name = 'Pico Pro'
+    pico_pro_support.manual_url = 'https://github.com/Intecpsp/picobrew-support/raw/master/pico-pro/PicoPro_Manual.pdf'
+    pico_pro_support.faq_url = 'https://raw.githubusercontent.com/Intecpsp/picobrew-support/master/pico-pro/Frequently-Asked-Questions.md'
+    pico_pro_support.instructional_videos_url = 'https://raw.githubusercontent.com/Intecpsp/picobrew-support/master/pico-pro/Instructional-Videos.md'
+    pico_pro_support.misc_media = {
+        'Cold Brew' : 'https://github.com/Intecpsp/picobrew-support/raw/master/pico-pro/PicoPro_ColdBrew.pdf',
+        'Manual Brew' : 'https://github.com/Intecpsp/picobrew-support/raw/master/pico-pro/PicoPro_ManualBrew.pdf',
+        'Sous Vide' : 'https://github.com/Intecpsp/picobrew-support/raw/master/pico-pro/Pico_SousVide.pdf'
+    }
+    return render_template('support.html', support_object=pico_pro_support)
+
+
+@main.route('/support_picoferm')
+def support_picoferm():
+    picoferm_support = SupportObject()
+    picoferm_support.name = 'PicoFerm'
+    picoferm_support.manual_url = 'https://github.com/Intecpsp/picobrew-support/raw/master/picoferm/PicoFerm_Manual.pdf'
+    picoferm_support.misc_media = {
+        'Wifi Setup' : 'https://github.com/Intecpsp/picobrew-support/raw/master/picoferm/Wifi-setup.png'
+    }
+    return render_template('support.html', support_object=picoferm_support)
+
+
+@main.route('/support_picostill')
+def support_picostill():
+    picostill_support = SupportObject()
+    picostill_support.name = 'PicoStill'
+    picostill_support.manual_url = 'https://github.com/Intecpsp/picobrew-support/raw/master/picostill/PicoStill_Manual.pdf'
+    picostill_support.instructional_videos_url = 'https://raw.githubusercontent.com/Intecpsp/picobrew-support/master/picostill/Instructional-Videos.md'
+    return render_template('support.html', support_object=picostill_support)
+
+
+@main.route('/support_z_series')
+def support_z_series():
+    z_series_support = SupportObject()
+    z_series_support.name = 'Z Series'
+    z_series_support.manual_url = 'https://github.com/Intecpsp/picobrew-support/raw/master/z-series/ZN_AssemblyGuide.pdf'
+    z_series_support.faq_url = 'https://raw.githubusercontent.com/Intecpsp/picobrew-support/master/z-series/Frequently-Asked-Questions.md'
+    z_series_support.misc_media = {
+        'Quick Start' : 'https://github.com/Intecpsp/picobrew-support/raw/master/z-series/Z_QuickStart.pdf',
+        'Bottling Kit' : 'https://github.com/Intecpsp/picobrew-support/raw/master/z-series/Z_BottlingKit.pdf',
+        'Draft Kit' : 'https://github.com/Intecpsp/picobrew-support/raw/master/z-series/Z_DraftKit.pdf'
+    }
+    return render_template('support.html', support_object=z_series_support)
+
+
+@main.route('/support_additional')
+def support_additional():
+    additional_support = SupportObject()
+    additional_support.name = 'Additional Resources'
+    additional_support.misc_media = {
+        'picobrew_pico' : 'https://github.com/chiefwigms/picobrew_pico',
+        'picobrew-support' : 'https://github.com/Intecpsp/picobrew-support',
+        'Awesome-Picobrew' : 'https://github.com/manofthemountain/awesome-picobrew'
+    }
+    return render_template('support.html', support_object=additional_support)
+
 
 @main.route('/brew_history')
 def brew_history():
