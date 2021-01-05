@@ -81,6 +81,8 @@
                 <iframe id="{{key.replace(' ', '_')}}" style='width:100%; height:100%;' frameborder='0'></iframe>
             {% elif segment.split('.').pop() == 'md' %}
                 <div id="{{key.replace(' ', '_')}}"><a href='{{segment}}'>{{segment}}</a></div>
+            {% elif segment.split('.').pop() == 'png' %}
+                <img src='{{segment}}'>
             {% elif 'com' in segment.split('.').pop() %}
                 <div id="{{key.replace(' ', '_')}}"><a href='{{segment}}'>{{segment}}</a></div>
             {% endif %}
