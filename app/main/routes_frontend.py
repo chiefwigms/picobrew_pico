@@ -270,6 +270,43 @@ def support_additional():
     return render_template('support.html', support_object=additional_support)
 
 
+@main.route('/support_kegsmarts')
+def support_kegsmarts():
+    kegsmarts_support = SupportObject()
+    kegsmarts_support.name = 'KegSmarts'
+    kegsmarts_support.manual_url = 'https://github.com/Intecpsp/picobrew-support/raw/master/legacy/kegsmarts/KegSmarts_Manual.pdf'
+    kegsmarts_support.misc_media = {
+        'Firmware' : 'https://raw.githubusercontent.com/Intecpsp/picobrew-support/master/legacy/kegsmarts/Firmware.md',
+        'Firmware-Installation' : 'https://raw.githubusercontent.com/Intecpsp/picobrew-support/master/legacy/kegsmarts/Firmware-Installation.md'
+    }
+    return render_template('support.html', support_object=kegsmarts_support)
+
+
+@main.route('/support_pico_s')
+def support_pico_s():
+    pico_s_support = SupportObject()
+    pico_s_support.name = 'Pico S'
+    pico_s_support.manual_url = 'https://github.com/Intecpsp/picobrew-support/raw/master/legacy/pico-s/Pico_Manual.pdf'
+    pico_s_support.faq_url = 'https://raw.githubusercontent.com/Intecpsp/picobrew-support/master/legacy/pico-s/Frequently-Asked-Questions.md'
+    pico_s_support.instructional_videos_url = 'https://raw.githubusercontent.com/Intecpsp/picobrew-support/master/legacy/pico-s/Instructional-Videos.md'
+    return render_template('support.html', support_object=pico_s_support)
+
+
+@main.route('/support_zymatic')
+def support_zymatic():
+    zymatic_support = SupportObject()
+    zymatic_support.name = 'Zymatic'
+    zymatic_support.manual_url = 'https://github.com/Intecpsp/picobrew-support/raw/master/legacy/zymatic/Zymatic_Manual.pdf'
+    zymatic_support.faq_url = 'https://raw.githubusercontent.com/Intecpsp/picobrew-support/master/legacy/zymatic/Frequently-Asked-Questions.md'
+    zymatic_support.instructional_videos_url = 'https://raw.githubusercontent.com/Intecpsp/picobrew-support/master/legacy/zymatic/Instructional-Videos.md'
+    zymatic_support.misc_media = {
+        'Firmware' : 'https://raw.githubusercontent.com/Intecpsp/picobrew-support/master/legacy/zymatic/Firmware.md',
+        'Firmware-Installation' : 'https://raw.githubusercontent.com/Intecpsp/picobrew-support/master/legacy/zymatic/Firmware-Installation.md',
+        'Maintenance' : 'https://raw.githubusercontent.com/Intecpsp/picobrew-support/master/legacy/zymatic/Maintenance.md'
+    }
+    return render_template('support.html', support_object=zymatic_support)
+
+
 @main.route('/brew_history')
 def brew_history():
     return render_template('brew_history.html', sessions=load_brew_sessions(), invalid=get_invalid_sessions('brew'))
