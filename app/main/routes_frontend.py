@@ -376,7 +376,7 @@ def delete_pico_recipe():
 def available_networks():
     # TODO: properly handle failures by hiding settings in /setup or showing error
 
-    wifi_list = subprocess.check_output('./scripts/pi/wifi_scan.sh', shell=True)
+    wifi_list = subprocess.check_output('./scripts/pi/wifi_scan.sh | grep 2.4', shell=True)
     networks = []
     for network in wifi_list.split(b'\n'):
         network_parts = shlex.split(network.decode())
@@ -417,20 +417,21 @@ def setup():
             return '', 204
         elif 'interface' in payload:
             if payload['interface'] == 'wlan0':
-                # change wireless configuration (/etc/wpa_supplicant/wpa_supplicant-wlan0.conf)
-                # sudo sed -i -e"s/^ssid=.*/ssid=\"$SSID\"/" /etc/wpa_supplicant/wpa_supplicant-wlan0.conf
-                # sudo sed -i -e"s/^psk=.*/psk=\"$WIFIPASS\"/" /etc/wpa_supplicant/wpa_supplicant-wlan0.conf
-            
+                # change wireless configuration (wpa_supplicant-wlan0.conf and wpa_supplicant.conf)
+                # sudo sed -i -e"s/^\bssid=.*/ssid=\"$SSID\"/" /etc/wpa_supplicant/wpa_supplicant.conf
+                # sudo sed -i -e"s/^psk=.*/psk=\"$WIFIPASS\"/" /etc/wpa_supplicant/wpa_supplicant.conf
+
                 try:
                     # <= beta4 => /etc/wpa_supplicant/wpa_supplicant.conf
                     # >= beta5 => /etc/wpa_supplicant/wpa_supplicant-wlan0.conf
                     wpa_files = " ".join([_x for _x in ("/etc/wpa_supplicant/wpa_supplicant.conf", "/etc/wpa_supplicant/wpa_supplicant-wlan0.conf") if os.path.exists(_x)])
 
                     # set ssid in wpa_supplicant files
+                    # regex \b marks a word boundary
                     ssid = payload['ssid']
                     subprocess.check_output(
-                        """sed -i -e 's/ssid=.*/ssid="{}"/' {}""".format(ssid, wpa_files), shell=True)
-                    
+                        """sed -i 's/\bssid=.*/ssid="{}"/' {}""".format(ssid, wpa_files), shell=True)
+
                     # set bssid (if set by user) in wpa_supplicant files
                     if 'bssid' in payload and payload['bssid']:
                         bssid = payload['bssid']
@@ -438,22 +439,23 @@ def setup():
                         subprocess.check_output(
                             """sudo sed -i '/bssid/s/# *//g' {}""".format(wpa_files), shell=True)
                         subprocess.check_output(
-                            """sed -i -e 's/bssid=.*/bssid={}/' {}""".format(bssid, wpa_files), shell=True)
+                            """sudo sed -i 's/bssid=.*/bssid={}/' {}""".format(bssid, wpa_files), shell=True)
                     else:
-                        # add comment for bssid line (if present)
+                        # add a comment for bssid line (if present)
                         subprocess.check_output(
-                            """sudo sed -i '/bssid/s/bssid/# bssid/g' {}""".format(wpa_files), shell=True)
-                    
+                            """sudo sed -i 's/\(bssid=.*\)/# \\1/g' {}""".format(wpa_files), shell=True)
+
                     # set credentials (if set by user) in wpa_supplicant files
                     if 'password' in payload and payload['password']:
                         psk = payload['password']
                         subprocess.check_output(
-                            """sed -i -e 's/psk=.*/psk="{}"/' {}""".format(psk, wpa_files), shell=True)
-                    
+                            """sed -i 's/psk=.*/psk="{}"/' {}""".format(psk, wpa_files), shell=True)
+
                     def restart_wireless():
                         import subprocess
                         import time
                         time.sleep(2)
+                        current_app.logger.info("applying changes and restarting wireless interface")
                         subprocess.check_output('systemctl restart wpa_supplicant@wlan0.service', shell=True)
 
                     # async restart wireless service
@@ -474,7 +476,7 @@ def setup():
                     ssid = payload['ssid']
                     subprocess.check_output(
                         """sed -i -e 's/ssid=.*/ssid={}/' {}""".format(ssid, hostapd_file), shell=True)
-                    
+
                     # set credentials (if set by user) in hostapd file
                     if 'password' in payload and payload['password']:
                         psk = payload['password']
@@ -539,14 +541,24 @@ def accesspoint_credentials():
 def wireless_credentials():
     # TODO: properly handle No such file or directory by hiding settings in /setup or showing error
 
-    ssid = subprocess.check_output('more /etc/wpa_supplicant/wpa_supplicant-wlan0.conf | grep -w ssid | awk -F "=" \'{print $2}\'', shell=True)
-    psk = subprocess.check_output('more /etc/wpa_supplicant/wpa_supplicant-wlan0.conf | grep -w psk | awk -F "=" \'{print $2}\'', shell=True)
-    
+    # grep -w matches an exact word:
+    #   example non match:
+    #       echo "bssid=test-value" | grep -w ssid => ""
+    #   example match:
+    #       echo "bssid=test-value" | grep -w bssid => "bssid=test-value"
+    cmd_template = "more /etc/wpa_supplicant/wpa_supplicant-wlan0.conf | grep -v '^\s*[#]' | grep -w {key} "
+
+    ssid = subprocess.check_output(cmd_template.format(key='ssid') + '| awk -F "=" \'{print $2}\'', shell=True)
+    psk = subprocess.check_output(cmd_template.format(key='psk') + '| awk -F "=" \'{print $2}\'', shell=True)
+
     try:
-        bssid = subprocess.check_output('more /etc/wpa_supplicant/wpa_supplicant-wlan0.conf | grep -w bssid | awk -F "=" \'{print $2}\'', shell=True)
+        # first remove any line that might be a comment (default)
+        # second filter to the line that contains the text 'bssid'
+        # return the value after the '=' in bssid=<value>
+        bssid = subprocess.check_output(cmd_template.format(key='bssid') + '| awk -F "=" \'{print $2}\'', shell=True)
     except:
         bssid = None
-    
+
     return { 
         'ssid': ssid.decode("utf-8").strip().strip('"'),
         'psk': psk.decode("utf-8").strip().strip('"'),
