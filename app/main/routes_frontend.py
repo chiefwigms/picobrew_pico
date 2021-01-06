@@ -80,7 +80,8 @@ def handle_devices():
         alias = request.form['alias']
 
         # verify uid not already configured
-        if uid in {**active_brew_sessions, **active_ferm_sessions, **active_iSpindel_sessions, **active_still_sessions}:
+        if (uid in {**active_brew_sessions, **active_ferm_sessions, **active_iSpindel_sessions, **active_still_sessions} 
+                and active_session(uid).alias != ''):
             error = f'Product ID {uid} already configured'
             current_app.logger.error(error)
             return render_template('devices.html', error=error,
@@ -936,3 +937,16 @@ def increment_zseries_recipe_id():
         recipe_id += 1
 
     return recipe_id
+
+
+def active_session(uid):
+    if uid in active_brew_sessions:
+        return active_brew_sessions[uid]
+    elif uid in active_ferm_sessions:
+        return active_ferm_sessions[uid]
+    elif uid in active_iSpindel_sessions:
+        return active_iSpindel_sessions[uid]
+    elif uid in active_still_sessions:
+        return active_still_sessions[uid]
+    
+    return None
