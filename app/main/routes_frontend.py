@@ -121,7 +121,7 @@ def handle_devices():
             active_iSpindel_sessions[uid].alias = alias
         else:
             active_brew_sessions[uid] = PicoBrewSession(mtype)
-            active_brew_sessions[uid].is_pico = True if mtype == MachineType.PICOBREW else False
+            active_brew_sessions[uid].is_pico = True if mtype in [MachineType.PICOBREW, MachineType.PICOBREW_C] else False
             active_brew_sessions[uid].alias = alias
 
     return render_template('devices.html', config=server_config(), active_sessions=active_sessions)
