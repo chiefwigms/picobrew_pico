@@ -71,10 +71,17 @@ get_ferm_state_args = {
 @main.route('/API/PicoFerm/getState')
 @use_args(get_ferm_state_args, location='querystring')
 def process_get_ferm_state(args):
-    if args['uid'] not in active_ferm_sessions:
-        create_new_session(args['uid'])
+    uid = args['uid']
+    if uid not in active_ferm_sessions:
+        active_ferm_sessions[uid] = PicoFermSession()
+    
     # TODO - Define logic on state - for now request information from PicoFerm
-    return '#10,0#'
+    session = active_ferm_sessions[uid]
+
+    if session.active == True:
+        return '#10,0#'
+    elif session.uninit or session.file == None:
+        return '#2,4'
 
 
 # LogDataSet: /API/PicoFerm/logDataSet?uid={UID}&rate={RATE}&voltage={VOLTAGE}&data={DATA}
@@ -108,12 +115,17 @@ def process_log_ferm_dataset(args):
     active_ferm_sessions[uid].voltage = str(args['voltage']) + 'V'
     graph_update = json.dumps({'voltage': args['voltage'], 'data': session_data})
     socketio.emit('ferm_session_update|{}'.format(args['uid']), graph_update)
-    if (datetime.now().date() - active_ferm_sessions[uid].start_time.date()).days > 14:
+
+    ferm_days_elapsed = (datetime.now().date() - active_ferm_sessions[uid].start_time.date()).days
+
+    # end fermentation at 14d counter or when user specifies fermentation is complete
+    if ferm_days_elapsed > 14 or (active_ferm_sessions[uid].uninit == False and active_ferm_sessions[uid].active == False):
         active_ferm_sessions[uid].file.write('{}\n]'.format(log_data[:-2]))
         active_ferm_sessions[uid].cleanup()
         # The server makes a determination when fermenting is done based on the datalog after it sends '2,4'
         return '#2,4#'
     else:
+        active_ferm_sessions[uid].active = True
         active_ferm_sessions[uid].file.write(log_data)
         active_ferm_sessions[uid].file.flush()
         # Errors like '10,16' send data but mark data error.
