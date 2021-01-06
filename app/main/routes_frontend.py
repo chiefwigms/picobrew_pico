@@ -455,11 +455,11 @@ def setup():
                         import subprocess
                         import time
                         time.sleep(2)
-                        current_app.logger.info("applying changes and restarting wireless interface")
                         subprocess.check_output('systemctl restart wpa_supplicant@wlan0.service', shell=True)
 
                     # async restart wireless service
                     thread = Thread(target=restart_wireless)
+                    current_app.logger.info("applying changes and restarting wireless interface")
                     thread.start()
 
                     return '', 204
