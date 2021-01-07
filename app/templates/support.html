@@ -1,14 +1,14 @@
 <script src='static/js/showdown/showdown.min.js'></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        if ('{{support_object.manual_url}}' != 'None') {
-            getPdf('https://docs.google.com/viewer?url={{support_object.manual_url}}&embedded=true', '#manualFrame');
+        if ('{{support_object.manual_path}}' != 'None') {
+            getPdf('{{support_object.manual_path}}', '#manualFrame');
         }
-        if ('{{support_object.faq_url}}' != 'None') {
-            getMarkdown('{{support_object.faq_url}}', 'faqDiv');
+        if ('{{support_object.faq_path}}' != 'None') {
+            getMarkdown('{{support_object.faq_path}}', 'faqDiv');
         }
-        if ('{{support_object.instructional_videos_url}}' != 'None') {
-            getMarkdown('{{support_object.instructional_videos_url}}', 'instructionalDiv');
+        if ('{{support_object.instructional_videos_path}}' != 'None') {
+            getMarkdown('{{support_object.instructional_videos_path}}', 'instructionalDiv');
         }
         if ('{{support_object.misc_media|tojson}}' != 'None') {
             var data = JSON.parse('{{support_object.misc_media|tojson}}');
@@ -16,7 +16,7 @@
                 var frameKey = key.replace(/ /g, '_')
                 var media = data[key]
                 if (media.split('.').pop() == 'pdf') {
-                    getPdf('https://docs.google.com/viewer?url='+media+'&embedded=true', '#'+frameKey);
+                    getPdf(media, '#'+frameKey);
                 }
                 if (media.split('.').pop() == 'md') {
                     getMarkdown(media, frameKey);
@@ -54,18 +54,18 @@
 {% block content %}
 <div class='text-white'>
     <h2>{{support_object.name}}</h2>
-    {% if support_object.manual_url != None %}
+    {% if support_object.manual_path != None %}
         <br />
         <hr />
         <h3>Manual</h3>
         <iframe id='manualFrame' style='width:100%; height:100%;' frameborder='0'></iframe>
     {% endif %}
-    {% if support_object.faq_url != None %}
+    {% if support_object.faq_path != None %}
         <br />
         <hr />
         <div id='faqDiv'></div>
     {% endif %}
-    {% if support_object.instructional_videos_url != None %}
+    {% if support_object.instructional_videos_path != None %}
         <br />
         <hr />
         <div id='instructionalDiv'></div>

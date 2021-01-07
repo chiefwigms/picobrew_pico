@@ -143,7 +143,7 @@ class iSpindelSession:
 class SupportObject:
     def __init__(self):
         self.name = None
-        self.manual_url = None
-        self.faq_url = None
-        self.instructional_videos_url = None
+        self.manual_path = None
+        self.faq_path = None
+        self.instructional_videos_path = None
         self.misc_media = None
