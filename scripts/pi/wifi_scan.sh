@@ -1,4 +1,4 @@
-sudo iwlist wlan0 scanning | awk 'BEGIN{ FS="[:=]"; OFS = " " }
+sudo ifconfig wlan0 up && sudo iwlist wlan0 scanning | awk 'BEGIN{ FS="[:=]"; OFS = " " }
 /ESSID/{
     essid[c++]=$2
 }

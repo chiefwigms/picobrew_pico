@@ -27,10 +27,40 @@ file_glob_pattern = "[!._]*.json"
 yaml = YAML()
 
 
+def system_info():
+    try:
+        system_info = subprocess.check_output("cat /etc/os-release || sw_vers || systeminfo | findstr /C:'OS'", shell=True)
+        system_info = system_info.decode("utf-8")
+    except:
+        system_info = "Not Supported on this Device"
+
+    return system_info
+
+
+def platform():
+    system = system_info()
+
+    if 'raspbian' in system:
+        return 'RaspberryPi'
+    elif 'Mac OS X' in system:
+        return 'MacOS'
+    elif 'Microsoft Windows' in system:
+        return 'Windows'
+    else:
+        return "unknown"
+
+
+platform_info = platform()
+
+
+def render_template_with_defaults(template, **kwargs):
+    return render_template(template, platform=platform_info, **kwargs)
+
+
 # -------- Routes --------
 @main.route('/')
 def index():
-    return render_template('index.html', brew_sessions=load_active_brew_sessions(),
+    return render_template_with_defaults('index.html', brew_sessions=load_active_brew_sessions(),
                            ferm_sessions=load_active_ferm_sessions(),
                            iSpindel_sessions=load_active_iSpindel_sessions())
 
@@ -63,6 +93,19 @@ def shutdown_system():
     return redirect('/')
 
 
+@main.route('/logs')
+def download_logs():
+    try:
+        max_lines = request.args.get('max', 20000)
+        logs = subprocess.check_output(f"systemctl status rc.local -n {max_lines}", shell=True)
+        logs = logs.decode("utf-8")
+    except Exception as e:
+        error = f'Unexpected Error Retrieving Server Logs: {e}'
+        return error, 500
+
+    return logs, 200
+
+
 @main.route('/devices', methods=['GET', 'POST'])
 def handle_devices():
     active_sessions = {
@@ -84,7 +127,7 @@ def handle_devices():
                 and active_session(uid).alias != ''):
             error = f'Product ID {uid} already configured'
             current_app.logger.error(error)
-            return render_template('devices.html', error=error,
+            return render_template_with_defaults('devices.html', error=error,
                 config=server_config(), active_sessions=active_sessions)
 
         current_app.logger.debug(f'machine_type: {mtype}; uid: {uid}; alias: {alias}')
@@ -106,7 +149,7 @@ def handle_devices():
                 yaml.dump(server_cfg, f)
             error = f'Unexpected Error Writing Configuration File: {e}'
             current_app.logger.error(e)
-            return render_template('devices.html', error=error,
+            return render_template_with_defaults('devices.html', error=error,
                 config=server_config(), active_sessions=active_sessions)
 
         # ... and into already loaded active sessions
@@ -124,7 +167,7 @@ def handle_devices():
             active_brew_sessions[uid].is_pico = True if mtype in [MachineType.PICOBREW, MachineType.PICOBREW_C] else False
             active_brew_sessions[uid].alias = alias
 
-    return render_template('devices.html', config=server_config(), active_sessions=active_sessions)
+    return render_template_with_defaults('devices.html', config=server_config(), active_sessions=active_sessions)
 
 
 @main.route('/devices/<uid>', methods=['POST', 'DELETE'])
@@ -144,7 +187,7 @@ def handle_specific_device(uid):
     if uid not in {**active_brew_sessions, **active_ferm_sessions, **active_iSpindel_sessions, **active_still_sessions}:
         error = f'Product ID {uid} not already configured'
         current_app.logger.error(error)
-        return render_template('devices.html', error=error,
+        return render_template_with_defaults('devices.html', error=error,
             config=server_config(), active_sessions=active_sessions)
 
     current_app.logger.debug(f'machine_type: {mtype}; uid: {uid}; alias: {alias}')
@@ -167,7 +210,7 @@ def handle_specific_device(uid):
             yaml.dump(server_cfg, f)
         error = f'Unexpected Error Writing Configuration File: {e}'
         current_app.logger.error(e)
-        return render_template('devices.html', error=error,
+        return render_template_with_defaults('devices.html', error=error,
             config=server_config(), active_sessions=active_sessions)
 
     # ... and change existing active session references to alias
@@ -187,17 +230,17 @@ def handle_specific_device(uid):
 
 @main.route('/brew_history')
 def brew_history():
-    return render_template('brew_history.html', sessions=load_brew_sessions(), invalid=get_invalid_sessions('brew'))
+    return render_template_with_defaults('brew_history.html', sessions=load_brew_sessions(), invalid=get_invalid_sessions('brew'))
 
 
 @main.route('/ferm_history')
 def ferm_history():
-    return render_template('ferm_history.html', sessions=load_ferm_sessions(), invalid=get_invalid_sessions('ferm'))
+    return render_template_with_defaults('ferm_history.html', sessions=load_ferm_sessions(), invalid=get_invalid_sessions('ferm'))
 
 
 @main.route('/iSpindel_history')
 def iSpindel_history():
-    return render_template('iSpindel_history.html', sessions=load_iSpindel_sessions(), invalid=get_invalid_sessions('iSpindel'))
+    return render_template_with_defaults('iSpindel_history.html', sessions=load_iSpindel_sessions(), invalid=get_invalid_sessions('iSpindel'))
 
 
 @main.route('/zymatic_recipes')
@@ -205,7 +248,7 @@ def _zymatic_recipes():
     global zymatic_recipes, invalid_recipes
     zymatic_recipes = load_zymatic_recipes()
     recipes_dict = [json.loads(json.dumps(recipe, default=lambda r: r.__dict__)) for recipe in zymatic_recipes]
-    return render_template('zymatic_recipes.html', recipes=recipes_dict, invalid=invalid_recipes.get(MachineType.ZYMATIC, set()))
+    return render_template_with_defaults('zymatic_recipes.html', recipes=recipes_dict, invalid=invalid_recipes.get(MachineType.ZYMATIC, set()))
 
 
 @main.route('/new_zymatic_recipe', methods=['GET', 'POST'])
@@ -221,7 +264,7 @@ def new_zymatic_recipe():
         else:
             return 'Recipe Exists!', 418
     else:
-        return render_template('new_zymatic_recipe.html')
+        return render_template_with_defaults('new_zymatic_recipe.html')
 
 
 @main.route('/import_zymatic_recipe', methods=['GET', 'POST'])
@@ -239,7 +282,7 @@ def import_zymatic_recipe():
             return getattr(e, 'message', e.args[0]), 400
     else:
         machine_ids = [uid for uid in active_brew_sessions if active_brew_sessions[uid].machine_type == MachineType.ZYMATIC]
-        return render_template('import_brewhouse_recipe.html', user_required=True, machine_ids=machine_ids)
+        return render_template_with_defaults('import_brewhouse_recipe.html', user_required=True, machine_ids=machine_ids)
 
 
 @main.route('/update_zymatic_recipe', methods=['POST'])
@@ -287,12 +330,12 @@ def _zseries_recipes():
     global zseries_recipes, invalid_recipes
     zseries_recipes = load_zseries_recipes()
     recipes_dict = [json.loads(json.dumps(recipe, default=lambda r: r.__dict__)) for recipe in zseries_recipes]
-    return render_template('zseries_recipes.html', recipes=recipes_dict, invalid=invalid_recipes.get(MachineType.ZSERIES, set()))
+    return render_template_with_defaults('zseries_recipes.html', recipes=recipes_dict, invalid=invalid_recipes.get(MachineType.ZSERIES, set()))
 
 
 @main.route('/new_zseries_recipe')
 def new_zseries_recipe():
-    return render_template('new_zseries_recipe.html')
+    return render_template_with_defaults('new_zseries_recipe.html')
 
 
 @main.route('/new_zseries_recipe_save', methods=['POST'])
@@ -421,7 +464,7 @@ def import_zseries_recipe():
             return getattr(e, 'message', e.args[0]), 400
     else:
         machine_ids = [uid for uid in active_brew_sessions if active_brew_sessions[uid].machine_type == MachineType.ZSERIES]
-        return render_template('import_brewhouse_recipe.html', user_required=False, machine_ids=machine_ids)
+        return render_template_with_defaults('import_brewhouse_recipe.html', user_required=False, machine_ids=machine_ids)
 
 
 def load_zseries_recipes():
@@ -494,7 +537,7 @@ def _pico_recipes():
     global pico_recipes, invalid_recipes
     pico_recipes = load_pico_recipes()
     recipes_dict = [json.loads(json.dumps(recipe, default=lambda r: r.__dict__)) for recipe in pico_recipes]
-    return render_template('pico_recipes.html', recipes=recipes_dict, invalid=invalid_recipes.get(MachineType.PICOBREW, set()))
+    return render_template_with_defaults('pico_recipes.html', recipes=recipes_dict, invalid=invalid_recipes.get(MachineType.PICOBREW, set()))
 
 
 @main.route('/new_pico_recipe', methods=['GET', 'POST'])
@@ -512,7 +555,7 @@ def new_pico_recipe():
         else:
             return 'Recipe Exists!', 418
     else:
-        return render_template('new_pico_recipe.html')
+        return render_template_with_defaults('new_pico_recipe.html')
 
 
 @main.route('/import_pico_recipe', methods=['GET', 'POST'])
@@ -530,7 +573,7 @@ def import_pico_recipe():
             return getattr(e, 'message', e.args[0]), 400
     else:
         machine_ids = [uid for uid in active_brew_sessions if active_brew_sessions[uid].machine_type in [MachineType.PICOBREW, MachineType.PICOBREW_C]]
-        return render_template('import_brewhouse_recipe.html', rfid_required=True, machine_ids=machine_ids)
+        return render_template_with_defaults('import_brewhouse_recipe.html', rfid_required=True, machine_ids=machine_ids)
 
 
 @main.route('/update_pico_recipe', methods=['POST'])
@@ -688,7 +731,7 @@ def setup():
             current_app.logger.error("ERROR: unsupported payload received %s".format(payload))
             return 'Invalid Setup Payload Received - Setup Failed!', 418
     else:
-        return render_template('setup.html',
+        return render_template_with_defaults('setup.html',
             hostname=hostname(),
             ap0=accesspoint_credentials(),
             wireless_credentials=wireless_credentials(),
@@ -769,15 +812,6 @@ def about():
     except:
         localChanges = "unavailable (check network)"
 
-    # capture os version information
-    # proc = subprocess.Popen(["cat", "/etc/os-release"], stdout=subprocess.PIPE, shell=True)
-    # (osRelease, err) = proc.communicate()
-    try:
-        osReleaseInfo = subprocess.check_output("cat /etc/os-release || sw_vers || systeminfo | findstr /C:'OS'", shell=True)
-        osReleaseInfo = osReleaseInfo.decode("utf-8")
-    except:
-        osReleaseInfo = "Not Supported on this Device"
-
     # # capture raspbian pinout
     # proc = subprocess.Popen(["pinout"], stdout=subprocess.PIPE, shell=True)
     # (pinout, err) = proc.communicate()
@@ -786,9 +820,13 @@ def about():
         pinout = pinout.decode("utf-8")
     except:
         pinout = None
+
+    image_release = os.environ.get("IMG_RELEASE", None)
+    image_variant = os.environ.get("IMG_VARIANT", None)
+    image_version = None if image_release == None else f"{image_release}_{image_variant}" 
     
-    return render_template('about.html', git_version=gitSha, latest_git_sha=latestMasterSha, local_changes=localChanges,
-                           os_release=osReleaseInfo, raspberrypi_info=pinout)
+    return render_template_with_defaults('about.html', git_version=gitSha, latest_git_sha=latestMasterSha, local_changes=localChanges,
+                           os_release=system_info(), raspberrypi_info=pinout, raspberrypi_image=image_version)
 
 
 def load_pico_recipes():

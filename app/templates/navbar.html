@@ -38,14 +38,18 @@
     </li>
     <li class="nav-item dropdown">
       <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">System</a>
-      <div class="dropdown-menu dropdown-menu-right navbar-dark bg-dark" aria-labelledby="navbarDropdown">
-        <a class="dropdown-item nav-link bg-dark" href="/about">About</a>
-        <a class="dropdown-item nav-link bg-dark" href="/devices">Devices</a>
-        <a class="dropdown-item nav-link bg-dark" href="/setup">Setup/Configure</a>
-        <a class="dropdown-item nav-link bg-dark" href="/restart_server">Update/Restart Server</a>
-        <a class="dropdown-item nav-link bg-dark" href="/restart_system">Restart System (Pi)</a>
-        <a class="dropdown-item nav-link bg-dark" href="/shutdown_system">Shutdown System (Pi)</a>
-      </div>
+      <ul class="dropdown-menu dropdown-menu-right navbar-dark bg-dark" aria-labelledby="navbarDropdown">
+        <li><a class="nav-link bg-dark dropdown-item text-white" href="/about">About</a></li>
+        <li><a class="nav-link bg-dark dropdown-item text-white" href="/devices">Devices</a></li>
+        <li><a class="nav-link bg-dark dropdown-item text-white" href="/restart_server">Update/Restart Server</a></li>
+        {% if platform is defined and platform == "RaspberryPi" %}
+        <li role="separator bg-dark text-white" class="dropdown-divider"></li>
+        <li><a class="nav-link bg-dark dropdown-item text-white" href="/setup">Setup/Configure (Pi)</a></li>
+        <li><a class="nav-link bg-dark dropdown-item text-white" href="/logs">System Logs (Pi)</a></li>
+        <li><a class="nav-link bg-dark dropdown-item text-white" href="/restart_system">Restart System (Pi)</a></li>
+        <li><a class="nav-link bg-dark dropdown-item text-white" href="/shutdown_system">Shutdown System (Pi)</a></li>
+        {% endif %}
+      </ul>
     </li>
   </ul>
 </nav>
