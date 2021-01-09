@@ -5,6 +5,12 @@ AP_IP="192.168.72.1"
 AP_SSID="PICOBREW"
 AP_PASS="PICOBREW"
 
+export IMG_NAME="PICOBREW_PICO"
+export IMG_RELEASE="beta6"
+export IMG_VARIANT="stable"
+# export IMG_VARIANT="latest"
+export GIT_SHA='$(git rev-parse --short HEAD)'
+
 # Enable root login
 #sed -i 's/.*PermitRootLogin.*/PermitRootLogin yes/g' /etc/ssh/sshd_config
 
@@ -36,12 +42,17 @@ systemctl stop apt-daily-upgrade.timer
 systemctl disable apt-daily.timer
 systemctl disable apt-daily-upgrade.timer
 
-echo 'Revert to stable WiFi firmware...'
-dpkg --purge firmware-brcm80211
-wget http://archive.raspberrypi.org/debian/pool/main/f/firmware-nonfree/firmware-brcm80211_20190114-1+rpt4_all.deb
-dpkg -i firmware-brcm80211_20190114-1+rpt4_all.deb
-apt-mark hold firmware-brcm80211
-rm firmware-brcm80211_20190114-1+rpt4_all.deb
+# revert 'stable' image to have rpt4 wireless firmware
+# build 'latest' image with the following lines commented out (required for Pi 400 - see https://github.com/chiefwigms/picobrew_pico/issues/182)
+if [[ ${IMG_VARIANT} == "stable" ]];
+then
+    echo 'Revert to stable WiFi firmware...'
+    dpkg --purge firmware-brcm80211
+    wget http://archive.raspberrypi.org/debian/pool/main/f/firmware-nonfree/firmware-brcm80211_20190114-1+rpt4_all.deb
+    dpkg -i firmware-brcm80211_20190114-1+rpt4_all.deb
+    apt-mark hold firmware-brcm80211
+    rm firmware-brcm80211_20190114-1+rpt4_all.deb
+fi
 
 echo 'Updating packages...'
 export DEBIAN_FRONTEND=noninteractive
@@ -356,7 +367,10 @@ then
   pip3 install -r requirements.txt
 fi
 
-echo 'Starting Picobrew Server...'
+source_sha=${GIT_SHA}
+rpi_image_version=${IMG_RELEASE}_${IMG_VARIANT}
+
+echo "Starting Picobrew Server (image: \${rpi_image_version}; source: \${source_sha}) ..."
 python3 server.py 0.0.0.0 8080 &
 
 exit 0

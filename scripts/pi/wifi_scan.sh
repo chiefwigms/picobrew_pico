@@ -1,4 +1,4 @@
-sudo iwlist wlan0 scanning | awk 'BEGIN{ FS="[:=]"; OFS = " " }
+sudo sh -c 'ifconfig wlan0 up && iwlist wlan0 scanning | iwlist wlan0 scanning last' | awk 'BEGIN{ FS="[:=]"; OFS = " " }
 /ESSID/{
     essid[c++]=$2
 }
@@ -14,7 +14,7 @@ sudo iwlist wlan0 scanning | awk 'BEGIN{ FS="[:=]"; OFS = " " }
     gsub(/.*Address: /,"")
     address[a++]=$0
 }
-/Encryption key/{ 
+/Encryption key/{
     encryption[d++]=$2
 }
 /Quality/{
@@ -22,7 +22,7 @@ sudo iwlist wlan0 scanning | awk 'BEGIN{ FS="[:=]"; OFS = " " }
     signal[b++]=$3
 }
 END {
-    for( c in essid ) { 
+    for( c in essid ) {
         print address[c],essid[c],frequency[c],channel[c],signal[c],encryption[c]
     }
 }'
