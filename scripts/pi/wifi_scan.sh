@@ -1,4 +1,4 @@
-sudo sh -c 'ifconfig wlan0 up && iwlist wlan0 scanning' | awk 'BEGIN{ FS="[:=]"; OFS = " " }
+sudo sh -c 'ifconfig wlan0 up && iwlist wlan0 scanning | iwlist wlan0 scanning last' | awk 'BEGIN{ FS="[:=]"; OFS = " " }
 /ESSID/{
     essid[c++]=$2
 }

@@ -656,7 +656,7 @@ def setup():
                     # regex \b marks a word boundary
                     ssid = payload['ssid']
                     subprocess.check_output(
-                        """sed -i 's/\bssid=.*/ssid="{}"/' {}""".format(ssid, wpa_files), shell=True)
+                        """sed -i 's/\\bssid=.*/ssid="{}"/' {}""".format(ssid, wpa_files), shell=True)
 
                     # set bssid (if set by user) in wpa_supplicant files
                     if 'bssid' in payload and payload['bssid']:
@@ -672,7 +672,7 @@ def setup():
                             """sudo sed -i 's/\(bssid=.*\)/# \\1/g' {}""".format(wpa_files), shell=True)
 
                     # set credentials (if set by user) in wpa_supplicant files
-                    if 'password' in payload and payload['password']:
+                    if 'password' in payload:
                         psk = payload['password']
                         subprocess.check_output(
                             """sed -i 's/psk=.*/psk="{}"/' {}""".format(psk, wpa_files), shell=True)
