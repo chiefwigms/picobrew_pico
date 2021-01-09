@@ -370,7 +370,7 @@ fi
 source_sha=${GIT_SHA}
 rpi_image_version=${IMG_RELEASE}_${IMG_VARIANT}
 
-echo "Starting Picobrew Server (image: \$\{rpi_image_version\} ;source: \$\{source_sha\}) ..."
+echo "Starting Picobrew Server (image: \${rpi_image_version}; source: \${source_sha}) ..."
 python3 server.py 0.0.0.0 8080 &
 
 exit 0
