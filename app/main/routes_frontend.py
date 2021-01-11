@@ -40,7 +40,6 @@ def system_info():
 
 def platform():
     system = system_info()
-
     if 'raspbian' in system:
         return 'RaspberryPi'
     elif 'Mac OS X' in system:
@@ -95,16 +94,33 @@ def shutdown_system():
 
 
 @main.route('/logs')
-def download_logs():
-    try:
-        max_lines = request.args.get('max', 20000)
-        logs = subprocess.check_output(f"systemctl status rc.local -n {max_lines}", shell=True)
-        logs = logs.decode("utf-8")
-    except Exception as e:
-        error = f'Unexpected Error Retrieving Server Logs: {e}'
-        return error, 500
+def view_logs():
+    return render_template_with_defaults('logs.html')
 
-    return logs, 200
+
+@main.route('/logs/<log_type>.log')
+def download_logs(log_type):
+    try:
+        filename = ""
+        if log_type == 'nginx.access':
+            filename = "/var/log/nginx/picobrew.access.log"
+        elif log_type == 'nginx.error':
+            filename = "/var/log/nginx/picobrew.error.log"
+        elif log_type == 'picobrew_pico':
+            max_lines = request.args.get('max', 20000)
+            filename = f"{current_app.config['BASE_PATH']}/app/logs/picobrew_pico.log"
+            subprocess.check_output(f"systemctl status rc.local -n {max_lines} > {filename}", shell=True)
+        else:
+            error_msg = f"invalid log type specified {log_type} is unsupported"
+            return error_msg, 400
+
+        response = make_response(send_file(filename))
+        # custom content-type will force a download vs rendering with window.location
+        response.headers['Content-Type'] = 'application/octet-stream'
+        return response
+    except Exception as e:
+        error = f'Unexpected Error Retrieving {log_type} log file:<br/> {e}'
+        return error, 500
 
 
 @main.route('/devices', methods=['GET', 'POST'])
@@ -155,16 +171,20 @@ def handle_devices():
 
         # ... and into already loaded active sessions
         if mtype is MachineType.PICOFERM:
-            active_ferm_sessions[uid] = PicoFermSession()
+            if uid not in active_ferm_sessions:
+                active_ferm_sessions[uid] = PicoFermSession()
             active_ferm_sessions[uid].alias = alias
         elif mtype is MachineType.PICOSTILL:
-            active_still_sessions[uid] = PicoStillSession()
+            if uid not in active_still_sessions:
+                active_still_sessions[uid] = PicoStillSession()
             active_still_sessions[uid].alias = alias
         elif mtype is MachineType.ISPINDEL:
-            active_iSpindel_sessions[uid] = iSpindelSession()
+            if uid not in active_iSpindel_sessions:
+                active_iSpindel_sessions[uid] = iSpindelSession()
             active_iSpindel_sessions[uid].alias = alias
         else:
-            active_brew_sessions[uid] = PicoBrewSession(mtype)
+            if uid not in active_brew_sessions:
+                active_brew_sessions[uid] = PicoBrewSession(mtype)
             active_brew_sessions[uid].is_pico = True if mtype in [MachineType.PICOBREW, MachineType.PICOBREW_C] else False
             active_brew_sessions[uid].alias = alias
 

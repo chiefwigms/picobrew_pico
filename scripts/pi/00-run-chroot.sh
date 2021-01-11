@@ -7,8 +7,8 @@ AP_PASS="PICOBREW"
 
 export IMG_NAME="PICOBREW_PICO"
 export IMG_RELEASE="beta6"
-export IMG_VARIANT="stable"
-# export IMG_VARIANT="latest"
+# export IMG_VARIANT="stable"
+export IMG_VARIANT="latest"
 export GIT_SHA='$(git rev-parse --short HEAD)'
 
 # Enable root login
@@ -73,7 +73,7 @@ apt -y install libnss-resolve hostapd dnsmasq dnsutils samba git python3 python3
 
 echo 'Installing Picobrew Server...'
 cd /
-git clone https://github.com/chiefwigms/picobrew_pico.git
+git clone https://github.com/tmack8001/picobrew_pico.git --branch tmack/issue-182-pi-400-and-multi-image
 cd /picobrew_pico
 pip3 install -r requirements.txt
 cd /
@@ -242,7 +242,7 @@ cat /certs/server.crt /certs/domain.crt > /certs/bundle.crt
 echo 'Setting up nginx for http and https...'
 cat > /etc/nginx/sites-available/picobrew.com.conf <<EOF
 server {
-    listen 80;
+    listen 127.0.0.1:80;
     server_name www.picobrew.com picobrew.com;
 
     access_log                  /var/log/nginx/picobrew.access.log;
@@ -252,7 +252,7 @@ server {
         aio threads;
 
         proxy_set_header    Host \$http_host;
-        proxy_pass          http://localhost:8080;
+        proxy_pass          http://127.0.0.1:8080;
     }
 
     location /socket.io {
@@ -263,12 +263,12 @@ server {
         proxy_buffering off;
         proxy_set_header Upgrade \$http_upgrade;
         proxy_set_header Connection "Upgrade";
-        proxy_pass http://localhost:8080/socket.io;
+        proxy_pass http://127.0.0.1:8080/socket.io;
     }
 }
 
 server {
-    listen 443 ssl;
+    listen 127.0.0.1:443 ssl;
     server_name www.picobrew.com picobrew.com;
 
     ssl_certificate             /certs/bundle.crt;
@@ -284,7 +284,7 @@ server {
         proxy_set_header    X-Real-IP \$remote_addr;
         proxy_set_header    X-Forwarded-For \$proxy_add_x_forwarded_for;
         proxy_set_header    X-Forwarded-Proto \$scheme;
-        proxy_pass          http://localhost:8080;
+        proxy_pass          http://127.0.0.1:8080;
     }
     
     location /socket.io {
@@ -295,7 +295,7 @@ server {
         proxy_buffering off;
         proxy_set_header Upgrade \$http_upgrade;
         proxy_set_header Connection "Upgrade";
-        proxy_pass http://localhost:8080/socket.io;
+        proxy_pass http://127.0.0.1:8080/socket.io;
     }
 }
 EOF
@@ -369,6 +369,8 @@ fi
 
 source_sha=${GIT_SHA}
 rpi_image_version=${IMG_RELEASE}_${IMG_VARIANT}
+export IMG_RELEASE=${IMG_RELEASE}
+export IMG_VARIANT=${IMG_VARIANT}
 
 echo "Starting Picobrew Server (image: \${rpi_image_version}; source: \${source_sha}) ..."
 python3 server.py 0.0.0.0 8080 &

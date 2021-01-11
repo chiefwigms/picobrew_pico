@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block content %}
+  <div class="text-white">
+    <h2>Server Logs</h4>
+    <p>Below are a few links to download logs for analysis (these can be found in the <code>app</code> samba share as well). When submitting issues to the Open Source team please include as much detail as possible usually this involves only adding the <code>Flask/Python Server Logs</code> linked below. Though upon request the Nginx server logs (Nginx <code>Error Logs</code> and/or <code>Access Logs</code>) might be requested.</p>
+  </div>
+  
+  
+  <br/>
+  <br/>
+
+  {% if platform is defined and platform == "RaspberryPi" %}
+  <div class="text-white">
+    <h3>Flask Server Logs</h3>
+    <a class="btn btn-primary btn-sm" href="/logs/picobrew_pico.log" role="button">Flask/Python Server Logs</a>
+  </div>
+  <br/>
+  <br/>
+  <div class="text-white">
+    <h3>Nginx Server Logs</h3>
+    <a class="btn btn-info btn-sm" href="/logs/nginx.access.log" role="button">Nginx Access Logs</a>
+    <a class="btn btn-danger btn-sm" href="/logs/nginx.error.log" role="button">Nginx Error Logs</a>
+  </div>
+  {% endif %}
+  
+  
+  <div></div>
+{% endblock %}
