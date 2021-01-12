@@ -73,7 +73,7 @@ apt -y install libnss-resolve hostapd dnsmasq dnsutils samba git python3 python3
 
 echo 'Installing Picobrew Server...'
 cd /
-git clone https://github.com/tmack8001/picobrew_pico.git --branch tmack/issue-182-pi-400-and-multi-image
+git clone https://github.com/chiefwigms/picobrew_pico.git
 cd /picobrew_pico
 pip3 install -r requirements.txt
 cd /
