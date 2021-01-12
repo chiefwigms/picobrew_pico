@@ -242,7 +242,7 @@ cat /certs/server.crt /certs/domain.crt > /certs/bundle.crt
 echo 'Setting up nginx for http and https...'
 cat > /etc/nginx/sites-available/picobrew.com.conf <<EOF
 server {
-    listen 127.0.0.1:80;
+    listen 80;
     server_name www.picobrew.com picobrew.com;
 
     access_log                  /var/log/nginx/picobrew.access.log;
@@ -268,7 +268,7 @@ server {
 }
 
 server {
-    listen 127.0.0.1:443 ssl;
+    listen 443 ssl;
     server_name www.picobrew.com picobrew.com;
 
     ssl_certificate             /certs/bundle.crt;
