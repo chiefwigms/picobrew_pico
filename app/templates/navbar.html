@@ -38,20 +38,20 @@
     </li>
     <li class="nav-item dropdown">
       <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Support</a>
-      <ul class="dropdown-menu dropdown-menu-right navbar-dark bg-dark" aria-labelledby="navbarDropdown">
-        <li><a class="dropdown-item nav-link bg-dark text-white" href="/support/accessories">Accessories</a></li>
-        <li><a class="dropdown-item nav-link bg-dark text-white" href="/support/additional_info">Additional Resources</a></li>
-        <li role="separator" class="drodown-divider"></li>
+      <div class="dropdown-menu dropdown-menu-right navbar-dark bg-dark" aria-labelledby="navbarDropdown">
+        <a class="dropdown-item nav-link bg-dark" href="/support/accessories">Accessories</a>
+        <a class="dropdown-item nav-link bg-dark" href="/support/additional_info">Additional Resources</a>
+        <div role="separator" class="dropdown-divider bg-dark"></div>
         <!-- Unsupported device, though support docs are loaded into server
-        <li><a class="dropdown-item nav-link bg-dark text-white" href="/support_kegsmarts">KegSmarts</a></li> -->
-        <li><a class="dropdown-item nav-link bg-dark text-white" href="/support/pico_c">Pico C</a></li>
-        <li><a class="dropdown-item nav-link bg-dark text-white" href="/support/pico_pro">Pico Pro</a></li>
-        <li><a class="dropdown-item nav-link bg-dark text-white" href="/support/pico_s">Pico S</a></li>
-        <li><a class="dropdown-item nav-link bg-dark text-white" href="/support/picoferm">PicoFerm</a></li>
-        <li><a class="dropdown-item nav-link bg-dark text-white" href="/support/picostill">PicoStill</a></li>
-        <li><a class="dropdown-item nav-link bg-dark text-white" href="/support/z_series">Z Series</a></li>
-        <li><a class="dropdown-item nav-link bg-dark text-white" href="/support/zymatic">Zymatic</a></li>
-      </ul>
+        <a class="dropdown-item nav-link bg-dark" href="/support_kegsmarts">KegSmarts</a> -->
+        <a class="dropdown-item nav-link bg-dark" href="/support/pico_c">Pico C</a>
+        <a class="dropdown-item nav-link bg-dark" href="/support/pico_pro">Pico Pro</a>
+        <a class="dropdown-item nav-link bg-dark" href="/support/pico_s">Pico S</a>
+        <a class="dropdown-item nav-link bg-dark" href="/support/picoferm">PicoFerm</a>
+        <a class="dropdown-item nav-link bg-dark" href="/support/picostill">PicoStill</a>
+        <a class="dropdown-item nav-link bg-dark" href="/support/z_series">Z Series</a>
+        <a class="dropdown-item nav-link bg-dark" href="/support/zymatic">Zymatic</a>
+        </div>
     </li>
     <li class="nav-item dropdown">
       <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">System</a>
@@ -60,7 +60,7 @@
         <li><a class="nav-link bg-dark dropdown-item text-white" href="/devices">Devices</a></li>
         <li><a class="nav-link bg-dark dropdown-item text-white" href="/restart_server">Update/Restart Server</a></li>
         {% if platform is defined and platform == "RaspberryPi" %}
-        <li role="separator bg-dark text-white" class="dropdown-divider"></li>
+        <li role="separator" class="dropdown-divider bg-dark text-white"></li>
         <li><a class="nav-link bg-dark dropdown-item text-white" href="/setup">Setup/Configure (Pi)</a></li>
         <li><a class="nav-link bg-dark dropdown-item text-white" href="/logs">System Logs (Pi)</a></li>
         <li><a class="nav-link bg-dark dropdown-item text-white" href="/restart_system">Restart System (Pi)</a></li>
