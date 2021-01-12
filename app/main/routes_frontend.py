@@ -13,10 +13,11 @@ from flask import current_app, make_response, render_template, request, redirect
 from pathlib import Path
 from threading import Thread
 from time import sleep
+from os import path
 
 from . import main
 from .config import MachineType, base_path, server_config
-from .model import PicoBrewSession, PicoFermSession, PicoStillSession, iSpindelSession
+from .model import PicoBrewSession, PicoFermSession, PicoStillSession, iSpindelSession, SupportObject
 from .recipe_import import import_recipes
 from .recipe_parser import PicoBrewRecipe, PicoBrewRecipeImport, ZymaticRecipe, ZymaticRecipeImport, ZSeriesRecipe
 from .session_parser import load_iSpindel_session, get_iSpindel_graph_data, load_ferm_session, get_ferm_graph_data, get_brew_graph_data, load_brew_session, active_brew_sessions, active_ferm_sessions, active_iSpindel_sessions, active_still_sessions
@@ -227,6 +228,7 @@ def handle_specific_device(uid):
         return '', 204
     else:
         return redirect('/devices')
+
 
 @main.route('/brew_history')
 def brew_history():

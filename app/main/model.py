@@ -139,3 +139,11 @@ class iSpindelSession:
         self.voltage = '-'
         self.start_time = None
         self.data = []
+
+class SupportObject:
+    def __init__(self):
+        self.name = None
+        self.manual_path = None
+        self.faq_path = None
+        self.instructional_videos_path = None
+        self.misc_media = None
