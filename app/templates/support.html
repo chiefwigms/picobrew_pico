@@ -1,4 +1,4 @@
-<script src='static/js/showdown/showdown.min.js'></script>
+<script src='/static/js/showdown/showdown.min.js'></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         if ('{{support_object.manual_path}}' != 'None') {
@@ -54,6 +54,18 @@
 {% block content %}
 <div class='text-white'>
     <h2>{{support_object.name}}</h2>
+
+    <div class="container">
+        {% if support_object.name == "KegSmarts" %}
+        <div id=alert class='show w-75 mx-auto alert text-center alert-danger'>
+            This device type is currently not supported by this server
+        </div>
+        {% endif %}
+        <div id=alert class='show w-75 mx-auto alert text-center alert-warning'>
+            All support documentation included in server at this time are direct copies from Picobrew.com in the off chance that Picobrew.com isn't available in the future. At a later time the server will come with its own documentation as well as community source device documentation.
+        </div>
+    </div>
+
     {% if support_object.manual_path != None %}
         <br />
         <hr />
@@ -74,8 +86,6 @@
         <br />
         <hr />
         {% for key, segment in support_object.misc_media.items() %}
-            <br />
-            <hr />
             <h4>{{key}}</h4>
             {% if segment.split('.').pop() == 'pdf' %}
                 <iframe id="{{key.replace(' ', '_')}}" style='width:100%; height:100%;' frameborder='0'></iframe>
@@ -86,6 +96,8 @@
             {% elif 'com' in segment.split('.').pop() %}
                 <div id="{{key.replace(' ', '_')}}"><a href='{{segment}}'>{{segment}}</a></div>
             {% endif %}
+            <br />
+            <hr />
         {% endfor %}
     {% endif %}
 </div>
