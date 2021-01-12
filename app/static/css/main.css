@@ -47,15 +47,3 @@ form#f_new_recipe {
 .table-recipe {
   width: 100%;
 }
-
-.navbar-nav li:hover > ul.dropdown-menu {
-  display: block;
-}
-.dropdown-submenu {
-  position:relative;
-}
-.dropdown-submenu>.dropdown-menu {
-  top:0;
-  left:100%;
-  margin-top:-6px;
-}
