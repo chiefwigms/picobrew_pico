@@ -55,16 +55,16 @@
     </li>
     <li class="nav-item dropdown">
       <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">System</a>
-      <ul class="dropdown-menu dropdown-menu-right navbar-dark bg-dark" aria-labelledby="navbarDropdown">
-        <li><a class="nav-link bg-dark dropdown-item text-white" href="/about">About</a></li>
-        <li><a class="nav-link bg-dark dropdown-item text-white" href="/devices">Devices</a></li>
-        <li><a class="nav-link bg-dark dropdown-item text-white" href="/restart_server">Update/Restart Server</a></li>
+      <div class="dropdown-menu dropdown-menu-right navbar-dark bg-dark" aria-labelledby="navbarDropdown">
+        <a class="nav-link bg-dark dropdown-item" href="/about">About</a>
+        <a class="nav-link bg-dark dropdown-item" href="/devices">Devices</a>
+        <a class="nav-link bg-dark dropdown-item" href="/restart_server">Update/Restart Server</a>
         {% if platform is defined and platform == "RaspberryPi" %}
-        <li role="separator" class="dropdown-divider bg-dark text-white"></li>
-        <li><a class="nav-link bg-dark dropdown-item text-white" href="/setup">Setup/Configure (Pi)</a></li>
-        <li><a class="nav-link bg-dark dropdown-item text-white" href="/logs">System Logs (Pi)</a></li>
-        <li><a class="nav-link bg-dark dropdown-item text-white" href="/restart_system">Restart System (Pi)</a></li>
-        <li><a class="nav-link bg-dark dropdown-item text-white" href="/shutdown_system">Shutdown System (Pi)</a></li>
+        <div class="dropdown-divider bg-dark"></div>
+        <a class="nav-link bg-dark dropdown-item" href="/setup">Setup/Configure (Pi)</a>
+        <a class="nav-link bg-dark dropdown-item" href="/logs">System Logs (Pi)</a>
+        <a class="nav-link bg-dark dropdown-item" href="/restart_system">Restart System (Pi)</a>
+        <a class="nav-link bg-dark dropdown-item" href="/shutdown_system">Shutdown System (Pi)</a>
         {% endif %}
       </ul>
     </li>
