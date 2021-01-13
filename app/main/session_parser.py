@@ -264,7 +264,7 @@ def restore_active_ferm_sessions():
         active_ferm_session_files = list(ferm_active_sessions_path().glob(file_glob_pattern))
         for file in active_ferm_session_files:
             # print('DEBUG: restore_active_sessions() found {} as an active session'.format(file))
-            ferm_session = load_ferm_session(file)            
+            ferm_session = load_ferm_session(file)
             # print('DEBUG: restore_active_sessions() {}'.format(ferm_session))
             uid = ferm_session['uid']
             if uid not in active_ferm_sessions:
@@ -290,7 +290,7 @@ def restore_active_iSpindel_sessions():
             # print('DEBUG: restore_active_sessions() found {} as an active session'.format(file))
             ferm_session = load_iSpindel_session(file)
             # print('DEBUG: restore_active_sessions() {}'.format(ferm_session))
-            uid = ferm_session['uid'
+            uid = ferm_session['uid']
             if uid not in active_iSpindel_sessions:
                 active_iSpindel_sessions[uid] = iSpindelSession()
 
@@ -299,7 +299,7 @@ def restore_active_iSpindel_sessions():
             session.file.flush()
             session.filepath = file
             session.start_time = ferm_session['date']
-            
+
             session.data = ferm_session['data']
             session.graph = ferm_session['graph']
 
