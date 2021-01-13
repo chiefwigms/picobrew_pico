@@ -235,14 +235,12 @@ def restore_active_brew_sessions():
         for file in active_brew_session_files:
             # print('DEBUG: restore_active_sessions() found {} as an active session'.format(file))
             brew_session = load_brew_session(file)
-            uid = brew_session['uid']
-
             # print('DEBUG: restore_active_sessions() {}'.format(brew_session))
+            uid = brew_session['uid']
             if uid not in active_brew_sessions:
                 session = PicoBrewSession()
-            else:
-                session = active_brew_sessions[uid]
 
+            session = active_brew_sessions[uid]
             session.file = open(file, 'a')
             session.file.flush()
             session.filepath = file
@@ -266,7 +264,7 @@ def restore_active_ferm_sessions():
         active_ferm_session_files = list(ferm_active_sessions_path().glob(file_glob_pattern))
         for file in active_ferm_session_files:
             # print('DEBUG: restore_active_sessions() found {} as an active session'.format(file))
-            ferm_session = load_ferm_session(file)
+            ferm_session = load_ferm_session(file)            
             # print('DEBUG: restore_active_sessions() {}'.format(ferm_session))
             uid = ferm_session['uid']
             if uid not in active_ferm_sessions:
@@ -276,13 +274,13 @@ def restore_active_ferm_sessions():
             session.file = open(file, 'a')
             session.file.flush()
             session.filepath = file
-            session.alias = ferm_session['alias']
             session.start_time = ferm_session['date']
             session.active = True
 
             session.data = ferm_session['data']
             session.graph = ferm_session['graph']
-            active_ferm_sessions[ferm_session['uid']] = session
+
+            active_ferm_sessions[uid] = session
 
 
 def restore_active_iSpindel_sessions():
@@ -292,19 +290,20 @@ def restore_active_iSpindel_sessions():
             # print('DEBUG: restore_active_sessions() found {} as an active session'.format(file))
             ferm_session = load_iSpindel_session(file)
             # print('DEBUG: restore_active_sessions() {}'.format(ferm_session))
-            if ferm_session['uid'] not in active_iSpindel_sessions:
-                active_iSpindel_sessions[ferm_session['uid']] = []
+            uid = ferm_session['uid'
+            if uid not in active_iSpindel_sessions:
+                active_iSpindel_sessions[uid] = iSpindelSession()
 
-            session = iSpindelSession()
+            session = active_iSpindel_sessions[uid]
             session.file = open(file, 'a')
             session.file.flush()
             session.filepath = file
-            session.alias = ferm_session['alias']
             session.start_time = ferm_session['date']
-
+            
             session.data = ferm_session['data']
             session.graph = ferm_session['graph']
-            active_iSpindel_sessions[ferm_session['uid']] = session
+
+            active_iSpindel_sessions[uid] = session
 
 
 def restore_active_sessions():
