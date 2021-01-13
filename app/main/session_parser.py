@@ -235,31 +235,30 @@ def restore_active_brew_sessions():
         for file in active_brew_session_files:
             # print('DEBUG: restore_active_sessions() found {} as an active session'.format(file))
             brew_session = load_brew_session(file)
-            # print('DEBUG: restore_active_sessions() {}'.format(brew_session))
-            if brew_session['uid'] not in active_brew_sessions:
-                active_brew_sessions[brew_session['uid']] = []
+            uid = brew_session['uid']
 
-            session = PicoBrewSession()
+            # print('DEBUG: restore_active_sessions() {}'.format(brew_session))
+            if uid not in active_brew_sessions:
+                session = PicoBrewSession()
+            else:
+                session = active_brew_sessions[uid]
+
             session.file = open(file, 'a')
             session.file.flush()
             session.filepath = file
-            session.alias = brew_session['alias']
             session.created_at = brew_session['date']
             session.name = brew_session['name']
             session.type = brew_session['type']
             session.session = brew_session['session']                   # session guid
             session.id = -1                                             # session id (integer)
 
-            if 'machine_type' in brew_session:
-                session.machine_type = brew_session['machine_type']     # keep track of machine type of uid (if known)
-
             if 'recovery' in brew_session:
                 session.recovery = brew_session['recovery']             # find last step name
 
             # session.remaining_time = None
-            session.is_pico = brew_session['is_pico']
             session.data = brew_session['data']
-            active_brew_sessions[brew_session['uid']] = session
+
+            active_brew_sessions[uid] = session
 
 
 def restore_active_ferm_sessions():

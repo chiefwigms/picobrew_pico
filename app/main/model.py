@@ -140,6 +140,7 @@ class iSpindelSession:
         self.start_time = None
         self.data = []
 
+
 class SupportObject:
     def __init__(self):
         self.name = None
