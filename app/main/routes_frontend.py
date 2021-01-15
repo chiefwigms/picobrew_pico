@@ -622,7 +622,6 @@ def parse_still_session(file):
 def load_active_still_sessions():
     still_sessions = []
     for uid in active_still_sessions:
-        active_still_sessions[uid].ip_address = 'localhost'
         still_sessions.append({'alias': active_still_sessions[uid].alias,
                               'ipaddr': active_still_sessions[uid].ip_address,
                               'graph': get_still_graph_data(uid, active_still_sessions[uid].data),

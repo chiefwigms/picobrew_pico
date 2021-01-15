@@ -88,7 +88,7 @@
           <div id="{{still_session.graph.chart_id}}" style="min-width: 320px; height: 400px; margin: 0 auto"></div>
           <script>var graph_data={{still_session.graph|tojson}};</script>
           <script src="/static/js/still_graph_socketio.js"></script>
-          {% if still_session.ipaddr %}
+          {% if still_session.ipaddr is defined and still_session.ipaddr != None and still_session.ipaddr|length%}
           <div class="card bg-dark text-white-50">
             <h5 class="card-header" id="h2_{{still_session.graph.chart_id}}">
               <a class="collapsed" role="button" data-toggle="collapse" href="#c2_{{still_session.graph.chart_id}}" data-parent="#accordion" aria-expanded="false" aria-controls="c2_{{still_session.graph.chart_id}}">
@@ -97,7 +97,7 @@
             </h5>
             <div id="c2_{{still_session.graph.chart_id}}" class="collapse show" aria-labelledby="h2_{{still_session.graph.chart_id}}">
               <div class="card-body">
-                <iframe src="http://{{still_session.ipaddr}}/datapage"></iframe>
+                <iframe src="http://{{still_session.ipaddr}}/data-page"></iframe>
               </div>
             </div>
           </div>
