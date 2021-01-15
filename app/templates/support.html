@@ -133,7 +133,8 @@
                     <h5 class="card-header" id="h_{{key.replace(' ', '_')}}">
                         <a class="collapsed" role="button" data-toggle="collapse" href="#c_{{key.replace(' ', '_')}}"
                             data-parent="#accordion" aria-expanded="false" aria-controls="c_{{key.replace(' ', '_')}}">
-                            {{key}}</a></h5>
+                            {{key}}</a>
+                    </h5>
                     <div id="c_{{key.replace(' ', '_')}}" class="collapse" aria-labelledby="h_{{key.replace(' ', '_')}}">
                         <div class="card-body">
                             <div class="row">
@@ -149,7 +150,7 @@
                                             <div id="{{key.replace(' ', '_')}}"></div>
                                         {% elif segment.split('.').pop() in ['png','jpg'] %}
                                             <img src='{{segment}}'>
-                                        {% elif 'com' in segment.split('.').pop() %}
+                                        {% else %}
                                             <div id="{{key.replace(' ', '_')}}"><a href='{{segment}}'>{{segment}}</a></div>
                                         {% endif %}
                                     </div>

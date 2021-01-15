@@ -92,7 +92,14 @@ def support_additional():
     additional_support.misc_media = {
         'picobrew_pico' : 'https://github.com/chiefwigms/picobrew_pico',
         'picobrew-support' : 'https://github.com/Intecpsp/picobrew-support',
-        'Awesome-Picobrew' : 'https://github.com/manofthemountain/awesome-picobrew'
+        'Awesome-Picobrew' : 'https://github.com/manofthemountain/awesome-picobrew',
+        'Facebook Group - Picobrewers' : 'https://www.facebook.com/groups/Picobrewers',
+        'Reddit - Picobrew' : 'https://www.reddit.com/r/picobrew/',
+        'HomebrewTalk - PicoBrew Zymatic' : 'https://www.homebrewtalk.com/threads/picobrew-zymatic.434787/',
+        'HomebrewTalk - PicoBrew Z' : 'https://www.homebrewtalk.com/threads/picobrew-z.645332/',
+        'HomebrewTalk - Picobrew Pico Users' : 'https://www.homebrewtalk.com/threads/picobrew-pico-users.593969/',
+        'Community Forum - Picobrewers' : 'https://picobrewers.org',
+        'PicoFree - Bring Your Own Ingredients Kit' : 'https://www.pico-free.com'
     }
     return render_template('support.html', support_object=additional_support)
 
