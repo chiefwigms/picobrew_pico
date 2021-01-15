@@ -29,7 +29,7 @@ def recover_incomplete_session(raw_data):
         recovered_session = '[\n]'
     elif raw_data.endswith(','):
         # Recover from incomplete json data file
-        recovered_session = raw_data[:-1] + '\n]'
+        recovered_session = raw_data[:-1] + '\n]\n'
 
     return recovered_session
 

@@ -52,7 +52,7 @@ def process_iSpindel_data():
     socketio.emit('iSpindel_session_update|{}'.format(data['ID']), graph_update)
     
     if (datetime.now().date() - active_iSpindel_sessions[uid].start_time.date()).days > 14:
-        active_iSpindel_sessions[uid].file.write('{}\n]'.format(log_data[:-2]))
+        active_iSpindel_sessions[uid].file.write('{}\n]\n'.format(log_data[:-2]))
         active_iSpindel_sessions[uid].cleanup()
         return ('', 200)
     else:
