@@ -65,7 +65,7 @@ yAxis: [
     title: {
       text: 'Specific Gravity'
     },
-    min: 1.0,
+    min: 0.9,
     //max: 1.1
     opposite: true
 }],

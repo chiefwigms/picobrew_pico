@@ -80,6 +80,7 @@ class PicoStillSession:
         self.file = None
         self.filepath = None
         self.alias = ''
+        self.ip_address = None
         self.uninit = True
         self.created_at = None
         self.name = 'Waiting To Distill'
@@ -118,25 +119,6 @@ class PicoFermSession:
         self.filepath = None
         self.uninit = True
         self.voltage = '-'
-        self.start_time = None
-        self.data = []
-
-
-class PicoStillSession:
-    def __init__(self):
-        self.file = None
-        self.filepath = None
-        self.alias = ''
-        self.name = 'Graphing Not Supported Yet'
-        self.start_time = None
-        self.data = []
-
-    def cleanup(self):
-        if self.file and self.filepath:
-            self.file.close()
-            shutil.move(str(self.filepath), str(still_archive_sessions_path()))
-        self.file = None
-        self.filepath = None
         self.start_time = None
         self.data = []
 

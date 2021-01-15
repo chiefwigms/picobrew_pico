@@ -77,6 +77,9 @@
     <div class="card bg-dark text-white-50">
       <h5 class="card-header" id="h_{{still_session.graph.chart_id}}">
         <a class="collapsed" role="button" data-toggle="collapse" href="#c_{{still_session.graph.chart_id}}" data-parent="#accordion" aria-expanded="false" aria-controls="c_{{still_session.graph.chart_id}}">
+          <span class="equipment-icon">
+            <img src="/static/img/picostill.svg" atl="picostill" />
+          </span>
           {% if still_session.alias is defined and still_session.alias|length %}{{still_session.alias}}{% else %}{{still_session.graph.chart_id}}{% endif %}
         </a>
       </h5>
@@ -84,12 +87,26 @@
         <div class="card-body">
           <div id="{{still_session.graph.chart_id}}" style="min-width: 320px; height: 400px; margin: 0 auto"></div>
           <script>var graph_data={{still_session.graph|tojson}};</script>
-          <script src="static/js/still_graph_socketio.js"></script>
+          <script src="/static/js/still_graph_socketio.js"></script>
+          {% if still_session.ipaddr %}
+          <div class="card bg-dark text-white-50">
+            <h5 class="card-header" id="h2_{{still_session.graph.chart_id}}">
+              <a class="collapsed" role="button" data-toggle="collapse" href="#c2_{{still_session.graph.chart_id}}" data-parent="#accordion" aria-expanded="false" aria-controls="c2_{{still_session.graph.chart_id}}">
+                Embedded PicoStill UI (iframe)
+              </a>
+            </h5>
+            <div id="c2_{{still_session.graph.chart_id}}" class="collapse show" aria-labelledby="h2_{{still_session.graph.chart_id}}">
+              <div class="card-body">
+                <iframe src="http://{{still_session.ipaddr}}/datapage"></iframe>
+              </div>
+            </div>
+          </div>
+          {% endif %}
         </div>
       </div>
     </div>
     {% endfor %}
-    <a href="/still_manual">Begin Manual Still Session</a>
+    <!-- <a href="/still_manual">Begin Manual Still Session</a> -->
   </div>
   <div id="accordion">
     {% for iSpindel_session in iSpindel_sessions %}

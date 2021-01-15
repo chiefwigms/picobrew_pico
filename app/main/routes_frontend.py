@@ -353,7 +353,7 @@ def still_manual():
       if 'stillipaddress' in request.form:
         still_ip = request.form['stillipaddress']
         device_id = request.form['stilluid']
-        
+
         connect_failure = False
         try:
             still_data_uri = 'http://{}/data'.format(still_ip)
@@ -363,16 +363,16 @@ def still_manual():
         except:
             datastring      = None
             connect_failure = True
-        
+
         if not datastring or datastring[0] != '#':
             connect_failure = True
-        
+
         if connect_failure:
             return 'Connect PicoStill: Failed to connect to PicoStill on address \"' + still_ip + '\"', 418
 
         from .still_polling import new_still_session
         from .still_polling import FlaskThread
-        
+
         thread = FlaskThread(target=new_still_session,
                              args=(still_ip, device_id),
                              daemon=True)
@@ -622,7 +622,9 @@ def parse_still_session(file):
 def load_active_still_sessions():
     still_sessions = []
     for uid in active_still_sessions:
+        active_still_sessions[uid].ip_address = 'localhost'
         still_sessions.append({'alias': active_still_sessions[uid].alias,
+                              'ipaddr': active_still_sessions[uid].ip_address,
                               'graph': get_still_graph_data(uid, active_still_sessions[uid].data),
                               'uid' : uid})
     return still_sessions

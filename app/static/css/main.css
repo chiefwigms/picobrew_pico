@@ -34,6 +34,7 @@ span.equipment-icon {
 }
 span.equipment-icon img {
   width: 80%;
+  max-height: 3.5em;
 }
 .fermentation-start {
   margin-top: 10px;

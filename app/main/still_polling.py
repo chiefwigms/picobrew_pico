@@ -1,5 +1,3 @@
-# Function(s) to initiate a new PicoStill session and poll
-# the device's data URI to build a local distillation session
 import json
 import requests
 
@@ -14,11 +12,14 @@ from time import sleep
 from datetime import datetime
 from threading import Thread
 
+# Function(s) to initiate a new PicoStill session and poll
+# the device's data URI to build a local distillation session\
+
 class FlaskThread(Thread):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.app = current_app._get_current_object()
-    
+
     def run(self):
       with self.app.app_context():
         super().run()
@@ -38,7 +39,7 @@ def poll_still(still_ip, uid):
 
     if not datastring or datastring[0] != '#':
       return False
-     
+
     datastring = datastring[1:-1]
     t1,t2,t3,t4,pres,ok,d1,d2,errmsg = datastring.split(',')
     time = (datetime.utcnow() - datetime(1970, 1, 1)).total_seconds() * 1000
@@ -63,6 +64,7 @@ def poll_still(still_ip, uid):
 
     return (ok, errmsg)
 
+
 def new_still_session(still_ip, device_id):
     global connection_failures
 
@@ -72,7 +74,7 @@ def new_still_session(still_ip, device_id):
         create_new_session(uid)
     else:
         # If we have an old session, clean it up and create a new one...
-        active_still_sessions[uid].file.write('\n]')
+        active_still_sessions[uid].file.write('\n]\n')
         active_still_sessions[uid].cleanup()
         create_new_session(uid)
 
@@ -84,9 +86,9 @@ def new_still_session(still_ip, device_id):
         else:
             connection_failures = 0
         sleep(60)
-      
+
     # If we've had 3 failures, clean up our session and end it.
-    active_still_sessions[uid].file.write('\n]')
+    active_still_sessions[uid].file.write('\n]\n')
     active_still_sessions[uid].cleanup()
     return
 
@@ -96,7 +98,7 @@ def create_new_session(uid):
     if uid not in active_still_sessions:
         active_still_sessions[uid] = PicoStillSession()
     active_still_sessions[uid].uninit = False
-    active_still_sessions[uid].start_time = datetime.now()  # Not now, but X samples * 60*RATE sec ago
+    active_still_sessions[uid].start_time = datetime.now()
     active_still_sessions[uid].filepath = still_active_sessions_path().joinpath('{0}#{1}.json'.format(active_still_sessions[uid].start_time.strftime('%Y%m%d_%H%M%S'), uid))
     active_still_sessions[uid].file = open(active_still_sessions[uid].filepath, 'w')
     active_still_sessions[uid].file.write('[\n')

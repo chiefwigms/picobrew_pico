@@ -53,6 +53,6 @@ Highcharts.chart(graph_data.chart_id, {
       //max: 15
       opposite: true
   }],
-  
+
   series: graph_data.series,
 });

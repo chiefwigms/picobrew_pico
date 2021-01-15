@@ -1,4 +1,4 @@
-from flask import current_app, send_from_directory
+from flask import current_app, request, send_from_directory
 from webargs import fields
 from webargs.flaskparser import use_args, FlaskParser
 from random import seed
@@ -37,7 +37,16 @@ def process_picostill_check_firmware(args):
     if uid not in active_still_sessions:
         active_still_sessions[uid] = PicoStillSession()
 
+    active_still_sessions[uid].ip_address = still_ip_address(request)
+
     if firmware_upgrade_required(MachineType.PICOSTILL, args['version']):
         filename = firmware_filename(MachineType.PICOSTILL, minimum_firmware(MachineType.PICOSTILL))
         return '#http://picobrew.com/firmware/picostill/{}#'.format(filename)
     return '#-1#'
+
+
+# -------- Utility --------
+def still_ip_address(request):
+    headers_list = request.headers.getlist("X-Forwarded-For")
+    ip_address = headers_list[0] if headers_list else request.remote_addr
+    return ip_address
