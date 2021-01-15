@@ -61,7 +61,12 @@ def support_picostill():
     picostill_support.manual_path = '/static/support/picostill/PicoStill_Manual.pdf'
     picostill_support.instructional_videos_path = '/static/support/picostill/Instructional-Videos.md'
     picostill_support.misc_media = {
-        'Light Reference' : '/static/support/picostill/PicoStill_Lights.jpg'
+        'Wifi Setup' : '/static/support/picostill/picostill-wifi-setup.png',
+        'Light Reference' : '/static/support/picostill/PicoStill_Lights.jpg',
+        'Setup Instructions' : '/static/support/picostill/picostill-setup-instructions.png',
+        'Program Functions' : '/static/support/picostill/picostill-program-functions.png',
+        'Utility Functions' : '/static/support/picostill/picostill-utility-functions.png',
+        'Firmware Network Info' : '/static/support/picostill/picostill-wifi-setup.png'
     }
     return render_template('support.html', support_object=picostill_support)
 
