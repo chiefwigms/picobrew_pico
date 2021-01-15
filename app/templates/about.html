@@ -30,6 +30,18 @@
       </div>
     </div>
   </div>
+  {% if raspberrypi_image %}
+  <div class="row">
+    <div class="group col-sm-8">
+      <div class="card bg-dark text-white">
+        <h2>RaspberryPi Image Version</h2>
+        <pre class="text-white">
+          <code class="float-left">{{raspberrypi_image}}</code>
+        </pre>
+      </div>
+    </div>
+  </div>
+  {% endif %}
   <div class="row">
     <div class="group col-sm-8">
       <div class="card bg-dark text-white">
@@ -37,9 +49,8 @@
         <pre class="text-white">
           <code class="float-left">{{os_release}}</code>
         </pre>
-
         {% if raspberrypi_info %}
-          <h3>Raspberry PI Info</h2>
+          <h3>System Info</h2>
           <pre class="text-white">
             <code class="float-left">{{raspberrypi_info}}</code>
           </pre>

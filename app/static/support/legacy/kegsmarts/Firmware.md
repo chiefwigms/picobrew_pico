@@ -1,11 +1,14 @@
 # PicoBrew KegSmarts™ Firmware
 
-*This page contains the latest version of the KegSmarts™ firmware and a running changelog of software updates made available by PicoBrew. For installation instructions and tools, please click [here](Firmware-Installation.md).*
+*This page contains the latest version of the KegSmarts™ firmware and a running changelog of software updates made available by PicoBrew. For installation instructions and tools, please click [here](/static/support/legacy/kegsmarts/Firmware-Installation.md).*
 
 **Latest Version: 1.0.6**
+
 **Last Updated: August 14th, 2017**
-[Click Here to Download Latest KegSmarts™ Firmware](KegSmarts_1_0_6.zip)
-[Click Here to Download CC3000 WiFi Chip Firmware](../common/WiFiPatch.zip)
+
+[Click Here to Download Latest KegSmarts™ Firmware](/static/support/legacy/kegsmarts/KegSmarts_1_0_6.zip)
+
+[Click Here to Download CC3000 WiFi Chip Firmware](/static/support/legacy/common/WiFiPatch.zip)
 
 ## Change Log
 

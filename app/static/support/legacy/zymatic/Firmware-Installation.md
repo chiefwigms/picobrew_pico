@@ -1,17 +1,18 @@
 # PicoBrew Zymatic® Firmware Installation
 
 *This page contains instructions and tools for updating your Zymatic® firmware.
-For information on the latest firmware for your Zymatic®, please click [here](Firmware.md).*
+For information on the latest firmware for your Zymatic®, please click [here](/static/support/legacy/zymatic/Firmware.md).*
 
 ## Quick Downloads
 
-[PicoFlash Utility](../common/PicoFlash.zip)
-[Latest Zymatic® Firmware](Zymatic_1_1_14.zip)
+[PicoFlash Utility](/static/support/legacy/common/PicoFlash.zip)
+
+[Latest Zymatic® Firmware](/static/support/legacy/zymatic/Zymatic_1_1_14.zip)
 
 ## Installation Instructions
 
 1. **Download And Install the PicoFlash Utility**
-    * Download the PicoFlash utility [here](../common/PicoFlash.zip).
+    * Download the PicoFlash utility [here](/static/support/legacy/common/PicoFlash.zip).
     * A zipped folder will be downloaded to your downloads folder unless you specify another location or have a set preference for your browser.
     * Navigate to your downloads folder (or the folder that the downloaded PicoFlash file was stored).
     * Unzip the file by right clicking on the file and selecting "extract all".
@@ -20,7 +21,7 @@ For information on the latest firmware for your Zymatic®, please click [here](F
     * Double-click the installer (PicoBrew Zymatic.exe) and proceed through the installation.
     * *Note: There are other files that are loaded for the installation process. If you are not sure which one is the .exe file, you can right click the files, select properties, and the type of file should be listed under the general tab of this properties window*
 2. **Download Firmware**
-    * Download the latest firmware [here](Zymatic_1_1_14.zip).
+    * Download the latest firmware [here](/static/support/legacy/zymatic/Zymatic_1_1_14.zip).
     * A zipped folder will be downloaded to your downloads folder unless you specify another location or have a set preference for your browser.
     * Navigate to your downloads folder (or the folder that the downloaded PicoFlash file was stored).
     * Unzip the file by right clicking on the file and selecting "extract all".
@@ -28,9 +29,9 @@ For information on the latest firmware for your Zymatic®, please click [here](F
     * IMPORTANT: Make sure your Zymatic® is powered ON and not brewing beer!
     * Connect your PC to the PicoBrew Zymatic® via USB.
     * Note: It may take a minute or two for your computer to recognize your Zymatic®. If an error message appers, wait one to two minutes before pressing "retry"
-    * Open the PicoFlash utility, and click the ellipses button ![...](../common/ellipsesButton.png).
+    * Open the PicoFlash utility, and click the ellipses button ![...](/static/support/legacy/common/ellipsesButton.png).
     * Navigate to the Zymatic® firmware you downloaded (.hex file) and select it.
-    * Click ![FLASH Now!](../common/flashButton.png).
+    * Click ![FLASH Now!](/static/support/legacy/common/flashButton.png).
     * The utility will open a new window and show some progress bars while it installs the firmware on your Zymatic®.
     * When the utility has successfully completed updating the firmware, it will close automatically and restart your Zymatic®.
     * While the system is restarting, unplug the USB.

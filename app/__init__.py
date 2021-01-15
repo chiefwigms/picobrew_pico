@@ -94,6 +94,6 @@ def create_app(debug=False):
                             if uid not in active_brew_sessions:
                                 active_brew_sessions[uid] = PicoBrewSession(mtype)
                             active_brew_sessions[uid].alias = aliases[mtype][uid]
-                            active_brew_sessions[uid].is_pico = True if mtype == MachineType.PICOBREW else False
+                            active_brew_sessions[uid].is_pico = True if mtype in [MachineType.PICOBREW, MachineType.PICOBREW_C] else False
 
     return app

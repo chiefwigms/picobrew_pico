@@ -7,3 +7,7 @@
 ## Extracting Citrus Oil with the PicoStill
 
 [![PicoBrew How-To: Extracting Citrus Oil with the PicoStill](http://img.youtube.com/vi/0PIiafuvp0E/0.jpg)](https://www.youtube.com/watch?v=0PIiafuvp0E)
+
+## Zymatic-PicoStill
+
+[![Zymatic-PicoStill](http://img.youtube.com/vi/qJzYRzCHDnk/0.jpg)](https://www.youtube.com/watch?v=qJzYRzCHDnk)

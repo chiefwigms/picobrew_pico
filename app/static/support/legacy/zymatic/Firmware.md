@@ -1,11 +1,14 @@
 # PicoBrew Zymatic® Firmware
 
-*This page contains the latest version of the Zymatic® firmware and a running changelog of software updates made available by PicoBrew. For installation instructions and tools, please click [here](Firmware-Installation.md).*
+*This page contains the latest version of the Zymatic® firmware and a running changelog of software updates made available by PicoBrew. For installation instructions and tools, please click [here](/static/support/legacy/zymatic/Firmware-Installation.md).*
 
 **Latest Version: 1.1.14**
+
 **Last Updated: February 9th, 2017**
-[Click Here to Download Latest Zymatic® Firmware](legacy/zymatic/Zymatic_1_1_14.zip)
-[Click Here to Download CC3000 WiFi Chip Firmware](../common/WiFiPatch.zip)
+
+[Click Here to Download Latest Zymatic® Firmware](/static/support/legacy/zymatic/Zymatic_1_1_14.zip)
+
+[Click Here to Download CC3000 WiFi Chip Firmware](/static/support/legacy/common/WiFiPatch.zip)
 
 ## Change Log
 

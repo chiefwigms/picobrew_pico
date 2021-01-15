@@ -269,15 +269,17 @@ def restore_active_ferm_sessions():
             # print('DEBUG: restore_active_sessions() found {} as an active session'.format(file))
             ferm_session = load_ferm_session(file)
             # print('DEBUG: restore_active_sessions() {}'.format(ferm_session))
-            if ferm_session['uid'] not in active_ferm_sessions:
-                active_ferm_sessions[ferm_session['uid']] = []
+            uid = ferm_session['uid']
+            if uid not in active_ferm_sessions:
+                active_ferm_sessions[uid] = PicoFermSession()
 
-            session = PicoFermSession()
+            session = active_ferm_sessions[uid]
             session.file = open(file, 'a')
             session.file.flush()
             session.filepath = file
             session.alias = ferm_session['alias']
             session.start_time = ferm_session['date']
+            session.active = True
 
             session.data = ferm_session['data']
             session.graph = ferm_session['graph']

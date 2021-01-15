@@ -28,10 +28,40 @@ file_glob_pattern = "[!._]*.json"
 yaml = YAML()
 
 
+def system_info():
+    try:
+        system_info = subprocess.check_output("cat /etc/os-release || sw_vers || systeminfo | findstr /C:'OS'", shell=True)
+        system_info = system_info.decode("utf-8")
+    except:
+        system_info = "Not Supported on this Device"
+
+    return system_info
+
+
+def platform():
+    system = system_info()
+
+    if 'raspbian' in system:
+        return 'RaspberryPi'
+    elif 'Mac OS X' in system:
+        return 'MacOS'
+    elif 'Microsoft Windows' in system:
+        return 'Windows'
+    else:
+        return "unknown"
+
+
+platform_info = platform()
+
+
+def render_template_with_defaults(template, **kwargs):
+    return render_template(template, platform=platform_info, **kwargs)
+
+
 # -------- Routes --------
 @main.route('/')
 def index():
-    return render_template('index.html', brew_sessions=load_active_brew_sessions(),
+    return render_template_with_defaults('index.html', brew_sessions=load_active_brew_sessions(),
                            ferm_sessions=load_active_ferm_sessions(),
                            iSpindel_sessions=load_active_iSpindel_sessions())
 
@@ -64,6 +94,19 @@ def shutdown_system():
     return redirect('/')
 
 
+@main.route('/logs')
+def download_logs():
+    try:
+        max_lines = request.args.get('max', 20000)
+        logs = subprocess.check_output(f"systemctl status rc.local -n {max_lines}", shell=True)
+        logs = logs.decode("utf-8")
+    except Exception as e:
+        error = f'Unexpected Error Retrieving Server Logs: {e}'
+        return error, 500
+
+    return logs, 200
+
+
 @main.route('/devices', methods=['GET', 'POST'])
 def handle_devices():
     active_sessions = {
@@ -81,10 +124,11 @@ def handle_devices():
         alias = request.form['alias']
 
         # verify uid not already configured
-        if uid in {**active_brew_sessions, **active_ferm_sessions, **active_iSpindel_sessions, **active_still_sessions}:
+        if (uid in {**active_brew_sessions, **active_ferm_sessions, **active_iSpindel_sessions, **active_still_sessions} 
+                and active_session(uid).alias != ''):
             error = f'Product ID {uid} already configured'
             current_app.logger.error(error)
-            return render_template('devices.html', error=error,
+            return render_template_with_defaults('devices.html', error=error,
                 config=server_config(), active_sessions=active_sessions)
 
         current_app.logger.debug(f'machine_type: {mtype}; uid: {uid}; alias: {alias}')
@@ -106,7 +150,7 @@ def handle_devices():
                 yaml.dump(server_cfg, f)
             error = f'Unexpected Error Writing Configuration File: {e}'
             current_app.logger.error(e)
-            return render_template('devices.html', error=error,
+            return render_template_with_defaults('devices.html', error=error,
                 config=server_config(), active_sessions=active_sessions)
 
         # ... and into already loaded active sessions
@@ -121,10 +165,10 @@ def handle_devices():
             active_iSpindel_sessions[uid].alias = alias
         else:
             active_brew_sessions[uid] = PicoBrewSession(mtype)
-            active_brew_sessions[uid].is_pico = True if mtype == MachineType.PICOBREW else False
+            active_brew_sessions[uid].is_pico = True if mtype in [MachineType.PICOBREW, MachineType.PICOBREW_C] else False
             active_brew_sessions[uid].alias = alias
 
-    return render_template('devices.html', config=server_config(), active_sessions=active_sessions)
+    return render_template_with_defaults('devices.html', config=server_config(), active_sessions=active_sessions)
 
 
 @main.route('/devices/<uid>', methods=['POST', 'DELETE'])
@@ -144,7 +188,7 @@ def handle_specific_device(uid):
     if uid not in {**active_brew_sessions, **active_ferm_sessions, **active_iSpindel_sessions, **active_still_sessions}:
         error = f'Product ID {uid} not already configured'
         current_app.logger.error(error)
-        return render_template('devices.html', error=error,
+        return render_template_with_defaults('devices.html', error=error,
             config=server_config(), active_sessions=active_sessions)
 
     current_app.logger.debug(f'machine_type: {mtype}; uid: {uid}; alias: {alias}')
@@ -167,7 +211,7 @@ def handle_specific_device(uid):
             yaml.dump(server_cfg, f)
         error = f'Unexpected Error Writing Configuration File: {e}'
         current_app.logger.error(e)
-        return render_template('devices.html', error=error,
+        return render_template_with_defaults('devices.html', error=error,
             config=server_config(), active_sessions=active_sessions)
 
     # ... and change existing active session references to alias
@@ -185,141 +229,20 @@ def handle_specific_device(uid):
     else:
         return redirect('/devices')
 
-@main.route('/support_accessories')
-def support_accessories():
-    acc_support = SupportObject()
-    acc_support.name = 'Mini Kegerator'
-    acc_support.manual_path = 'static/support/accessories/MiniKegerator_Manual.pdf'
-    return render_template('support.html', support_object=acc_support)
-
-
-@main.route('/support_pico_c')
-def support_pico_c():
-    pico_c_support = SupportObject()
-    pico_c_support.name = 'Pico C'
-    pico_c_support.manual_path = 'static/support/pico-c/PicoC_Manual.pdf'
-    pico_c_support.faq_path = 'static/support/pico-c/Frequently-Asked-Questions.md'
-    pico_c_support.instructional_videos_path = 'static/support/pico-c/Instructional-Videos.md'
-    pico_c_support.misc_media = {
-        'DIY Cleaning Bucket' : 'static/support/pico-c/DIY_CleaningBucket.pdf',
-        'Cold Brew' : 'static/support/pico-c/PicoC_ColdBrew.pdf',
-        'Manual Brew' : 'static/support/pico-c/PicoC_ManualBrew.pdf',
-        'Sous Vide' : 'static/support/pico-c/PicoC_SousVide.pdf'
-    }
-    return render_template('support.html', support_object=pico_c_support)
-
-
-@main.route('/support_pico_pro')
-def support_pico_pro():
-    pico_pro_support = SupportObject()
-    pico_pro_support.name = 'Pico Pro'
-    pico_pro_support.manual_path = 'static/support/pico-pro/PicoPro_Manual.pdf'
-    pico_pro_support.faq_path = 'static/support/pico-pro/Frequently-Asked-Questions.md'
-    pico_pro_support.instructional_videos_path = 'static/support/pico-pro/Instructional-Videos.md'
-    pico_pro_support.misc_media = {
-        'Cold Brew' : 'static/support/pico-pro/PicoPro_ColdBrew.pdf',
-        'Manual Brew' : 'static/support/pico-pro/PicoPro_ManualBrew.pdf',
-        'Sous Vide' : 'static/support/pico-pro/Pico_SousVide.pdf'
-    }
-    return render_template('support.html', support_object=pico_pro_support)
-
-
-@main.route('/support_picoferm')
-def support_picoferm():
-    picoferm_support = SupportObject()
-    picoferm_support.name = 'PicoFerm'
-    picoferm_support.manual_path = 'static/support/picoferm/PicoFerm_Manual.pdf'
-    picoferm_support.misc_media = {
-        'Wifi Setup' : 'static/support/picoferm/Wifi-setup.png'
-    }
-    return render_template('support.html', support_object=picoferm_support)
-
-
-@main.route('/support_picostill')
-def support_picostill():
-    picostill_support = SupportObject()
-    picostill_support.name = 'PicoStill'
-    picostill_support.manual_path = 'static/support/picostill/PicoStill_Manual.pdf'
-    picostill_support.instructional_videos_path = 'static/support/picostill/Instructional-Videos.md'
-    return render_template('support.html', support_object=picostill_support)
-
-
-@main.route('/support_z_series')
-def support_z_series():
-    z_series_support = SupportObject()
-    z_series_support.name = 'Z Series'
-    z_series_support.manual_path = 'static/support/z-series/ZN_AssemblyGuide.pdf'
-    z_series_support.faq_path = 'static/support/z-series/Frequently-Asked-Questions.md'
-    z_series_support.misc_media = {
-        'Quick Start' : 'static/support/z-series/Z_QuickStart.pdf',
-        'Bottling Kit' : 'static/support/z-series/Z_BottlingKit.pdf',
-        'Draft Kit' : 'static/support/z-series/Z_DraftKit.pdf'
-    }
-    return render_template('support.html', support_object=z_series_support)
-
-
-@main.route('/support_additional')
-def support_additional():
-    additional_support = SupportObject()
-    additional_support.name = 'Additional Resources'
-    additional_support.misc_media = {
-        'picobrew_pico' : 'https://github.com/chiefwigms/picobrew_pico',
-        'picobrew-support' : 'https://github.com/Intecpsp/picobrew-support',
-        'Awesome-Picobrew' : 'https://github.com/manofthemountain/awesome-picobrew'
-    }
-    return render_template('support.html', support_object=additional_support)
-
-
-@main.route('/support_kegsmarts')
-def support_kegsmarts():
-    kegsmarts_support = SupportObject()
-    kegsmarts_support.name = 'KegSmarts'
-    kegsmarts_support.manual_path = 'static/support/legacy/kegsmarts/KegSmarts_Manual.pdf'
-    kegsmarts_support.misc_media = {
-        'Firmware' : 'static/support/legacy/kegsmarts/Firmware.md',
-        'Firmware-Installation' : 'static/support/legacy/kegsmarts/Firmware-Installation.md'
-    }
-    return render_template('support.html', support_object=kegsmarts_support)
-
-
-@main.route('/support_pico_s')
-def support_pico_s():
-    pico_s_support = SupportObject()
-    pico_s_support.name = 'Pico S'
-    pico_s_support.manual_path = 'static/support/legacy/pico-s/Pico_Manual.pdf'
-    pico_s_support.faq_path = 'static/support/legacy/pico-s/Frequently-Asked-Questions.md'
-    pico_s_support.instructional_videos_path = 'static/support/legacy/pico-s/Instructional-Videos.md'
-    return render_template('support.html', support_object=pico_s_support)
-
-
-@main.route('/support_zymatic')
-def support_zymatic():
-    zymatic_support = SupportObject()
-    zymatic_support.name = 'Zymatic'
-    zymatic_support.manual_path = 'static/support/legacy/zymatic/Zymatic_Manual.pdf'
-    zymatic_support.faq_path = 'static/support/legacy/zymatic/Frequently-Asked-Questions.md'
-    zymatic_support.instructional_videos_path = 'static/support/legacy/zymatic/Instructional-Videos.md'
-    zymatic_support.misc_media = {
-        'Firmware' : 'static/support/legacy/zymatic/Firmware.md',
-        'Firmware-Installation' : 'static/support/legacy/zymatic/Firmware-Installation.md',
-        'Maintenance' : 'static/support/legacy/zymatic/Maintenance.md'
-    }
-    return render_template('support.html', support_object=zymatic_support)
-
 
 @main.route('/brew_history')
 def brew_history():
-    return render_template('brew_history.html', sessions=load_brew_sessions(), invalid=get_invalid_sessions('brew'))
+    return render_template_with_defaults('brew_history.html', sessions=load_brew_sessions(), invalid=get_invalid_sessions('brew'))
 
 
 @main.route('/ferm_history')
 def ferm_history():
-    return render_template('ferm_history.html', sessions=load_ferm_sessions(), invalid=get_invalid_sessions('ferm'))
+    return render_template_with_defaults('ferm_history.html', sessions=load_ferm_sessions(), invalid=get_invalid_sessions('ferm'))
 
 
 @main.route('/iSpindel_history')
 def iSpindel_history():
-    return render_template('iSpindel_history.html', sessions=load_iSpindel_sessions(), invalid=get_invalid_sessions('iSpindel'))
+    return render_template_with_defaults('iSpindel_history.html', sessions=load_iSpindel_sessions(), invalid=get_invalid_sessions('iSpindel'))
 
 
 @main.route('/zymatic_recipes')
@@ -327,7 +250,7 @@ def _zymatic_recipes():
     global zymatic_recipes, invalid_recipes
     zymatic_recipes = load_zymatic_recipes()
     recipes_dict = [json.loads(json.dumps(recipe, default=lambda r: r.__dict__)) for recipe in zymatic_recipes]
-    return render_template('zymatic_recipes.html', recipes=recipes_dict, invalid=invalid_recipes.get(MachineType.ZYMATIC, set()))
+    return render_template_with_defaults('zymatic_recipes.html', recipes=recipes_dict, invalid=invalid_recipes.get(MachineType.ZYMATIC, set()))
 
 
 @main.route('/new_zymatic_recipe', methods=['GET', 'POST'])
@@ -343,7 +266,7 @@ def new_zymatic_recipe():
         else:
             return 'Recipe Exists!', 418
     else:
-        return render_template('new_zymatic_recipe.html')
+        return render_template_with_defaults('new_zymatic_recipe.html')
 
 
 @main.route('/import_zymatic_recipe', methods=['GET', 'POST'])
@@ -361,7 +284,7 @@ def import_zymatic_recipe():
             return getattr(e, 'message', e.args[0]), 400
     else:
         machine_ids = [uid for uid in active_brew_sessions if active_brew_sessions[uid].machine_type == MachineType.ZYMATIC]
-        return render_template('import_brewhouse_recipe.html', user_required=True, machine_ids=machine_ids)
+        return render_template_with_defaults('import_brewhouse_recipe.html', user_required=True, machine_ids=machine_ids)
 
 
 @main.route('/update_zymatic_recipe', methods=['POST'])
@@ -409,12 +332,12 @@ def _zseries_recipes():
     global zseries_recipes, invalid_recipes
     zseries_recipes = load_zseries_recipes()
     recipes_dict = [json.loads(json.dumps(recipe, default=lambda r: r.__dict__)) for recipe in zseries_recipes]
-    return render_template('zseries_recipes.html', recipes=recipes_dict, invalid=invalid_recipes.get(MachineType.ZSERIES, set()))
+    return render_template_with_defaults('zseries_recipes.html', recipes=recipes_dict, invalid=invalid_recipes.get(MachineType.ZSERIES, set()))
 
 
 @main.route('/new_zseries_recipe')
 def new_zseries_recipe():
-    return render_template('new_zseries_recipe.html')
+    return render_template_with_defaults('new_zseries_recipe.html')
 
 
 @main.route('/new_zseries_recipe_save', methods=['POST'])
@@ -442,6 +365,33 @@ def update_zseries_recipe():
     return '', 204
 
 
+@main.route('/device/<uid>/sessions/<session_type>', methods=['PUT'])
+def update_device_session(uid, session_type):
+    update = request.get_json()
+    if session_type == 'ferm':
+        session = active_ferm_sessions[uid]
+
+        if update['active'] == False:
+            session.active = False
+            if session.file != None:
+                session.file.seek(0, os.SEEK_END)
+                if session.file.tell() > 0:
+                    # mark for completion and archive session file
+                    session.file.seek(session.file.tell() - 1, os.SEEK_SET)  # Remove trailing , from last data set
+                    session.file.write('\n]')
+                    session.cleanup()
+                else:
+                    # delete empty session file (user started fermentation, but device never reported data)
+                    os.remove(session.filepath)
+        else:
+            session.active = True
+
+        return '', 204
+    else:
+        current_app.logger.error(f'invalid session type : {session_type}')
+        return 'Invalid session type provided \"' + session_type + '\"', 418
+
+
 @main.route('/recipes/<machine_type>/<rid>/<name>.json', methods=['GET'])
 def download_recipe(machine_type, rid, name):
     recipe_dirpath = ""
@@ -452,6 +402,7 @@ def download_recipe(machine_type, rid, name):
     elif machine_type == "zseries":
         recipe_dirpath = zseries_recipe_path()
     else:
+        current_app.logger.error(f'invalid machine_type : {machine_type}')
         return 'Invalid machine type provided \"' + machine_type + '\"', 418
 
     files = list(recipe_dirpath.glob(file_glob_pattern))
@@ -515,7 +466,7 @@ def import_zseries_recipe():
             return getattr(e, 'message', e.args[0]), 400
     else:
         machine_ids = [uid for uid in active_brew_sessions if active_brew_sessions[uid].machine_type == MachineType.ZSERIES]
-        return render_template('import_brewhouse_recipe.html', user_required=False, machine_ids=machine_ids)
+        return render_template_with_defaults('import_brewhouse_recipe.html', user_required=False, machine_ids=machine_ids)
 
 
 def load_zseries_recipes():
@@ -588,7 +539,7 @@ def _pico_recipes():
     global pico_recipes, invalid_recipes
     pico_recipes = load_pico_recipes()
     recipes_dict = [json.loads(json.dumps(recipe, default=lambda r: r.__dict__)) for recipe in pico_recipes]
-    return render_template('pico_recipes.html', recipes=recipes_dict, invalid=invalid_recipes.get(MachineType.PICOBREW, set()))
+    return render_template_with_defaults('pico_recipes.html', recipes=recipes_dict, invalid=invalid_recipes.get(MachineType.PICOBREW, set()))
 
 
 @main.route('/new_pico_recipe', methods=['GET', 'POST'])
@@ -606,7 +557,7 @@ def new_pico_recipe():
         else:
             return 'Recipe Exists!', 418
     else:
-        return render_template('new_pico_recipe.html')
+        return render_template_with_defaults('new_pico_recipe.html')
 
 
 @main.route('/import_pico_recipe', methods=['GET', 'POST'])
@@ -624,7 +575,7 @@ def import_pico_recipe():
             return getattr(e, 'message', e.args[0]), 400
     else:
         machine_ids = [uid for uid in active_brew_sessions if active_brew_sessions[uid].machine_type in [MachineType.PICOBREW, MachineType.PICOBREW_C]]
-        return render_template('import_brewhouse_recipe.html', rfid_required=True, machine_ids=machine_ids)
+        return render_template_with_defaults('import_brewhouse_recipe.html', rfid_required=True, machine_ids=machine_ids)
 
 
 @main.route('/update_pico_recipe', methods=['POST'])
@@ -653,7 +604,7 @@ def delete_pico_recipe():
 def available_networks():
     # TODO: properly handle failures by hiding settings in /setup or showing error
 
-    wifi_list = subprocess.check_output('./scripts/pi/wifi_scan.sh', shell=True)
+    wifi_list = subprocess.check_output('./scripts/pi/wifi_scan.sh | grep 2.4', shell=True)
     networks = []
     for network in wifi_list.split(b'\n'):
         network_parts = shlex.split(network.decode())
@@ -695,17 +646,20 @@ def setup():
         elif 'interface' in payload:
             if payload['interface'] == 'wlan0':
                 # change wireless configuration (wpa_supplicant-wlan0.conf and wpa_supplicant.conf)
-                # sudo sed -i -e"s/^ssid=.*/ssid=\"$SSID\"/" /etc/wpa_supplicant/wpa_supplicant.conf
+                # sudo sed -i -e"s/^\bssid=.*/ssid=\"$SSID\"/" /etc/wpa_supplicant/wpa_supplicant.conf
                 # sudo sed -i -e"s/^psk=.*/psk=\"$WIFIPASS\"/" /etc/wpa_supplicant/wpa_supplicant.conf
-            
+
                 try:
-                    wpa_files = "/etc/wpa_supplicant/wpa_supplicant.conf /etc/wpa_supplicant/wpa_supplicant-wlan0.conf"
+                    # <= beta4 => /etc/wpa_supplicant/wpa_supplicant.conf
+                    # >= beta5 => /etc/wpa_supplicant/wpa_supplicant-wlan0.conf
+                    wpa_files = " ".join([_x for _x in ("/etc/wpa_supplicant/wpa_supplicant.conf", "/etc/wpa_supplicant/wpa_supplicant-wlan0.conf") if os.path.exists(_x)])
 
                     # set ssid in wpa_supplicant files
+                    # regex \b marks a word boundary
                     ssid = payload['ssid']
                     subprocess.check_output(
-                        """sed -i -e 's/ssid=.*/ssid="{}"/' {}""".format(ssid, wpa_files), shell=True)
-                    
+                        """sed -i 's/\\bssid=.*/ssid="{}"/' {}""".format(ssid, wpa_files), shell=True)
+
                     # set bssid (if set by user) in wpa_supplicant files
                     if 'bssid' in payload and payload['bssid']:
                         bssid = payload['bssid']
@@ -713,18 +667,18 @@ def setup():
                         subprocess.check_output(
                             """sudo sed -i '/bssid/s/# *//g' {}""".format(wpa_files), shell=True)
                         subprocess.check_output(
-                            """sed -i -e 's/bssid=.*/bssid={}/' {}""".format(bssid, wpa_files), shell=True)
+                            """sudo sed -i 's/bssid=.*/bssid={}/' {}""".format(bssid, wpa_files), shell=True)
                     else:
-                        # add comment for bssid line (if present)
+                        # add a comment for bssid line (if present)
                         subprocess.check_output(
-                            """sudo sed -i '/bssid/s/bssid/# bssid/g' {}""".format(wpa_files), shell=True)
-                    
+                            """sudo sed -i 's/\(bssid=.*\)/# \\1/g' {}""".format(wpa_files), shell=True)
+
                     # set credentials (if set by user) in wpa_supplicant files
-                    if 'password' in payload and payload['password']:
+                    if 'password' in payload:
                         psk = payload['password']
                         subprocess.check_output(
-                            """sed -i -e 's/psk=.*/psk="{}"/' {}""".format(psk, wpa_files), shell=True)
-                    
+                            """sed -i 's/psk=.*/psk="{}"/' {}""".format(psk, wpa_files), shell=True)
+
                     def restart_wireless():
                         import subprocess
                         import time
@@ -733,6 +687,7 @@ def setup():
 
                     # async restart wireless service
                     thread = Thread(target=restart_wireless)
+                    current_app.logger.info("applying changes and restarting wireless interface")
                     thread.start()
 
                     return '', 204
@@ -749,7 +704,7 @@ def setup():
                     ssid = payload['ssid']
                     subprocess.check_output(
                         """sed -i -e 's/ssid=.*/ssid={}/' {}""".format(ssid, hostapd_file), shell=True)
-                    
+
                     # set credentials (if set by user) in hostapd file
                     if 'password' in payload and payload['password']:
                         psk = payload['password']
@@ -778,7 +733,7 @@ def setup():
             current_app.logger.error("ERROR: unsupported payload received %s".format(payload))
             return 'Invalid Setup Payload Received - Setup Failed!', 418
     else:
-        return render_template('setup.html',
+        return render_template_with_defaults('setup.html',
             hostname=hostname(),
             ap0=accesspoint_credentials(),
             wireless_credentials=wireless_credentials(),
@@ -814,14 +769,24 @@ def accesspoint_credentials():
 def wireless_credentials():
     # TODO: properly handle No such file or directory by hiding settings in /setup or showing error
 
-    ssid = subprocess.check_output('more /etc/wpa_supplicant/wpa_supplicant-wlan0.conf | grep -w ssid | awk -F "=" \'{print $2}\'', shell=True)
-    psk = subprocess.check_output('more /etc/wpa_supplicant/wpa_supplicant-wlan0.conf | grep -w psk | awk -F "=" \'{print $2}\'', shell=True)
-    
+    # grep -w matches an exact word:
+    #   example non match:
+    #       echo "bssid=test-value" | grep -w ssid => ""
+    #   example match:
+    #       echo "bssid=test-value" | grep -w bssid => "bssid=test-value"
+    cmd_template = "more /etc/wpa_supplicant/wpa_supplicant-wlan0.conf | grep -v '^\s*[#]' | grep -w {key} "
+
+    ssid = subprocess.check_output(cmd_template.format(key='ssid') + '| awk -F "=" \'{print $2}\'', shell=True)
+    psk = subprocess.check_output(cmd_template.format(key='psk') + '| awk -F "=" \'{print $2}\'', shell=True)
+
     try:
-        bssid = subprocess.check_output('more /etc/wpa_supplicant/wpa_supplicant-wlan0.conf | grep -w bssid | awk -F "=" \'{print $2}\'', shell=True)
+        # first remove any line that might be a comment (default)
+        # second filter to the line that contains the text 'bssid'
+        # return the value after the '=' in bssid=<value>
+        bssid = subprocess.check_output(cmd_template.format(key='bssid') + '| awk -F "=" \'{print $2}\'', shell=True)
     except:
         bssid = None
-    
+
     return { 
         'ssid': ssid.decode("utf-8").strip().strip('"'),
         'psk': psk.decode("utf-8").strip().strip('"'),
@@ -849,15 +814,6 @@ def about():
     except:
         localChanges = "unavailable (check network)"
 
-    # capture os version information
-    # proc = subprocess.Popen(["cat", "/etc/os-release"], stdout=subprocess.PIPE, shell=True)
-    # (osRelease, err) = proc.communicate()
-    try:
-        osReleaseInfo = subprocess.check_output("cat /etc/os-release || sw_vers || systeminfo | findstr /C:'OS'", shell=True)
-        osReleaseInfo = osReleaseInfo.decode("utf-8")
-    except:
-        osReleaseInfo = "Not Supported on this Device"
-
     # # capture raspbian pinout
     # proc = subprocess.Popen(["pinout"], stdout=subprocess.PIPE, shell=True)
     # (pinout, err) = proc.communicate()
@@ -866,9 +822,13 @@ def about():
         pinout = pinout.decode("utf-8")
     except:
         pinout = None
+
+    image_release = os.environ.get("IMG_RELEASE", None)
+    image_variant = os.environ.get("IMG_VARIANT", None)
+    image_version = None if image_release == None else f"{image_release}_{image_variant}" 
     
-    return render_template('about.html', git_version=gitSha, latest_git_sha=latestMasterSha, local_changes=localChanges,
-                           os_release=osReleaseInfo, raspberrypi_info=pinout)
+    return render_template_with_defaults('about.html', git_version=gitSha, latest_git_sha=latestMasterSha, local_changes=localChanges,
+                           os_release=system_info(), raspberrypi_info=pinout, raspberrypi_image=image_version)
 
 
 def load_pico_recipes():
@@ -944,6 +904,8 @@ def load_active_ferm_sessions():
     ferm_sessions = []
     for uid in active_ferm_sessions:
         ferm_sessions.append({'alias': active_ferm_sessions[uid].alias,
+                              'uid': uid,
+                              'active': active_ferm_sessions[uid].active,
                               'graph': get_ferm_graph_data(uid, active_ferm_sessions[uid].voltage,
                                                            active_ferm_sessions[uid].data)})
     return ferm_sessions
@@ -977,6 +939,7 @@ def load_iSpindel_sessions():
     iSpindel_sessions = [parse_iSpindel_session(file) for file in sorted(files, reverse=True)]
     return list(filter(lambda x: x != None, iSpindel_sessions))
 
+
 # Read initial recipe list on load
 pico_recipes = []
 zymatic_recipes = []
@@ -1005,7 +968,6 @@ def initialize_data():
 
 
 # utilities
-
 def increment_zseries_recipe_id():
     recipe_id = 1
     found = False
@@ -1015,3 +977,16 @@ def increment_zseries_recipe_id():
         recipe_id += 1
 
     return recipe_id
+
+
+def active_session(uid):
+    if uid in active_brew_sessions:
+        return active_brew_sessions[uid]
+    elif uid in active_ferm_sessions:
+        return active_ferm_sessions[uid]
+    elif uid in active_iSpindel_sessions:
+        return active_iSpindel_sessions[uid]
+    elif uid in active_still_sessions:
+        return active_still_sessions[uid]
+    
+    return None
