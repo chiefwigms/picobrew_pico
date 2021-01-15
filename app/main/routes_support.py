@@ -60,9 +60,6 @@ def support_picostill():
     picostill_support.name = 'PicoStill'
     picostill_support.manual_path = '/static/support/picostill/PicoStill_Manual.pdf'
     picostill_support.instructional_videos_path = '/static/support/picostill/Instructional-Videos.md'
-    picostill_support.misc_media = {
-        'Light Reference' : '/static/support/picostill/PicoStill_Lights.jpg'
-    }
     return render_template('support.html', support_object=picostill_support)
 
 

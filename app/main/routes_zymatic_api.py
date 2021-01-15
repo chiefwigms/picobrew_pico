@@ -205,7 +205,7 @@ def process_log_session(args):
         uid = get_machine_by_session(session)
         active_brew_sessions[uid].file.seek(0, os.SEEK_END)
         active_brew_sessions[uid].file.seek(active_brew_sessions[uid].file.tell() - 1, os.SEEK_SET)  # Remove trailing , from last data set
-        active_brew_sessions[uid].file.write('\n]')
+        active_brew_sessions[uid].file.write('\n]\n')
         active_brew_sessions[uid].cleanup()
     return ret
 

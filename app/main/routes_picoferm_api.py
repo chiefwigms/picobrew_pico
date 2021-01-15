@@ -120,7 +120,7 @@ def process_log_ferm_dataset(args):
 
     # end fermentation at 14d counter or when user specifies fermentation is complete
     if ferm_days_elapsed > 14 or (active_ferm_sessions[uid].uninit == False and active_ferm_sessions[uid].active == False):
-        active_ferm_sessions[uid].file.write('{}\n]'.format(log_data[:-2]))
+        active_ferm_sessions[uid].file.write('{}\n\n]'.format(log_data[:-2]))
         active_ferm_sessions[uid].cleanup()
         # The server makes a determination when fermenting is done based on the datalog after it sends '2,4'
         return '#2,4#'
