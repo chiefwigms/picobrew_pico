@@ -141,7 +141,7 @@ def process_associated_paks(args):
 
 
 #   Recipe: /API/pico/getRecipe?uid={UID}&rfid={RFID}&ibu={IBU}&abv={ABV}
-# Response: '{0}' where : #NAME/IBU_TWEAK,ABV_TWEAK,ABV,IBU,[TEMPERATURE,STEP_TIME,DRAIN_TIME,LOCATION,STEP_NAME]+,|128x64 2048 byte OLED Image (http://javl.github.io/image2cpp/)|#
+# Response: '{0}' where : #NAME/IBU_TWEAK,ABV_TWEAK,ABV,IBU,[TEMPERATURE,STEP_TIME,DRAIN_TIME,LOCATION,STEP_NAME]+,|128x64 1024 byte OLED Image|#
 get_recipe_args = {
     'uid': fields.Str(required=True),       # 32 character alpha-numeric serial number
     'rfid': fields.Str(required=True),      # 14 character alpha-numeric PicoPak RFID

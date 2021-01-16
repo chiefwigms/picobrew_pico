@@ -276,7 +276,7 @@ $(document).ready(function () {
         recipe.ibu = document.getElementById('f_new_recipe').elements['ibu'].value;
         recipe.abv_tweak = -1
         recipe.ibu_tweak = -1
-        recipe.image = ''
+        recipe.image = recipe_img
         recipe.steps = table.getData();
         $.ajax({
             url: 'new_pico_recipe',

@@ -47,3 +47,10 @@ form#f_new_recipe {
 .table-recipe {
   width: 100%;
 }
+canvas {
+  background-color: white;
+  margin-bottom: 10px;
+}
+.form-group label, p{
+  color: #fff;
+}
