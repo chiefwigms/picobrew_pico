@@ -236,30 +236,27 @@ def restore_active_brew_sessions():
             # print('DEBUG: restore_active_sessions() found {} as an active session'.format(file))
             brew_session = load_brew_session(file)
             # print('DEBUG: restore_active_sessions() {}'.format(brew_session))
-            if brew_session['uid'] not in active_brew_sessions:
-                active_brew_sessions[brew_session['uid']] = []
+            uid = brew_session['uid']
+            if uid not in active_brew_sessions:
+                session = PicoBrewSession()
 
-            session = PicoBrewSession()
+            session = active_brew_sessions[uid]
             session.file = open(file, 'a')
             session.file.flush()
             session.filepath = file
-            session.alias = brew_session['alias']
             session.created_at = brew_session['date']
             session.name = brew_session['name']
             session.type = brew_session['type']
             session.session = brew_session['session']                   # session guid
             session.id = -1                                             # session id (integer)
 
-            if 'machine_type' in brew_session:
-                session.machine_type = brew_session['machine_type']     # keep track of machine type of uid (if known)
-
             if 'recovery' in brew_session:
                 session.recovery = brew_session['recovery']             # find last step name
 
             # session.remaining_time = None
-            session.is_pico = brew_session['is_pico']
             session.data = brew_session['data']
-            active_brew_sessions[brew_session['uid']] = session
+
+            active_brew_sessions[uid] = session
 
 
 def restore_active_ferm_sessions():
@@ -277,13 +274,13 @@ def restore_active_ferm_sessions():
             session.file = open(file, 'a')
             session.file.flush()
             session.filepath = file
-            session.alias = ferm_session['alias']
             session.start_time = ferm_session['date']
             session.active = True
 
             session.data = ferm_session['data']
             session.graph = ferm_session['graph']
-            active_ferm_sessions[ferm_session['uid']] = session
+
+            active_ferm_sessions[uid] = session
 
 
 def restore_active_iSpindel_sessions():
@@ -293,19 +290,20 @@ def restore_active_iSpindel_sessions():
             # print('DEBUG: restore_active_sessions() found {} as an active session'.format(file))
             ferm_session = load_iSpindel_session(file)
             # print('DEBUG: restore_active_sessions() {}'.format(ferm_session))
-            if ferm_session['uid'] not in active_iSpindel_sessions:
-                active_iSpindel_sessions[ferm_session['uid']] = []
+            uid = ferm_session['uid']
+            if uid not in active_iSpindel_sessions:
+                active_iSpindel_sessions[uid] = iSpindelSession()
 
-            session = iSpindelSession()
+            session = active_iSpindel_sessions[uid]
             session.file = open(file, 'a')
             session.file.flush()
             session.filepath = file
-            session.alias = ferm_session['alias']
             session.start_time = ferm_session['date']
 
             session.data = ferm_session['data']
             session.graph = ferm_session['graph']
-            active_iSpindel_sessions[ferm_session['uid']] = session
+
+            active_iSpindel_sessions[uid] = session
 
 
 def restore_active_sessions():
