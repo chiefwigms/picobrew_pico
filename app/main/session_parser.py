@@ -238,7 +238,7 @@ def restore_active_brew_sessions():
             # print('DEBUG: restore_active_sessions() {}'.format(brew_session))
             uid = brew_session['uid']
             if uid not in active_brew_sessions:
-                session = PicoBrewSession()
+                active_brew_sessions[uid] = PicoBrewSession()
 
             session = active_brew_sessions[uid]
             session.file = open(file, 'a')
