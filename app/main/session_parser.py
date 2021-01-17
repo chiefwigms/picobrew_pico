@@ -300,8 +300,9 @@ def restore_active_iSpindel_sessions():
             session.file = open(file, 'a')
             session.file.flush()
             session.filepath = file
-            session.start_time = ferm_session['date']
+            session.start_time = datetime.strptime(ferm_session['date'], '%Y%m%d_%H%M%S')
 
+            session.uninit = False
             session.data = ferm_session['data']
             session.graph = ferm_session['graph']
 
