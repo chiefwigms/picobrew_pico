@@ -1,11 +1,18 @@
-var plusIcon = function (cell, formatterParams) {
-    return "<i class='far fa-plus-square fa-lg'></i>";
-}
-var minusIcon = function (cell, formatterParams) {
-    return "<i class='far fa-minus-square fa-lg'></i>";
+const fixedRows = 3;
+var isDataLoading;
+
+function rowIsEditable(cell) {
+    var pos = cell.getTable().getRowPosition(cell.getRow(),true);
+    return (pos < fixedRows) ? false : true;
 }
 var editCheck = function (cell) {
-    return !(["Preparing To Brew", "Heating"].includes(cell.getRow().getCell("name").getValue()));
+    return rowIsEditable(cell);
+}
+var plusIcon = function (cell, formatterParams) {
+    return rowIsEditable(cell) ? "<i class='far fa-plus-square fa-lg'></i>" : "";
+}
+var minusIcon = function (cell, formatterParams) {
+    return rowIsEditable(cell) ? "<i class='far fa-minus-square fa-lg'></i>" : "";
 }
 function showAlert(msg, type) {
     $('#alert').html("<div class='w-100 alert text-center alert-" + type + "'>" + msg + "</div>");
@@ -24,6 +31,9 @@ var default_data = [
     { name: "Hops 4", location: "Adjunct4", temperature: 202, step_time: 8, drain_time: 5 },
 ];
 var tables_loaded = [];
+var idMutator = function (value, data, type, params, component) {
+	return isDataLoading ? component.getTable().getRows().length : data.id;
+}
 var recipe_table = {
     movableRows: true,
     headerSort: false,
@@ -34,6 +44,9 @@ var recipe_table = {
         {
             rowHandle: true, formatter: "handle", headerSort: false, frozen: true, width: 50
         },
+        {
+			title: "ID", field:"id", visible: false, mutatorData: idMutator
+        },        
         {
             title: "Step #", formatter: "rownum", hozAlign: "center", width: 60
         },
@@ -58,6 +71,9 @@ var recipe_table = {
                     "Adjunct3",
                     "Adjunct4",
                 ]
+            },
+            cellEdited: (cell) => {
+                calculate_hop_timing(cell.getTable().getData(), cell.getTable())
             }
         },
         {
@@ -105,7 +121,7 @@ var recipe_table = {
             editable: false,
             mutator: (value, data, type, params, component) => {
                 // type is always data (field isn't editable)
-                if (data.location.indexOf("Adjunct") == 0)
+                if (data.location && data.location.indexOf("Adjunct") == 0)
                     return data.hop_time == undefined ? data.step_time : data.hop_time;
                 else
                     return "";
@@ -122,16 +138,29 @@ var recipe_table = {
         {
             formatter: plusIcon, width: 49, hozAlign: "center",
             cellClick: function (e, cell) {
-                cell.getTable().addRow({}, false, cell.getRow());
+                if (rowIsEditable(cell)) {
+                    var newRowData = Object.assign({}, cell.getRow().getData());
+                    newRowData.name = "New Step";
+                    newRowData.id = getMaxID(cell)+1;
+                    cell.getTable().addRow(newRowData, false, cell.getRow());
+                }
             }
         },
         {
             formatter: minusIcon, width: 49, hozAlign: "center",
             cellClick: function (e, cell) {
-                cell.getRow().delete();
+                if (rowIsEditable(cell)) {
+                    cell.getRow().delete();
+                    if (cell.getTable().getRows().length==fixedRows) {
+                        cell.getTable().addRow(Object.assign({},default_data[fixedRows]));
+                    }
+                }
             }
         },
     ],
+    dataLoading: function() {
+        isDataLoading=true;
+    },
     dataLoaded: data_loaded,
     tooltips: function (column) {
         var tip = ""
@@ -156,6 +185,7 @@ var recipe_table = {
 };
 
 function data_loaded(data) {
+    isDataLoading=false;
     calculate_hop_timing(data)
 }
 
@@ -182,13 +212,59 @@ function calculate_hop_timing(data, provided_table = undefined) {
         var rows = provided_table.getRows();
         var adjunctSteps = rows.filter(row => row.getData().location.indexOf("Adjunct") == 0);
 
-        var cumulative_hop_time = 0;
+        var cumulative_hop_time = {
+            "Adjunct1": 0,
+            "Adjunct2": 0,
+            "Adjunct3": 0,
+            "Adjunct4": 0
+        };
         adjunctSteps.slice().reverse().forEach(adjunctRow => {
             var row_data = adjunctRow.getData();
-            cumulative_hop_time += row_data.step_time;
-            adjunctRow.update({ "hop_time": cumulative_hop_time });
+            for (x in cumulative_hop_time) {
+                if (row_data.location <= "Adjunct" + x) {
+                    cumulative_hop_time[x] += row_data.step_time
+                }
+            }
+
+            // cumulative_hop_time += row_data.step_time;
+            adjunctRow.update({ "hop_time": cumulative_hop_time[row_data.location] });
         });
     }
+}
+
+function getMaxID(component) {
+    var maxID=0;
+    var rows=component.getTable().getRows();
+
+    rows.forEach(function (row) {
+        rowData=row.getData();
+		if (rowData.id > maxID)
+			maxID=rowData.id;
+    });
+
+    return maxID;
+}    
+
+function isRowMoved(row){
+	var pos = row.getPosition(true);
+	var index = row.getIndex();
+	var moved = true;
+
+	if (pos < fixedRows) {
+		row.move(fixedRows-1);
+		row.getTable().redraw(true);
+	}
+
+	if (index < fixedRows) {
+		if (index == 0) 
+			row.move(1, true);
+		else 
+			row.move(index-1);
+		moved = false;
+		row.getTable().redraw(true);
+	}
+
+	return moved;
 }
 
 $(document).ready(function () {
@@ -200,7 +276,7 @@ $(document).ready(function () {
         recipe.ibu = document.getElementById('f_new_recipe').elements['ibu'].value;
         recipe.abv_tweak = -1
         recipe.ibu_tweak = -1
-        recipe.image = ''
+        recipe.image = recipe_img
         recipe.steps = table.getData();
         $.ajax({
             url: 'new_pico_recipe',

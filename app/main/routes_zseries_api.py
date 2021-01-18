@@ -171,11 +171,14 @@ def process_recipe_request(recipe_id):
 #                   "ZBackendError": 0
 #               }
 def process_zstate(args):
+    uid = request.args['token']
+    if uid not in active_brew_sessions:
+        active_brew_sessions[uid] = PicoBrewSession(MachineType.ZSERIES)
+    
     json = request.json
     update_required = firmware_upgrade_required(MachineType.ZSERIES, json['CurrentFirmware'])
     firmware_source = "https://picobrew.com/firmware/zseries/{}".format(firmware_filename(MachineType.ZSERIES, minimum_firmware(MachineType.ZSERIES)))
-    uid = request.args['token']
-
+    
     returnVal = {
         "Alias": zseries_alias(uid),
         "BoilerType": json['BoilerType'],       # TODO sometimes machine loses boilertype, need to resync with known state
@@ -563,7 +566,7 @@ def close_session(uid, session_id, body):
 
     active_session.file.seek(0, os.SEEK_END)
     active_session.file.seek(active_session.file.tell() - 1, os.SEEK_SET)  # Remove trailing , from last data set
-    active_session.file.write('\n]')
+    active_session.file.write('\n]\n')
     active_session.cleanup()
 
     return ret

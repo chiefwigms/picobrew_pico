@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+{% block content %}
+  <script src="/static/js/highcharts/highcharts.js"></script>
+  <script src="/static/js/highcharts/annotations.js"></script>
+  <script src="/static/js/highcharts/export-data.js"></script>
+  <script src="/static/js/highcharts/exporting.js"></script>
+  <script src="/static/js/highcharts/dark-unica.js"></script>
+  <script src="/static/js/devices.js"></script>
+  <div id="accordion">
+    <div class="row bg-dark text-white-50">
+      <div class="col-sm-12">
+        <a id="badd_device" class="collapsed btn btn-sm btn-success float-right mr-5" role="button" data-toggle="collapse"
+          href="#c_new_device" data-parent="#accordion" aria-expanded="false" aria-controls="c_new_device">
+          <i class="fas fa-plus"></i>  Add New Device
+      </a>
+      </div>
+      <form id="c_new_device" class="collapse card-body col-sm-5" aria-labelledby="badd_device" 
+        action="/devices" method="POST">
+        <div class="form-row form-group">
+            <label for="machine_type_new">Machine Type</label>
+            <select class="form-control form-control-sm" id="machine_type_new" name="machine_type">
+              <option value="PicoBrewC">PicoBrew C</option>
+              <option value="PicoBrew">Picobrew Pro/S</option>
+              <option value="Zymatic">Zymatic</option>
+              <option value="ZSeries">ZSeries</option>
+              <option value="PicoFerm">PicoFerm</option>
+              <option value="PicoStill">PicoStill</option>
+              <option value="iSpindel">iSpindel</option>
+            </select>
+        </div>
+        <div class="form-row form-group">
+            <label for="uid_new">Machine/Product ID</label>
+            <input type="text" class="form-control form-control-sm" name="uid" id="uid_new"
+              placeholder="Product ID (Username > Settings > Equipment)" value="">
+          </div>
+        <div class="form-row form-group">
+            <label for="alias_new">Alias</label>
+            <input type="text" class="form-control form-control-sm" name="alias" id="alias_new"
+              placeholder="BrewHaus Alias" value="">
+        </div>
+        <div class="form-row form-group">
+            <button type="submit" class="btn btn-primary">Save</button>
+        </div>
+      </form>
+    </div>
+    </br>
+    {% if 'aliases' in config %}
+    {% for machine_type in config['aliases'] %}
+    <div class="card bg-dark text-white">
+      {% if machine_type == 'PicoBrewC' %}
+      <h2 id="m_{{machine_type}}">Picobrew C</h2>
+      {% elif machine_type == 'PicoBrew' %}
+      <h2 id="m_{{machine_type}}">Picobrew S/Pro</h2>
+      {% else %}
+      <h2 id="m_{{machine_type}}">{{machine_type}}</h2>
+      {% endif %}
+      {% if config['aliases'][machine_type] == None %}
+      <p>No devices configurated</p>
+      {% else %}
+      {% for uid in config['aliases'][machine_type] %}
+      <div class="card bg-dark text-white-50">
+        <h5 class="card-header" id="h_{{uid}}">
+          <a class="collapsed" role="button" data-toggle="collapse" href="#c_{{uid}}" data-parent="#accordion" aria-expanded="false" aria-controls="c_{{uid}}">
+            {{config['aliases'][machine_type][uid]}}
+            <button class="btn btn-sm btn-danger float-right mr-5" type="button" id="bdelete_{{uid}}"
+                onclick="event.stopPropagation();event.preventDefault();delete_device('{{machine_type}}', '{{uid}}');">
+                <i class="fas fa-trash"></i>
+            </button>
+            <button class="btn btn-sm btn-success float-right mr-3" type="button" id="bsave_{{uid}}"
+                onclick="event.stopPropagation();event.preventDefault();save_device('{{uid}}');"
+                style="display:none;">
+                <i class="far fa-save fa-lg"></i>
+            </button>
+          </a>
+        </h5>
+        <form id="c_{{uid}}" class="collapse card-body col-sm-5" aria-labelledby="h_{{uid}}"
+          action="/devices/{{uid}}" method="POST">
+          <div class="form-row form-group">
+            <label for="machine_type_{{uid}}">Machine Type</label>
+            <input type="text" class="form-control form-control-sm" name="machine_type" id="machine_type_{{uid}}"
+                placeholder="Machine Type" value="{{machine_type}}" readonly>
+          </div>
+          <div class="form-row form-group">
+            <label for="uid_{{uid}}">Machine/Product ID</label>
+            <input type="text" class="form-control form-control-sm" name="uid" id="uid_{{uid}}"
+                placeholder="Product ID (Username > Settings > Equipment)" value="{{uid}}" readonly>
+          </div>
+          <div class="form-row form-group">
+            <label for="alias_{{config['aliases'][machine_type][uid]}}">Alias</label>
+            <input type="text" class="form-control form-control-sm" name="alias" id="alias_{{config['aliases'][machine_type][uid]}}"
+                placeholder="BrewHaus Alias" value="{{config['aliases'][machine_type][uid]}}">
+          </div>
+          <div class="form-row form-group">
+            <button type="submit" class="btn btn-primary">Save</button>
+          </div>
+        </form>
+      </div>
+      {% endfor %}
+      {% endif %}
+    </div>
+    </br>
+    </br>
+    {% endfor %}
+    {% endif %}
+  </div>
+{% endblock %}

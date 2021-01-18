@@ -1,11 +1,12 @@
 {% extends "base.html" %}
 {% block content %}
-  <script src="static/js/highcharts/highcharts.js"></script>
-  <script src="static/js/highcharts/annotations.js"></script>
-  <script src="static/js/highcharts/export-data.js"></script>
-  <script src="static/js/highcharts/exporting.js"></script>
-  <script src="static/js/highcharts/dark-unica.js"></script>
-  <script src="static/js/socketio/socket.io.slim.js"></script>
+  <script src="/static/js/highcharts/highcharts.js"></script>
+  <script src="/static/js/highcharts/annotations.js"></script>
+  <script src="/static/js/highcharts/export-data.js"></script>
+  <script src="/static/js/highcharts/exporting.js"></script>
+  <script src="/static/js/highcharts/dark-unica.js"></script>
+  <script src="/static/js/socketio/socket.io.slim.js"></script>
+  <script src="/static/js/index.js"></script>
   <script>var socket = io.connect('//' + document.domain + ':' + location.port);</script>
   <div id="accordion">
     {% for brew_session in brew_sessions %}
@@ -28,7 +29,7 @@
         <div class="card-body">
           <div id="{{brew_session.graph.chart_id}}" style="min-width: 320px; height: 400px; margin: 0 auto"></div>
           <script>var graph_data={{brew_session.graph|tojson}};</script>
-          <script src="static/js/brew_graph_socketio.js"></script>
+          <script src="/static/js/brew_graph_socketio.js"></script>
         </div>
       </div>
     </div>
@@ -43,13 +44,32 @@
             <img src="/static/img/picoferm.svg" atl="picoferm">
           </span>
           {% if ferm_session.alias is defined and ferm_session.alias|length %}{{ferm_session.alias}}{% else %}{{ferm_session.graph.chart_id}}{% endif %}
+          {% if ferm_session.active %}
+          <button class="fermentation-start d-none btn btn-sm btn-success float-right mr-5" type="button" id="bstart_{{ferm_session.uid}}"
+              onclick="event.stopPropagation();event.preventDefault();start_fermentation('{{ferm_session.uid}}');">
+              <i class="fas fa-play-circle"></i> Start Fermentation
+          </button>
+          <button class="fermentation-stop d-block btn btn-sm btn-danger float-right mr-5" type="button" id="bstop_{{ferm_session.uid}}"
+              onclick="event.stopPropagation();event.preventDefault();stop_fermentation('{{ferm_session.uid}}');">
+              <i class="fas fa-stop-circle"></i> Stop Fermentation
+          </button>
+          {% else %}
+          <button class="fermentation-start d-block btn btn-sm btn-success float-right mr-5" type="button" id="bstart_{{ferm_session.uid}}"
+              onclick="event.stopPropagation();event.preventDefault();start_fermentation('{{ferm_session.uid}}');">
+              <i class="fas fa-play-circle"></i> Start Fermentation
+          </button>
+          <button class="fermentation-stop d-none btn btn-sm btn-danger float-right mr-5" type="button" id="bstop_{{ferm_session.uid}}"
+              onclick="event.stopPropagation();event.preventDefault();stop_fermentation('{{ferm_session.uid}}');">
+              <i class="fas fa-stop-circle"></i> Stop Fermentation
+          </button>
+          {% endif %}
         </a>
       </h5>
       <div id="c_{{ferm_session.graph.chart_id}}" class="collapse show" aria-labelledby="h_{{ferm_session.graph.chart_id}}">
         <div class="card-body">
           <div id="{{ferm_session.graph.chart_id}}" style="min-width: 320px; height: 400px; margin: 0 auto"></div>
           <script>var graph_data={{ferm_session.graph|tojson}};</script>
-          <script src="static/js/ferm_graph_socketio.js"></script>
+          <script src="/static/js/ferm_graph_socketio.js"></script>
         </div>
       </div>
     </div>
@@ -70,7 +90,7 @@
         <div class="card-body">
           <div id="{{iSpindel_session.graph.chart_id}}" style="min-width: 320px; height: 400px; margin: 0 auto"></div>
           <script>var graph_data={{iSpindel_session.graph|tojson}};</script>
-          <script src="static/js/iSpindel_graph_socketio.js"></script>
+          <script src="/static/js/iSpindel_graph_socketio.js"></script>
         </div>
       </div>
     </div>

@@ -1,10 +1,29 @@
 {% extends "base.html" %}
 {% block content %}
-<script src="static/js/convert_units.js"></script>
-<script src="static/js/pico_recipe.js"></script>
+<script src="/static/js/convert_units.js"></script>
+<script src="/static/js/pico_image.js"></script>
+<script src="/static/js/pico_recipe.js"></script>
 <script>var tables = {};</script>
 {% include "units_selector.html" %}
 <form id="f_new_recipe">
+  <div class="form-row">
+    <div class="form-inline">
+      <div class="form-group col-sm-2">
+        <canvas id="recipe_image" width="128" height="64"></canvas>
+      </div>
+      <div class="form-group col-sm-2">
+        <input type="file" accept="image/*" style="color:transparent;" id="recipe_image_loader">
+      </div>
+      <div class="form-group col-sm-1">
+        <label class="checkbox-inline" for="recipe_image_invert">Invert</label>
+        <input type="checkbox" class="form-check-input" id="recipe_image_invert">
+      </div>
+      <div class="form-group col-sm-1">
+        <label for="recipe_image_threshold">Threshold</label>
+        <input type="text" class="form-control form-control-sm" id="recipe_image_threshold" placeholder="0-255" value=128>
+      </div>
+    </div>
+  </div>
   <div class="form-row">
     <div class="form-group col-sm-3">
       <input type="text" class="form-control form-control-sm" id="recipe_name" placeholder="Recipe Name">
@@ -24,8 +43,13 @@
 </form>
 <div class="table-recipe table-sm table-striped table-bordered table-light" id="t_new_recipe"></div>
 <script>
+  recipe_table['rowMoved'] = function (row) {
+    isRowMoved(row);
+  }
   var table = new Tabulator("#t_new_recipe", recipe_table);
   table.setData(default_data);
   tables["new_recipe"] = table;
+  document.getElementById('recipe_image_loader').addEventListener('change', load_new_image, false);
+  load_image('recipe_image', recipe_img);
 </script>
 {% endblock %}

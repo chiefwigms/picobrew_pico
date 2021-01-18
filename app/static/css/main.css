@@ -35,9 +35,22 @@ span.equipment-icon {
 span.equipment-icon img {
   width: 80%;
 }
+.fermentation-start {
+  margin-top: 10px;
+}
+.fermentation-stop {
+  margin-top: 10px;
+}
 form#f_new_recipe {
   width: 100%;
 }
 .table-recipe {
   width: 100%;
+}
+canvas {
+  background-color: white;
+  margin-bottom: 10px;
+}
+.form-group label, p{
+  color: #fff;
 }

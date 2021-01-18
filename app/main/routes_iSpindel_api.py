@@ -27,11 +27,8 @@ iSpindel_dataset_args = {
 # Process iSpindel Data: /API/iSpindel
 @main.route('/API/iSpindel', methods=['POST'])
 def process_iSpindel_data():
-    
     data = request.get_json()
-    
     uid = str(data['ID'])
-
     
     if uid not in active_iSpindel_sessions or active_iSpindel_sessions[uid].uninit:
         create_new_session(uid)
@@ -39,18 +36,23 @@ def process_iSpindel_data():
     time = ((datetime.utcnow() - datetime(1970, 1, 1)).total_seconds() * 1000)
     session_data = []
     log_data = ''
-    point = {'time': time,
-             'temp': data['temperature'],
-             'gravity': data['gravity'],
-            }
+    point = {
+        'time': time,
+        'temp': data['temperature'],
+        'gravity': data['gravity'],
+    }
+
     session_data.append(point)
     log_data += '\t{},\n'.format(json.dumps(point))
+    
     active_iSpindel_sessions[uid].data.extend(session_data)
     active_iSpindel_sessions[uid].voltage = str(data['battery']) + 'V'
+    
     graph_update = json.dumps({'voltage': data['battery'], 'data': session_data})
     socketio.emit('iSpindel_session_update|{}'.format(data['ID']), graph_update)
+    
     if (datetime.now().date() - active_iSpindel_sessions[uid].start_time.date()).days > 14:
-        active_iSpindel_sessions[uid].file.write('{}\n]'.format(log_data[:-2]))
+        active_iSpindel_sessions[uid].file.write('{}\n]\n'.format(log_data[:-2]))
         active_iSpindel_sessions[uid].cleanup()
         return ('', 200)
     else:

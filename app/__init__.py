@@ -3,16 +3,18 @@ from flask_cors import CORS
 from flask_socketio import SocketIO
 from pathlib import Path
 from shutil import copyfile
-import yaml
+from ruamel.yaml import YAML
 import pathlib
 
 BASE_PATH = Path(__file__).parents[1]
 
 socketio = SocketIO()
+yaml = YAML()
 
 def create_dir(dir_path):
     # create the directory and any missing parent directories, if it doesn't already exist
     pathlib.Path(dir_path).mkdir(parents=True, exist_ok=True)
+
 
 def create_app(debug=False):
     """Create an application."""
@@ -26,7 +28,8 @@ def create_app(debug=False):
     from .main.config import MachineType
     from .main.model import PicoBrewSession, PicoFermSession, PicoStillSession, iSpindelSession
     from .main.routes_frontend import initialize_data
-    from .main.session_parser import restore_active_sessions, active_brew_sessions, active_ferm_sessions, active_still_sessions, active_iSpindel_sessions
+    from .main.session_parser import (restore_active_sessions, active_brew_sessions,
+                                      active_ferm_sessions, active_still_sessions, active_iSpindel_sessions)
 
     from .main import main as main_blueprint
 
@@ -41,7 +44,7 @@ def create_app(debug=False):
         copyfile(example_cfg_file, cfg_file)
 
     with open(cfg_file, 'r') as f:
-        server_cfg = yaml.safe_load(f)
+        server_cfg = yaml.load(f)
 
     app.config.update(
         SECRET_KEY='bosco',
@@ -52,7 +55,7 @@ def create_app(debug=False):
         FIRMWARE_PATH=BASE_PATH.joinpath('app/firmware'),
         SERVER_CONFIG=server_cfg
     )
-    
+
     # create subdirectories if they don't already exist
     create_dir(app.config['RECIPES_PATH'].joinpath('pico'))
     create_dir(app.config['RECIPES_PATH'].joinpath('zymatic'))
@@ -68,24 +71,30 @@ def create_app(debug=False):
         initialize_data()
 
     if 'aliases' in server_cfg:
-        machine_types = [MachineType.ZSERIES, MachineType.ZYMATIC, MachineType.PICOBREW, MachineType.PICOBREW_C, MachineType.PICOFERM, MachineType.ISPINDEL]
+        machine_types = [MachineType.ZSERIES, MachineType.ZYMATIC, MachineType.PICOBREW,
+                         MachineType.PICOBREW_C, MachineType.PICOFERM, MachineType.ISPINDEL]
         for mtype in machine_types:
             aliases = server_cfg['aliases']
             if mtype in aliases and aliases[mtype] is not None:
                 for uid in aliases[mtype]:
                     if uid in aliases[mtype] and uid != "uid":
                         if mtype == MachineType.PICOFERM:
-                            active_ferm_sessions[uid] = PicoFermSession()
+                            if uid not in active_ferm_sessions:
+                                active_ferm_sessions[uid] = PicoFermSession()
                             active_ferm_sessions[uid].alias = aliases[mtype][uid]
                         elif mtype == MachineType.ISPINDEL:
-                            active_iSpindel_sessions[uid] = iSpindelSession()
+                            if uid not in active_iSpindel_sessions:
+                                active_iSpindel_sessions[uid] = iSpindelSession()
                             active_iSpindel_sessions[uid].alias = aliases[mtype][uid]
                         elif mtype == MachineType.PICOSTILL:
-                            active_still_sessions[uid] = PicoStillSession()
+                            if uid not in active_still_sessions:
+                                active_still_sessions[uid] = PicoStillSession()
                             active_still_sessions[uid].alias = aliases[mtype][uid]
                         else:
-                            active_brew_sessions[uid] = PicoBrewSession(mtype)
+                            if uid not in active_brew_sessions:
+                                active_brew_sessions[uid] = PicoBrewSession(mtype)
                             active_brew_sessions[uid].alias = aliases[mtype][uid]
-                            active_brew_sessions[uid].is_pico = True if mtype == MachineType.PICOBREW else False
+                            active_brew_sessions[uid].machine_type = mtype
+                            active_brew_sessions[uid].is_pico = True if mtype in [MachineType.PICOBREW, MachineType.PICOBREW_C] else False
 
     return app

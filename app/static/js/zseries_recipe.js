@@ -1,3 +1,4 @@
+const fixedRows = 0;
 var plusIcon = function (cell, formatterParams) {
     return "<i class='far fa-plus-square fa-lg'></i>";
 }
@@ -63,6 +64,9 @@ var recipe_table = {
                     "Adjunct4",
                     "Pause",
                 ]
+            },
+            cellEdited: (cell) => {
+                calculate_hop_timing(cell.getTable().getData(), cell.getTable())
             }
         },
         {
@@ -107,7 +111,7 @@ var recipe_table = {
             editable: false,
             mutator: (value, data, type, params, component) => {
                 // type is always data (field isn't editable)
-                if (data.location.indexOf("Adjunct") == 0)
+                if (data.location && data.location.indexOf("Adjunct") == 0)
                     return data.hop_time == undefined ? data.step_time : data.hop_time;
                 else
                     return "";
@@ -124,13 +128,18 @@ var recipe_table = {
         {
             formatter: plusIcon, width: 49, hozAlign: "center",
             cellClick: function (e, cell) {
-                cell.getTable().addRow({}, false, cell.getRow());
+                cell.getTable().addRow(Object.assign({}, cell.getRow().getData()), false, cell.getRow()).then(function(row) {
+                    row.update({name: "New Step"});
+                });
             }
         },
         {
             formatter: minusIcon, width: 49, hozAlign: "center",
             cellClick: function (e, cell) {
                 cell.getRow().delete();
+                if (cell.getTable().getRows().length==fixedRows) {
+                    cell.getTable().addRow(Object.assign({},default_data[fixedRows]));
+                }
             }
         },
     ],
@@ -164,6 +173,10 @@ function data_loaded(data) {
     calculate_hop_timing(data)
 }
 
+function isRowMoved(row){
+	return true;
+}
+
 function calculate_hop_timing(data, provided_table = undefined) {
     //data - all data loaded into the table
     if (data.length == 0) {
@@ -187,11 +200,22 @@ function calculate_hop_timing(data, provided_table = undefined) {
         var rows = provided_table.getRows();
         var adjunctSteps = rows.filter(row => row.getData().location.indexOf("Adjunct") == 0);
 
-        var cumulative_hop_time = 0;
+        var cumulative_hop_time = {
+            "Adjunct1": 0,
+            "Adjunct2": 0,
+            "Adjunct3": 0,
+            "Adjunct4": 0
+        };
         adjunctSteps.slice().reverse().forEach(adjunctRow => {
             var row_data = adjunctRow.getData();
-            cumulative_hop_time += row_data.step_time;
-            adjunctRow.update({ "hop_time": cumulative_hop_time });
+            for (x in cumulative_hop_time) {
+                if (row_data.location <= "Adjunct" + x) {
+                    cumulative_hop_time[x] += row_data.step_time
+                }
+            }
+
+            // cumulative_hop_time += row_data.step_time;
+            adjunctRow.update({ "hop_time": cumulative_hop_time[row_data.location] });
         });
     }
 }

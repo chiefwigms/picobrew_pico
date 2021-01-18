@@ -53,6 +53,10 @@ zymatic_firmware_check_args = {
 @main.route('/API/zymaticFirmwareCheck')
 @use_args(zymatic_firmware_check_args, location='querystring')
 def process_zymatic_firmware_check(args):
+    uid = args['machine']
+    if uid not in active_brew_sessions:
+        active_brew_sessions[uid] = PicoBrewSession(MachineType.ZYMATIC)
+
     return '\r\n#F#\r\n'
 
 
@@ -151,7 +155,7 @@ def process_log_session(args):
     if args['code'] == 0:
         uid = args['machine']
         if uid not in active_brew_sessions:
-            active_brew_sessions[uid] = PicoBrewSession(MachineType.Zymatic)
+            active_brew_sessions[uid] = PicoBrewSession(MachineType.ZYMATIC)
         active_brew_sessions[uid].session = uuid.uuid4().hex[:32]
         active_brew_sessions[uid].name = get_recipe_name_by_id(args['recipe'])
         active_brew_sessions[uid].filepath = brew_active_sessions_path().joinpath('{0}#{1}#{2}#{3}.json'.format(datetime.now().strftime('%Y%m%d_%H%M%S'), uid, active_brew_sessions[uid].session, active_brew_sessions[uid].name.replace(' ', '_')))
@@ -201,7 +205,7 @@ def process_log_session(args):
         uid = get_machine_by_session(session)
         active_brew_sessions[uid].file.seek(0, os.SEEK_END)
         active_brew_sessions[uid].file.seek(active_brew_sessions[uid].file.tell() - 1, os.SEEK_SET)  # Remove trailing , from last data set
-        active_brew_sessions[uid].file.write('\n]')
+        active_brew_sessions[uid].file.write('\n]\n')
         active_brew_sessions[uid].cleanup()
     return ret
 

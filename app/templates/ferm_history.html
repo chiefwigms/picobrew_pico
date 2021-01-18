@@ -1,12 +1,12 @@
 {% extends "base.html" %}
 {% block content %}
-  <script src="static/js/highcharts/highcharts.js"></script>
-  <script src="static/js/highcharts/annotations.js"></script>
-  <script src="static/js/highcharts/export-data.js"></script>
-  <script src="static/js/highcharts/exporting.js"></script>
-  <script src="static/js/highcharts/dark-unica.js"></script>
-  <script src="static/js/server_management.js"></script>
-  <script src="static/js/ferm_history.js"></script>
+  <script src="/static/js/highcharts/highcharts.js"></script>
+  <script src="/static/js/highcharts/annotations.js"></script>
+  <script src="/static/js/highcharts/export-data.js"></script>
+  <script src="/static/js/highcharts/exporting.js"></script>
+  <script src="/static/js/highcharts/dark-unica.js"></script>
+  <script src="/static/js/server_management.js"></script>
+  <script src="/static/js/ferm_history.js"></script>
   {% include "invalid_file.html" %}
   <div id="accordion">
     {% for session in sessions %}
@@ -14,13 +14,21 @@
       <h5 class="card-header" id="h_{{session.graph.chart_id}}">
         <a class="collapsed" role="button" data-toggle="collapse" href="#c_{{session.graph.chart_id}}" data-parent="#accordion" aria-expanded="false" aria-controls="c_{{session.graph.chart_id}}">
           {{session.name}} on {{session.date}}
+          <button class="btn btn-sm btn-primary float-right mr-5" type="button" id="bdownload_{{session.filename}}"
+              onclick="event.stopPropagation();event.preventDefault();download_session('{{session.filename}}');">
+              <i class="fas fa-download"></i>
+          </button>
+          <button class="btn btn-sm btn-danger float-right mr-3" type="button" id="bdelete_{{session.filename}}"
+            onclick="event.stopPropagation();event.preventDefault();delete_file('{{session.filepath}}');">
+            <i class="fas fa-trash"></i>
+          </button>  
         </a>
       </h5>
       <div id="c_{{session.graph.chart_id}}" class="collapse" aria-labelledby="h_{{session.graph.chart_id}}">
         <div class="card-body">
           <div id="{{session.graph.chart_id}}" style="min-width: 320px; height: 400px; margin: 0 auto"></div>
           <script>var graph_data={{session.graph|tojson}};</script>
-          <script src="static/js/ferm_graph.js"></script>
+          <script src="/static/js/ferm_graph.js"></script>
         </div>
       </div>
     </div>

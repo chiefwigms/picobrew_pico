@@ -24,6 +24,9 @@ register_args = {
 @main.route('/API/pico/register')
 @use_args(register_args, location='querystring')
 def process_register(args):
+    uid = args['uid']
+    if uid not in active_brew_sessions:
+        active_brew_sessions[uid] = PicoBrewSession()
     return '#T#\r\n'
 
 
@@ -138,7 +141,7 @@ def process_associated_paks(args):
 
 
 #   Recipe: /API/pico/getRecipe?uid={UID}&rfid={RFID}&ibu={IBU}&abv={ABV}
-# Response: '{0}' where : #NAME/IBU_TWEAK,ABV_TWEAK,ABV,IBU,[TEMPERATURE,STEP_TIME,DRAIN_TIME,LOCATION,STEP_NAME]+,|128x64 2048 byte OLED Image (http://javl.github.io/image2cpp/)|#
+# Response: '{0}' where : #NAME/IBU_TWEAK,ABV_TWEAK,ABV,IBU,[TEMPERATURE,STEP_TIME,DRAIN_TIME,LOCATION,STEP_NAME]+,|128x64 1024 byte OLED Image|#
 get_recipe_args = {
     'uid': fields.Str(required=True),       # 32 character alpha-numeric serial number
     'rfid': fields.Str(required=True),      # 14 character alpha-numeric PicoPak RFID
@@ -205,13 +208,13 @@ pico_still_args = {
     'picoUid': fields.Str(required=True),       # 32 character alpha-numeric serial number
     'picoStillUid': fields.Str(required=True),   # 12 character alpha-numeric serial number
 }
-
 # Can Use Still: /API/pico/canUsePicoStill?picoUid={UID}&picoStillUid={UID}
 #    Response: '#{0}#\r\n' where {0} : T (or F?)
 @main.route('/API/pico/canUsePicoStill')
 @use_args(pico_still_args, location='querystring')
 def process_can_use_pico_still(args):
     return '#T#\r\n'
+
 
 # Has cleaned still: /API/pico/hasCleanedAck?picoUid={UID}&picoStillUid={UID}
 #    Response: '#{0}#\r\n' where {0} : T (or F?)
@@ -220,6 +223,7 @@ def process_can_use_pico_still(args):
 def process_is_cleaned(args):
     return '#T#\r\n'
 
+
 # Set cleaned still: /API/pico/setCleanedAck?picoUid={UID}&picoStillUid={UID}
 #    Response: '#T#\r\n'
 # Allows a user override of hasCleanedAck if unsuccessful
@@ -227,7 +231,6 @@ def process_is_cleaned(args):
 @use_args(pico_still_args, location='querystring')
 def process_set_cleaned(args):
     return '#T#\r\n'
-
 
 
 # -------- Utility --------
@@ -266,5 +269,5 @@ def cleanup_old_session(uid):
     if uid in active_brew_sessions and active_brew_sessions[uid].file:
         active_brew_sessions[uid].file.seek(0, os.SEEK_END)
         active_brew_sessions[uid].file.seek(active_brew_sessions[uid].file.tell() - 1, os.SEEK_SET)  # Remove trailing , from last data set
-        active_brew_sessions[uid].file.write('\n]')
+        active_brew_sessions[uid].file.write('\n]\n')
         active_brew_sessions[uid].cleanup()

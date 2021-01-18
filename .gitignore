@@ -2,8 +2,10 @@
 
 # python files
 **/__pycache__
+env
 
 # project specific ignores
+logs/
 config.yaml
 app/recipes/pico/*
 app/recipes/zymatic/*

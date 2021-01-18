@@ -1,6 +1,7 @@
-Flask_Cors==3.0.8
-Flask_SocketIO==4.3.1
-webargs==6.1.0
+Flask_Cors==3.0.9
+Flask_SocketIO==4.3.2
+webargs==7.0.0
 Flask==1.1.2
-PyYAML==5.3.1
-requests==2.24.0
+ruamel.yaml==0.16.12
+requests==2.25.0
+mock==4.0.3
