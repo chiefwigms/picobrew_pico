@@ -61,7 +61,12 @@ def support_picostill():
     picostill_support.manual_path = '/static/support/picostill/PicoStill_Manual.pdf'
     picostill_support.instructional_videos_path = '/static/support/picostill/Instructional-Videos.md'
     picostill_support.misc_media = {
-        'Light Reference' : '/static/support/picostill/PicoStill_Lights.jpg'
+        'Wifi Setup' : '/static/support/picostill/picostill-wifi-setup.png',
+        'Light Reference' : '/static/support/picostill/PicoStill_Lights.jpg',
+        'Setup Instructions' : '/static/support/picostill/picostill-setup-instructions.png',
+        'Program Functions' : '/static/support/picostill/picostill-program-functions.png',
+        'Utility Functions' : '/static/support/picostill/picostill-utility-functions.png',
+        'Firmware Network Info' : '/static/support/picostill/picostill-wifi-setup.png'
     }
     return render_template('support.html', support_object=picostill_support)
 
@@ -87,7 +92,14 @@ def support_additional():
     additional_support.misc_media = {
         'picobrew_pico' : 'https://github.com/chiefwigms/picobrew_pico',
         'picobrew-support' : 'https://github.com/Intecpsp/picobrew-support',
-        'Awesome-Picobrew' : 'https://github.com/manofthemountain/awesome-picobrew'
+        'Awesome-Picobrew' : 'https://github.com/manofthemountain/awesome-picobrew',
+        'Facebook Group - Picobrewers' : 'https://www.facebook.com/groups/Picobrewers',
+        'Reddit - Picobrew' : 'https://www.reddit.com/r/picobrew/',
+        'HomebrewTalk - PicoBrew Zymatic' : 'https://www.homebrewtalk.com/threads/picobrew-zymatic.434787/',
+        'HomebrewTalk - PicoBrew Z' : 'https://www.homebrewtalk.com/threads/picobrew-z.645332/',
+        'HomebrewTalk - Picobrew Pico Users' : 'https://www.homebrewtalk.com/threads/picobrew-pico-users.593969/',
+        'Community Forum - Picobrewers' : 'https://picobrewers.org',
+        'PicoFree - Bring Your Own Ingredients Kit' : 'https://www.pico-free.com'
     }
     return render_template('support.html', support_object=additional_support)
 
