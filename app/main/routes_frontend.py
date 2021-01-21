@@ -546,16 +546,3 @@ def increment_zseries_recipe_id():
         recipe_id += 1
 
     return recipe_id
-
-
-def active_session(uid):
-    if uid in active_brew_sessions:
-        return active_brew_sessions[uid]
-    elif uid in active_ferm_sessions:
-        return active_ferm_sessions[uid]
-    elif uid in active_iSpindel_sessions:
-        return active_iSpindel_sessions[uid]
-    elif uid in active_still_sessions:
-        return active_still_sessions[uid]
-    
-    return None

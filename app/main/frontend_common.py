@@ -1,6 +1,8 @@
 import subprocess
 from flask import render_template
 
+from .session_parser import active_brew_sessions, active_ferm_sessions, active_iSpindel_sessions, active_still_sessions
+
 
 def system_info():
     try:
@@ -34,3 +36,16 @@ platform_info = platform()
 
 def render_template_with_defaults(template, **kwargs):
     return render_template(template, platform=platform_info, **kwargs)
+
+
+def active_session(uid):
+    if uid in active_brew_sessions:
+        return active_brew_sessions[uid]
+    elif uid in active_ferm_sessions:
+        return active_ferm_sessions[uid]
+    elif uid in active_iSpindel_sessions:
+        return active_iSpindel_sessions[uid]
+    elif uid in active_still_sessions:
+        return active_still_sessions[uid]
+    
+    return None

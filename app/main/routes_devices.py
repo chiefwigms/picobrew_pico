@@ -4,7 +4,7 @@ from pathlib import Path
 from os import path
 
 from . import main
-from .frontend_common import render_template_with_defaults
+from .frontend_common import active_session, render_template_with_defaults
 from .model import PicoBrewSession, PicoFermSession, PicoStillSession, iSpindelSession
 from .session_parser import (active_brew_sessions, active_ferm_sessions, 
                                 active_iSpindel_sessions, active_still_sessions)
