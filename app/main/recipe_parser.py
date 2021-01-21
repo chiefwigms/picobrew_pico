@@ -30,6 +30,7 @@ class ZymaticRecipe():
         self.id = None
         self.name = None
         self.name_ = None
+        self.notes = None
         self.steps = []
 
     def parse(self, file):
@@ -40,6 +41,7 @@ class ZymaticRecipe():
         self.id = recipe.get('id', 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX') or 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX'
         self.name = recipe.get('name', 'Empty Recipe') or 'Empty Recipe'
         self.name_ = self.name.replace(" ", "_").replace("\'", "")
+        self.notes = recipe.get('notes', None) or None
         if 'steps' in recipe:
             for recipe_step in recipe['steps']:
                 step = ZymaticRecipeStep()
@@ -120,6 +122,7 @@ class ZSeriesRecipe():
         self.id = None
         self.name = None
         self.name_ = None
+        self.notes = None
         self.start_water = 13.1
         self.kind_code = 0
         self.type_code = None
@@ -133,6 +136,7 @@ class ZSeriesRecipe():
         self.id = recipe.get('id', 0) or 0
         self.name = recipe.get('name', 'Empty Recipe') or 'Empty Recipe'
         self.name_ = self.name.replace(" ", "_").replace("\'", "")
+        self.notes = recipe.get('notes', None) or None
         self.start_water = recipe.get('start_water', 13.1) or 13.1
         self.type_code = recipe.get('type_code', "Beer") or "Beer"
         if 'steps' in recipe:
@@ -236,6 +240,7 @@ class PicoBrewRecipe():
     def __init__(self):
         self.id = None
         self.name = None
+        self.notes = None
         self.name_ = None
         self.abv_tweak = None
         self.ibu_tweak = None
@@ -251,6 +256,7 @@ class PicoBrewRecipe():
         self.id = recipe.get('id', 'XXXXXXXXXXXXXX') or 'XXXXXXXXXXXXXX'
         self.name = recipe.get('name', 'Empty Recipe') or 'Empty Recipe'
         self.name_ = self.name.replace(" ", "_").replace("\'", "")
+        self.notes = recipe.get('notes', None) or None
         self.abv_tweak = recipe.get('abv_tweak', -1) or -1
         self.ibu_tweak = recipe.get('ibu_tweak', -1) or -1
         self.abv = recipe.get('abv', 6) or 6

@@ -33,6 +33,9 @@
                 <canvas id="canvas_{{recipe['id']}}" width="128" height="64"></canvas>
                 <script>load_image('canvas_{{recipe['id']}}', '{{recipe['image']}}');</script>
                 {% endif %}
+                {% if recipe['notes'] %}
+                <p id="textarea_{{recipe['id']}}">{{recipe['notes']}}</p>
+                {% endif %}
                 <div class="table-recipe table-sm table-striped table-bordered table-light" id="t_{{recipe['id']}}">
                 </div>
                 <script>

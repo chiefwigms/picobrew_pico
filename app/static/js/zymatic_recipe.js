@@ -219,6 +219,7 @@ $(document).ready(function () {
         var recipe = {}
         recipe.id = ''
         recipe.name = document.getElementById('f_new_recipe').elements['recipe_name'].value;
+        recipe.notes = document.getElementById('f_new_recipe').elements['notes'].value;
         recipe.steps = table.getData();
         $.ajax({
             url: 'new_zymatic_recipe',
