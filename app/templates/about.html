@@ -4,6 +4,21 @@
   <div class="row">
     <div class="group col-sm-8">
       <div class="card bg-dark text-white">
+        <h2>Server Information</h2>
+        {% if server_info %}
+          {% if 'ip_addresses' in server_info and server_info['ip_addresses'] != None %}
+            <p>IP Address(es):
+            {% for ip in server_info['ip_addresses'] %}
+             <a href="http://{{ip}}">{{ip}}</a>
+            {% endfor %}
+            </p>
+          {% endif %}
+          {% if 'hostname' in server_info and server_info['hostname'] != None %}
+          <p>Hostname: {{server_info['hostname']}}</p>
+          {% endif %}
+      {% endif %}
+      </div>
+      <div class="card bg-dark text-white">
         <h2>Python Server Version</h2>
         <p>local version: {{git_version}}</p>
         {% if git_version != latest_git_sha %}
