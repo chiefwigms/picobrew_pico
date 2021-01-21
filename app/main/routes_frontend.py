@@ -5,7 +5,7 @@ import requests
 import socket
 import uuid
 from ruamel.yaml import YAML
-from flask import current_app, make_response, request, send_file, escape
+from flask import current_app, escape, make_response, redirect, request, send_file
 from pathlib import Path
 from os import path
 from werkzeug.utils import secure_filename
@@ -51,7 +51,7 @@ def ferm_history():
 
 @main.route('/still_history')
 def still_history():
-    return render_template('still_history.html', sessions=load_still_sessions(), invalid=get_invalid_sessions('still'))
+    return render_template_with_defaults('still_history.html', sessions=load_still_sessions(), invalid=get_invalid_sessions('still'))
 
 
 @main.route('/iSpindel_history')
@@ -380,7 +380,7 @@ def still_manual():
 
         return redirect('/')
     else:
-      return render_template('still_manual.html',
+      return render_template_with_defaults('still_manual.html',
                              still_sessions=load_active_still_sessions())
 
 
