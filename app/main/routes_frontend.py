@@ -90,12 +90,12 @@ def import_zymatic_recipe():
 
 @main.route('/update_zymatic_recipe', methods=['POST'])
 def update_zymatic_recipe():
-    update = request.get_json()
+    update_recipe = request.get_json()
     files = list(zymatic_recipe_path().glob(file_glob_pattern))
     for filename in files:
         recipe = load_zymatic_recipe(filename)
-        if recipe.id == update['id']:
-            recipe.update_steps(filename, update['steps'])
+        if recipe.id == update_recipe['id']:
+            recipe.update_recipe(filename, update_recipe)
     return '', 204
 
 
@@ -157,12 +157,12 @@ def new_zseries_recipe_save():
 
 @main.route('/update_zseries_recipe', methods=['POST'])
 def update_zseries_recipe():
-    update = request.get_json()
+    update_recipe = request.get_json()
     files = list(zseries_recipe_path().glob(file_glob_pattern))
     for filename in files:
         recipe = load_zseries_recipe(filename)
-        if str(recipe.id) == update['id']:
-            recipe.update_steps(filename, update['steps'])
+        if str(recipe.id) == update_recipe['id']:
+            recipe.update_recipe(filename, update_recipe)
     return '', 204
 
 
@@ -379,12 +379,12 @@ def import_pico_recipe():
 
 @main.route('/update_pico_recipe', methods=['POST'])
 def update_pico_recipe():
-    update = request.get_json()
+    update_recipe = request.get_json()
     files = list(pico_recipe_path().glob(file_glob_pattern))
     for filename in files:
         recipe = load_pico_recipe(filename)
-        if recipe.id == update['id']:
-            recipe.update_steps(filename, update['steps'])
+        if recipe.id == update_recipe['id']:
+            recipe.update_recipe(filename, update_recipe)
     return '', 204
 
 
