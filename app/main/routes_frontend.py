@@ -5,7 +5,7 @@ import requests
 import socket
 import uuid
 from ruamel.yaml import YAML
-from flask import current_app, make_response, request, send_file
+from flask import current_app, make_response, request, send_file, escape
 from pathlib import Path
 from os import path
 
@@ -285,8 +285,9 @@ def load_zseries_recipe(file):
 def parse_recipe(machineType, recipe, file):
     try:
         recipe.parse(file)
-    except:
+    except Exception as e:
         current_app.logger.error("ERROR: An exception occurred parsing recipe {}".format(file))
+        current_app.logger.error(e)
         add_invalid_recipe(machineType, file)
     
 
@@ -409,6 +410,8 @@ def load_pico_recipes():
 def load_pico_recipe(file):
     recipe = PicoBrewRecipe()
     parse_recipe(MachineType.PICOBREW, recipe, file)
+    
+    recipe.name_escaped = escape(recipe.name)
     return recipe
 
 
@@ -420,8 +423,9 @@ def get_pico_recipes():
 def parse_brew_session(file):
     try:
         return load_brew_session(file)
-    except:
-        current_app.logger.error("ERROR: An exception occurred parsing {}".format(file))
+    except Exception as e:
+        current_app.logger.error("An exception occurred parsing {}".format(file))
+        current_app.logger.error(e)
         add_invalid_session("brew", file)
 
 

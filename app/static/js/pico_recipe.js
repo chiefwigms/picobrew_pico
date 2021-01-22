@@ -350,7 +350,7 @@ function edit_recipe(recipe_id) {
 function download_recipe(recipe_id, recipe_name) {
     var table = Tabulator.prototype.findTable("#t_" + recipe_id)[0];
     if (table) {
-        window.location = '/recipes/picobrew/' + recipe_id + '/' + recipe_name + '.json';
+        window.location = '/recipes/picobrew/' + recipe_id + '/' + unescapeHtml(recipe_name) + '.json';
     }
 };
 
