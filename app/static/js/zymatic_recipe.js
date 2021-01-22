@@ -245,6 +245,8 @@ function update_recipe(recipe_id) {
     if (table) {
         var recipe = {};
         recipe.id = recipe_id
+        recipe.name = $('#recipe_name_' + recipe_id).val()
+        recipe.notes = $('#notes_' + recipe_id).val()
         recipe.steps = table.getData();
         $.ajax({
             url: 'update_zymatic_recipe',
@@ -263,6 +265,11 @@ function update_recipe(recipe_id) {
             },
         });
     }
+};
+
+function edit_recipe(recipe_id) {
+    $('#view_' + recipe_id).toggleClass('d-none');
+    $('#form_' + recipe_id).toggleClass('d-none');
 };
 
 function download_recipe(recipe_id, recipe_name) {

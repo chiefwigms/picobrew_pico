@@ -12,7 +12,7 @@
         <canvas id="recipe_image" width="128" height="64"></canvas>
       </div>
       <div class="form-group col-sm-2">
-        <input type="file" accept="image/*" style="color:transparent;" id="recipe_image_loader">
+        <input type="file" accept="image/*" style="color:transparent;" id="recipe_image_loader" class="recipe_image_loader">
       </div>
       <div class="form-group col-sm-1">
         <label class="checkbox-inline" for="recipe_image_invert">Invert</label>
@@ -54,7 +54,6 @@
   var table = new Tabulator("#t_new_recipe", recipe_table);
   table.setData(default_data);
   tables["new_recipe"] = table;
-  document.getElementById('recipe_image_loader').addEventListener('change', load_new_image, false);
   load_image('recipe_image', recipe_img);
 </script>
 {% endblock %}
