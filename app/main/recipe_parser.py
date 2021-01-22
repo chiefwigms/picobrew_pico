@@ -318,8 +318,8 @@ class PicoBrewRecipe():
             old_recipe_file = filename
             filename = pico_recipe_path().joinpath('{}.json'.format(self.name_))
 
-        self.abv = int(recipe.get('abv', self.abv))
-        self.ibu = int(recipe.get('ibu', self.ibu))
+        self.abv = float(recipe.get('abv', self.abv))
+        self.ibu = float(recipe.get('ibu', self.ibu))
         self.image = recipe.get('image', self.image)
         self.notes = recipe.get('notes', self.notes)
         self.steps = []
