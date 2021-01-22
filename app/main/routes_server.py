@@ -229,13 +229,14 @@ def hostname():
 def ip_addresses():
     command_output = None
     try:
-        command_output = subprocess.check_output("ifconfig -l | xargs -n1 ipconfig getifaddr", shell=True).decode("utf-8").strip()
+        command_output = subprocess.check_output("ifconfig -l | xargs -n1 ipconfig getifaddr || hostname -I", shell=True).decode("utf-8").rstrip()
+        command_output = list(filter(None, re.split('\\s', command_output)))
     except subprocess.CalledProcessError as error:
-        # any interface that doesn't contain an IP address (bridges, etc) will error the command
+        # any interface that doesn't contain an IP address (bridges, etc) will error the `ipconfig getifaddr` command
         current_app.logger.warn(f"current device doesn't support 'ifconfig' error={error.returncode} output={error.output}")
-        command_output = list(filter(None, error.output.decode().split("\n")))
+        command_output = list(filter(None, re.split('\\s', error.output.decode())))
 
-    pat=re.compile(r'\b(?:\d{1,3}\.){3}\d{1,3}\b')  
+    pat=re.compile(r'\b(?:\d{1,3}\.){3}\d{1,3}\b')
     ip_addrs = [m.group(0) for s in command_output for m in pat.finditer(s)]
 
     if len(ip_addrs) > 0:
