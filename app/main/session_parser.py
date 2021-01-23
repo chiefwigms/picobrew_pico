@@ -41,7 +41,8 @@ def load_brew_session(file):
     # 0 = Date, 1 = UID, 2 = RFID / Session GUID (guid), 3 = Session Name, 4 = Session Type (integer - z only)
     json_data = load_session_file(file)
 
-    name = info[3].replace('_', ' ')
+    # unencode the name section ('_' => ' ' ; '%23' -> '#')
+    name = info[3].replace('_', ' ').replace("%23", "#")
     step = ''
     chart_id = info[0] + '_' + info[2]
     alias = '' if info[1] not in active_brew_sessions else active_brew_sessions[info[1]].alias

@@ -260,7 +260,11 @@ def create_new_session(uid, sesId, sesType):
         active_brew_sessions[uid].name = PICO_SESSION[sesType]
     else:
         active_brew_sessions[uid].name = 'Unknown Session ({})'.format(sesType)
-    active_brew_sessions[uid].filepath = brew_active_sessions_path().joinpath('{0}#{1}#{2}#{3}.json'.format(datetime.now().strftime('%Y%m%d_%H%M%S'), uid, sesId, active_brew_sessions[uid].name.replace(' ', '_')))
+
+    # replace spaces and '#' with other character sequences
+    encoded_recipe = active_brew_sessions[uid].name.replace(' ', '_').replace("#", "%23")
+    filename = '{0}#{1}#{2}#{3}.json'.format(datetime.now().strftime('%Y%m%d_%H%M%S'), uid, sesId, encoded_recipe)
+    active_brew_sessions[uid].filepath = brew_active_sessions_path().joinpath(filename)
     active_brew_sessions[uid].file = open(active_brew_sessions[uid].filepath, 'w')
     active_brew_sessions[uid].file.write('[')
 
