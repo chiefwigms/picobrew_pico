@@ -26,4 +26,47 @@
     {% endblock %}
   </div>
 </body>
+<script>
+  var entityMap = {
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&#38;',
+    "'": '&#39;',
+    '/': '&#x2F;',
+    '`': '&#x60;',
+    '=': '&#x3D;'
+  };
+
+  var inverseEntityMap = {
+    '&amp;': '&',
+    '&lt;': '<',
+    '&gt;': '>',
+    '&quot;': '"',
+    '&#38;': '"',
+    '&#39;': "'",
+    '&lsquo;': "'",
+    '&rsquo;': "'",
+    '&#8216;': "'",
+    '&#8217;': "'",
+    '&apos;': "'",
+    '&#145;': "'",
+    '&#x2f;': '/',
+    '&#x60;': '`',
+    '&#x3d;': '='
+  }
+
+  function escapeHtml (string) {
+    return String(string).replace(/[&<>"'`=\/]/g, function (s) {
+      return entityMap[s];
+    });
+  }
+
+  function unescapeHtml (string) {
+    return String(string).replace(/&(amp|lt|gt|quot|#38|#39|lsquo|rsquo|#8216|#8217|apos|#145|#x2F|#x60|#x3d);/g, function (s) {
+      return inverseEntityMap[s];
+    });
+  }
+
+</script>
 </html>

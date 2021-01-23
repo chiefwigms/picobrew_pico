@@ -9,7 +9,7 @@
                 (ABV = {{recipe['abv']}}, IBU = {{recipe['ibu']}})
                 {% endif %}
                 <button class="btn btn-sm btn-primary float-right mr-5" type="button" id="bdownload_{{recipe['id']}}"
-                    onclick="event.stopPropagation();event.preventDefault();download_recipe('{{recipe['id']}}', '{{recipe['name']}}');">
+                    onclick="event.stopPropagation();event.preventDefault();download_recipe('{{recipe['id']}}', '{{recipe['name_escaped']}}');">
                     <i class="fas fa-download"></i>
                 </button>
                 <button class="btn btn-sm btn-info float-right mr-3" type="button" id="bclone_{{recipe['id']}}"

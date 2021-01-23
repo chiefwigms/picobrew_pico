@@ -1,6 +1,7 @@
 import json
 from datetime import datetime
 from pathlib import Path
+from flask import current_app
 
 from .config import brew_active_sessions_path, ferm_active_sessions_path, iSpindel_active_sessions_path
 from .model import PicoBrewSession, PicoFermSession, iSpindelSession
@@ -15,10 +16,14 @@ active_iSpindel_sessions = {}
 
 def load_session_file(file):
     json_data = {}
-    with open(file) as fp:
-        raw_data = fp.read().rstrip()
-        session = recover_incomplete_session(raw_data)
-        json_data = json.loads(session)
+    try:
+        with open(file) as fp:
+            raw_data = fp.read().rstrip()
+            session = recover_incomplete_session(raw_data)
+            json_data = json.loads(session)
+    except Exception as e:
+        current_app.logger.error("ERROR: An exception occurred parsing session file {}".format(file))
+        current_app.logger.error(e)
 
     return json_data
 
