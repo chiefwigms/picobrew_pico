@@ -290,9 +290,9 @@ def restore_active_iSpindel_sessions():
         active_iSpindel_session_files = list(iSpindel_active_sessions_path().glob(file_glob_pattern))
         for file in active_iSpindel_session_files:
             # print('DEBUG: restore_active_sessions() found {} as an active session'.format(file))
-            ferm_session = load_iSpindel_session(file)
+            iSpindel_session = load_iSpindel_session(file)
             # print('DEBUG: restore_active_sessions() {}'.format(ferm_session))
-            uid = ferm_session['uid']
+            uid = iSpindel_session['uid']
             if uid not in active_iSpindel_sessions:
                 active_iSpindel_sessions[uid] = iSpindelSession()
 
@@ -300,14 +300,15 @@ def restore_active_iSpindel_sessions():
             session.file = open(file, 'a')
             session.file.flush()
             session.filepath = file
-            session.start_time = datetime.strptime(ferm_session['date'], '%Y%m%d_%H%M%S')
+            session.start_time = datetime.strptime(iSpindel_session['date'], '%Y%m%d_%H%M%S')
+            session.active = True
 
             session.uninit = False
-            session.data = ferm_session['data']
-            session.graph = ferm_session['graph']
+            session.data = iSpindel_session['data']
+            session.graph = iSpindel_session['graph']
 
             active_iSpindel_sessions[uid] = session
-
+            #active_iSpindel_sessions[iSpindel_session['uid']] = session
 
 def restore_active_sessions():
     # initialize active sessions during start up

@@ -30,35 +30,41 @@ def process_iSpindel_data():
     data = request.get_json()
     uid = str(data['ID'])
     
-    if uid not in active_iSpindel_sessions or active_iSpindel_sessions[uid].uninit:
+    if (uid not in active_iSpindel_sessions or active_iSpindel_sessions[uid].uninit) and active_iSpindel_sessions[uid].active:
         create_new_session(uid)
 
-    time = ((datetime.utcnow() - datetime(1970, 1, 1)).total_seconds() * 1000)
-    session_data = []
-    log_data = ''
-    point = {
-        'time': time,
-        'temp': data['temperature'],
-        'gravity': data['gravity'],
-    }
+    if active_iSpindel_sessions[uid].active:
+        time = ((datetime.utcnow() - datetime(1970, 1, 1)).total_seconds() * 1000)
+        session_data = []
+        log_data = ''
+        point = {
+            'time': time,
+            'temp': data['temperature'],
+            'gravity': data['gravity'],
+        }
 
-    session_data.append(point)
-    log_data += '\t{},\n'.format(json.dumps(point))
-    
-    active_iSpindel_sessions[uid].data.extend(session_data)
-    active_iSpindel_sessions[uid].voltage = str(data['battery']) + 'V'
-    
-    graph_update = json.dumps({'voltage': data['battery'], 'data': session_data})
-    socketio.emit('iSpindel_session_update|{}'.format(data['ID']), graph_update)
-    
-    if (datetime.now().date() - active_iSpindel_sessions[uid].start_time.date()).days > 14:
-        active_iSpindel_sessions[uid].file.write('{}\n]\n'.format(log_data[:-2]))
-        active_iSpindel_sessions[uid].cleanup()
-        return ('', 200)
+        session_data.append(point)
+        log_data += '\t{},\n'.format(json.dumps(point))
+        
+        active_iSpindel_sessions[uid].data.extend(session_data)
+        active_iSpindel_sessions[uid].voltage = str(data['battery']) + 'V'
+        
+        graph_update = json.dumps({'voltage': data['battery'], 'data': session_data})
+        socketio.emit('iSpindel_session_update|{}'.format(data['ID']), graph_update)
+        
+        ferm_days_elapsed = (datetime.now().date() - active_iSpindel_sessions[uid].start_time.date()).days
+        
+        if ferm_days_elapsed > 14 or (active_iSpindel_sessions[uid].uninit == False and active_iSpindel_sessions[uid].active == False):
+            active_iSpindel_sessions[uid].file.write('{}\n]\n'.format(log_data[:-2]))
+            active_iSpindel_sessions[uid].cleanup()
+            return ('', 200)
+        else:
+            active_iSpindel_sessions[uid].active = True
+            active_iSpindel_sessions[uid].file.write(log_data)
+            active_iSpindel_sessions[uid].file.flush()
+            return ('', 200)
     else:
-        active_iSpindel_sessions[uid].file.write(log_data)
-        active_iSpindel_sessions[uid].file.flush()
-        return ('', 200)  
+        return('', 200)
     
 # -------- Utility --------
 def create_new_session(uid):

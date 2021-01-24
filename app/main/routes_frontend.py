@@ -138,7 +138,7 @@ def handle_devices():
         mtype = MachineType(request.form['machine_type'])
         uid = request.form['uid']
         alias = request.form['alias']
-
+        print("UID in /devices: " + uid + "     ALIAS in /devices: " + alias)
         # verify uid not already configured
         if (uid in {**active_brew_sessions, **active_ferm_sessions, **active_iSpindel_sessions, **active_still_sessions} 
                 and active_session(uid).alias != ''):
@@ -390,6 +390,8 @@ def update_device_session(uid, session_type):
     update = request.get_json()
     if session_type == 'ferm':
         session = active_ferm_sessions[uid]
+    elif session_type == 'iSpindel':
+        session = active_iSpindel_sessions[uid]
 
         if update['active'] == False:
             session.active = False
@@ -397,7 +399,14 @@ def update_device_session(uid, session_type):
                 session.file.seek(0, os.SEEK_END)
                 if session.file.tell() > 0:
                     # mark for completion and archive session file
-                    session.file.seek(session.file.tell() - 1, os.SEEK_SET)  # Remove trailing , from last data set
+                    #print(session.file.seek(session.file.tell() - 1, os.SEEK_SET))
+                    #end_loc = session.file.seek(session.file.tell() - 2, os.SEEK_SET)
+                    #print("Ending location = " + str(end_loc))
+                    #print("Session.file.tell = ", + session.file.tell())
+                    #print("Session.file.tell - 1 = ", + (session.file.tell()-1))
+                    #print("os.SEEK_END = ", + os.SEEK_END)
+                    
+                    session.file.seek(session.file.tell() - 2, os.SEEK_SET)  # Remove trailing , from last data set
                     session.file.write('\n]')
                     session.cleanup()
                 else:
@@ -947,6 +956,8 @@ def load_active_iSpindel_sessions():
     iSpindel_sessions = []
     for uid in active_iSpindel_sessions:
         iSpindel_sessions.append({'alias': active_iSpindel_sessions[uid].alias,
+                                  'uid' : uid,
+                                  'active': active_iSpindel_sessions[uid].active,
                                   'graph': get_iSpindel_graph_data(uid, active_iSpindel_sessions[uid].voltage,
                                                                    active_iSpindel_sessions[uid].data)})
     return iSpindel_sessions

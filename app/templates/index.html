@@ -84,6 +84,25 @@
             <img src="/static/img/tilt.svg" atl="tilt or ispindle">
           </span>
           {% if iSpindel_session.alias is defined and iSpindel_session.alias|length %}{{iSpindel_session.alias}}{% else %}{{iSpindel_session.graph.chart_id}}{% endif %}
+          {% if iSpindel_session.active %}
+          <button class="fermentation-start d-none btn btn-sm btn-success float-right mr-5" type="button" id="bstart_{{iSpindel_session.uid}}"
+              onclick="event.stopPropagation();event.preventDefault();start_iSpindel_fermentation('{{iSpindel_session.uid}}');">
+              <i class="fas fa-play-circle"></i> Start Fermentation
+          </button>
+          <button class="fermentation-stop d-block btn btn-sm btn-danger float-right mr-5" type="button" id="bstop_{{iSpindel_session.uid}}"
+              onclick="event.stopPropagation();event.preventDefault();stop_iSpindel_fermentation('{{iSpindel_session.uid}}');">
+              <i class="fas fa-stop-circle"></i> Stop Fermentation
+          </button>
+          {% else %}
+          <button class="fermentation-start d-block btn btn-sm btn-success float-right mr-5" type="button" id="bstart_{{iSpindel_session.uid}}"
+              onclick="event.stopPropagation();event.preventDefault();start_iSpindel_fermentation('{{iSpindel_session.uid}}');">
+              <i class="fas fa-play-circle"></i> Start Fermentation
+          </button>
+          <button class="fermentation-stop d-none btn btn-sm btn-danger float-right mr-5" type="button" id="bstop_{{iSpindel_session.uid}}"
+              onclick="event.stopPropagation();event.preventDefault();stop_iSpindel_fermentation('{{iSpindel_session.uid}}');">
+              <i class="fas fa-stop-circle"></i> Stop Fermentation
+          </button>
+          {% endif %}
         </a>
       </h5>
       <div id="c_{{iSpindel_session.graph.chart_id}}" class="collapse show" aria-labelledby="h_{{iSpindel_session.graph.chart_id}}">
