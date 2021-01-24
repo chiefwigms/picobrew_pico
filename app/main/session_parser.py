@@ -14,27 +14,38 @@ active_still_sessions = {}
 active_iSpindel_sessions = {}
 
 
-def load_session_file(file):
+def load_session_file(filename):
     json_data = {}
     try:
-        with open(file) as fp:
+        with open(filename) as fp:
             raw_data = fp.read().rstrip()
-            session = recover_incomplete_session(raw_data)
+            session = recover_incomplete_session(raw_data, filename)
             json_data = json.loads(session)
     except Exception as e:
-        current_app.logger.error("ERROR: An exception occurred parsing session file {}".format(file))
+        current_app.logger.error("An exception occurred parsing session file {}".format(filename))
         current_app.logger.error(e)
 
     return json_data
 
 
-def recover_incomplete_session(raw_data):
+def recover_incomplete_session(raw_data, filename):
+    # attempt to recover various incomplete session files
+    # (raw_data is already rstrip() so no trailing whitespace)
     recovered_session = raw_data
     if raw_data == None or raw_data.endswith('[') or raw_data == '':
-        # Recover from aborted session data file
+        # aborted session data file (containing no datalog entries)
         recovered_session = '[\n]'
+    elif raw_data.endswith(',\n]'):
+        # closed trailing comma in datalog
+        recovered_session = raw_data[:-3] + '\n]\n'
+    elif raw_data.endswith(',\n\n]'):
+        # closed trailing comma and extra newline in datalog
+        recovered_session = raw_data[:-4] + '\n]\n'
+    elif raw_data.endswith('}'):
+        # unclosed array of data entries
+        recovered_session = raw_data + '\n]\n'
     elif raw_data.endswith(','):
-        # Recover from incomplete json data file
+        # open trailing comma
         recovered_session = raw_data[:-1] + '\n]\n'
 
     return recovered_session
