@@ -1,6 +1,7 @@
 import json
 from datetime import datetime
 from pathlib import Path
+from flask import current_app
 
 from .config import brew_active_sessions_path, ferm_active_sessions_path, iSpindel_active_sessions_path
 from .model import PicoBrewSession, PicoFermSession, iSpindelSession
@@ -13,23 +14,38 @@ active_still_sessions = {}
 active_iSpindel_sessions = {}
 
 
-def load_session_file(file):
+def load_session_file(filename):
     json_data = {}
-    with open(file) as fp:
-        raw_data = fp.read().rstrip()
-        session = recover_incomplete_session(raw_data)
-        json_data = json.loads(session)
+    try:
+        with open(filename) as fp:
+            raw_data = fp.read().rstrip()
+            session = recover_incomplete_session(raw_data, filename)
+            json_data = json.loads(session)
+    except Exception as e:
+        current_app.logger.error("An exception occurred parsing session file {}".format(filename))
+        current_app.logger.error(e)
 
     return json_data
 
 
-def recover_incomplete_session(raw_data):
+def recover_incomplete_session(raw_data, filename):
+    # attempt to recover various incomplete session files
+    # (raw_data is already rstrip() so no trailing whitespace)
     recovered_session = raw_data
     if raw_data == None or raw_data.endswith('[') or raw_data == '':
-        # Recover from aborted session data file
+        # aborted session data file (containing no datalog entries)
         recovered_session = '[\n]'
+    elif raw_data.endswith(',\n]'):
+        # closed trailing comma in datalog
+        recovered_session = raw_data[:-3] + '\n]\n'
+    elif raw_data.endswith(',\n\n]'):
+        # closed trailing comma and extra newline in datalog
+        recovered_session = raw_data[:-4] + '\n]\n'
+    elif raw_data.endswith('}'):
+        # unclosed array of data entries
+        recovered_session = raw_data + '\n]\n'
     elif raw_data.endswith(','):
-        # Recover from incomplete json data file
+        # open trailing comma
         recovered_session = raw_data[:-1] + '\n]\n'
 
     return recovered_session
@@ -41,7 +57,8 @@ def load_brew_session(file):
     # 0 = Date, 1 = UID, 2 = RFID / Session GUID (guid), 3 = Session Name, 4 = Session Type (integer - z only)
     json_data = load_session_file(file)
 
-    name = info[3].replace('_', ' ')
+    # unencode the name section ('_' => ' ' ; '%23' -> '#')
+    name = info[3].replace('_', ' ').replace("%23", "#")
     step = ''
     chart_id = info[0] + '_' + info[2]
     alias = '' if info[1] not in active_brew_sessions else active_brew_sessions[info[1]].alias

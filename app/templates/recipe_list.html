@@ -9,7 +9,7 @@
                 (ABV = {{recipe['abv']}}, IBU = {{recipe['ibu']}})
                 {% endif %}
                 <button class="btn btn-sm btn-primary float-right mr-5" type="button" id="bdownload_{{recipe['id']}}"
-                    onclick="event.stopPropagation();event.preventDefault();download_recipe('{{recipe['id']}}', '{{recipe['name']}}');">
+                    onclick="event.stopPropagation();event.preventDefault();download_recipe('{{recipe['id']}}', '{{recipe['name_escaped']}}');">
                     <i class="fas fa-download"></i>
                 </button>
                 <button class="btn btn-sm btn-info float-right mr-3" type="button" id="bclone_{{recipe['id']}}"
@@ -29,17 +29,84 @@
         </h5>
         <div id="c_{{recipe['id']}}" class="collapse" aria-labelledby="h_{{recipe['id']}}">
             <div class="card-body">
-                {% if recipe['image'] %}
-                <canvas id="canvas_{{recipe['id']}}" width="128" height="64"></canvas>
-                <script>load_image('canvas_{{recipe['id']}}', '{{recipe['image']}}');</script>
-                {% endif %}
+                <div id="view_{{recipe['id']}}" style="min-height: 80px">
+                    <button class="btn btn-sm btn-warning float-right mr-3" type="button" id="bedit_{{recipe['id']}}"
+                        data-toggle="tooltip" data-placement="right" title="Click to Edit Recipe Metadata (name, abv, ibu, image, notes)"
+                        onclick="event.stopPropagation();event.preventDefault();edit_recipe('{{recipe['id']}}');">
+                        <i class="fas fa-pen"></i> Edit
+                    </button>
+                    {% if recipe['is_pico'] and recipe['image'] %}
+                    <canvas id="canvas_{{recipe['id']}}" width="128" height="64"></canvas>
+                    <script>load_image('canvas_{{recipe['id']}}', '{{recipe['image']}}');</script>
+                    {% endif %}
+                    {% if recipe['notes'] %}
+                    <p class="mr-8" id="textarea_{{recipe['id']}}">{{recipe['notes']}}</p>
+                    {% endif %}
+                </div>
+                <div id="form_{{recipe['id']}}" class="d-none">
+                    <button class="btn btn-sm btn-info float-right mr-3" type="button" id="bview_{{recipe['id']}}"
+                        data-toggle="tooltip" data-placement="right" title="Click to toggle View-Only Mode"
+                        onclick="event.stopPropagation();event.preventDefault();edit_recipe('{{recipe['id']}}');">
+                        <i class="fas fa-eye"></i>  View
+                    </button>
+                    <form id="f_{{recipe['id']}}">
+                        <div class="form-row">
+                          {% if recipe['supports_image'] %}
+                          <div class="form-inline">
+                            <div class="form-group col-sm-2">
+                              <canvas id="recipe_image_{{recipe['id']}}" width="128" height="64"></canvas>
+                              {% if recipe['image'] %}
+                                <script>
+                                    load_image('recipe_image_{{recipe['id']}}', '{{recipe['image']}}');
+                                    recipe_images["{{recipe['id']}}"] = "{{recipe['image']}}"
+                                </script>
+                              {% endif %}
+                            </div>
+                            <div class="form-group col-sm-2">
+                              <input type="file" accept="image/*" style="color:transparent;" id="recipe_image_loader_{{recipe['id']}}" class="recipe_image_loader">
+                            </div>
+                            <div class="form-group col-sm-1">
+                              <label class="checkbox-inline" for="recipe_image_invert_{{recipe['id']}}">Invert</label>
+                              <input type="checkbox" class="form-check-input" id="recipe_image_invert_{{recipe['id']}}">
+                            </div>
+                            <div class="form-group col-sm-1">
+                              <label for="recipe_image_threshold_{{recipe['id']}}">Threshold</label>
+                              <input type="text" class="form-control form-control-sm" id="recipe_image_threshold_{{recipe['id']}}" placeholder="0-255" value=128>
+                            </div>
+                          </div>
+                          {% endif %}
+                        </div>
+                        <div class="form-row">
+                          <div class="form-group col-sm-3">
+                            <input type="text" class="form-control form-control-sm" id="recipe_name_{{recipe['id']}}" placeholder="Recipe Name" value="{{recipe['name']}}">
+                          </div>
+                          {% if recipe['is_pico'] %}
+                          <div class="form-group col-sm-1">
+                            <input type="text" class="form-control form-control-sm" id="abv_{{recipe['id']}}" placeholder="ABV (7.9)" value="{{recipe['abv']}}">
+                          </div>
+                          <div class="form-group col-sm-1">
+                            <input type="text" class="form-control form-control-sm" id="ibu_{{recipe['id']}}" placeholder="IBU (48)" value="{{recipe['ibu']}}">
+                          </div>
+                          {% endif %}
+                        </div>
+                        <div class="form-row">
+                          <div class="form-group col-sm-12">
+                            <textarea class="form-control form-control-sm" id="notes_{{recipe['id']}}" rows=5 placeholder="Notes (description and details of recipe)">{% if recipe['notes'] %}{{recipe['notes']}}{% endif %}</textarea>
+                          </div>
+                        </div>
+                      </form>
+                </div>
                 <div class="table-recipe table-sm table-striped table-bordered table-light" id="t_{{recipe['id']}}">
                 </div>
                 <script>
                     function displayUnsavedState(data) {
-                        document.getElementById("bsave_{{recipe['id']}}").style.display = "block";
+                        $("#bsave_{{recipe['id']}}").show();
                     }
                     
+                    // recipe metadata toggles unsaved state
+                    $('#f_{{recipe['id']}} textarea').bind('input propertychange', displayUnsavedState)
+                    $('#f_{{recipe['id']}} input[type=text]').bind('input propertychange', displayUnsavedState)
+
                     recipe_table['cellEdited'] = displayUnsavedState
                     recipe_table['rowAdded'] = displayUnsavedState
                     recipe_table['rowDeleted'] = displayUnsavedState

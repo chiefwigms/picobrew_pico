@@ -1,4 +1,5 @@
 import json
+import os
 import uuid
 
 from .config import zymatic_recipe_path, pico_recipe_path, zseries_recipe_path
@@ -30,6 +31,7 @@ class ZymaticRecipe():
         self.id = None
         self.name = None
         self.name_ = None
+        self.notes = None
         self.steps = []
 
     def parse(self, file):
@@ -40,6 +42,7 @@ class ZymaticRecipe():
         self.id = recipe.get('id', 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX') or 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX'
         self.name = recipe.get('name', 'Empty Recipe') or 'Empty Recipe'
         self.name_ = self.name.replace(" ", "_").replace("\'", "")
+        self.notes = recipe.get('notes', None) or None
         if 'steps' in recipe:
             for recipe_step in recipe['steps']:
                 step = ZymaticRecipeStep()
@@ -58,9 +61,17 @@ class ZymaticRecipe():
             ''.join(steps)
         )
 
-    def update_steps(self, file, steps):
+    def update_recipe(self, filename, recipe):
+        old_recipe_file = None
+        if (self.name and self.name != recipe.get('name', self.name)):
+            self.name = recipe.get('name', 'Empty Recipe')
+            self.name_ = self.name.replace(" ", "_").replace("\'", "")
+            old_recipe_file = filename
+            filename = zymatic_recipe_path().joinpath('{}.json'.format(self.name_))
+
+        self.notes = recipe.get('notes', self.notes)
         self.steps = []
-        for s in steps:
+        for s in recipe.get('steps', self.steps):
             step = ZymaticRecipeStep()
             step.name = s.get('name', 'Empty Step') or 'Empty Step'
             step.temperature = 70 if 'temperature' not in s else int(s['temperature'])
@@ -70,8 +81,12 @@ class ZymaticRecipe():
             self.steps.append(step)
         updated_recipe = json.loads(json.dumps(self, default=lambda r: r.__dict__))
         del updated_recipe['name_']
-        with open(file, 'w') as f:
+        
+        with open(filename, 'w') as f:
             json.dump(updated_recipe, f, indent=4, sort_keys=True)
+
+        if (old_recipe_file):
+            os.remove(old_recipe_file)
 
 
 def ZymaticRecipeImport(recipes):
@@ -120,6 +135,7 @@ class ZSeriesRecipe():
         self.id = None
         self.name = None
         self.name_ = None
+        self.notes = None
         self.start_water = 13.1
         self.kind_code = 0
         self.type_code = None
@@ -133,6 +149,7 @@ class ZSeriesRecipe():
         self.id = recipe.get('id', 0) or 0
         self.name = recipe.get('name', 'Empty Recipe') or 'Empty Recipe'
         self.name_ = self.name.replace(" ", "_").replace("\'", "")
+        self.notes = recipe.get('notes', None) or None
         self.start_water = recipe.get('start_water', 13.1) or 13.1
         self.type_code = recipe.get('type_code', "Beer") or "Beer"
         if 'steps' in recipe:
@@ -157,9 +174,17 @@ class ZSeriesRecipe():
             r['Steps'].append(step.serialize())
         return r
 
-    def update_steps(self, file, steps):
+    def update_recipe(self, filename, recipe):
+        old_recipe_file = None
+        if (self.name and self.name != recipe.get('name', self.name)):
+            self.name = recipe.get('name', 'Empty Recipe')
+            self.name_ = self.name.replace(" ", "_").replace("\'", "")
+            old_recipe_file = filename
+            filename = zseries_recipe_path().joinpath('{}.json'.format(self.name_))
+
+        self.notes = recipe.get('notes', self.notes)
         self.steps = []
-        for s in steps:
+        for s in recipe.get('steps', self.steps):
             step = ZSeriesRecipeStep()
             step.name = s.get('name', 'Empty Step') or 'Empty Step'
             step.temperature = 70 if 'temperature' not in s else int(s['temperature'])
@@ -173,8 +198,12 @@ class ZSeriesRecipe():
         del updated_recipe['name_']
         del updated_recipe['kind_code']
         del updated_recipe['type_code']
-        with open(file, 'w') as f:
+
+        with open(filename, 'w') as f:
             json.dump(updated_recipe, f, indent=4, sort_keys=True)
+        
+        if (old_recipe_file):
+            os.remove(old_recipe_file)
 
 
 def ZSeriesRecipeImport(recipe):
@@ -236,11 +265,13 @@ class PicoBrewRecipe():
     def __init__(self):
         self.id = None
         self.name = None
+        self.notes = None
         self.name_ = None
         self.abv_tweak = None
         self.ibu_tweak = None
         self.abv = None
         self.ibu = None
+        self.is_pico = True
         self.image = None
         self.steps = []
 
@@ -251,6 +282,7 @@ class PicoBrewRecipe():
         self.id = recipe.get('id', 'XXXXXXXXXXXXXX') or 'XXXXXXXXXXXXXX'
         self.name = recipe.get('name', 'Empty Recipe') or 'Empty Recipe'
         self.name_ = self.name.replace(" ", "_").replace("\'", "")
+        self.notes = recipe.get('notes', None) or None
         self.abv_tweak = recipe.get('abv_tweak', -1) or -1
         self.ibu_tweak = recipe.get('ibu_tweak', -1) or -1
         self.abv = recipe.get('abv', 6) or 6
@@ -278,9 +310,20 @@ class PicoBrewRecipe():
             self.image
         )
 
-    def update_steps(self, file, steps):
+    def update_recipe(self, filename, recipe):
+        old_recipe_file = None
+        if (self.name and self.name != recipe.get('name', self.name)):
+            self.name = recipe.get('name', 'Empty Recipe')
+            self.name_ = self.name.replace(" ", "_").replace("\'", "")
+            old_recipe_file = filename
+            filename = pico_recipe_path().joinpath('{}.json'.format(self.name_))
+
+        self.abv = float(recipe.get('abv', self.abv))
+        self.ibu = float(recipe.get('ibu', self.ibu))
+        self.image = recipe.get('image', self.image)
+        self.notes = recipe.get('notes', self.notes)
         self.steps = []
-        for s in steps:
+        for s in recipe.get('steps', self.steps):
             step = PicoBrewRecipeStep()
             step.name = s.get('name', 'Empty Step') or 'Empty Step'
             step.location = s.get('location', 'PassThru') or 'PassThru'
@@ -290,8 +333,12 @@ class PicoBrewRecipe():
             self.steps.append(step)
         updated_recipe = json.loads(json.dumps(self, default=lambda r: r.__dict__))
         del updated_recipe['name_']
-        with open(file, 'w') as f:
+        
+        with open(filename, 'w') as f:
             json.dump(updated_recipe, f, indent=4, sort_keys=True)
+
+        if (old_recipe_file):
+            os.remove(old_recipe_file)  
 
 
 def PicoBrewRecipeImport(recipe, rfid=None):

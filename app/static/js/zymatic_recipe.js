@@ -219,6 +219,7 @@ $(document).ready(function () {
         var recipe = {}
         recipe.id = ''
         recipe.name = document.getElementById('f_new_recipe').elements['recipe_name'].value;
+        recipe.notes = document.getElementById('f_new_recipe').elements['notes'].value;
         recipe.steps = table.getData();
         $.ajax({
             url: 'new_zymatic_recipe',
@@ -244,6 +245,8 @@ function update_recipe(recipe_id) {
     if (table) {
         var recipe = {};
         recipe.id = recipe_id
+        recipe.name = $('#recipe_name_' + recipe_id).val()
+        recipe.notes = $('#notes_' + recipe_id).val()
         recipe.steps = table.getData();
         $.ajax({
             url: 'update_zymatic_recipe',
@@ -264,10 +267,15 @@ function update_recipe(recipe_id) {
     }
 };
 
+function edit_recipe(recipe_id) {
+    $('#view_' + recipe_id).toggleClass('d-none');
+    $('#form_' + recipe_id).toggleClass('d-none');
+};
+
 function download_recipe(recipe_id, recipe_name) {
     var table = Tabulator.prototype.findTable("#t_" + recipe_id)[0];
     if (table) {
-        window.location = '/recipes/zymatic/' + recipe_id + '/' + recipe_name + '.json';
+        window.location = '/recipes/zymatic/' + recipe_id + '/' + unescapeHtml(recipe_name) + '.json';
     }
 };
 

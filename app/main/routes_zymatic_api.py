@@ -158,7 +158,12 @@ def process_log_session(args):
             active_brew_sessions[uid] = PicoBrewSession(MachineType.ZYMATIC)
         active_brew_sessions[uid].session = uuid.uuid4().hex[:32]
         active_brew_sessions[uid].name = get_recipe_name_by_id(args['recipe'])
-        active_brew_sessions[uid].filepath = brew_active_sessions_path().joinpath('{0}#{1}#{2}#{3}.json'.format(datetime.now().strftime('%Y%m%d_%H%M%S'), uid, active_brew_sessions[uid].session, active_brew_sessions[uid].name.replace(' ', '_')))
+
+        # replace spaces and '#' with other character sequences
+        encoded_recipe = active_brew_sessions[uid].name.replace(' ', '_').replace("#", "%23")
+        filename = '{0}#{1}#{2}#{3}.json'.format(datetime.now().strftime('%Y%m%d_%H%M%S'), uid, active_brew_sessions[uid].session, encoded_recipe)
+        active_brew_sessions[uid].filepath = brew_active_sessions_path().joinpath(filename)
+        
         active_brew_sessions[uid].file = open(active_brew_sessions[uid].filepath, 'w')
         active_brew_sessions[uid].file.write('[')
         active_brew_sessions[uid].file.flush()

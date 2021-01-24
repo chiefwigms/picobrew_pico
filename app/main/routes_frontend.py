@@ -2,22 +2,17 @@ import json
 import os
 import re
 import requests
-import shlex
 import socket
-import subprocess
-import sys
-import traceback
 import uuid
 from ruamel.yaml import YAML
-from flask import current_app, make_response, render_template, request, redirect, send_file
+from flask import current_app, make_response, request, send_file, escape
 from pathlib import Path
-from threading import Thread
-from time import sleep
 from os import path
 
 from . import main
 from .config import MachineType, base_path, server_config
-from .model import PicoBrewSession, PicoFermSession, PicoStillSession, iSpindelSession, SupportObject
+from .frontend_common import render_template_with_defaults
+from .model import PicoBrewSession, PicoFermSession, PicoStillSession, iSpindelSession
 from .recipe_import import import_recipes
 from .recipe_parser import PicoBrewRecipe, PicoBrewRecipeImport, ZymaticRecipe, ZymaticRecipeImport, ZSeriesRecipe
 from .session_parser import load_iSpindel_session, get_iSpindel_graph_data, load_ferm_session, get_ferm_graph_data, get_brew_graph_data, load_brew_session, active_brew_sessions, active_ferm_sessions, active_iSpindel_sessions, active_still_sessions
@@ -28,35 +23,6 @@ file_glob_pattern = "[!._]*.json"
 yaml = YAML()
 
 
-def system_info():
-    try:
-        system_info = subprocess.check_output("cat /etc/os-release || sw_vers || systeminfo | findstr /C:'OS'", shell=True)
-        system_info = system_info.decode("utf-8")
-    except:
-        system_info = "Not Supported on this Device"
-
-    return system_info
-
-
-def platform():
-    system = system_info()
-    if 'raspbian' in system:
-        return 'RaspberryPi'
-    elif 'Mac OS X' in system:
-        return 'MacOS'
-    elif 'Microsoft Windows' in system:
-        return 'Windows'
-    else:
-        return "unknown"
-
-
-platform_info = platform()
-
-
-def render_template_with_defaults(template, **kwargs):
-    return render_template(template, platform=platform_info, **kwargs)
-
-
 # -------- Routes --------
 @main.route('/')
 def index():
@@ -65,6 +31,7 @@ def index():
                            iSpindel_sessions=load_active_iSpindel_sessions())
 
 
+#<<<<<<< HEAD
 @main.route('/restart_server')
 def restart_server():
     # git pull & install any updated requirements
@@ -250,6 +217,8 @@ def handle_specific_device(uid):
         return redirect('/devices')
 
 
+#=======
+#>>>>>>> upstream/master
 @main.route('/brew_history')
 def brew_history():
     return render_template_with_defaults('brew_history.html', sessions=load_brew_sessions(), invalid=get_invalid_sessions('brew'))
@@ -309,12 +278,12 @@ def import_zymatic_recipe():
 
 @main.route('/update_zymatic_recipe', methods=['POST'])
 def update_zymatic_recipe():
-    update = request.get_json()
+    update_recipe = request.get_json()
     files = list(zymatic_recipe_path().glob(file_glob_pattern))
     for filename in files:
         recipe = load_zymatic_recipe(filename)
-        if recipe.id == update['id']:
-            recipe.update_steps(filename, update['steps'])
+        if recipe.id == update_recipe['id']:
+            recipe.update_recipe(filename, update_recipe)
     return '', 204
 
 
@@ -376,12 +345,12 @@ def new_zseries_recipe_save():
 
 @main.route('/update_zseries_recipe', methods=['POST'])
 def update_zseries_recipe():
-    update = request.get_json()
+    update_recipe = request.get_json()
     files = list(zseries_recipe_path().glob(file_glob_pattern))
     for filename in files:
         recipe = load_zseries_recipe(filename)
-        if str(recipe.id) == update['id']:
-            recipe.update_steps(filename, update['steps'])
+        if str(recipe.id) == update_recipe['id']:
+            recipe.update_recipe(filename, update_recipe)
     return '', 204
 
 
@@ -513,8 +482,9 @@ def load_zseries_recipe(file):
 def parse_recipe(machineType, recipe, file):
     try:
         recipe.parse(file)
-    except:
+    except Exception as e:
         current_app.logger.error("ERROR: An exception occurred parsing recipe {}".format(file))
+        current_app.logger.error(e)
         add_invalid_recipe(machineType, file)
     
 
@@ -607,12 +577,12 @@ def import_pico_recipe():
 
 @main.route('/update_pico_recipe', methods=['POST'])
 def update_pico_recipe():
-    update = request.get_json()
+    update_recipe = request.get_json()
     files = list(pico_recipe_path().glob(file_glob_pattern))
     for filename in files:
         recipe = load_pico_recipe(filename)
-        if recipe.id == update['id']:
-            recipe.update_steps(filename, update['steps'])
+        if recipe.id == update_recipe['id']:
+            recipe.update_recipe(filename, update_recipe)
     return '', 204
 
 
@@ -628,236 +598,6 @@ def delete_pico_recipe():
     return 'Delete Recipe: Failed to find recipe id \"' + recipe_id + '\"', 418
 
 
-def available_networks():
-    # TODO: properly handle failures by hiding settings in /setup or showing error
-
-    wifi_list = subprocess.check_output('./scripts/pi/wifi_scan.sh | grep 2.4', shell=True)
-    networks = []
-    for network in wifi_list.split(b'\n'):
-        network_parts = shlex.split(network.decode())
-        if len(network_parts) == 6:
-            networks.append({
-                "bssid": network_parts[0],
-                "ssid": network_parts[1],
-                "frequency": network_parts[2],
-                "channel": network_parts[3],
-                "signal": network_parts[4],
-                "encryption": network_parts[5]
-            })
-    return networks
-
-
-@main.route('/setup', methods=['GET', 'POST'])
-def setup():
-    if request.method == 'POST':
-        payload = request.get_json()
-
-        if 'hostname' in payload:
-            # change the device hostname and reboot
-            new_hostname = payload['hostname']
-
-            # check if hostname is only a-z0-9\-
-            if not re.match("^[a-zA-Z0-9-]+$", new_hostname):
-                current_app.logger.error("ERROR: invalid hostname provided: {}".format(new_hostname))
-                return 'Invalid Hostname (only supports a-z 0-9 and - as characters)!', 400
-
-            subprocess.check_output(
-                """echo '{}' > /etc/hostname""".format(new_hostname), shell=True)
-            subprocess.check_output(
-                """sed -i -e 's/{}/{}/' /etc/hosts""".format(hostname(), new_hostname), shell=True)
-
-            # restart for new host settings to take effect
-            os.system('shutdown -r now')
-
-            return '', 204
-        elif 'interface' in payload:
-            if payload['interface'] == 'wlan0':
-                # change wireless configuration (wpa_supplicant-wlan0.conf and wpa_supplicant.conf)
-                # sudo sed -i -e"s/^\bssid=.*/ssid=\"$SSID\"/" /etc/wpa_supplicant/wpa_supplicant.conf
-                # sudo sed -i -e"s/^psk=.*/psk=\"$WIFIPASS\"/" /etc/wpa_supplicant/wpa_supplicant.conf
-
-                try:
-                    # <= beta4 => /etc/wpa_supplicant/wpa_supplicant.conf
-                    # >= beta5 => /etc/wpa_supplicant/wpa_supplicant-wlan0.conf
-                    wpa_files = " ".join([_x for _x in ("/etc/wpa_supplicant/wpa_supplicant.conf", "/etc/wpa_supplicant/wpa_supplicant-wlan0.conf") if os.path.exists(_x)])
-
-                    # set ssid in wpa_supplicant files
-                    # regex \b marks a word boundary
-                    ssid = payload['ssid']
-                    subprocess.check_output(
-                        """sed -i 's/\\bssid=.*/ssid="{}"/' {}""".format(ssid, wpa_files), shell=True)
-
-                    # set bssid (if set by user) in wpa_supplicant files
-                    if 'bssid' in payload and payload['bssid']:
-                        bssid = payload['bssid']
-                        # remove comment for bssid line (if present)
-                        subprocess.check_output(
-                            """sudo sed -i '/bssid/s/# *//g' {}""".format(wpa_files), shell=True)
-                        subprocess.check_output(
-                            """sudo sed -i 's/bssid=.*/bssid={}/' {}""".format(bssid, wpa_files), shell=True)
-                    else:
-                        # add a comment for bssid line (if present)
-                        subprocess.check_output(
-                            """sudo sed -i 's/\(bssid=.*\)/# \\1/g' {}""".format(wpa_files), shell=True)
-
-                    # set credentials (if set by user) in wpa_supplicant files
-                    if 'password' in payload:
-                        psk = payload['password']
-                        subprocess.check_output(
-                            """sed -i 's/psk=.*/psk="{}"/' {}""".format(psk, wpa_files), shell=True)
-
-                    def restart_wireless():
-                        import subprocess
-                        import time
-                        time.sleep(2)
-                        subprocess.check_output('systemctl restart wpa_supplicant@wlan0.service', shell=True)
-
-                    # async restart wireless service
-                    thread = Thread(target=restart_wireless)
-                    current_app.logger.info("applying changes and restarting wireless interface")
-                    thread.start()
-
-                    return '', 204
-                    # TODO: redirect to a page with alert of success or failure of wireless service reset
-                except Exception:
-                    current_app.logger.error("ERROR: error occured in wireless setup:", sys.exc_info()[2])
-                    current_app.logger.error(traceback.format_exc())
-                    return 'Wireless Setup Failed!', 418
-            elif payload['interface'] == 'ap0':
-                try:
-                    hostapd_file = "/etc/hostapd/hostapd.conf"
-
-                    # set ssid in hostapd file
-                    ssid = payload['ssid']
-                    subprocess.check_output(
-                        """sed -i -e 's/ssid=.*/ssid={}/' {}""".format(ssid, hostapd_file), shell=True)
-
-                    # set credentials (if set by user) in hostapd file
-                    if 'password' in payload and payload['password']:
-                        psk = payload['password']
-                        subprocess.check_output(
-                            """sed -i -e 's/wpa_passphrase=.*/wpa_passphrase={}/' {}""".format(psk, hostapd_file), shell=True)
-
-                    def restart_ap0_interface():
-                        import subprocess
-                        import time
-                        time.sleep(2)
-                        subprocess.check_output('systemctl restart hostapd.service', shell=True)
-
-                    # async restart hostapd service
-                    thread = Thread(target=restart_ap0_interface)
-                    thread.start()
-
-                    return '', 204
-                except Exception:
-                    current_app.logger.error("ERROR: error occured in wireless setup:", sys.exc_info()[2])
-                    current_app.logger.error(traceback.format_exc())
-                    return 'Wireless Setup Failed!', 418
-            else:
-                current_app.logger.error("ERROR: invalid interface provided %s".format(payload['interface']))
-                return 'Invalid Interface Provided - Setup Failed!', 418
-        else:
-            current_app.logger.error("ERROR: unsupported payload received %s".format(payload))
-            return 'Invalid Setup Payload Received - Setup Failed!', 418
-    else:
-        return render_template_with_defaults('setup.html',
-            hostname=hostname(),
-            ap0=accesspoint_credentials(),
-            wireless_credentials=wireless_credentials(),
-            available_networks=available_networks())
-
-
-def hostname():
-    try:
-        subprocess.check_output("more /etc/hostname", shell=True)
-        return subprocess.check_output("hostname", shell=True).decode("utf-8").strip()
-    except:
-        current_app.logger.warn("WARN: current device doesn't support hostname changes")
-
-    return None
-
-
-def accesspoint_credentials():
-    # TODO: properly handle No such file or directory by hiding settings in /setup or showing error
-    try:
-        ssid = subprocess.check_output('more /etc/hostapd/hostapd.conf | grep -w ^ssid | awk -F "=" \'{print $2}\'', shell=True)
-        psk = subprocess.check_output('more /etc/hostapd/hostapd.conf | grep -w ^wpa_passphrase | awk -F "=" \'{print $2}\'', shell=True)
-        
-        return {
-            'ssid': ssid.decode("utf-8").strip().strip('"'),
-            'psk': psk.decode("utf-8").strip().strip('"'),
-        }
-    except:
-        current_app.logger.warn("WARN: failed to retrieve access point information from hostapd")
-        
-    return {}
-
-
-def wireless_credentials():
-    # TODO: properly handle No such file or directory by hiding settings in /setup or showing error
-
-    # grep -w matches an exact word:
-    #   example non match:
-    #       echo "bssid=test-value" | grep -w ssid => ""
-    #   example match:
-    #       echo "bssid=test-value" | grep -w bssid => "bssid=test-value"
-    cmd_template = "more /etc/wpa_supplicant/wpa_supplicant-wlan0.conf | grep -v '^\s*[#]' | grep -w {key} "
-
-    ssid = subprocess.check_output(cmd_template.format(key='ssid') + '| awk -F "=" \'{print $2}\'', shell=True)
-    psk = subprocess.check_output(cmd_template.format(key='psk') + '| awk -F "=" \'{print $2}\'', shell=True)
-
-    try:
-        # first remove any line that might be a comment (default)
-        # second filter to the line that contains the text 'bssid'
-        # return the value after the '=' in bssid=<value>
-        bssid = subprocess.check_output(cmd_template.format(key='bssid') + '| awk -F "=" \'{print $2}\'', shell=True)
-    except:
-        bssid = None
-
-    return { 
-        'ssid': ssid.decode("utf-8").strip().strip('"'),
-        'psk': psk.decode("utf-8").strip().strip('"'),
-        'bssid': bssid.decode("utf-8").strip().strip('"')
-    }
-
-
-@main.route('/about', methods=['GET'])
-def about():
-    # query local git short sha
-    gitSha = subprocess.check_output("cd {0}; git rev-parse --short HEAD".format(base_path()), shell=True)
-    gitSha = gitSha.decode("utf-8")
-
-    # query latest git remote sha
-    try:
-        latestMasterSha = subprocess.check_output("cd {0}; git fetch origin && git rev-parse --short origin/master".format(base_path()), shell=True)
-        latestMasterSha = latestMasterSha.decode("utf-8")
-    except:
-        latestMasterSha = "unavailable (check network)"
-
-    # query for local file changes
-    try:
-        localChanges = subprocess.check_output("cd {0}; git fetch origin; git --no-pager diff --name-only".format(base_path()), shell=True)
-        localChanges = localChanges.decode("utf-8").strip()
-    except:
-        localChanges = "unavailable (check network)"
-
-    # # capture raspbian pinout
-    # proc = subprocess.Popen(["pinout"], stdout=subprocess.PIPE, shell=True)
-    # (pinout, err) = proc.communicate()
-    try:
-        pinout = subprocess.check_output("pinout", shell=True)
-        pinout = pinout.decode("utf-8")
-    except:
-        pinout = None
-
-    image_release = os.environ.get("IMG_RELEASE", None)
-    image_variant = os.environ.get("IMG_VARIANT", None)
-    image_version = None if image_release == None else f"{image_release}_{image_variant}" 
-    
-    return render_template_with_defaults('about.html', git_version=gitSha, latest_git_sha=latestMasterSha, local_changes=localChanges,
-                           os_release=system_info(), raspberrypi_info=pinout, raspberrypi_image=image_version)
-
-
 def load_pico_recipes():
     files = list(pico_recipe_path().glob(file_glob_pattern))
     recipes = [load_pico_recipe(file) for file in files]
@@ -867,6 +607,8 @@ def load_pico_recipes():
 def load_pico_recipe(file):
     recipe = PicoBrewRecipe()
     parse_recipe(MachineType.PICOBREW, recipe, file)
+    
+    recipe.name_escaped = escape(recipe.name)
     return recipe
 
 
@@ -878,8 +620,9 @@ def get_pico_recipes():
 def parse_brew_session(file):
     try:
         return load_brew_session(file)
-    except:
-        current_app.logger.error("ERROR: An exception occurred parsing {}".format(file))
+    except Exception as e:
+        current_app.logger.error("An exception occurred parsing {}".format(file))
+        current_app.logger.error(e)
         add_invalid_session("brew", file)
 
 
@@ -1006,16 +749,3 @@ def increment_zseries_recipe_id():
         recipe_id += 1
 
     return recipe_id
-
-
-def active_session(uid):
-    if uid in active_brew_sessions:
-        return active_brew_sessions[uid]
-    elif uid in active_ferm_sessions:
-        return active_ferm_sessions[uid]
-    elif uid in active_iSpindel_sessions:
-        return active_iSpindel_sessions[uid]
-    elif uid in active_still_sessions:
-        return active_still_sessions[uid]
-    
-    return None

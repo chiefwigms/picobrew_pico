@@ -7,16 +7,11 @@ env
 # project specific ignores
 logs/
 config.yaml
-app/recipes/pico/*
-app/recipes/zymatic/*
-app/recipes/zseries/*
 
-app/sessions/brew/active/*
-app/sessions/brew/archive/*
-app/sessions/ferm/active/*
-app/sessions/ferm/archive/*
-app/sessions/iSpindel/active/*
-app/sessions/iSpindel/archive/*
+# ignore all machine_type recipe and session files
+app/recipes/*/*
+app/sessions/*/active/*
+app/sessions/*/archive/*
 
 scripts/docker/nginx/certs/*
 

@@ -405,11 +405,14 @@ def create_session(token, body):
     active_session.created_at = datetime.utcnow().isoformat()
     active_session.name = recipe.name if recipe else body['Name']
     active_session.type = body['SessionType']
+
+    # replace spaces and '#' with other character sequences
+    encoded_recipe = active_brew_sessions[uid].name.replace(' ', '_').replace("#", "%23")
     filename = '{0}#{1}#{2}#{3}#{4}.json'.format(
         datetime.now().strftime('%Y%m%d_%H%M%S'),
         uid,
         active_session.session,
-        active_session.name.replace(' ', '_'),
+        encoded_recipe,
         active_session.type)
     active_session.filepath = brew_active_sessions_path().joinpath(filename)
 

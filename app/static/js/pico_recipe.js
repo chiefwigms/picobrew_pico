@@ -268,6 +268,16 @@ function isRowMoved(row){
 }
 
 $(document).ready(function () {
+    $('.recipe_image_loader').on('change', function(element) {
+        load_new_image(element);
+        // if on recipe list view, extract recipeId embedded in element id
+        if (element.target.id.includes("recipe_image_loader_")) {
+            var recipe_id = element.target.id.replace("recipe_image_loader_", "")    
+            $("#bsave_" + recipe_id).show();
+        }
+    });
+
+
     $('#b_new_recipe').click(function () {
         var recipe = {}
         recipe.id = ''
@@ -276,7 +286,8 @@ $(document).ready(function () {
         recipe.ibu = document.getElementById('f_new_recipe').elements['ibu'].value;
         recipe.abv_tweak = -1
         recipe.ibu_tweak = -1
-        recipe.image = recipe_img
+        recipe.image = recipe_images[recipe.id]
+        recipe.notes = document.getElementById('f_new_recipe').elements['notes'].value;
         recipe.steps = table.getData();
         $.ajax({
             url: 'new_pico_recipe',
@@ -306,7 +317,12 @@ function update_recipe(recipe_id) {
     if (table) {
         var recipe = {};
         recipe.id = recipe_id
+        recipe.name = $('#recipe_name_' + recipe_id).val()
+        recipe.abv = $('#abv_' + recipe_id).val()
+        recipe.ibu = $('#ibu' + recipe_id).val()
+        recipe.notes = $('#notes_' + recipe_id).val()
         recipe.steps = table.getData();
+        recipe.image = recipe_images[recipe.id]
         $.ajax({
             url: 'update_pico_recipe',
             type: 'POST',
@@ -326,10 +342,15 @@ function update_recipe(recipe_id) {
     }
 };
 
+function edit_recipe(recipe_id) {
+    $('#view_' + recipe_id).toggleClass('d-none');
+    $('#form_' + recipe_id).toggleClass('d-none');
+};
+
 function download_recipe(recipe_id, recipe_name) {
     var table = Tabulator.prototype.findTable("#t_" + recipe_id)[0];
     if (table) {
-        window.location = '/recipes/picobrew/' + recipe_id + '/' + recipe_name + '.json';
+        window.location = '/recipes/picobrew/' + recipe_id + '/' + unescapeHtml(recipe_name) + '.json';
     }
 };
 
