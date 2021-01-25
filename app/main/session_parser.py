@@ -325,7 +325,6 @@ def restore_active_iSpindel_sessions():
             session.graph = iSpindel_session['graph']
 
             active_iSpindel_sessions[uid] = session
-            #active_iSpindel_sessions[iSpindel_session['uid']] = session
 
 def restore_active_sessions():
     # initialize active sessions during start up

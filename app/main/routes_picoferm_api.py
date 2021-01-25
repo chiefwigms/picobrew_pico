@@ -110,7 +110,7 @@ def process_log_ferm_dataset(args):
                  }
         session_data.append(point)
         time = time + time_delta
-        log_data += '\t{},\n'.format(json.dumps(point))
+        log_data += '\n\t{},'.format(json.dumps(point))
     active_ferm_sessions[uid].data.extend(session_data)
     active_ferm_sessions[uid].voltage = str(args['voltage']) + 'V'
     graph_update = json.dumps({'voltage': args['voltage'], 'data': session_data})
@@ -120,7 +120,7 @@ def process_log_ferm_dataset(args):
 
     # end fermentation at 14d counter or when user specifies fermentation is complete
     if ferm_days_elapsed > 14 or (active_ferm_sessions[uid].uninit == False and active_ferm_sessions[uid].active == False):
-        active_ferm_sessions[uid].file.write('{}\n\n]'.format(log_data[:-2]))
+        active_ferm_sessions[uid].file.write('{}\n\n]'.format(log_data[:-1]))
         active_ferm_sessions[uid].cleanup()
         # The server makes a determination when fermenting is done based on the datalog after it sends '2,4'
         return '#2,4#'
@@ -141,4 +141,4 @@ def create_new_session(uid):
     active_ferm_sessions[uid].start_time = datetime.now()  # Not now, but X samples * 60*RATE sec ago
     active_ferm_sessions[uid].filepath = ferm_active_sessions_path().joinpath('{0}#{1}.json'.format(active_ferm_sessions[uid].start_time.strftime('%Y%m%d_%H%M%S'), uid))
     active_ferm_sessions[uid].file = open(active_ferm_sessions[uid].filepath, 'w')
-    active_ferm_sessions[uid].file.write('[\n')
+    active_ferm_sessions[uid].file.write('[')
