@@ -30,8 +30,8 @@ def handle_devices():
     # register device alias and type
     if request.method == 'POST':
         mtype = MachineType(request.form['machine_type'])
-        uid = request.form['uid']
-        alias = request.form['alias']
+        uid = str(request.form['uid'])
+        alias = str(request.form['alias'])
 
         # verify uid not already configured
         if (uid in {**active_brew_sessions, **active_ferm_sessions, **active_iSpindel_sessions, **active_still_sessions} 
