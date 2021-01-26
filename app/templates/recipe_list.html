@@ -51,7 +51,7 @@
                     </button>
                     <form id="f_{{recipe['id']}}">
                         <div class="form-row">
-                          {% if recipe['supports_image'] %}
+                          {% if recipe['is_pico'] %}
                           <div class="form-inline">
                             <div class="form-group col-sm-2">
                               <canvas id="recipe_image_{{recipe['id']}}" width="128" height="64"></canvas>
