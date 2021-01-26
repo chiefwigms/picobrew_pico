@@ -120,6 +120,8 @@ def load_zymatic_recipes():
 def load_zymatic_recipe(file):
     recipe = ZymaticRecipe()
     parse_recipe(MachineType.ZYMATIC, recipe, file)
+
+    recipe.name_escaped = escape(recipe.name).replace(" ", "_")
     return recipe
 
 
@@ -193,8 +195,8 @@ def update_device_session(uid, session_type):
         return 'Invalid session type provided \"' + session_type + '\"', 418
 
 
-@main.route('/recipes/<machine_type>/<rid>/<name>.json', methods=['GET'])
-def download_recipe(machine_type, rid, name):
+@main.route('/recipes/<machine_type>/<id>/<name>.json', methods=['GET'])
+def download_recipe(machine_type, id, name):
     recipe_dirpath = ""
     if machine_type == "picobrew":
         recipe_dirpath = pico_recipe_path()
@@ -204,18 +206,27 @@ def download_recipe(machine_type, rid, name):
         recipe_dirpath = zseries_recipe_path()
     else:
         current_app.logger.error(f'invalid machine_type : {machine_type}')
-        return 'Invalid machine type provided \"' + machine_type + '\"', 418
+        return f'Invalid machine type provided "{machine_type}"', 418
 
     files = list(recipe_dirpath.glob(file_glob_pattern))
     
     for filename in files:
-        recipe = load_zseries_recipe(filename)
-        if str(recipe.id) == str(rid) and str(recipe.name) == name:
+        recipe = None
+        if machine_type == "picobrew":
+            recipe = load_pico_recipe(filename)
+        elif machine_type == "zymatic":
+            recipe = load_zymatic_recipe(filename)
+        elif machine_type == "zseries":
+            recipe = load_zseries_recipe(filename)
+
+        # just to be sure check recipe.id and recipe.name replacing spaces with underscores (expected file naming by server)
+        if recipe and str(recipe.id) == str(id) and str(recipe.name).replace(" ", "_") == name:
             response = make_response(send_file(filename))
             # custom content-type will force a download vs rendering with window.location
             response.headers['Content-Type'] = 'application/octet-stream'
             return response
-    return 'Download Recipe: Failed to find recipe id \"' + id + '\"', 418
+
+    return f'Download Recipe: Failed to find recipe id "{id}" with name "{name}"', 418
 
 
 @main.route('/sessions/<session_type>/<filename>', methods=['GET'])
@@ -228,7 +239,7 @@ def download_session(session_type, filename):
     elif session_type == "iSpindel":
         session_dirpath = iSpindel_archive_sessions_path()
     else:
-        return 'Invalid session type provided \"' + session_type + '\"', 418
+        return f'Invalid session type provided "{session_type}"', 418
 
     files = list(session_dirpath.glob(file_glob_pattern))
     filepath = session_dirpath.joinpath(filename)
@@ -239,7 +250,7 @@ def download_session(session_type, filename):
             # custom content-type will force a download vs rendering with window.location
             response.headers['Content-Type'] = 'application/octet-stream'
             return response
-    return 'Download Session: Failed to find session with filename \"' + filename + '\"', 418
+    return f'Download Session: Failed to find session with filename "{filename}"', 418
 
 
 @main.route('/delete_zseries_recipe', methods=['GET', 'POST'])
@@ -251,7 +262,7 @@ def delete_zseries_recipe():
         if str(recipe.id) == recipe_id:
             os.remove(filename)
             return '', 204
-    return 'Delete Recipe: Failed to find recipe id \"' + recipe_id + '\"', 418
+    return f'Delete Recipe: Failed to find recipe id "{recipe_id}"', 418
 
 
 @main.route('/import_zseries_recipe', methods=['GET', 'POST'])
@@ -279,6 +290,7 @@ def load_zseries_recipes():
 def load_zseries_recipe(file):
     recipe = ZSeriesRecipe()
     parse_recipe(MachineType.ZSERIES, recipe, file)
+    recipe.name_escaped = escape(recipe.name).replace(" ", "_")
     return recipe
 
 
@@ -398,7 +410,7 @@ def delete_pico_recipe():
         if recipe.id == recipe_id:
             os.remove(filename)
             return '', 204
-    return 'Delete Recipe: Failed to find recipe id \"' + recipe_id + '\"', 418
+    return 'Delete Recipe: Failed to find recipe id "{recipe_id}"', 418
 
 
 def load_pico_recipes():
@@ -411,7 +423,7 @@ def load_pico_recipe(file):
     recipe = PicoBrewRecipe()
     parse_recipe(MachineType.PICOBREW, recipe, file)
     
-    recipe.name_escaped = escape(recipe.name)
+    recipe.name_escaped = escape(recipe.name).replace(" ", "_")
     return recipe
 
 

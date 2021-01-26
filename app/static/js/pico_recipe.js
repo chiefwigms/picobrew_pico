@@ -319,7 +319,7 @@ function update_recipe(recipe_id) {
         recipe.id = recipe_id
         recipe.name = $('#recipe_name_' + recipe_id).val()
         recipe.abv = $('#abv_' + recipe_id).val()
-        recipe.ibu = $('#ibu' + recipe_id).val()
+        recipe.ibu = $('#ibu_' + recipe_id).val()
         recipe.notes = $('#notes_' + recipe_id).val()
         recipe.steps = table.getData();
         recipe.image = recipe_images[recipe.id]
