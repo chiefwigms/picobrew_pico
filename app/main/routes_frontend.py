@@ -182,7 +182,7 @@ def update_device_session(uid, session_type):
             if session.file != None:
                 session.file.seek(0, os.SEEK_END)
                 if session.file.tell() > 0:
-                    # mark for completion and archive session file              
+                    # mark for completion and archive session file
                     session.file.seek(session.file.tell() - 1, os.SEEK_SET)  # Remove trailing comma from last data set
                     session.file.write('\n]')
                     session.cleanup()
