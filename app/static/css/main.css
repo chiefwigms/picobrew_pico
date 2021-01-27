@@ -54,3 +54,7 @@ canvas {
 .form-group label, p{
   color: #fff;
 }
+p.mr-8 table {
+  margin-top: 0;
+  margin-bottom: 1rem;
+}
