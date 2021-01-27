@@ -1,3 +1,27 @@
+<script src='/static/js/showdown/showdown.min.js'></script>
+<script>
+  const classMap = {
+    table: 'table table-dark table-striped table-bordered'
+  }
+  const bindings = Object.keys(classMap)
+    .map(key => ({
+      type: 'output',
+      regex: new RegExp(`<${key}(.*)>`, 'g'),
+      replace: `<${key} class="${classMap[key]}" $1>`
+  }));
+  const options = {
+    'tables': true, 
+    'simpleLineBreaks': true,
+    'extensions': [...bindings]
+  };
+  const converter = new showdown.Converter(options);
+
+  function getMarkdown(text, outDiv) {
+    target = document.getElementById(outDiv);
+    html = converter.makeHtml(text);
+    target.innerHTML = html;
+  }
+</script>
 <div id="accordion">
     {% for recipe in recipes %}
     <div class="card bg-dark text-white-50">
@@ -40,7 +64,13 @@
                     <script>load_image('canvas_{{recipe['id']}}', '{{recipe['image']}}');</script>
                     {% endif %}
                     {% if recipe['notes'] %}
-                    <p class="mr-8" id="textarea_{{recipe['id']}}">{{recipe['notes']}}</p>
+                    <script>
+                      document.addEventListener('DOMContentLoaded', function() {
+                        var notes = `{{recipe['notes']}}`
+                        getMarkdown(notes, "textarea_{{recipe['id']}}");
+                      });
+                    </script>
+                    <p class="mr-8" id="textarea_{{recipe['id']}}"></p>
                     {% endif %}
                 </div>
                 <div id="form_{{recipe['id']}}" class="d-none">
