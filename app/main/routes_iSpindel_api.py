@@ -52,10 +52,10 @@ def process_iSpindel_data():
         graph_update = json.dumps({'voltage': data['battery'], 'data': session_data})
         socketio.emit('iSpindel_session_update|{}'.format(data['ID']), graph_update)
         
-        ferm_days_elapsed = (datetime.now().date() - active_iSpindel_sessions[uid].start_time.date()).days
         
-        if ferm_days_elapsed > 14 or (active_iSpindel_sessions[uid].uninit == False and active_iSpindel_sessions[uid].active == False):
-            active_iSpindel_sessions[uid].file.write('{}\n]\n'.format(log_data[:-1]))
+        # end fermentation only when user specifies fermentation is complete
+        if (active_iSpindel_sessions[uid].uninit == False and active_iSpindel_sessions[uid].active == False):
+            active_iSpindel_sessions[uid].file.write('{}\n\n]'.format(log_data[:-2]))
             active_iSpindel_sessions[uid].cleanup()
             return('', 200)
         else:

@@ -116,11 +116,10 @@ def process_log_ferm_dataset(args):
     graph_update = json.dumps({'voltage': args['voltage'], 'data': session_data})
     socketio.emit('ferm_session_update|{}'.format(args['uid']), graph_update)
 
-    ferm_days_elapsed = (datetime.now().date() - active_ferm_sessions[uid].start_time.date()).days
 
-    # end fermentation at 14d counter or when user specifies fermentation is complete
-    if ferm_days_elapsed > 14 or (active_ferm_sessions[uid].uninit == False and active_ferm_sessions[uid].active == False):
-        active_ferm_sessions[uid].file.write('{}\n\n]'.format(log_data[:-1]))
+    # end fermentation only when user specifies fermentation is complete
+    if active_ferm_sessions[uid].uninit == False and active_ferm_sessions[uid].active == False:
+        active_ferm_sessions[uid].file.write('{}\n\n]'.format(log_data[:-2]))
         active_ferm_sessions[uid].cleanup()
         # The server makes a determination when fermenting is done based on the datalog after it sends '2,4'
         return '#2,4#'
