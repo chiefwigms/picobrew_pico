@@ -110,11 +110,12 @@ def process_log_ferm_dataset(args):
                  }
         session_data.append(point)
         time = time + time_delta
-        log_data += '\t{},\n'.format(json.dumps(point))
+        log_data += '\n\t{},'.format(json.dumps(point))
     active_ferm_sessions[uid].data.extend(session_data)
     active_ferm_sessions[uid].voltage = str(args['voltage']) + 'V'
     graph_update = json.dumps({'voltage': args['voltage'], 'data': session_data})
     socketio.emit('ferm_session_update|{}'.format(args['uid']), graph_update)
+
 
     # end fermentation only when user specifies fermentation is complete
     if active_ferm_sessions[uid].uninit == False and active_ferm_sessions[uid].active == False:
@@ -139,4 +140,4 @@ def create_new_session(uid):
     active_ferm_sessions[uid].start_time = datetime.now()  # Not now, but X samples * 60*RATE sec ago
     active_ferm_sessions[uid].filepath = ferm_active_sessions_path().joinpath('{0}#{1}.json'.format(active_ferm_sessions[uid].start_time.strftime('%Y%m%d_%H%M%S'), uid))
     active_ferm_sessions[uid].file = open(active_ferm_sessions[uid].filepath, 'w')
-    active_ferm_sessions[uid].file.write('[\n')
+    active_ferm_sessions[uid].file.write('[')
