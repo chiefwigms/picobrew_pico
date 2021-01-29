@@ -179,6 +179,7 @@ def update_device_session(uid, session_type):
     else:
         valid_session = False
 
+    if valid_session:
         if update['active'] == False:
             session.active = False
             if session.file != None:
