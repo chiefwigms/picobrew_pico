@@ -172,11 +172,15 @@ def update_zseries_recipe():
 @main.route('/device/<uid>/sessions/<session_type>', methods=['PUT'])
 def update_device_session(uid, session_type):
     update = request.get_json()
+    valid_session = True
     if session_type == 'ferm':
         session = active_ferm_sessions[uid]
     elif session_type == 'iSpindel':
         session = active_iSpindel_sessions[uid]
+    else:
+        valid_session = False
 
+    if valid_session:
         if update['active'] == False:
             session.active = False
             if session.file != None:
