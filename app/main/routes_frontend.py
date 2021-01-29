@@ -176,6 +176,8 @@ def update_device_session(uid, session_type):
         session = active_ferm_sessions[uid]
     elif session_type == 'iSpindel':
         session = active_iSpindel_sessions[uid]
+    else:
+        valid_session = False
 
         if update['active'] == False:
             session.active = False
