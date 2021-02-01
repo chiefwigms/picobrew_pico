@@ -181,7 +181,7 @@ def process_zstate(args):
     
     returnVal = {
         "Alias": zseries_alias(uid),
-        "BoilerType": json['BoilerType'],       # TODO sometimes machine loses boilertype, need to resync with known state
+        "BoilerType": json.get('BoilerType', None),       # TODO sometimes machine loses boilertype, need to resync with known state
         "IsRegistered": True,                   # likely we don't care about registration with BYOS
         "IsUpdated": False if update_required else True,
         "ProgramUri": None,                     # what is this?
