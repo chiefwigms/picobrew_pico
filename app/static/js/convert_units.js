@@ -1,9 +1,12 @@
 // utility function to convert temperature units
 function convert_temperature(temp, units) {
+    let converted_temp;
     if (units.toLowerCase() == 'imperial') {
-        return (temp * 9 / 5) + 32  // convert celcius to fahrenheit
+        converted_temp = (temp * 9 / 5) + 32;  // convert celcius to fahrenheit
+    } else {
+        converted_temp = (temp - 32) * 5 / 9;  // convert fahrenheit to celcius
     }
-    return (temp - 32) * 5 / 9  // convert fahrenheit to celcius
+    return Number((converted_temp).toFixed(2));
 }
 
 function temperature_editor(cell, onRendered, success, cancel, editorParams) {
