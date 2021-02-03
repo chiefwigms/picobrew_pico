@@ -75,7 +75,6 @@ def process_get_ferm_state(args):
     if uid not in active_ferm_sessions:
         active_ferm_sessions[uid] = PicoFermSession()
     
-    # TODO - Define logic on state - for now request information from PicoFerm
     session = active_ferm_sessions[uid]
 
     if session.active == True:
@@ -96,11 +95,14 @@ log_ferm_dataset_args = {
 @use_args(log_ferm_dataset_args, location='querystring')
 def process_log_ferm_dataset(args):
     uid = args['uid']
+
     if uid not in active_ferm_sessions or active_ferm_sessions[uid].uninit:
         create_new_session(uid)
+
     data = json.loads(args['data'])
     time_delta = args['rate'] * 60 * 1000
     time = ((datetime.utcnow() - datetime(1970, 1, 1)).total_seconds() * 1000) - (time_delta * (len(data) - 1))
+
     session_data = []
     log_data = ''
     for d in data:
@@ -111,6 +113,7 @@ def process_log_ferm_dataset(args):
         session_data.append(point)
         time = time + time_delta
         log_data += '\n\t{},'.format(json.dumps(point))
+
     active_ferm_sessions[uid].data.extend(session_data)
     active_ferm_sessions[uid].voltage = str(args['voltage']) + 'V'
     graph_update = json.dumps({'voltage': args['voltage'], 'data': session_data})
@@ -137,7 +140,7 @@ def create_new_session(uid):
     if uid not in active_ferm_sessions:
         active_ferm_sessions[uid] = PicoFermSession()
     active_ferm_sessions[uid].uninit = False
-    active_ferm_sessions[uid].start_time = datetime.now()  # Not now, but X samples * 60*RATE sec ago
+    active_ferm_sessions[uid].start_time = datetime.now()  # Not now, but X interval seconds ago
     active_ferm_sessions[uid].filepath = ferm_active_sessions_path().joinpath('{0}#{1}.json'.format(active_ferm_sessions[uid].start_time.strftime('%Y%m%d_%H%M%S'), uid))
     active_ferm_sessions[uid].file = open(active_ferm_sessions[uid].filepath, 'w')
     active_ferm_sessions[uid].file.write('[')

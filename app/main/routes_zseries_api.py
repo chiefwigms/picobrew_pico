@@ -15,6 +15,7 @@ from .firmware import firmware_filename, firmware_upgrade_required, minimum_firm
 from .model import PicoBrewSession
 from .routes_frontend import get_zseries_recipes, load_brew_sessions
 from .session_parser import active_brew_sessions
+from .units import convert_temp
 
 
 arg_parser = FlaskParser()
@@ -46,12 +47,6 @@ class ZProgramId(int, Enum):
     BEER_OR_COFFEE = 24
     STILL = 26
     CHILL = 27
-
-
-def convertTemp(temp: float, units: str):
-    if units.upper() == 'F':
-        return (temp * 9/5) + 32  # convert celcius to fahrenheit
-    return (temp - 32) * 5/9  # convert fahrenheit to celcius
 
 
 # Get Firmware: /firmware/zseries/<version>
@@ -492,11 +487,11 @@ def update_session_log(token, body):
         'timeLeft': body['SecondsRemaining'],
         'step': body['StepName'],
         # temperatures from Z are in celsius vs prior device series
-        'target': convertTemp(body['TargetTemp'], 'F'),
-        'ambient': convertTemp(body['AmbientTemp'], 'F'),
-        'drain': convertTemp(body['DrainTemp'], 'F'),
-        'wort': convertTemp(body['WortTemp'], 'F'),
-        'therm': convertTemp(body['ThermoBlockTemp'], 'F'),
+        'target': convert_temp(body['TargetTemp'], 'F'),
+        'ambient': convert_temp(body['AmbientTemp'], 'F'),
+        'drain': convert_temp(body['DrainTemp'], 'F'),
+        'wort': convert_temp(body['WortTemp'], 'F'),
+        'therm': convert_temp(body['ThermoBlockTemp'], 'F'),
         'recovery': body['StepName'],
         'position': body['ValvePosition']
     }
