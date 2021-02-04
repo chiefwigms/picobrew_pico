@@ -74,8 +74,12 @@ function convert_units(units) {
 
     let temp_units = units == "metric" ? "C" : "F";
 
-    let temp_header_ref = ".tabulator-col[tabulator-field='temperature'] > div.tabulator-col-content > div.tabulator-col-title";
-    $(temp_header_ref).text("Temp (°" + temp_units + ")");
+    let temp_header_ref = ".tabulator-col[tabulator-field='temperature']"
+    let temp_col_title = ".tabulator-col-title";
+    let column_header_text = "Temp (°" + temp_units + ")"
+    $(temp_header_ref).find(temp_col_title).each(function() {
+        $(this).text(column_header_text)
+    });
 
     let temp_cells_ref = ".tabulator-cell[tabulator-field='temperature']";
     $(temp_cells_ref).each(function (index, elem) {
