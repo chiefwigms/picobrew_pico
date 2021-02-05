@@ -30,11 +30,11 @@
             <div class="row">
               <div class="col-sm">
                 <div class="text-white-50">Machine</div>
-                <div>{% if session.alias is defined and session.alias|length %}{{session.alias}}{% else %}{{session.uid}}{% endif %}</div>
+                <div>{% if session.alias is defined and session.alias|length %}{{session.alias}} ({{session.uid}}){% else %}{{session.uid}}{% endif %}</div>
               </div>
               <div class="col-sm">
                 <div class="text-white-50">Date Started</div>
-                <div>{{session.date.strftime('%A, %b %e %Y %k:%M:%S')}}</div>
+                <div>{{session.date.strftime('%A, %b %e %Y %H:%M:%S')}}</div>
               </div>
               <div class="col-sm">
                 <div class="text-white-50">Date Completed</div>

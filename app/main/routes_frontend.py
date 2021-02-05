@@ -5,7 +5,7 @@ import requests
 import socket
 import uuid
 from ruamel.yaml import YAML
-from flask import current_app, flash, make_response, redirect, request, send_file, escape
+from flask import current_app, make_response, request, send_file, escape
 from pathlib import Path
 from os import path
 from werkzeug.utils import secure_filename
