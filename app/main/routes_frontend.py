@@ -5,9 +5,11 @@ import requests
 import socket
 import uuid
 from ruamel.yaml import YAML
-from flask import current_app, make_response, request, send_file, escape
+from flask import current_app, flash, make_response, redirect, request, send_file, escape
 from pathlib import Path
 from os import path
+from werkzeug.utils import secure_filename
+
 
 from . import main
 from .config import MachineType, base_path, server_config
@@ -202,20 +204,57 @@ def update_device_session(uid, session_type):
         return 'Invalid session type provided \"' + session_type + '\"', 418
 
 
+ALLOWED_EXTENSIONS = {'json'}
+
+
+def allowed_extension(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+
+def recipe_dirpath(machine_type):
+    dirpath = None
+    if machine_type == "picobrew" or machine_type == "pico":
+        dirpath = pico_recipe_path()
+    elif machine_type == "zymatic":
+        dirpath = zymatic_recipe_path()
+    elif machine_type == "zseries":
+        dirpath = zseries_recipe_path()
+    return dirpath
+
+
+@main.route('/recipes/<machine_type>', methods=['POST'])
+def upload_file(machine_type):
+    # check if the post request has the file part
+    if 'recipe' not in request.files:
+        current_app.logger.error(f'invalid input : no file part')
+        return 'No file part', 400
+    file = request.files['recipe']
+    # if user does not select file, browser also
+    # submit an empty part without filename
+    if file.filename == '':
+        current_app.logger.error(f'invalid input : no selected file')
+        return 'no selected file', 400
+    if file and allowed_extension(file.filename):
+        filename = secure_filename(file.filename).replace(' ', '_')
+        dirpath = recipe_dirpath(machine_type)
+        if dirpath == None:
+            current_app.logger.error(f'invalid input : unsupported machine_type {machine_type}')
+            return 'unsupported machine_type', 400
+        file.save(os.path.join(dirpath, filename))
+        return f'upload of {file.filename} successful', 204
+    else:
+        return f'unsupported file : {file.filename}', 400
+
+
 @main.route('/recipes/<machine_type>/<id>/<name>.json', methods=['GET'])
 def download_recipe(machine_type, id, name):
-    recipe_dirpath = ""
-    if machine_type == "picobrew":
-        recipe_dirpath = pico_recipe_path()
-    elif machine_type == "zymatic":
-        recipe_dirpath = zymatic_recipe_path()
-    elif machine_type == "zseries":
-        recipe_dirpath = zseries_recipe_path()
-    else:
+    dirpath = recipe_dirpath(machine_type)
+    if dirpath == None:
         current_app.logger.error(f'invalid machine_type : {machine_type}')
         return f'Invalid machine type provided "{machine_type}"', 418
 
-    files = list(recipe_dirpath.glob(file_glob_pattern))
+    files = list(dirpath.glob(file_glob_pattern))
     
     for filename in files:
         recipe = None

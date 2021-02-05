@@ -238,6 +238,10 @@ $(document).ready(function () {
             },
         });
     });
+
+    $('#upload_recipe_file').on('change', function () {
+        upload_recipe_file('zymatic', $(this).prop('files')[0], 'zymatic_recipes');
+    });
 });
 
 function update_recipe(recipe_id) {

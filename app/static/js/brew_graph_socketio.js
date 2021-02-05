@@ -47,6 +47,10 @@ Highcharts.chart(graph_data.chart_id, {
 
   subtitle: graph_data.subtitle,
 
+  tooltip: {
+    shared: true
+  },
+
   xAxis: {
     type: 'datetime',
     title: {

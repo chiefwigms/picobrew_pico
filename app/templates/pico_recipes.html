@@ -6,6 +6,9 @@
 <script src="/static/js/pico_recipe.js"></script>
 <script>var tables = {};</script>
 {% include "units_selector.html" %}
+{% with machine_type='pico' %}
+    {% include "recipe_actions.html" %}
+{% endwith %}
 {% include "invalid_file.html" %}
 <br /><br /><br />
 {% include "recipe_list.html" %}
