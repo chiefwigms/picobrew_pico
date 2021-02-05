@@ -50,6 +50,8 @@ class ZymaticRecipe():
                 step.temperature = 70 if 'temperature' not in recipe_step else int(recipe_step['temperature'])
                 step.step_time = 0 if 'step_time' not in recipe_step else int(recipe_step['step_time'])
                 step.location = recipe_step.get('location', 'PassThru') or 'PassThru'
+                if step.location not in ZYMATIC_LOCATION:
+                    raise ValueError(f'step.location provided {step.location} is not supported by Zymatic machine type')
                 step.drain_time = 0 if 'drain_time' not in recipe_step else int(recipe_step['drain_time'])
                 self.steps.append(step)
 
@@ -77,6 +79,8 @@ class ZymaticRecipe():
             step.temperature = 70 if 'temperature' not in s else int(s['temperature'])
             step.step_time = 0 if 'step_time' not in s else int(s['step_time'])
             step.location = s.get('location', 'PassThru') or 'PassThru'
+            if step.location not in ZYMATIC_LOCATION:
+                raise ValueError(f'step.location provided {step.location} is not supported by Zymatic machine type')
             step.drain_time = 0 if 'drain_time' not in s else int(s['drain_time'])
             self.steps.append(step)
         updated_recipe = json.loads(json.dumps(self, default=lambda r: r.__dict__))
@@ -161,6 +165,8 @@ class ZSeriesRecipe():
                 step.location = recipe_step.get('location', 'PassThru') or 'PassThru'
                 if step.location == 'PassThrough':
                     step.location = 'PassThru'
+                if step.location not in ZSERIES_LOCATION:
+                    raise ValueError(f'step.location provided {step.location} is not supported by ZSeries machine type')
                 step.drain_time = 0 if 'drain_time' not in recipe_step else int(recipe_step['drain_time'])
                 self.steps.append(step)
 
@@ -192,6 +198,8 @@ class ZSeriesRecipe():
             step.location = s.get('location', 'PassThru') or 'PassThru'
             if step.location == 'PassThrough':
                 step.location = 'PassThru'
+            if step.location not in ZSERIES_LOCATION:
+                raise ValueError(f'step.location provided {step.location} is not supported by ZSeries machine type')
             step.drain_time = 0 if 'drain_time' not in s else int(s['drain_time'])
             self.steps.append(step)
         updated_recipe = json.loads(json.dumps(self, default=lambda r: r.__dict__))
@@ -293,6 +301,8 @@ class PicoBrewRecipe():
                 step = PicoBrewRecipeStep()
                 step.name = recipe_step.get('name', 'Empty Step') or 'Empty Step'
                 step.location = recipe_step.get('location', 'PassThru') or 'PassThru'
+                if step.location not in PICO_LOCATION:
+                    raise ValueError(f'step.location provided {step.location} is not supported by Pico machine type')
                 step.temperature = 70 if 'temperature' not in recipe_step else int(recipe_step['temperature'])
                 step.step_time = 0 if 'step_time' not in recipe_step else int(recipe_step['step_time'])
                 step.drain_time = 0 if 'drain_time' not in recipe_step else int(recipe_step['drain_time'])
@@ -327,6 +337,8 @@ class PicoBrewRecipe():
             step = PicoBrewRecipeStep()
             step.name = s.get('name', 'Empty Step') or 'Empty Step'
             step.location = s.get('location', 'PassThru') or 'PassThru'
+            if step.location not in PICO_LOCATION:
+                raise ValueError(f'step.location provided {step.location} is not supported by Pico machine type')
             step.temperature = 70 if 'temperature' not in s else int(s['temperature'])
             step.step_time = 0 if 'step_time' not in s else int(s['step_time'])
             step.drain_time = 0 if 'drain_time' not in s else int(s['drain_time'])

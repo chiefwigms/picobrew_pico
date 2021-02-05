@@ -243,6 +243,10 @@ $(document).ready(function () {
             },
         });
     });
+
+    $('#upload_recipe_file').on('change', function () {
+        upload_recipe_file('zseries', $(this).prop('files')[0], 'zseries_recipes');
+    });
 });
 
 function update_recipe(recipe_id) {

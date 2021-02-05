@@ -5,6 +5,9 @@
 <script src="/static/js/zseries_recipe.js"></script>
 <script>var tables = {};</script>
 {% include "units_selector.html" %}
+{% with machine_type='zseries' %}
+    {% include "recipe_actions.html" %}
+{% endwith %}
 {% include "invalid_file.html" %}
 <br /><br /><br />
 {% include "recipe_list.html" %}
