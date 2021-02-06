@@ -516,9 +516,10 @@ def load_active_brew_sessions():
 def load_brew_sessions(uid=None):
     files = []
     if uid:
-        files = list(brew_archive_sessions_path().glob("[^_.]*#{}*.json".format(uid)))
+        files = list(brew_archive_sessions_path().glob("*#{}*.json".format(uid)))
     else:
         files = list(brew_archive_sessions_path().glob(file_glob_pattern))
+
     brew_sessions = [parse_brew_session(file) for file in sorted(files, reverse=True)]
     return list(filter(lambda x: x != None, brew_sessions))
 
