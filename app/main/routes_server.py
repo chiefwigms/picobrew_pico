@@ -37,7 +37,7 @@ def restart_server():
 def restart_system():
     if platform() != "RaspberryPi":
         return '', 404
-    
+
     os.system('shutdown -r now')
     # TODO: redirect to a page with alert of restart
     return redirect('/')
@@ -47,7 +47,7 @@ def restart_system():
 def shutdown_system():
     if platform() != "RaspberryPi":
         return '', 404
-    
+
     os.system('shutdown -h now')
     # TODO: redirect to a page with alert of shutdown
     return redirect('/')
@@ -57,9 +57,9 @@ def shutdown_system():
 def view_logs():
     if platform() != "RaspberryPi":
         return '', 404
-    
+
     return render_template_with_defaults('logs.html')
-    
+
 
 @main.route('/logs/<log_type>.log')
 def download_logs(log_type):
@@ -113,22 +113,21 @@ def setup():
     if request.method == 'POST':
         if platform() != "RaspberryPi":
             return '', 404
-    
+
         payload = request.get_json()
 
         if 'hostname' in payload:
             # change the device hostname and reboot
+            old_hostname = hostname()
             new_hostname = payload['hostname']
 
-            # check if hostname is only a-z0-9\-
-            if not re.match("^[a-zA-Z0-9-]+$", new_hostname):
+            # check if hostname is only a-z0-9\-\_
+            if not re.match("^[a-zA-Z0-9\-_]+$", new_hostname):
                 current_app.logger.error("ERROR: invalid hostname provided: {}".format(new_hostname))
-                return 'Invalid Hostname (only supports a-z 0-9 and - as characters)!', 400
+                return 'Invalid Hostname (only supports a-z, 0-9, - and _ as characters)!', 400
 
-            subprocess.check_output(
-                """echo '{}' > /etc/hostname""".format(new_hostname), shell=True)
-            subprocess.check_output(
-                """sed -i -e 's/{}/{}/' /etc/hosts""".format(hostname(), new_hostname), shell=True)
+            # allow systemd to update hostname
+            subprocess.check_output(f"hostnamectl set-hostname --static {new_hostname}", shell=True)
 
             # restart for new host settings to take effect
             os.system('shutdown -r now')
@@ -240,7 +239,7 @@ def setup():
 
 def hostname():
     try:
-        return subprocess.check_output("more /etc/hostname || hostname", shell=True).decode("utf-8").strip()
+        return subprocess.check_output("hostname", shell=True).decode("utf-8").strip()
     except:
         current_app.logger.warn("current device doesn't support hostname changes")
     return None
