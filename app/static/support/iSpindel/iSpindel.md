@@ -15,7 +15,7 @@
   * Once connected to the iSpindel's AP, open a web browser on your device and navigate to "http://192.168.4.1"
   * You should see a page similar to the following:
 
-  ![iSpindel Config Screen](/static/support/iSpindel/iSpindel_Info_Page.png)
+  ![iSpindel Config Screen](/static/support/iSpindel/iSpindel_Info_Page.png =480x*)
     
     * Click on the **Information** tab highlighted in red
     * You should see a page similar to the following:
@@ -63,15 +63,11 @@ Perform the following steps:
 
 ## Additional References
 
-The iSpindel is an Open Source project. The repository may be found at https://github.com/universam1/iSpindel
+The iSpindel is an Open Source project. The repository may be found at <https://github.com/universam1/iSpindel>
 
-The "Easy Method" for calibrating your iSpindel is demonstrated in this video.
+To determine your calibration polynomial, you can use this online tool: <http://www.ispindel.de/tools/calibration/calibration.htm>
 
-[![iSpindel Calibration Video](http://img.youtube.com/vi/FAQrcyxFG9c/0.jpg)](https://youtu.be/FAQrcyxFG9c)
-
-To determine your calibration polynomial, you can use this online tool: http://www.ispindel.de/tools/calibration/calibration.htm
-
-A good general reference with lots of instructional videos for iSpindel can be found here: https://www.OpenSourceDistilling.com/iSpindel
+A good general reference with lots of instructional videos for iSpindel can be found here: <https://www.OpenSourceDistilling.com/iSpindel>
 
 
 That's it! Have fun monitoring your fermentation and go make some great beer!

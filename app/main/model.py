@@ -56,7 +56,7 @@ class PicoBrewSession:
         self.id = -1        # session id (integer)
         self.recovery = ''
         self.remaining_time = None
-        self.is_pico = True
+        self.is_pico = True if machineType in [MachineType.PICOBREW, MachineType.PICOBREW_C] else False
         self.data = []
 
     def cleanup(self):

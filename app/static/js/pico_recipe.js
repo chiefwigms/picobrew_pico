@@ -301,15 +301,15 @@ $(document).ready(function () {
                 setTimeout(function () { window.location.href = "pico_recipes"; }, 2000);
             },
             error: function (request, status, error) {
-                showAlert("Error: " + request.responseText, "danger");
+                showAlert(`Error: ${request.responseText}`, "danger");
                 //setTimeout(function () { window.location.href = "pico_recipes";}, 2000);
             },
         });
     });
-    function showAlert(msg, type) {
-        $('#alert').html("<div class='w-75 alert text-center alert-" + type + "'>" + msg + "</div>");
-        $('#alert').show();
-    }
+
+    $('#upload_recipe_file').on('change', function () {
+        upload_recipe_file('picobrew', $(this).prop('files')[0], 'pico_recipes');
+    });
 });
 
 function update_recipe(recipe_id) {
@@ -350,13 +350,13 @@ function edit_recipe(recipe_id) {
 function download_recipe(recipe_id, recipe_name) {
     var table = Tabulator.prototype.findTable("#t_" + recipe_id)[0];
     if (table) {
-        window.location = '/recipes/picobrew/' + recipe_id + '/' + unescapeHtml(recipe_name) + '.json';
+        window.location = `/recipes/picobrew/${recipe_id}/${unescapeHtml(recipe_name)}.json`;
     }
 };
 
 function clone_recipe(recipe) {
     recipe.id = ''
-    recipe.name = recipe.name + " (copy " + Math.floor((Math.random() * 100) + 1) + ")";
+    recipe.name = `${recipe.name} (copy ${Math.floor((Math.random() * 100) + 1)})`;
     $.ajax({
         url: 'new_pico_recipe',
         type: 'POST',
@@ -369,7 +369,7 @@ function clone_recipe(recipe) {
             setTimeout(function () { window.location.href = "pico_recipes"; }, 2000);
         },
         error: function (request, status, error) {
-            showAlert("Error: " + request.responseText, "danger")
+            showAlert(`Error: ${request.responseText}`, "danger")
             //setTimeout(function () { window.location.href = "pico_recipes";}, 2000);
         },
     });
@@ -389,7 +389,7 @@ function delete_recipe(recipe_id) {
                 setTimeout(function () { window.location.href = "pico_recipes"; }, 2000);
             },
             error: function (request, status, error) {
-                //showAlert("Error: " + request.responseText, "danger");
+                //showAlert(`Error: ${request.responseText}`, "danger");
                 //setTimeout(function () { window.location.href = "pico_recipes";}, 2000);
             },
         });

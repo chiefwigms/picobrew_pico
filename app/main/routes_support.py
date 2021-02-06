@@ -59,9 +59,8 @@ def support_iSpindel():
     iSpindel_support = SupportObject()
     iSpindel_support.name = 'iSpindel'
     iSpindel_support.faq_path = '/static/support/iSpindel/iSpindel.md'
-    iSpindel_support.instructional_videos_path = '/static/support/iSpindel/iSpindel.md'
+    iSpindel_support.instructional_videos_path = '/static/support/iSpindel/Instructional-Videos.md'
     iSpindel_support.misc_media = {
-        'iSpindel Setup' : '/static/support/iSpindel/iSpindel_Info_Page.png'
     }
     return render_template('support.html', support_object=iSpindel_support)
 

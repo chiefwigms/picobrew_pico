@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% block content %}
   <script src="/static/js/setup.js"></script>
+  {% if available_networks %}
   <form id="f_wireless_setup">
     <div class="text-white">
       <h4>Setup Wireless Interface</h4>
@@ -40,6 +41,7 @@
       </div>
     </div>
   </form>
+  {% endif %}
 
   {% if ap0 %}
   <br/>
@@ -78,24 +80,31 @@
   <br/>
   <form id="f_hostname_setup">
     <div class="text-white">
-      <h4>Setup Hostname</h4>
-      <p>If you want to have a custom hostname for your server you can customize this below. This is useful if you have multiple raspberrypi devices and/or want to have a more memoriable or meaningful hostname for your configuration.</p>
+      <h4>{% if platform == "RaspberryPi" %} Setup {% endif %}Hostname</h4>
+      {% if platform == "RaspberryPi" %}
+        <p>If you want to have a custom hostname for your server you can customize this below. This is useful if you have multiple raspberrypi devices and/or want to have a more memoriable or meaningful hostname for your configuration.</p>
+      {% endif %}
     </div>
     <div class="form-row">
       <div class="form-group col-sm-5">
-        <input type="text" class="form-control form-control-sm" id="hostname" value="{{hostname}}" placeholder="Hostname">
+        <input type="text" class="form-control form-control-sm" id="hostname" value="{{hostname}}" placeholder="Hostname" {% if platform != "RaspberryPi" %}disabled{% endif %}>
         <small id="hostname_HelpBlock" class="form-text text-muted">
           Name of device on the network
         </small>
         <br/>
+        {% if platform == "RaspberryPi" %}
         <button class="w-75 btn btn-sm btn-secondary btn-block" type="button" id="b_save_hostname_setup">Save</button>
         <small id="b_save_hostname_setup_HelpBlock" class="form-text text-warning">
           Changing hostname will restart the RaspberryPi and will be unavailable for a small period of time.
         </small>
-        
+        {% endif %}
       </div>
     </div>
   </form>
+  {% endif %}
+
+  {% if hostname == None and ap0 == None and available_networks == None %}
+  <p>Setup isn't supported on this installation type at this time.</p>
   {% endif %}
   
   <br/>

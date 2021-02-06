@@ -9,37 +9,44 @@ from .. import socketio
 from .config import iSpindel_active_sessions_path
 from .model import iSpindelSession
 from .session_parser import active_iSpindel_sessions
+from .units import convert_temp
+
 
 arg_parser = FlaskParser()
 
 iSpindel_dataset_args = {
-    'name': fields.Str(required=True),           #device name
-    'ID' : fields.Int(required=True),            #random device ID
-    'angle' : fields.Float(required=True),       #device floatation angle
-    'temperature' : fields.Float(required=True), #device temperature
-    'temp_units' : fields.Str(required=True),    #temperature units in C or F
-    'battery' : fields.Float(required=True),     #device battery voltage
-    'gravity' : fields.Float(required=True),     #calculated specific gravity
-    'interval' : fields.Int(required=True),      #sampling interval in seconds
-    'RSSI' : fields.Int(required=True)           #RSSI of WiFi signal
+    'name': fields.Str(required=False),           #device name
+    'ID' : fields.Int(required=True),             #random device ID
+    'angle' : fields.Float(required=False),       #device floatation angle
+    'temperature' : fields.Float(required=True),  #device temperature
+    'temp_units' : fields.Str(required=True),     #temperature units in C or F
+    'battery' : fields.Float(required=True),      #device battery voltage
+    'gravity' : fields.Float(required=True),      #calculated specific gravity
+    'interval' : fields.Int(required=False),      #sampling interval in seconds
+    'RSSI' : fields.Int(required=False)           #RSSI of WiFi signal
 }
 
-# Process iSpindel Data: /API/iSpindel
+# Process iSpindel Data: /API/iSpindel or /API/iSpindle
+@main.route('/API/iSpindle', methods=['POST'])
 @main.route('/API/iSpindel', methods=['POST'])
-def process_iSpindel_data():
-    data = request.get_json()
+@use_args(iSpindel_dataset_args)
+def process_iSpindel_data(data):
     uid = str(data['ID'])
     
-    if (uid not in active_iSpindel_sessions or active_iSpindel_sessions[uid].uninit) and active_iSpindel_sessions[uid].active:
-        create_new_session(uid)
+    if uid not in active_iSpindel_sessions:
+        active_iSpindel_sessions[uid] = iSpindelSession()
 
     if active_iSpindel_sessions[uid].active:
+        # initialize session and session files
+        if active_iSpindel_sessions[uid].uninit:
+            create_new_session(uid)
+
         time = ((datetime.utcnow() - datetime(1970, 1, 1)).total_seconds() * 1000)
         session_data = []
         log_data = ''
         point = {
             'time': time,
-            'temp': data['temperature'],
+            'temp': data['temperature'] if data['temp_units'] == 'F' else convert_temp(data['temperature'], 'F'),
             'gravity': data['gravity'],
         }
 
@@ -65,7 +72,7 @@ def process_iSpindel_data():
             return('', 200)
     else:
         return('', 200)
-    
+
 # -------- Utility --------
 def create_new_session(uid):
     if uid not in active_iSpindel_sessions:
