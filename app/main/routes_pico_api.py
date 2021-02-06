@@ -247,7 +247,7 @@ def get_recipe_name_by_id(recipe_id):
 def get_recipe_list():
     recipe_list = ''
     for r in get_pico_recipes():
-        recipe_list += r.id + ',' + r.name + '|'
+        recipe_list += f'{r.id},{r.name}|'
     return recipe_list
 
 
