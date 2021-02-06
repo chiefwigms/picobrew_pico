@@ -5,7 +5,7 @@
   * Turn iSpindel on
   * Put the iSpindel into Access Point (AP) mode by pressing the RESET button on the Wemos D1 rapidly three times
       * The STATUS LED on the Wemos D1 should blink briefly approximately once per second
-  * Join your computer/tablet/phone to the iSpindel AP
+  * Connect your computer/tablet/phone to the iSpindel AP
       * iSpindel AP will broadcast its SSID as "iSpindel"
       * No password is required      
 
@@ -13,22 +13,27 @@
 
 ### Step 1: Determine the iSpindel's Unique Device ID
   * Once connected to the iSpindel's AP, open a web browser on your device and navigate to "http://192.168.4.1"
-    * You should see a page similar to the following:
-    ![alt text](iSpindel_Info_Page.png)
+  * You should see a page similar to the following:
 
+  ![iSpindel Config Screen](/static/support/iSpindel/iSpindel_Info_Page.png)
+    
     * Click on the **Information** tab highlighted in red
-    * You should see a page similar to the following
-    ![alt text](iSpindel_ID.png)
+    * You should see a page similar to the following:
+    
+  ![iSpindel UID](/static/support/iSpindel/iSpindel_ID.png)
+
     * Note the Chip ID, outlined in red. This value will be used to setup an alias in the server's device listings. Once noted, press your browser's BACK button to return to the iSpindel's Configuration Page.
 
 ### Step 2: Setup the iSpindel for Server Communication
   * You should see a page similar to the following:
-  ![alt text](iSpindel_Config.png)
+
+  ![iSpindel Server Setup](/static/support/iSpindel/iSpindel_Config.png)
+
     * Note: in the image above PicoBrew has stikethrough because this iSpindel has been previously connected to the PICOBREW server.
 
   * After clicking the Configuration tab (as highlighted above) you will see a page similar to the following
 
-  ![alt text](iSpindel_Config_Details.png)
+  ![iSpindel Server Configuration Setup](/static/support/iSpindel/iSpindel_Config_Details.png)
 
   * On this page, enter the highlighted settings from above:
       * "PICOBREW" into the **SSID** field
@@ -48,7 +53,8 @@
 ## Setup the Server Devices Page
 Now that your iSpindel is configured and connected to your server, let's add it to the server's device list. On a browser connected to the server's AP, open the server. Under the **System** pulldown menu, select **Devices**. After clicking **+ Add New Device** you should see a page similar to this:
 
-![alt text](Server_Devices.png)
+  ![Server Setup](/static/support/iSpindel/Server_Devices.png)
+
 Perform the following steps:
   * Under the **Machine Type** pulldown select *iSpindel*
   * In the **Machine/Product ID** box, enter the Chip ID value from Step 1 above (in the example shown this value is 3149094)
