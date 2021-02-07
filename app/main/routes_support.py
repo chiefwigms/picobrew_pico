@@ -54,6 +54,17 @@ def support_picoferm():
     return render_template('support.html', support_object=picoferm_support)
 
 
+@main.route('/support/iSpindel')
+def support_iSpindel():
+    iSpindel_support = SupportObject()
+    iSpindel_support.name = 'iSpindel'
+    iSpindel_support.faq_path = '/static/support/iSpindel/iSpindel.md'
+    iSpindel_support.instructional_videos_path = '/static/support/iSpindel/Instructional-Videos.md'
+    iSpindel_support.misc_media = {
+    }
+    return render_template('support.html', support_object=iSpindel_support)
+
+
 @main.route('/support/picostill')
 def support_picostill():
     picostill_support = SupportObject()
@@ -139,3 +150,5 @@ def support_zymatic():
         'Maintenance' : '/static/support/legacy/zymatic/Maintenance.md'
     }
     return render_template('support.html', support_object=zymatic_support)
+    
+

@@ -73,7 +73,6 @@ def process_iSpindel_data(data):
     else:
         return('', 200)
 
-
 # -------- Utility --------
 def create_new_session(uid):
     if uid not in active_iSpindel_sessions:
