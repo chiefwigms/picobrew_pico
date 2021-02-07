@@ -51,9 +51,12 @@ check_firmware_args = {
 @main.route('/API/pico/checkFirmware')
 @use_args(check_firmware_args, location='querystring')
 def process_check_firmware(args):
+    uid = args['uid']
     # only give update available if machine type is known (C firmware != S/Pro Firmware)
-    if args['uid'] in active_brew_sessions and firmware_upgrade_required(active_brew_sessions[args['uid']].machine_type, args['version']):
-        return '#T#'
+    if uid in active_brew_sessions:
+        active_session = active_brew_sessions[uid]
+        if active_session.machine_type and firmware_upgrade_required(active_session.machine_type, args['version']):
+            return '#T#'
     return '#F#'
 
 
