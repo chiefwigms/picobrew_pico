@@ -30,8 +30,8 @@ def handle_devices():
     # register device alias and type
     if request.method == 'POST':
         mtype = MachineType(request.form['machine_type'])
-        uid = str(request.form['uid'])
-        alias = str(request.form['alias'])
+        uid = str(request.form['uid']).strip()
+        alias = str(request.form['alias']).strip()
 
         # uid and alias are required
         if len(uid) == 0 or len(alias) == 0:
