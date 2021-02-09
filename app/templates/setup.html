@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+{% block content %}
+  <script src="/static/js/setup.js"></script>
+  {% if available_networks %}
+  <form id="f_wireless_setup">
+    <div class="text-white">
+      <h4>Setup Wireless Interface</h4>
+      <p>The upstream wireless interface (ie. interface wlan0 on raspberrypi setups) is used for connecting to you local home network. Some features included may be negatively impacted by not having a value upstream wireless connection to your home network and public internet. Specific features that will be broken include, but aren't limited to: importing from picobrew.com and updating source code.</p>
+    </div>
+    <div class="form-row">
+      <div class="form-group col-sm-5">
+        <select id="wifi_selector" class="form-control form-control-sm">
+          <option selected>Select Available WiFi Network</option>
+          {% for network in available_networks %}
+            <option value="{{network.bssid}}" data-bssid="{{network.bssid}}" data-ssid="{{network.ssid}}" >{{network.ssid}} ({{network.bssid}} - {{network.frequency}} Ghz - Channel {{network.channel}})</option>
+          {% endfor %}
+        </select>
+        <br/>
+        <hr/>
+        <br/>
+        <input type="text" class="form-control form-control-sm" id="wifi_bssid" value="{{wireless_credentials.bssid}}" placeholder="BSSID (optional - to force 2.4ghz)">
+        <small id="wifi_bssid_HelpBlock" class="form-text text-muted">
+          Unique MAC address identifing a 2.4ghz wireless network (optional)
+        </small>
+        <br/>
+        <input type="text" class="form-control form-control-sm" id="wifi_ssid" value="{{wireless_credentials.ssid}}" placeholder="SSID">
+        <small id="wifi_ssid_HelpBlock" class="form-text text-muted">
+          Name of Wi-Fi network
+        </small>
+        <br/>
+        <input type="password" class="form-control form-control-sm" id="wifi_credentials" value="{{wireless_credentials.psk}}" placeholder="Credentials (WPA-PSK)">
+        <span class="form-inline text-white float-right">
+          <input type="checkbox" id="show-wifi-password" onclick="showPassword('wifi_credentials')">
+          <label for="show-wifi-password" style="padding-left: 0.4em;">Show Password</label>
+        </span>
+        <small id="wifi_credentials_HelpBlock" class="form-text text-muted">
+          Credentials for Wi-Fi (WPA-PSK)
+        </small>
+        <br/>
+        <button class="w-75 btn btn-sm btn-secondary btn-block" type="button" id="b_save_wireless_setup">Save</button>
+      </div>
+    </div>
+  </form>
+  {% endif %}
+
+  {% if ap0 %}
+  <br/>
+  <hr/>
+  <br/>
+  <form id="f_ap0_setup">
+    <div class="text-white">
+      <h4>Setup Access Point Interface</h4>
+      <p>This access point (ie. interface ap0 on raspberrypi setups) is used to broadcast the network for your Picobrew devices to connect to.</p>
+    </div>
+    <div class="form-row">
+      <div class="form-group col-sm-5">
+        <input type="text" class="form-control form-control-sm" id="ap0_ssid" value="{{ap0.ssid}}" placeholder="SSID">
+        <small id="wifi_ssid_HelpBlock" class="form-text text-muted">
+          Name of AP network
+        </small>
+        <br/>
+        <input type="password" class="form-control form-control-sm" id="ap0_credentials" value="{{ap0.psk}}" placeholder="Credentials (WPA-PSK)">
+        <span class="form-inline text-white float-right">
+          <input type="checkbox" id="show-ap0-password" onclick="showPassword('ap0_credentials')">
+          <label for="show-ap0-password" style="padding-left: 0.4em;">Show Password</label>
+        </span>
+        <small id="ap0_credentials_HelpBlock" class="form-text text-muted">
+          Credentials for AP (WPA-PSK)
+        </small>
+        <br/>
+        <button class="w-75 btn btn-sm btn-secondary btn-block" type="button" id="b_save_ap0_setup">Save</button>
+      </div>
+    </div>
+  </form>
+  {% endif %}
+
+  {% if hostname %}
+  <br/>
+  <hr/>
+  <br/>
+  <form id="f_hostname_setup">
+    <div class="text-white">
+      <h4>{% if platform == "RaspberryPi" %} Setup {% endif %}Hostname</h4>
+      {% if platform == "RaspberryPi" %}
+        <p>If you want to have a custom hostname for your server you can customize this below. This is useful if you have multiple raspberrypi devices and/or want to have a more memoriable or meaningful hostname for your configuration.</p>
+      {% endif %}
+    </div>
+    <div class="form-row">
+      <div class="form-group col-sm-5">
+        <input type="text" class="form-control form-control-sm" id="hostname" value="{{hostname}}" placeholder="Hostname" {% if platform != "RaspberryPi" %}disabled{% endif %}>
+        <small id="hostname_HelpBlock" class="form-text text-muted">
+          Name of device on the network
+        </small>
+        <br/>
+        {% if platform == "RaspberryPi" %}
+        <button class="w-75 btn btn-sm btn-secondary btn-block" type="button" id="b_save_hostname_setup">Save</button>
+        <small id="b_save_hostname_setup_HelpBlock" class="form-text text-warning">
+          Changing hostname will restart the RaspberryPi and will be unavailable for a small period of time.
+        </small>
+        {% endif %}
+      </div>
+    </div>
+  </form>
+  {% endif %}
+
+  {% if hostname == None and ap0 == None and available_networks == None %}
+  <p>Setup isn't supported on this installation type at this time.</p>
+  {% endif %}
+  
+  <br/>
+  <div class="table-sm table-striped table-bordered table-light"  id="t_configuration"></div>
+  <div></div>
+{% endblock %}

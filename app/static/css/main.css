@@ -1,13 +1,60 @@
+#options, #recipe_actions{
+  margin-bottom: 25px;
+  text-align: right;
+}
 .card-header > a {
   display: block;
   position: relative;
 }
 .card-header > a:after {
   content: "\f078"; /* fa-chevron-down */
-  font-family: 'FontAwesome';
+  font-family: 'Font Awesome\ 5 Free';
+  font-weight: 900;
   position: absolute;
   right: 0;
 }
 .card-header > a[aria-expanded="true"]:after {
   content: "\f077"; /* fa-chevron-up */
+}
+.navbar-collapse {
+  align-items: flex-end;
+  flex-grow: unset;
+}
+.nav-link {
+  text-align: right;
+}
+.navbar-nav .dropdown-menu {
+  padding: 0.5rem;
+  min-width: 0px;
+}
+span.equipment-icon {
+  max-width: 60px;
+  text-align: center;
+  display: inline-block;
+}
+span.equipment-icon img {
+  width: 80%;
+}
+.fermentation-start {
+  margin-top: 10px;
+}
+.fermentation-stop {
+  margin-top: 10px;
+}
+form#f_new_recipe {
+  width: 100%;
+}
+.table-recipe {
+  width: 100%;
+}
+canvas {
+  background-color: white;
+  margin-bottom: 10px;
+}
+.form-group label, p{
+  color: #fff;
+}
+p.mr-8 table {
+  margin-top: 0;
+  margin-bottom: 1rem;
 }

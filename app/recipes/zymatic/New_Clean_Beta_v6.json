@@ -1,0 +1,140 @@
+{
+    "clean": true,
+    "id": "c66b2c4f4a3f42fb8180c795d0d01813",
+    "name": "New Clean Beta v6",
+    "steps": [
+        {
+            "drain_time": "0",
+            "location": "Mash",
+            "name": "Fill Mash",
+            "step_time": "5",
+            "temperature": "0"
+        },
+        {
+            "drain_time": "0",
+            "location": "Adjunct4",
+            "name": "Balance Temps",
+            "step_time": "5",
+            "temperature": "0"
+        },
+        {
+            "drain_time": "0",
+            "location": "PassThru",
+            "name": "Heat to 120",
+            "step_time": "0",
+            "temperature": "120"
+        },
+        {
+            "drain_time": "0",
+            "location": "Adjunct4",
+            "name": "120",
+            "step_time": "20",
+            "temperature": "120"
+        },
+        {
+            "drain_time": "0",
+            "location": "PassThru",
+            "name": "Heat to 140",
+            "step_time": "0",
+            "temperature": "140"
+        },
+        {
+            "drain_time": "0",
+            "location": "Adjunct4",
+            "name": "140",
+            "step_time": "35",
+            "temperature": "140"
+        },
+        {
+            "drain_time": "0",
+            "location": "Mash",
+            "name": "Mash",
+            "step_time": "5",
+            "temperature": "0"
+        },
+        {
+            "drain_time": "0",
+            "location": "PassThru",
+            "name": "Balance Temps",
+            "step_time": "3",
+            "temperature": "0"
+        },
+        {
+            "drain_time": "0",
+            "location": "Adjunct4",
+            "name": "140",
+            "step_time": "5",
+            "temperature": "140"
+        },
+        {
+            "drain_time": "0",
+            "location": "Adjunct4",
+            "name": "160",
+            "step_time": "5",
+            "temperature": "160"
+        },
+        {
+            "drain_time": "0",
+            "location": "Adjunct4",
+            "name": "175",
+            "step_time": "5",
+            "temperature": "175"
+        },
+        {
+            "drain_time": "0",
+            "location": "PassThru",
+            "name": "Heat to 200",
+            "step_time": "0",
+            "temperature": "197"
+        },
+        {
+            "drain_time": "0",
+            "location": "Adjunct4",
+            "name": "200",
+            "step_time": "19",
+            "temperature": "197"
+        },
+        {
+            "drain_time": "0",
+            "location": "Mash",
+            "name": "Mash",
+            "step_time": "3",
+            "temperature": "0"
+        },
+        {
+            "drain_time": "0",
+            "location": "PassThru",
+            "name": "Balance Temps",
+            "step_time": "3",
+            "temperature": "0"
+        },
+        {
+            "drain_time": "0",
+            "location": "Adjunct4",
+            "name": "Cool",
+            "step_time": "3",
+            "temperature": "120"
+        },
+        {
+            "drain_time": "8",
+            "location": "Mash",
+            "name": "Mash",
+            "step_time": "5",
+            "temperature": "0"
+        },
+        {
+            "drain_time": "0",
+            "location": "Pause",
+            "name": "See RecP Notes",
+            "step_time": "0",
+            "temperature": "0"
+        },
+        {
+            "drain_time": "0",
+            "location": "Adjunct4",
+            "name": "Flush System",
+            "step_time": "12",
+            "temperature": "0"
+        }
+    ]
+}

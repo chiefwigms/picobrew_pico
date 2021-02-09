@@ -1,0 +1,20 @@
+.DS_Store
+
+# python files
+**/__pycache__
+env
+
+# project specific ignores
+logs/
+config.yaml
+
+# ignore all machine_type recipe and session files
+app/recipes/*/*
+app/sessions/*/active/*
+app/sessions/*/archive/*
+
+scripts/docker/nginx/certs/*
+
+# terraform
+terraform/.terraform
+terraform/*.tfstate*

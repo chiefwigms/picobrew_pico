@@ -1,0 +1,91 @@
+{
+    "clean": true,
+    "id": "7f489e3740f848519558c41a036fe2cb",
+    "name": "Cleaning v1",
+    "steps": [
+        {
+            "drain_time": "0",
+            "location": "PassThru",
+            "name": "Heat Water",
+            "step_time": "0",
+            "temperature": "152"
+        },
+        {
+            "drain_time": "5",
+            "location": "Mash",
+            "name": "Clean Mash",
+            "step_time": "15",
+            "temperature": "152"
+        },
+        {
+            "drain_time": "0",
+            "location": "PassThru",
+            "name": "Heat to Temp",
+            "step_time": "0",
+            "temperature": "152"
+        },
+        {
+            "drain_time": "1",
+            "location": "Adjunct1",
+            "name": "Adjunct",
+            "step_time": "3",
+            "temperature": "152"
+        },
+        {
+            "drain_time": "1",
+            "location": "Adjunct2",
+            "name": "Adjunct",
+            "step_time": "2",
+            "temperature": "152"
+        },
+        {
+            "drain_time": "1",
+            "location": "Adjunct3",
+            "name": "Adjunct",
+            "step_time": "2",
+            "temperature": "152"
+        },
+        {
+            "drain_time": "1",
+            "location": "Adjunct4",
+            "name": "Adjunct",
+            "step_time": "2",
+            "temperature": "152"
+        },
+        {
+            "drain_time": "0",
+            "location": "PassThru",
+            "name": "Heat to Temp",
+            "step_time": "0",
+            "temperature": "197"
+        },
+        {
+            "drain_time": "0",
+            "location": "Mash",
+            "name": "Clean Mash",
+            "step_time": "10",
+            "temperature": "197"
+        },
+        {
+            "drain_time": "0",
+            "location": "Mash",
+            "name": "Clean Mash",
+            "step_time": "2",
+            "temperature": "197"
+        },
+        {
+            "drain_time": "0",
+            "location": "Adjunct1",
+            "name": "Clean Adjunct",
+            "step_time": "2",
+            "temperature": "197"
+        },
+        {
+            "drain_time": "2",
+            "location": "PassThru",
+            "name": "Chill",
+            "step_time": "10",
+            "temperature": "120"
+        }
+    ]
+}

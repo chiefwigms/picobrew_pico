@@ -1,0 +1,34 @@
+version: "3.8"
+services:
+  nginx:
+    image: nginx:1.15-alpine
+    restart: unless-stopped
+    command: "/bin/sh -c 'while :; do sleep 6h & wait $${!}; nginx -s reload; done & nginx -g \"daemon off;\"'"
+    volumes:
+      - ./scripts/docker/nginx/conf:/etc/nginx/conf.d
+      - ./scripts/docker/nginx/certs:/certs
+    ports:
+      - 80:80
+      - 443:443
+    links:
+      - app
+  
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment: 
+      FLASK_ENV: development
+      PORT: 8080
+    volumes:
+      - type: bind
+        source: ./app/recipes
+        target: /picobrew_pico/app/recipes
+      - type: bind
+        source: ./app/sessions
+        target: /picobrew_pico/app/sessions
+      - type: bind
+        source: ./app/firmware
+        target: /picobrew_pico/app/firmware
+    ports:
+      - 8080:8080

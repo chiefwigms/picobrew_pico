@@ -1,0 +1,14 @@
+{
+    "clean": true,
+    "id": "0160275741134b148eff90acdd5e462f",
+    "name": "Rinse v3",
+    "steps": [
+        {
+            "drain_time": "5",
+            "location": "PassThru",
+            "name": "Rinse",
+            "step_time": "2",
+            "temperature": "0"
+        }
+    ]
+}

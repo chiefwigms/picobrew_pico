@@ -1,12 +1,118 @@
 {% extends "base.html" %}
 {% block content %}
-  <div id="live_session" style="min-width: 320px; height: 400px; margin: 0 auto"></div>
-  <script>var graph_data = {{graph_data|tojson}};</script>
-  <script src="static/js/highcharts/highcharts.js"></script>
-  <script src="static/js/highcharts/annotations.js"></script>
-  <script src="static/js/highcharts/export-data.js"></script>
-  <script src="static/js/highcharts/exporting.js"></script>
-  <script src="static/js/highcharts/dark-unica.js"></script>
-  <script src="static/js/socketio/socket.io.slim.js"></script>
-  <script src="static/js/graph_socketio.js"></script>
+  <script src="/static/js/highcharts/highcharts.js"></script>
+  <script src="/static/js/highcharts/annotations.js"></script>
+  <script src="/static/js/highcharts/export-data.js"></script>
+  <script src="/static/js/highcharts/exporting.js"></script>
+  <script src="/static/js/highcharts/dark-unica.js"></script>
+  <script src="/static/js/socketio/socket.io.slim.js"></script>
+  <script src="/static/js/index.js"></script>
+  <script>var socket = io.connect('//' + document.domain + ':' + location.port);</script>
+  <div id="accordion">
+    {% for brew_session in brew_sessions %}
+    <div class="card bg-dark text-white-50">
+      <h5 class="card-header" id="h_{{brew_session.graph.chart_id}}">
+        <a class="collapsed" role="button" data-toggle="collapse" href="#c_{{brew_session.graph.chart_id}}" data-parent="#accordion" aria-expanded="false" aria-controls="c_{{brew_session.graph.chart_id}}">
+          <span class="equipment-icon">
+            {% if brew_session.machine_type is defined and (brew_session.machine_type == "PicoBrew" or brew_session.machine_type == "PicoBrewC") %}
+            <img src="/static/img/picobrew.svg" atl="picobrew c/s/pro" />
+            {% elif brew_session.machine_type is defined and brew_session.machine_type == "Zymatic" %}
+            <img src="/static/img/zymatic.svg" atl="zymatic" />
+            {% elif brew_session.machine_type is defined and brew_session.machine_type == "ZSeries" %}
+            <img src="/static/img/zseries.svg" atl="zseries" />
+            {% endif %}
+          </span>
+          {% if brew_session.alias is defined and brew_session.alias|length %}{{brew_session.alias}}{% else %}{{brew_session.graph.chart_id}}{% endif %}
+        </a>
+      </h5>
+      <div id="c_{{brew_session.graph.chart_id}}" class="collapse show" aria-labelledby="h_{{brew_session.graph.chart_id}}">
+        <div class="card-body">
+          <div id="{{brew_session.graph.chart_id}}" style="min-width: 320px; height: 400px; margin: 0 auto"></div>
+          <script>var graph_data={{brew_session.graph|tojson}};</script>
+          <script src="/static/js/brew_graph_socketio.js"></script>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  <div id="accordion">
+    {% for ferm_session in ferm_sessions %}
+    <div class="card bg-dark text-white-50">
+      <h5 class="card-header" id="h_{{ferm_session.graph.chart_id}}">
+        <a class="collapsed" role="button" data-toggle="collapse" href="#c_{{ferm_session.graph.chart_id}}" data-parent="#accordion" aria-expanded="false" aria-controls="c_{{ferm_session.graph.chart_id}}">
+          <span class="equipment-icon">
+            <img src="/static/img/picoferm.svg" atl="picoferm">
+          </span>
+          {% if ferm_session.alias is defined and ferm_session.alias|length %}{{ferm_session.alias}}{% else %}{{ferm_session.graph.chart_id}}{% endif %}
+          {% if ferm_session.active %}
+          <button class="fermentation-start d-none btn btn-sm btn-success float-right mr-5" type="button" id="bstart_{{ferm_session.uid}}"
+              onclick="event.stopPropagation();event.preventDefault();start_fermentation('{{ferm_session.uid}}');">
+              <i class="fas fa-play-circle"></i> Start Fermentation
+          </button>
+          <button class="fermentation-stop d-block btn btn-sm btn-danger float-right mr-5" type="button" id="bstop_{{ferm_session.uid}}"
+              onclick="event.stopPropagation();event.preventDefault();stop_fermentation('{{ferm_session.uid}}');">
+              <i class="fas fa-stop-circle"></i> Stop Fermentation
+          </button>
+          {% else %}
+          <button class="fermentation-start d-block btn btn-sm btn-success float-right mr-5" type="button" id="bstart_{{ferm_session.uid}}"
+              onclick="event.stopPropagation();event.preventDefault();start_fermentation('{{ferm_session.uid}}');">
+              <i class="fas fa-play-circle"></i> Start Fermentation
+          </button>
+          <button class="fermentation-stop d-none btn btn-sm btn-danger float-right mr-5" type="button" id="bstop_{{ferm_session.uid}}"
+              onclick="event.stopPropagation();event.preventDefault();stop_fermentation('{{ferm_session.uid}}');">
+              <i class="fas fa-stop-circle"></i> Stop Fermentation
+          </button>
+          {% endif %}
+        </a>
+      </h5>
+      <div id="c_{{ferm_session.graph.chart_id}}" class="collapse show" aria-labelledby="h_{{ferm_session.graph.chart_id}}">
+        <div class="card-body">
+          <div id="{{ferm_session.graph.chart_id}}" style="min-width: 320px; height: 400px; margin: 0 auto"></div>
+          <script>var graph_data={{ferm_session.graph|tojson}};</script>
+          <script src="/static/js/ferm_graph_socketio.js"></script>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  <div id="accordion">
+    {% for iSpindel_session in iSpindel_sessions %}
+    <div class="card bg-dark text-white-50">
+      <h5 class="card-header" id="h_{{iSpindel_session.graph.chart_id}}">
+        <a class="collapsed" role="button" data-toggle="collapse" href="#c_{{iSpindel_session.graph.chart_id}}" data-parent="#accordion" aria-expanded="false" aria-controls="c_{{iSpindel_session.graph.chart_id}}">
+          <span class="equipment-icon">
+            <img src="/static/img/tilt.svg" atl="tilt or ispindle">
+          </span>
+          {% if iSpindel_session.alias is defined and iSpindel_session.alias|length %}{{iSpindel_session.alias}}{% else %}{{iSpindel_session.graph.chart_id}}{% endif %}
+          {% if iSpindel_session.active %}
+          <button class="fermentation-start d-none btn btn-sm btn-success float-right mr-5" type="button" id="bstart_{{iSpindel_session.uid}}"
+              onclick="event.stopPropagation();event.preventDefault();start_iSpindel_fermentation('{{iSpindel_session.uid}}');">
+              <i class="fas fa-play-circle"></i> Start Fermentation
+          </button>
+          <button class="fermentation-stop d-block btn btn-sm btn-danger float-right mr-5" type="button" id="bstop_{{iSpindel_session.uid}}"
+              onclick="event.stopPropagation();event.preventDefault();stop_iSpindel_fermentation('{{iSpindel_session.uid}}');">
+              <i class="fas fa-stop-circle"></i> Stop Fermentation
+          </button>
+          {% else %}
+          <button class="fermentation-start d-block btn btn-sm btn-success float-right mr-5" type="button" id="bstart_{{iSpindel_session.uid}}"
+              onclick="event.stopPropagation();event.preventDefault();start_iSpindel_fermentation('{{iSpindel_session.uid}}');">
+              <i class="fas fa-play-circle"></i> Start Fermentation
+          </button>
+          <button class="fermentation-stop d-none btn btn-sm btn-danger float-right mr-5" type="button" id="bstop_{{iSpindel_session.uid}}"
+              onclick="event.stopPropagation();event.preventDefault();stop_iSpindel_fermentation('{{iSpindel_session.uid}}');">
+              <i class="fas fa-stop-circle"></i> Stop Fermentation
+          </button>
+          {% endif %}
+        </a>
+      </h5>
+      <div id="c_{{iSpindel_session.graph.chart_id}}" class="collapse show" aria-labelledby="h_{{iSpindel_session.graph.chart_id}}">
+        <div class="card-body">
+          <div id="{{iSpindel_session.graph.chart_id}}" style="min-width: 320px; height: 400px; margin: 0 auto"></div>
+          <script>var graph_data={{iSpindel_session.graph|tojson}};</script>
+          <script src="/static/js/iSpindel_graph_socketio.js"></script>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
 {% endblock %}
