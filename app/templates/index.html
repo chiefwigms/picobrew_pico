@@ -43,8 +43,8 @@
     {% set chart_id = ferm_session.graph.chart_id %}
     {% set expanded = 'true' if ferm_session.active else 'false' %}
     {% set show = 'show' if ferm_session.active else '' %}
-    {% set display_start = 'none' if ferm_session.active else 'block' %}
-    {% set display_stop = 'block' if ferm_session.active else 'none' %}
+    {% set display_start = 'd-none' if ferm_session.active else 'd-block' %}
+    {% set display_stop = 'd-block' if ferm_session.active else 'd-none' %}
     <div class="card bg-dark text-white-50">
       <h5 class="card-header" id="h_{{chart_id}}">
         <a class="collapsed" role="button" data-toggle="collapse" href="#c_{{chart_id}}" data-parent="#accordion" aria-expanded="{{expanded}}" aria-controls="c_{{chart_id}}">
@@ -52,11 +52,11 @@
             <img src="/static/img/picoferm.svg" atl="picoferm">
           </span>
           {% if ferm_session.alias is defined and ferm_session.alias|length %}{{ferm_session.alias}}{% else %}{{chart_id}}{% endif %}
-          <button class="fermentation-start d-{{display_start}} btn btn-sm btn-success float-right mr-5" type="button" id="bstart_{{ferm_session.uid}}"
+          <button class="fermentation-start {{display_start}} btn btn-sm btn-success float-right mr-5" type="button" id="bstart_{{ferm_session.uid}}"
               onclick="event.stopPropagation();event.preventDefault();start_fermentation('{{ferm_session.uid}}');">
               <i class="fas fa-play-circle"></i> Start Fermentation
           </button>
-          <button class="fermentation-stop d-{{display_stop}} btn btn-sm btn-danger float-right mr-5" type="button" id="bstop_{{ferm_session.uid}}"
+          <button class="fermentation-stop {{display_stop}} btn btn-sm btn-danger float-right mr-5" type="button" id="bstop_{{ferm_session.uid}}"
               onclick="event.stopPropagation();event.preventDefault();stop_fermentation('{{ferm_session.uid}}');">
               <i class="fas fa-stop-circle"></i> Stop Fermentation
           </button>
@@ -77,8 +77,8 @@
     {% set chart_id = iSpindel_session.graph.chart_id %}
     {% set expanded = 'true' if iSpindel_session.active else 'false' %}
     {% set show = 'show' if iSpindel_session.active else '' %}
-    {% set display_start = 'none' if iSpindel_session.active else 'block' %}
-    {% set display_stop = 'block' if iSpindel_session.active else 'none' %}
+    {% set display_start = 'd-none' if iSpindel_session.active else 'd-block' %}
+    {% set display_stop = 'd-block' if iSpindel_session.active else 'd-none' %}
     <div class="card bg-dark text-white-50">
       <h5 class="card-header" id="h_{{chart_id}}">
         <a class="collapsed" role="button" data-toggle="collapse" href="#c_{{chart_id}}" data-parent="#accordion" aria-expanded="{{expanded}}" aria-controls="c_{{chart_id}}">
@@ -86,11 +86,11 @@
             <img src="/static/img/tilt.svg" atl="tilt or ispindle">
           </span>
           {% if iSpindel_session.alias is defined and iSpindel_session.alias|length %}{{iSpindel_session.alias}}{% else %}{{chart_id}}{% endif %}
-          <button class="fermentation-{{display_start}} d-none btn btn-sm btn-success float-right mr-5" type="button" id="bstart_{{iSpindel_session.uid}}"
+          <button class="fermentation-start {{display_start}} btn btn-sm btn-success float-right mr-5" type="button" id="bstart_{{iSpindel_session.uid}}"
               onclick="event.stopPropagation();event.preventDefault();start_iSpindel_fermentation('{{iSpindel_session.uid}}');">
               <i class="fas fa-play-circle"></i> Start Fermentation
           </button>
-          <button class="fermentation-{{display_stop}} d-block btn btn-sm btn-danger float-right mr-5" type="button" id="bstop_{{iSpindel_session.uid}}"
+          <button class="fermentation-stop {{display_stop}} btn btn-sm btn-danger float-right mr-5" type="button" id="bstop_{{iSpindel_session.uid}}"
               onclick="event.stopPropagation();event.preventDefault();stop_iSpindel_fermentation('{{iSpindel_session.uid}}');">
               <i class="fas fa-stop-circle"></i> Stop Fermentation
           </button>
