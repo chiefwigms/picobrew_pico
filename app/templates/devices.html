@@ -55,7 +55,7 @@
       <h2 id="m_{{machine_type}}">{{machine_type}}</h2>
       {% endif %}
       {% if config['aliases'][machine_type] == None or not config['aliases'][machine_type] %}
-      <p>No devices configurated</p>
+      <p>No devices configured</p>
       {% else %}
       {% for uid in config['aliases'][machine_type] %}
       <div class="card bg-dark text-white-50">
