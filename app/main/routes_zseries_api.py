@@ -441,7 +441,18 @@ def update_session_log(token, body):
         'wort': convert_temp(body['WortTemp'], 'F'),
         'therm': convert_temp(body['ThermoBlockTemp'], 'F'),
         'recovery': body['StepName'],
-        'position': body['ValvePosition']
+        'position': body['ValvePosition'],
+        'drainPumpOn': body.get('DrainPumpOn', 0) == 1, # integer into boolean
+        'kegPumpOn': body.get('KegPumpOn', 0) == 1,     # integer into boolean
+        'errorCode': body.get('ErrorCode'),
+        'pauseReason': body.get('PauseReason'),         # integer (1 == waiting for user / finished / program)
+        # debug wifi information
+        'network': {
+            'recv': body.get('netRecv'),
+            'send': body.get('netSend'),
+            'wait': body.get('netWait'),
+            'signal': body.get('rssi')
+        }
     }
 
     event = None
@@ -454,12 +465,26 @@ def update_session_log(token, body):
     active_session.data.append(session_data)
     active_session.recovery = body['StepName']
     active_session.remaining_time = body['SecondsRemaining']
+
+    plot_bands = active_session.plot_band or []
+    if session_data.get('pauseReason') != 0 or session_data.get('errorCode') != 0:
+        if len(plot_bands) == 0:
+            plot_bands.append({
+                'from': session_data.get('time'),
+                'to': None
+            })
+            session_data.update({'plot_bands': plot_bands})
+    elif len(plot_bands) > 0:
+        plot_bands[-1].to = session_data.get('time')
+        session_data.update({'plot_bands': plot_bands})
+
     # for Z graphs we have more data available: wort, hex/therm, target, drain, ambient
     graph_update = json.dumps({'time': session_data['time'],
                                'data': [session_data['target'], session_data['wort'], session_data['therm'], session_data['drain'], session_data['ambient']],
                                'session': active_session.name,
                                'step': active_session.step,
                                'event': event,
+                               'plotBand': plot_bands[-1] if len(plot_bands) > 0 else {}
                                })
     socketio.emit('brew_session_update|{}'.format(token), graph_update)
     active_session.file.write('\n\t{},'.format(json.dumps(session_data)))

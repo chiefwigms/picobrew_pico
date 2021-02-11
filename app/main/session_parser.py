@@ -123,6 +123,7 @@ def get_brew_graph_data(chart_id, session_name, session_step, session_data, is_p
     valve_position = []  # ZSeries Only
 
     events = []
+    plot_bands = []
     for data in session_data:
         if all(k in data for k in ('therm', 'wort')):  # Pico and ZSeries
             wort_data.append([data['time'], int(data['wort'])])
@@ -143,15 +144,40 @@ def get_brew_graph_data(chart_id, session_name, session_step, session_data, is_p
 
         # add an overlay event for each step
         if 'event' in data:
-            events.append({'color': 'black', 'width': '2', 'value': data['time'],
-                           'label': {'text': data['event'], 'style': {'color': 'white', 'fontWeight': 'bold'},
-                                     'verticalAlign': 'top', 'x': -15, 'y': 0}})
+            events.append({
+                'color': 'black',
+                'value': data['time'],
+                'label': {
+                    'text': data['event']
+                }
+            })
+
+        # add an overlay error for each errorCode or pauseReason
+        error_code = data['errorCode'] if 'errorCode' in data else 0
+        pause_reason = data['pauseReason'] if 'pauseReason' in data else 0
+        if error_code > 0 or pause_reason > 0:
+            if len(plot_bands) == 0:
+                plot_bands.append({
+                    'from': data.get('time'),
+                    'to': None,
+                    'label': {
+                        'text': reason_phrase(error_code, pause_reason)
+                    }
+                })
+        elif len(plot_bands) > 0:
+            plot_bands[-1].update({'to', data.get('time')})
+
+    # if last data point is pause or error
+    if len(plot_bands) > 0 and plot_bands[-1]['to'] == None:
+        plot_bands[-1]['to'] = session_data[-1]['time']
+
 
     graph_data = {
         'chart_id': chart_id,
         'title': {'text': session_name},
         'subtitle': {'text': session_step},
-        'xaplotlines': events
+        'xaplotlines': events,
+        'xaplotbands': plot_bands
     }
     if len(ambient_data) > 0:
         graph_data.update({'series': [
@@ -208,6 +234,19 @@ def load_ferm_session(file):
         'data': json_data,
         'graph': get_ferm_graph_data(chart_id, None, json_data)
     })
+
+
+# map programmatic codes to user facing strings (displayed in the brew graph)
+def reason_phrase(error_code, pause_reason):
+    reason = ''
+    if pause_reason != 0:
+        reason += 'pause: '
+        if pause_reason == 1:
+            reason += 'program'
+    elif error_code != 0:
+        reason += 'error: {error_code}'
+
+    return reason
 
 
 def get_ferm_graph_data(chart_id, voltage, session_data):
