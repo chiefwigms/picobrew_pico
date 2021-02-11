@@ -24,6 +24,7 @@ def support_pico_c():
         'Cold Brew' : '/static/support/pico-c/PicoC_ColdBrew.pdf',
         'Manual Brew' : '/static/support/pico-c/PicoC_ManualBrew.pdf',
         'Sous Vide' : '/static/support/pico-c/PicoC_SousVide.pdf'
+        'Troubleshooting' : '/static/support/pico-c/PicoC_Troubleshooting.pdf',
     }
     return render_template('support.html', support_object=pico_c_support)
 
@@ -39,6 +40,7 @@ def support_pico_pro():
         'Cold Brew' : '/static/support/pico-pro/PicoPro_ColdBrew.pdf',
         'Manual Brew' : '/static/support/pico-pro/PicoPro_ManualBrew.pdf',
         'Sous Vide' : '/static/support/pico-pro/Pico_SousVide.pdf'
+        'Troubleshooting' : '/static/support/pico-pro/Pico_Troubleshooting.pdf',
     }
     return render_template('support.html', support_object=pico_pro_support)
 
@@ -50,6 +52,7 @@ def support_picoferm():
     picoferm_support.manual_path = '/static/support/picoferm/PicoFerm_Manual.pdf'
     picoferm_support.misc_media = {
         'Wifi Setup' : '/static/support/picoferm/Wifi-setup.png'
+        'Troubleshooting' : '/static/support/picoferm/PicoFerm_Troubleshooting.pdf',
     }
     return render_template('support.html', support_object=picoferm_support)
 
@@ -72,6 +75,7 @@ def support_picostill():
     picostill_support.manual_path = '/static/support/picostill/PicoStill_Manual.pdf'
     picostill_support.instructional_videos_path = '/static/support/picostill/Instructional-Videos.md'
     picostill_support.misc_media = {
+        'Troubleshooting' : '/static/support/picostill/PicoStill_Troubleshooting.pdf',
         'Wifi Setup' : '/static/support/picostill/picostill-wifi-setup.png',
         'Light Reference' : '/static/support/picostill/PicoStill_Lights.jpg',
         'Setup Instructions' : '/static/support/picostill/picostill-setup-instructions.png',
@@ -92,6 +96,7 @@ def support_z_series():
         'Quick Start' : '/static/support/z-series/Z_QuickStart.pdf',
         'Bottling Kit' : '/static/support/z-series/Z_BottlingKit.pdf',
         'Draft Kit' : '/static/support/z-series/Z_DraftKit.pdf'
+        'Troubleshooting' : '/static/support/z-series/Z_Troubleshooting.pdf',
     }
     return render_template('support.html', support_object=z_series_support)
 
@@ -123,6 +128,7 @@ def support_kegsmarts():
     kegsmarts_support.misc_media = {
         'Firmware' : '/static/support/legacy/kegsmarts/Firmware.md',
         'Firmware-Installation' : '/static/support/legacy/kegsmarts/Firmware-Installation.md'
+        'Troubleshooting' : '/static/support/legacy/kegsmarts/KegSmarts_Troubleshooting.pdf',
     }
     return render_template('support.html', support_object=kegsmarts_support)
 
@@ -134,6 +140,9 @@ def support_pico_s():
     pico_s_support.manual_path = '/static/support/legacy/pico-s/Pico_Manual.pdf'
     pico_s_support.faq_path = '/static/support/legacy/pico-s/Frequently-Asked-Questions.md'
     pico_s_support.instructional_videos_path = '/static/support/legacy/pico-s/Instructional-Videos.md'
+    kegsmarts_support.misc_media = {
+        'Troubleshooting' : '/static/support/legacy/legacy/pico-s/Pico_Troubleshooting.pdf',
+    }
     return render_template('support.html', support_object=pico_s_support)
 
 
@@ -148,6 +157,7 @@ def support_zymatic():
         'Firmware' : '/static/support/legacy/zymatic/Firmware.md',
         'Firmware-Installation' : '/static/support/legacy/zymatic/Firmware-Installation.md',
         'Maintenance' : '/static/support/legacy/zymatic/Maintenance.md'
+        'Troubleshooting' : '/static/support/legacy/zymatic/Zymatic_Troubleshooting.pdf',
     }
     return render_template('support.html', support_object=zymatic_support)
     
