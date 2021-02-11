@@ -3,6 +3,7 @@ from datetime import datetime
 from webargs import fields
 from webargs.flaskparser import use_args, FlaskParser
 from flask import request
+from marshmallow import INCLUDE
 
 from . import main
 from .. import socketio
@@ -29,7 +30,7 @@ iSpindel_dataset_args = {
 # Process iSpindel Data: /API/iSpindel or /API/iSpindle
 @main.route('/API/iSpindle', methods=['POST'])
 @main.route('/API/iSpindel', methods=['POST'])
-@use_args(iSpindel_dataset_args)
+@use_args(iSpindel_dataset_args, unknown=INCLUDE)
 def process_iSpindel_data(data):
     uid = str(data['ID'])
     
