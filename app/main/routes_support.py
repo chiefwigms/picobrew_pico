@@ -140,7 +140,7 @@ def support_pico_s():
     pico_s_support.manual_path = '/static/support/legacy/pico-s/Pico_Manual.pdf'
     pico_s_support.faq_path = '/static/support/legacy/pico-s/Frequently-Asked-Questions.md'
     pico_s_support.instructional_videos_path = '/static/support/legacy/pico-s/Instructional-Videos.md'
-    kegsmarts_support.misc_media = {
+    pico_s_support.misc_media = {
         'Troubleshooting' : '/static/support/legacy/legacy/pico-s/Pico_Troubleshooting.pdf',
     }
     return render_template('support.html', support_object=pico_s_support)
