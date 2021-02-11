@@ -237,6 +237,14 @@ def load_ferm_session(file):
 
 
 # map programmatic codes to user facing strings (displayed in the brew graph)
+#
+# error codes:
+#   4 == Overheat - too hot
+#   6 == Overheat - Max HEX Wort Delta
+#  12 == PicoStill Error
+#
+# pause reasons:
+#   1 == waiting for user / finished / program
 def reason_phrase(error_code, pause_reason):
     reason = ''
     if pause_reason != 0:
