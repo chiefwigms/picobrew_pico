@@ -467,13 +467,15 @@ def update_session_log(token, body):
     active_session.remaining_time = body['SecondsRemaining']
 
     plot_bands = active_session.plot_band or []
-    if session_data.get('pauseReason') != 0 or session_data.get('errorCode') != 0:
+    error_code = session_data.get('pauseReason', 0)
+    pause_reason = session_data.get('errorCode', 0)
+    if pause_reason != 0 or error_code != 0:
         if len(plot_bands) == 0:
             plot_bands.append({
                 'from': session_data.get('time'),
                 'to': None,
                 'label': {
-                    'text': reason_phrase(session_data.get('errorCode', 0), session_data.get('pauseReason', 0))
+                    'text': reason_phrase(error_code, pause_reason)
                 }
             })
             session_data.update({'plot_bands': plot_bands})

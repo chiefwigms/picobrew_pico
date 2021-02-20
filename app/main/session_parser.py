@@ -155,7 +155,7 @@ def get_brew_graph_data(chart_id, session_name, session_step, session_data, is_p
         # add an overlay error for each errorCode or pauseReason
         error_code = data['errorCode'] if 'errorCode' in data else 0
         pause_reason = data['pauseReason'] if 'pauseReason' in data else 0
-        if error_code > 0 or pause_reason > 0:
+        if error_code != 0 or pause_reason != 0:
             if len(plot_bands) == 0:
                 plot_bands.append({
                     'from': data.get('time'),
