@@ -26,6 +26,23 @@
       </h5>
       <div id="c_{{session.graph.chart_id}}" class="collapse" aria-labelledby="h_{{session.graph.chart_id}}">
         <div class="card-body">
+          <div id="d_{{session.graph.chart_id}}" class="text-white">
+            <div class="row">
+              <div class="col-sm">
+                <div class="text-white-50">Device</div>
+                <div>{% if session.alias is defined and session.alias|length %}{{session.alias}} ({{session.uid}}){% else %}{{session.uid}}{% endif %}</div>
+              </div>
+              <div class="col-sm">
+                <div class="text-white-50">Date Started</div>
+                <div>{{session.date.strftime('%A, %b %e %Y %H:%M:%S')}}</div>
+              </div>
+              <div class="col-sm">
+                <div class="text-white-50">Date Completed</div>
+                <div>{{session.end_date.strftime('%A, %b %e %Y %H:%M:%S')}}</div>
+              </div>
+            </div>
+            <div class="row">&nbsp;</div>
+          </div>
           <div id="{{session.graph.chart_id}}" style="min-width: 320px; height: 400px; margin: 0 auto"></div>
           <script>var graph_data={{session.graph|tojson}};</script>
           <script src="/static/js/ferm_graph.js"></script>
