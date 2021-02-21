@@ -466,7 +466,10 @@ def update_session_log(token, body):
     active_session.recovery = body['StepName']
     active_session.remaining_time = body['SecondsRemaining']
 
-    plot_bands = active_session.plot_band or []
+    plot_bands = []
+    if plot_band in active_session:
+        plot_bands = active_session.plot_band
+
     error_code = session_data.get('pauseReason', 0)
     pause_reason = session_data.get('errorCode', 0)
     if pause_reason != 0 or error_code != 0:
