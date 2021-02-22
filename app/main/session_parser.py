@@ -1,5 +1,6 @@
 import json
 from datetime import datetime
+from dateutil import tz
 from pathlib import Path
 from flask import current_app
 
@@ -67,8 +68,17 @@ def load_brew_session(file):
     if len(info) > 4:
         session_type = int(info[4])
 
+    # filename datetime string format "20200615_205946"
+    server_start_datetime = datetime.strptime(info[0], '%Y%m%d_%H%M%S')
+    # json datetime `timeStr` format "2020-06-15T20:59:46.280731" (UTC) ; 'time' milliseconds from epoch
+    server_end_datetime = datetime.strptime(info[0], '%Y%m%d_%H%M%S')
+    if len(json_data) > 0:
+        # set server end datetime to last data log entry
+        server_end_datetime = epoch_millis_converter(json_data[-1]['time'])
+
     session = {
-        'date': datetime.strptime(info[0], '%Y%m%d_%H%M%S'),
+        'date': server_start_datetime,
+        'end_date': server_end_datetime,
         'name': name,
         'filename': Path(file).name,
         'filepath': Path(file),
@@ -163,12 +173,24 @@ def load_ferm_session(file):
     name = info[1]
     alias = info[1] if info[1] not in active_ferm_sessions else active_ferm_sessions[info[1]].alias
 
+    # filename datetime string format "20200615_205946"
+    server_start_datetime = datetime.strptime(info[0], '%Y%m%d_%H%M%S')
+    # json datetime `timeStr` format "2020-06-15T20:59:46.280731" (UTC) ; 'time' milliseconds from epoch
+    server_end_datetime = datetime.strptime(info[0], '%Y%m%d_%H%M%S')
+    if len(json_data) > 0:
+        # set server start datetime to the first data log entry (approx -1hr from session file creation)
+        server_start_datetime = epoch_millis_converter(json_data[0]['time'])
+
+        # set server end datetime to last data log entry
+        server_end_datetime = epoch_millis_converter(json_data[-1]['time'])
+
     return ({
         'uid': info[1],
         'filename': Path(file).name,
         'filepath': Path(file),
         'alias': alias,
-        'date': datetime.strptime(info[0], '%Y%m%d_%H%M%S'),
+        'date': server_start_datetime,
+        'end_date': server_end_datetime,
         'name': name,  # should change to brew/user defined session name
         'data': json_data,
         'graph': get_ferm_graph_data(chart_id, None, json_data)
@@ -200,6 +222,13 @@ def get_ferm_graph_data(chart_id, voltage, session_data):
     return graph_data
 
 
+def epoch_millis_converter(epoch_ms):
+    epoch_ms_datetime = datetime.fromtimestamp(float(epoch_ms / 1000))
+    datetime_utc = datetime.utcfromtimestamp(float(epoch_ms_datetime.strftime("%s")))
+    datetime_utc = datetime_utc.replace(tzinfo=tz.tzutc())
+    return datetime_utc.astimezone(tz.tzlocal())
+
+
 def load_iSpindel_session(file):
     info = file.stem.split('#')
     
@@ -209,12 +238,24 @@ def load_iSpindel_session(file):
     chart_id = info[0] + '_' + str(info[1])
     alias = info[1] if info[1] not in active_iSpindel_sessions else active_iSpindel_sessions[info[1]].alias
     
+    # filename datetime string format "20200615_205946"
+    server_start_datetime = datetime.strptime(info[0], '%Y%m%d_%H%M%S')
+    # json datetime `timeStr` format "2020-06-15T20:59:46.280731" (UTC) ; 'time' milliseconds from epoch
+    server_end_datetime = datetime.strptime(info[0], '%Y%m%d_%H%M%S')
+    if len(json_data) > 0:
+        # set server start datetime to the first data log entry (approx -1hr from session file creation)
+        server_start_datetime = epoch_millis_converter(json_data[0]['time'])
+
+        # set server end datetime to last data log entry
+        server_end_datetime = epoch_millis_converter(json_data[-1]['time'])
+
     return ({
         'uid': info[1],
         'filename': Path(file).name,
         'filepath': Path(file),
         'alias': alias,
-        'date': info[0],
+        'date': server_start_datetime,
+        'end_date': server_end_datetime,
         'name': alias,  # should change to brew/user defined session name
         'data': json_data,
         'graph': get_iSpindel_graph_data(chart_id, None, json_data)
