@@ -45,18 +45,6 @@ def handle_devices():
             return render_template_with_defaults('devices.html', error=error,
                 config=server_config(), active_sessions=active_sessions)
 
-        # uid and alias are required
-        if len(uid) == 0 or len(alias) == 0:
-            if len(uid) == 0 and len(alias) == 0:
-                error = f'Machine/Product ID and Alias are required'
-            elif len(uid) == 0:
-                error = f'Machine/Product ID is required'
-            else:
-                error = f'Alias is required'
-            current_app.logger.error(error)
-            return render_template_with_defaults('devices.html', error=error,
-                config=server_config(), active_sessions=active_sessions)
-
         # verify uid not already configured
         if (uid in {**active_brew_sessions, **active_ferm_sessions, **active_iSpindel_sessions, **active_still_sessions} 
                 and active_session(uid).alias != ''):
