@@ -71,14 +71,14 @@ Highcharts.chart(graph_data.chart_id, {
       plotBand.events = {
         mouseover: function(e) {
           const chart = this.axis.chart;
-          chart.pauseReason = this.options.label.text
+          chart.pauseReason = this.options.label.text;
         },
         mouseout: function(e) {
           const chart = this.axis.chart;
-          chart.pauseReason = this.options.label.text
+          chart.pauseReason = null;
         }
       };
-      return plotBand
+      return plotBand;
     })
   },
 

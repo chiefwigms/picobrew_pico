@@ -164,8 +164,8 @@ def get_brew_graph_data(chart_id, session_name, session_step, session_data, is_p
                         'text': reason_phrase(error_code, pause_reason)
                     }
                 })
-        elif len(plot_bands) > 0:
-            plot_bands[-1].update({'to', data.get('time')})
+            elif len(plot_bands) > 0:
+                plot_bands[-1]['to'] = data.get('time')
 
     # if last data point is pause or error
     if len(plot_bands) > 0 and plot_bands[-1]['to'] == None:

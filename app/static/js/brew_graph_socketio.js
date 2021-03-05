@@ -21,6 +21,12 @@ Highcharts.chart(graph_data.chart_id, {
             {
               self.xAxis[0].addPlotLine({ 'color': 'black', 'width': '2', 'value': data.time, 'label': {'text': data.event, 'style': {'color': 'white', 'fontWeight': 'bold'}, 'verticalAlign': 'top', 'x': -15, 'y': 0}});
             }
+
+            if ('to' in data.plotBand && data.plotBand.to == null)
+            {
+              self.xAxis[0].options.plotBands[-1] = data.plotBand;
+              self.xAxis[0].update();
+            }
         });
       },
     },
@@ -90,14 +96,14 @@ Highcharts.chart(graph_data.chart_id, {
       plotBand.events = {
         mouseover: function(e) {
           const chart = this.axis.chart;
-          chart.pauseReason = this.options.label.text
+          chart.pauseReason = this.options.label.text;
         },
         mouseout: function(e) {
           const chart = this.axis.chart;
-          chart.pauseReason = this.options.label.text
+          chart.pauseReason = null;
         }
       };
-      return plotBand
+      return plotBand;
     })
   },
 
