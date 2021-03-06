@@ -4,8 +4,8 @@ from dateutil import tz
 from pathlib import Path
 from flask import current_app
 
-from .config import brew_active_sessions_path, ferm_active_sessions_path, iSpindel_active_sessions_path
-from .model import PicoBrewSession, PicoFermSession, iSpindelSession
+from .config import brew_active_sessions_path, ferm_active_sessions_path, iSpindel_active_sessions_path, tilt_active_sessions_path
+from .model import PicoBrewSession, PicoFermSession, iSpindelSession, TiltSession
 
 file_glob_pattern = "[!._]*.json"
 
@@ -13,6 +13,7 @@ active_brew_sessions = {}
 active_ferm_sessions = {}
 active_still_sessions = {}
 active_iSpindel_sessions = {}
+active_tilt_sessions = {}
 
 
 def load_session_file(filename):
@@ -288,6 +289,65 @@ def get_iSpindel_graph_data(chart_id, voltage, session_data):
     return graph_data
 
 
+def load_tilt_session(file):
+    info = file.stem.split('#')
+    
+    # 0 = Date, 1 = Device UID
+    json_data = load_session_file(file)
+    
+    chart_id = info[0] + '_' + str(info[1])
+    alias = info[1] if info[1] not in active_tilt_sessions else active_tilt_sessions[info[1]].alias
+    
+    # filename datetime string format "20200615_205946"
+    server_start_datetime = datetime.strptime(info[0], '%Y%m%d_%H%M%S')
+    # json datetime `timeStr` format "2020-06-15T20:59:46.280731" (UTC) ; 'time' milliseconds from epoch
+    server_end_datetime = datetime.strptime(info[0], '%Y%m%d_%H%M%S')
+    if len(json_data) > 0:
+        # set server start datetime to the first data log entry (approx -1hr from session file creation)
+        server_start_datetime = epoch_millis_converter(json_data[0]['time'])
+
+        # set server end datetime to last data log entry
+        server_end_datetime = epoch_millis_converter(json_data[-1]['time'])
+
+    return ({
+        'uid': info[1],
+        'filename': Path(file).name,
+        'filepath': Path(file),
+        'alias': alias,
+        'date': server_start_datetime,
+        'end_date': server_end_datetime,
+        'name': alias,  # should change to brew/user defined session name
+        'data': json_data,
+        'graph': get_tilt_graph_data(chart_id, None, json_data)
+    })
+
+
+def get_tilt_graph_data(chart_id, voltage, session_data):
+    temp_data = []
+    gravity_data = []
+    for data in session_data:
+        temp_data.append([data['time'], float(data['temp'])])
+        gravity_data.append([data['time'], float(data['gravity'])])
+    graph_data = {
+        'chart_id': str(chart_id),
+        'title': {'text': 'Fermentation'},
+        'series': [
+            {
+                'name': 'Temperature',
+                'data': temp_data
+            }, {
+                'name': 'Specific Gravity',
+                'data': gravity_data,
+                'yAxis': 1
+            }
+        ],
+    }
+
+    if voltage:
+        graph_data.update({'subtitle': {'text': 'Voltage: ' + voltage}})
+    return graph_data
+
+
 def restore_active_brew_sessions():
     if active_brew_sessions == {}:
         active_brew_session_files = list(brew_active_sessions_path().glob(file_glob_pattern))
@@ -367,8 +427,35 @@ def restore_active_iSpindel_sessions():
 
             active_iSpindel_sessions[uid] = session
 
+
+def restore_active_tilt_sessions():
+    if active_tilt_sessions == {}:
+        active_tilt_session_files = list(tilt_active_sessions_path().glob(file_glob_pattern))
+        for file in active_tilt_session_files:
+            # print('DEBUG: restore_active_sessions() found {} as an active session'.format(file))
+            tilt_session = load_tilt_session(file)
+            # print('DEBUG: restore_active_sessions() {}'.format(ferm_session))
+            uid = tilt_session['uid']
+            if uid not in active_tilt_sessions:
+                active_tilt_sessions[uid] = TiltSession()
+
+            session = active_tilt_sessions[uid]
+            session.file = open(file, 'a')
+            session.file.flush()
+            session.filepath = file
+            session.start_time = tilt_session['date']
+            session.active = True
+
+            session.uninit = False
+            session.data = tilt_session['data']
+            session.graph = tilt_session['graph']
+
+            active_tilt_sessions[uid] = session
+
+
 def restore_active_sessions():
     # initialize active sessions during start up
     restore_active_brew_sessions()
     restore_active_ferm_sessions()
     restore_active_iSpindel_sessions()
+    restore_active_tilt_sessions()

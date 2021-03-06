@@ -14,11 +14,11 @@ from werkzeug.utils import secure_filename
 from . import main
 from .config import MachineType, base_path, server_config
 from .frontend_common import render_template_with_defaults
-from .model import PicoBrewSession, PicoFermSession, PicoStillSession, iSpindelSession
+from .model import PicoBrewSession, PicoFermSession, PicoStillSession, iSpindelSession, TiltSession
 from .recipe_import import import_recipes
 from .recipe_parser import PicoBrewRecipe, PicoBrewRecipeImport, ZymaticRecipe, ZymaticRecipeImport, ZSeriesRecipe
-from .session_parser import load_iSpindel_session, get_iSpindel_graph_data, load_ferm_session, get_ferm_graph_data, get_brew_graph_data, load_brew_session, active_brew_sessions, active_ferm_sessions, active_iSpindel_sessions, active_still_sessions
-from .config import base_path, zymatic_recipe_path, zseries_recipe_path, pico_recipe_path, ferm_archive_sessions_path, brew_archive_sessions_path, iSpindel_archive_sessions_path, MachineType
+from .session_parser import load_iSpindel_session, get_iSpindel_graph_data, load_ferm_session, get_ferm_graph_data, get_brew_graph_data, load_brew_session, active_brew_sessions, active_ferm_sessions, active_iSpindel_sessions, active_still_sessions, load_tilt_session, get_tilt_graph_data, active_tilt_sessions
+from .config import base_path, zymatic_recipe_path, zseries_recipe_path, pico_recipe_path, ferm_archive_sessions_path, brew_archive_sessions_path, iSpindel_archive_sessions_path, tilt_archive_sessions_path, MachineType
 
 
 file_glob_pattern = "[!._]*.json"
@@ -30,7 +30,8 @@ yaml = YAML()
 def index():
     return render_template_with_defaults('index.html', brew_sessions=load_active_brew_sessions(),
                            ferm_sessions=load_active_ferm_sessions(),
-                           iSpindel_sessions=load_active_iSpindel_sessions())
+                           iSpindel_sessions=load_active_iSpindel_sessions(),
+                           tilt_sessions=load_active_tilt_sessions())
 
 
 
@@ -47,6 +48,11 @@ def ferm_history():
 @main.route('/iSpindel_history')
 def iSpindel_history():
     return render_template_with_defaults('iSpindel_history.html', sessions=load_iSpindel_sessions(), invalid=get_invalid_sessions('iSpindel'))
+
+
+@main.route('/tilt_history')
+def tilt_history():
+    return render_template_with_defaults('tilt_history.html', sessions=load_tilt_sessions(), invalid=get_invalid_sessions('tilt'))
 
 
 @main.route('/zymatic_recipes')
@@ -179,6 +185,8 @@ def update_device_session(uid, session_type):
         session = active_ferm_sessions[uid]
     elif session_type == 'iSpindel':
         session = active_iSpindel_sessions[uid]
+    elif session_type == 'tilt':
+        session = active_tilt_sessions[uid]
     else:
         valid_session = False
 
@@ -284,6 +292,8 @@ def download_session(session_type, filename):
         session_dirpath = ferm_archive_sessions_path()
     elif session_type == "iSpindel":
         session_dirpath = iSpindel_archive_sessions_path()
+    elif session_type == "tilt":
+        session_dirpath = tilt_archive_sessions_path()
     else:
         return f'Invalid session type provided "{session_type}"', 418
 
@@ -380,7 +390,7 @@ def delete_file():
             return '', 204
         current_app.logger.error("ERROR: failed to delete recipe file {}".format(filename))
         return "Delete Filename: Failed to find recipe file {}".format(filename), 418
-    elif body['type'] in ['brew', 'ferm', 'iSpindel', 'still']:
+    elif body['type'] in ['brew', 'ferm', 'iSpindel', 'tilt', 'still']:
         filepath = Path(filename)
         if filepath:
             os.remove(filename)
@@ -575,6 +585,30 @@ def load_iSpindel_sessions():
     return list(filter(lambda x: x != None, iSpindel_sessions))
 
 
+def parse_tilt_session(file):
+    try:
+        return load_tilt_session(file)
+    except:
+        current_app.logger.error("ERROR: An exception occurred parsing {}".format(file))
+        add_invalid_session("tilt", file)
+
+
+def load_active_tilt_sessions():
+    tilt_sessions = []
+    for uid in active_tilt_sessions:
+        tilt_sessions.append({'alias': active_tilt_sessions[uid].alias,
+                                  'uid' : uid,
+                                  'active': active_tilt_sessions[uid].active,
+                                  'graph': get_tilt_graph_data(uid, active_tilt_sessions[uid].voltage,
+                                                                   active_tilt_sessions[uid].data)})
+    return tilt_sessions
+
+
+def load_tilt_sessions():
+    files = list(tilt_archive_sessions_path().glob(file_glob_pattern))
+    tilt_sessions = [parse_tilt_session(file) for file in sorted(files, reverse=True)]
+    return list(filter(lambda x: x != None, tilt_sessions))
+
 # Read initial recipe list on load
 pico_recipes = []
 zymatic_recipes = []
@@ -600,6 +634,7 @@ def initialize_data():
     brew_sessions = load_active_brew_sessions()
     ferm_sessions = load_active_ferm_sessions()
     iSpindel_sessions = load_active_iSpindel_sessions()
+    tilt_sessions = load_active_tilt_sessions()
 
 
 # utilities
