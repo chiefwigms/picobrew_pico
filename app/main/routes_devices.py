@@ -5,12 +5,13 @@ from os import path
 
 from . import main
 from .frontend_common import active_session, render_template_with_defaults
-from .model import PicoBrewSession, PicoFermSession, PicoStillSession, iSpindelSession
+from .model import PicoBrewSession, PicoFermSession, PicoStillSession, iSpindelSession, TiltSession
 from .session_parser import (active_brew_sessions, active_ferm_sessions, 
-                                active_iSpindel_sessions, active_still_sessions)
+                                active_iSpindel_sessions, active_tilt_sessions, active_still_sessions)
 from .config import (base_path, server_config, MachineType,
                         zymatic_recipe_path, zseries_recipe_path, pico_recipe_path,
-                        ferm_archive_sessions_path, brew_archive_sessions_path, iSpindel_archive_sessions_path)
+                        ferm_archive_sessions_path, brew_archive_sessions_path,
+                        iSpindel_archive_sessions_path, tilt_archive_sessions_path)
 
 
 yaml = YAML()
@@ -23,6 +24,7 @@ def handle_devices():
         'brew': active_brew_sessions,
         'ferm': active_ferm_sessions,
         'iSpindel': active_iSpindel_sessions,
+        'tilt': active_tilt_sessions,
         'still': active_still_sessions
     }
     current_app.logger.debug(server_config())
@@ -46,7 +48,7 @@ def handle_devices():
                 config=server_config(), active_sessions=active_sessions)
 
         # verify uid not already configured
-        if (uid in {**active_brew_sessions, **active_ferm_sessions, **active_iSpindel_sessions, **active_still_sessions} 
+        if (uid in {**active_brew_sessions, **active_ferm_sessions, **active_iSpindel_sessions, **active_tilt_sessions, **active_still_sessions} 
                 and active_session(uid).alias != ''):
             error = f'Product ID {uid} already configured'
             current_app.logger.error(error)
@@ -88,6 +90,10 @@ def handle_devices():
             if uid not in active_iSpindel_sessions:
                 active_iSpindel_sessions[uid] = iSpindelSession()
             active_iSpindel_sessions[uid].alias = alias
+        elif mtype is MachineType.TILT:
+            if uid not in active_tilt_sessions:
+                active_tilt_sessions[uid] = TiltSession()
+            active_tilt_sessions[uid].alias = alias
         else:
             if uid not in active_brew_sessions:
                 active_brew_sessions[uid] = PicoBrewSession(mtype)
@@ -103,6 +109,7 @@ def handle_specific_device(uid):
         'brew': active_brew_sessions,
         'ferm': active_ferm_sessions,
         'iSpindel': active_iSpindel_sessions,
+        'tilt': active_tilt_sessions,
         'still': active_still_sessions
     }
 
@@ -111,7 +118,7 @@ def handle_specific_device(uid):
     alias = request.form['alias'] if 'alias' in request.form else ''
 
     # verify uid is already configured
-    if uid not in {**active_brew_sessions, **active_ferm_sessions, **active_iSpindel_sessions, **active_still_sessions}:
+    if uid not in {**active_brew_sessions, **active_ferm_sessions, **active_iSpindel_sessions, **active_tilt_sessions, **active_still_sessions}:
         error = f'Product ID {uid} not already configured'
         current_app.logger.error(error)
         return render_template_with_defaults('devices.html', error=error,
@@ -147,6 +154,8 @@ def handle_specific_device(uid):
         active_still_sessions[uid].alias = alias
     elif mtype is MachineType.ISPINDEL:
         active_iSpindel_sessions[uid].alias = alias
+    elif mtype is MachineType.TILT:
+        active_tilt_sessions[uid].alias = alias
     else:
         active_brew_sessions[uid].alias = alias
 

@@ -83,7 +83,7 @@
       <h5 class="card-header" id="h_{{chart_id}}">
         <a class="collapsed" role="button" data-toggle="collapse" href="#c_{{chart_id}}" data-parent="#accordion" aria-expanded="{{expanded}}" aria-controls="c_{{chart_id}}">
           <span class="equipment-icon">
-            <img src="/static/img/tilt.svg" atl="tilt or ispindle">
+            <img src="/static/img/tilt.svg" atl="ispindle">
           </span>
           {% if iSpindel_session.alias is defined and iSpindel_session.alias|length %}{{iSpindel_session.alias}}{% else %}{{chart_id}}{% endif %}
           <button class="fermentation-start {{display_start}} btn btn-sm btn-success float-right mr-5" type="button" id="bstart_{{iSpindel_session.uid}}"
@@ -101,6 +101,40 @@
           <div id="{{chart_id}}" style="min-width: 320px; height: 400px; margin: 0 auto"></div>
           <script>var graph_data={{iSpindel_session.graph|tojson}};</script>
           <script src="/static/js/iSpindel_graph_socketio.js"></script>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  <div id="accordion">
+    {% for tilt_session in tilt_sessions %}
+    {% set chart_id = tilt_session.graph.chart_id %}
+    {% set expanded = 'true' if tilt_session.active else 'false' %}
+    {% set show = 'show' if tilt_session.active else '' %}
+    {% set display_start = 'd-none' if tilt_session.active else 'd-block' %}
+    {% set display_stop = 'd-block' if tilt_session.active else 'd-none' %}
+    <div class="card bg-dark text-white-50">
+      <h5 class="card-header" id="h_{{chart_id}}">
+        <a class="collapsed" role="button" data-toggle="collapse" href="#c_{{chart_id}}" data-parent="#accordion" aria-expanded="{{expanded}}" aria-controls="c_{{chart_id}}">
+          <span class="equipment-icon">
+            <img src="/static/img/tilt.svg" atl="tilt">
+          </span>
+          {% if tilt_session.alias is defined and tilt_session.alias|length %}{{tilt_session.alias}}{% else %}{{chart_id}}{% endif %}
+          <button class="fermentation-start {{display_start}} btn btn-sm btn-success float-right mr-5" type="button" id="bstart_{{tilt_session.uid}}"
+              onclick="event.stopPropagation();event.preventDefault();start_tilt_fermentation('{{tilt_session.uid}}');">
+              <i class="fas fa-play-circle"></i> Start Fermentation
+          </button>
+          <button class="fermentation-stop {{display_stop}} btn btn-sm btn-danger float-right mr-5" type="button" id="bstop_{{tilt_session.uid}}"
+              onclick="event.stopPropagation();event.preventDefault();stop_tilt_fermentation('{{tilt_session.uid}}');">
+              <i class="fas fa-stop-circle"></i> Stop Fermentation
+          </button>
+        </a>
+      </h5>
+      <div id="c_{{chart_id}}" class="collapse {{show}}" aria-labelledby="h_{{chart_id}}">
+        <div class="card-body">
+          <div id="{{chart_id}}" style="min-width: 320px; height: 400px; margin: 0 auto"></div>
+          <script>var graph_data={{tilt_session.graph|tojson}};</script>
+          <script src="/static/js/tilt_graph_socketio.js"></script>
         </div>
       </div>
     </div>
