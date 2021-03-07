@@ -13,7 +13,7 @@ chart: {
       socket.on(event_name, function (event)
       {
           var data = JSON.parse(event);
-          self.setTitle(graph_data.title, {text: 'Volage: ' + data['voltage'] + 'V'});
+          self.setTitle(graph_data.title, {text: 'Voltage: ' + data['voltage'] + 'V'});
           for (point of data['data']) {
             self.series[0].addPoint([point.time, point.temp]);
             self.series[1].addPoint([point.time, point.pres]);  
