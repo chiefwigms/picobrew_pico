@@ -9,6 +9,11 @@
 # Update the git repo on boot prior to launching the server (set to False skip internet dependency)
 update_boot: True
 
+# Enable Tilt support (bluetooth). Set to False to disable
+tilt_monitoring: True
+# the interval in seconds before checking for tilt data
+tilt_monitoring_interval: 10
+
 # Your device's ProductID can be found via the following ways:
 #   1) Via 'Settings'->'Equipment' on www.picobrew.com (proper)
 #   2) On the 'About' screen on the device (those devices with screens that is)

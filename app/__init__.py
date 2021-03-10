@@ -106,8 +106,9 @@ def create_app(debug=False):
                             active_brew_sessions[uid].machine_type = mtype
                             active_brew_sessions[uid].is_pico = True if mtype in [MachineType.PICOBREW, MachineType.PICOBREW_C] else False
 
-    # TODO: verify this is enabled in config.yaml first before starting the thread
-    tiltThread = Thread(name='Tilt', target=tilt.run, daemon=True, args=(app,))
-    tiltThread.start()
+    if server_cfg['tilt_monitoring']:
+        sleep_interval = int(server_cfg['tilt_monitoring_interval']) if 'tilt_monitoring_interval' in server_cfg else 10
+        tiltThread = Thread(name='Tilt', target=tilt.run, daemon=True, args=(app,sleep_interval))
+        tiltThread.start()
 
     return app

@@ -24,7 +24,7 @@ TILTS = {
 _lock = None
 _socket = None
 
-def run(app):
+def run(app, sleep_interval):
     dev_id = 0
     global _lock
     global _socket
@@ -38,9 +38,9 @@ def run(app):
 
     blescan.hci_le_set_scan_parameters(_socket)
     blescan.hci_enable_le_scan(_socket)
-    monitor_tilt(app)
+    monitor_tilt(app, sleep_interval)
 
-def monitor_tilt(app):
+def monitor_tilt(app, sleep_interval):
     global _socket
     while True:
         beacons = distinct(blescan.parse_events(_socket, 10))
@@ -54,8 +54,7 @@ def monitor_tilt(app):
                             'temp': beacon['major'], # fahrenheit
                             'gravity': beacon['minor']
                         })
-        # TODO: make time configurable
-        time.sleep(10)
+        time.sleep(sleep_interval)
 
 # this can also be called from routes_tilt_api.py if the user is running an external pytilt service
 def process_tilt_data(data):
