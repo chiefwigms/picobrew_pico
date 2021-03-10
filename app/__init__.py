@@ -5,6 +5,7 @@ from pathlib import Path
 from shutil import copyfile
 from ruamel.yaml import YAML
 import pathlib
+from threading import Thread
 
 BASE_PATH = Path(__file__).parents[1]
 
@@ -33,6 +34,7 @@ def create_app(debug=False):
                                       active_iSpindel_sessions, active_tilt_sessions)
 
     from .main import main as main_blueprint
+    from .main import tilt
 
     # ----- Routes ----------
     app.register_blueprint(main_blueprint)
@@ -103,5 +105,9 @@ def create_app(debug=False):
                             active_brew_sessions[uid].alias = aliases[mtype][uid]
                             active_brew_sessions[uid].machine_type = mtype
                             active_brew_sessions[uid].is_pico = True if mtype in [MachineType.PICOBREW, MachineType.PICOBREW_C] else False
+
+    # TODO: verify this is enabled in config.yaml first before starting the thread
+    tiltThread = Thread(name='Tilt', target=tilt.run, daemon=True, args=(app,))
+    tiltThread.start()
 
     return app
