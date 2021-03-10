@@ -53,7 +53,7 @@ var recipe_table = {
             editor: "input"
         },
         {
-            title: "Location", field: "location", width: 120, hozAlign: "center", tooltip: false,
+            title: "Location", field: "location", width: 120, hozAlign: "center",
             validator: ["required", "string"],
             editor: "select",
             editorParams: {
