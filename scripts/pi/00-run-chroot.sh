@@ -14,12 +14,16 @@ export GIT_SHA='$(git rev-parse --short HEAD)'
 # Enable root login
 #sed -i 's/.*PermitRootLogin.*/PermitRootLogin yes/g' /etc/ssh/sshd_config
 
-echo 'Disabling Bluetooth...'
-systemctl disable bluetooth.service
-cat >> /boot/config.txt <<EOF
-enable_uart=1
-dtoverlay=disable-bt
-EOF
+# No longer disabling bluetooth to support tilt(s)
+# echo 'Disabling Bluetooth...'
+# systemctl disable bluetooth.service
+# cat >> /boot/config.txt <<EOF
+# enable_uart=1
+# dtoverlay=disable-bt
+# EOF
+
+echo 'Making bluetooth accessible without being root...'
+setcap cap_net_raw+eip /usr/bin/python3.7
 
 echo 'Load default wpa_supplicant.conf...'
 cat > /boot/wpa_supplicant.conf <<EOF

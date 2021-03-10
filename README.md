@@ -11,6 +11,8 @@ Allows for full control of the PicoBrew Pico S/C/Pro & Zymatic models.  Shout ou
   * Firmware versions 0.0.30 - 0.0.35 (selectable)
   * Pico S/C/Pro distillation (no session logging - limitation of firmware)
   * ZSeries (full session logging as included in Z firmware)
+* iSpindel (Beta)
+* Tilt (Beta)
 
 ## Features
 * Device Aliasing
