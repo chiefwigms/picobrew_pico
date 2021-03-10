@@ -26,9 +26,9 @@ function start_fermentation(uid) {
         },
     });
 
-}
+};
 
-function stop_fermentation(uid) {
+ function stop_fermentation(uid) {
     var session = {}
     session.active = false
     $.ajax({
@@ -78,7 +78,7 @@ function start_iSpindel_fermentation(uid) {
 
 };
 
-function stop_iSpindel_fermentation(uid) {
+ function stop_iSpindel_fermentation(uid) {
     var session = {}
     session.active = false
     $.ajax({
