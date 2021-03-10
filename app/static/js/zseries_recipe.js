@@ -38,8 +38,8 @@ var recipe_table = {
     layout: "fitDataFill",
     resizableColumns: false,
     tooltipGenerationMode: "hover",
-    tooltipsHeader: tooltips_func,
-    tooltips: tooltips_func,
+    tooltipsHeader: recipe_tooltips("ZSeries"),
+    tooltips: recipe_tooltips("ZSeries"),
     columns: [
         {
             rowHandle: true, formatter: "handle", headerSort: false, frozen: true, width: 50
