@@ -40,6 +40,8 @@ var recipe_table = {
     layout: "fitDataFill",
     resizableColumns: false,
     tooltipGenerationMode: "hover",
+    tooltipsHeader: tooltips_func,
+    tooltips: tooltips_func,
     columns: [
         {
             rowHandle: true, formatter: "handle", headerSort: false, frozen: true, width: 50
@@ -48,16 +50,16 @@ var recipe_table = {
 			title: "ID", field:"id", visible: false, mutatorData: idMutator
         },        
         {
-            title: "Step #", formatter: "rownum", hozAlign: "center", width: 60
+            title: "Step #", field:"step_num", formatter: "rownum", hozAlign: "center", width: 60
         },
         {
-            title: "Name", field: "name", width: 200, tooltip: false,
-            validator: ["required", "string"],
+            title: "Name", field: "name", width: 200,
+            validator: ["required", "string", "minLength:1", "maxLength:19", "regex:^[a-zA-Z0-9_@\\-\\ ]*$"],
             editable: editCheck,
             editor: "input"
         },
         {
-            title: "Location", field: "location", width: 120, hozAlign: "center", tooltip: false,
+            title: "Location", field: "location", width: 120, hozAlign: "center",
             validator: ["required", "string"],
             editable: editCheck,
             editor: "select",
@@ -136,7 +138,7 @@ var recipe_table = {
             bottomCalc: "sum"
         },
         {
-            formatter: plusIcon, width: 49, hozAlign: "center",
+            formatter: plusIcon, field: "add_step", width: 49, hozAlign: "center",
             cellClick: function (e, cell) {
                 if (rowIsEditable(cell)) {
                     var newRowData = Object.assign({}, cell.getRow().getData());
@@ -147,7 +149,7 @@ var recipe_table = {
             }
         },
         {
-            formatter: minusIcon, width: 49, hozAlign: "center",
+            formatter: minusIcon, field: "remove_step", width: 49, hozAlign: "center",
             cellClick: function (e, cell) {
                 if (rowIsEditable(cell)) {
                     cell.getRow().delete();
@@ -162,26 +164,6 @@ var recipe_table = {
         isDataLoading=true;
     },
     dataLoaded: data_loaded,
-    tooltips: function (column) {
-        var tip = ""
-        switch (column.getField()) {
-            case "temperature":
-                tip = "[0 - 208]";
-                break;
-            case "step_time":
-                tip = "[0 - 180]";
-                break;
-            case "drain_time":
-                tip = "[0 - 10]";
-                break;
-            case "hop_time":
-                tip = "Hop Contact Time";
-                break;
-            default:
-                break;
-        }
-        return tip;
-    },
 };
 
 function data_loaded(data) {

@@ -38,6 +38,8 @@ var recipe_table = {
     layout: "fitDataFill",
     resizableColumns: false,
     tooltipGenerationMode: "hover",
+    tooltipsHeader: tooltips_func,
+    tooltips: tooltips_func,
     columns: [
         {
             rowHandle: true, formatter: "handle", headerSort: false, frozen: true, width: 50
@@ -47,7 +49,7 @@ var recipe_table = {
         },
         {
             title: "Name", field: "name", width: 200,
-            validator: ["required", "minLength:1", "maxLength:19", "string"],
+            validator: ["required", "string", "minLength:1", "maxLength:19", "regex:^[a-zA-Z0-9_@\\-\\ ]*$"],
             editor: "input"
         },
         {
@@ -144,29 +146,6 @@ var recipe_table = {
         },
     ],
     dataLoaded: data_loaded,
-    tooltips: function (column) {
-        var tip = ""
-        switch (column.getField()) {
-            case "name":
-                tip = "19 Characters Max";
-                break;
-            case "temperature":
-                tip = "[0 - 208]";
-                break;
-            case "step_time":
-                tip = "[0 - 180]";
-                break;
-            case "drain_time":
-                tip = "[0 - 10]";
-                break;
-            case "hop_time":
-                tip = "Hop Contact Time";
-                break;
-            default:
-                break;
-        }
-        return tip;
-    },
 };
 
 function data_loaded(data) {
