@@ -6,6 +6,7 @@ from shutil import copyfile
 from ruamel.yaml import YAML
 import pathlib
 from threading import Thread
+import sys
 
 BASE_PATH = Path(__file__).parents[1]
 
@@ -34,7 +35,6 @@ def create_app(debug=False):
                                       active_iSpindel_sessions, active_tilt_sessions)
 
     from .main import main as main_blueprint
-    from .main import tilt
 
     # ----- Routes ----------
     app.register_blueprint(main_blueprint)
@@ -106,9 +106,11 @@ def create_app(debug=False):
                             active_brew_sessions[uid].machine_type = mtype
                             active_brew_sessions[uid].is_pico = True if mtype in [MachineType.PICOBREW, MachineType.PICOBREW_C] else False
 
-    if server_cfg['tilt_monitoring']:
-        sleep_interval = int(server_cfg['tilt_monitoring_interval']) if 'tilt_monitoring_interval' in server_cfg else 10
-        tiltThread = Thread(name='Tilt', target=tilt.run, daemon=True, args=(app,sleep_interval))
-        tiltThread.start()
+    if sys.platform != "darwin":
+        from .main import tilt
+        if server_cfg['tilt_monitoring']:
+            sleep_interval = int(server_cfg['tilt_monitoring_interval']) if 'tilt_monitoring_interval' in server_cfg else 10
+            tiltThread = Thread(name='Tilt', target=tilt.run, daemon=True, args=(app,sleep_interval))
+            tiltThread.start()
 
     return app
