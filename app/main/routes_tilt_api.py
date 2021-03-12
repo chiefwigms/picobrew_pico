@@ -35,12 +35,15 @@ def process_tilt_dataset(dataset):
         process_tilt_data(data)
     return('', 200)
 
-# this can also be called from tilt.py if this is not running on a mac
+# this can also be called from tilt.py and when using bluetooth, more data is available
+# including a uid and rssi (signal strength)
 def process_tilt_data(data):
     global _lock
     with _lock:
-        uid = data['color']
-        
+        # pytilt will just have color, but the bluetooth data from tilt.py will have uid as well
+        # so we favor that
+        uid = data['uid'] if 'uid' in data else data['color']
+
         if uid not in active_tilt_sessions:
             active_tilt_sessions[uid] = TiltSession()
 
@@ -55,7 +58,8 @@ def process_tilt_data(data):
             point = {
                 'time': time,
                 'temp': data['temp'],
-                'gravity': (data['gravity'] / 1000) if data['gravity'] > 1000 else data['gravity'],
+                'gravity': data['gravity'] / 1000,
+                'rssi': data['rssi'],
             }
 
             session_data.append(point)
@@ -79,7 +83,7 @@ def create_new_session(uid):
     if uid not in active_tilt_sessions:
         active_tilt_sessions[uid] = TiltSession()
     active_tilt_sessions[uid].uninit = False
-    active_tilt_sessions[uid].start_time = datetime.now()  # Not now, but X samples * 60*RATE sec ago
+    active_tilt_sessions[uid].start_time = datetime.now()
     active_tilt_sessions[uid].filepath = tilt_active_sessions_path().joinpath('{0}#{1}.json'.format(active_tilt_sessions[uid].start_time.strftime('%Y%m%d_%H%M%S'), uid))
     active_tilt_sessions[uid].file = open(active_tilt_sessions[uid].filepath, 'w')
     active_tilt_sessions[uid].file.write('[')

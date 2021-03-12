@@ -24,6 +24,8 @@ export GIT_SHA='$(git rev-parse --short HEAD)'
 
 echo 'Making bluetooth accessible without being root...'
 setcap cap_net_raw+eip /usr/bin/python3.7
+usermod -a -G bluetooth pi
+systemctl restart dbus
 
 echo 'Load default wpa_supplicant.conf...'
 cat > /boot/wpa_supplicant.conf <<EOF
