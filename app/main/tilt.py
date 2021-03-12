@@ -47,9 +47,8 @@ def tilts(devices):
                 if color_uid in TILTS:
                     # maintain same field names as pytilt in case someone wants to use that
                     # but add uid and rssi
-                    uid = d.metadata['uuids'][0] if ('uuids' in d.metadata and len(d.metadata['uuids']) > 0) else d.address
                     tilts.append({
-                        'uid': uid,
+                        'uid': d.address,
                         'rssi': get_number(data[-1:]),
                         'color': TILTS[color_uid],
                         'timestamp': datetime.now().isoformat(),
