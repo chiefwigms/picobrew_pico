@@ -3,6 +3,10 @@ from flask import current_app
 
 
 class MachineType(str, Enum):
+    def __str__(self):
+        return str(self.value)
+
+
     PICOBREW_C = 'PicoBrewC'
     PICOBREW = 'PicoBrew'
     PICOFERM = 'PicoFerm'

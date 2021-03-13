@@ -76,8 +76,8 @@ def handle_devices():
         try:
             new_server_cfg = server_cfg
             with open(cfg_file, 'w') as f:
-                if new_server_cfg['aliases'][mtype] is None:
-                    new_server_cfg['aliases'][mtype] = {}
+                if mtype not in new_server_cfg['aliases'] or new_server_cfg['aliases'][mtype] is None:
+                    new_server_cfg['aliases'][str(mtype)] = {}
                 new_server_cfg['aliases'][mtype][uid] = alias
                 yaml.dump(new_server_cfg, f)
                 current_app.config.update(SERVER_CONFIG=server_cfg)
