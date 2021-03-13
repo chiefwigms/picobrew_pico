@@ -13,8 +13,8 @@ chart: {
       socket.on(event_name, function (event)
       {
           var data = JSON.parse(event);
-          if (data['voltage']) {
-            self.setTitle(graph_data.title, {text: 'Voltage: ' + data['voltage'] + 'V'});
+          if (data['rssi']) {
+            self.setTitle(graph_data.title, {text: 'RSSI: ' + data['rssi'] + 'dBm'});
           } else {
             self.setTitle(graph_data.title);
           }

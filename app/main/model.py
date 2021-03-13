@@ -149,7 +149,7 @@ class TiltSession:
         self.alias = ''
         self.active = False
         self.uninit = True
-        self.voltage = None
+        self.rssi = None
         self.start_time = None
         self.data = []
 
@@ -161,7 +161,7 @@ class TiltSession:
         self.file = None
         self.filepath = None
         self.uninit = True
-        self.voltage = None
+        self.rssi = None
         self.start_time = None
         self.data = []
 
