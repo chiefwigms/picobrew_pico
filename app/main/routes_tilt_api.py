@@ -66,7 +66,8 @@ def process_tilt_data(data):
             log_data += '\n\t{},'.format(json.dumps(point))
             
             active_tilt_sessions[uid].data.extend(session_data)
-            graph_update = json.dumps({'voltage': None, 'data': session_data})
+            active_tilt_sessions[uid].rssi = str(data['rssi'])
+            graph_update = json.dumps({'rssi': data['rssi'], 'data': session_data})
             socketio.emit('tilt_session_update|{}'.format(uid), graph_update)
             
             # end fermentation only when user specifies fermentation is complete

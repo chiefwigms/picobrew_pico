@@ -302,12 +302,16 @@ def load_tilt_session(file):
     server_start_datetime = datetime.strptime(info[0], '%Y%m%d_%H%M%S')
     # json datetime `timeStr` format "2020-06-15T20:59:46.280731" (UTC) ; 'time' milliseconds from epoch
     server_end_datetime = datetime.strptime(info[0], '%Y%m%d_%H%M%S')
+    rssi = None
     if len(json_data) > 0:
         # set server start datetime to the first data log entry (approx -1hr from session file creation)
         server_start_datetime = epoch_millis_converter(json_data[0]['time'])
 
         # set server end datetime to last data log entry
         server_end_datetime = epoch_millis_converter(json_data[-1]['time'])
+
+        # use latest rssi reading
+        rssi = json_data[-1]['rssi']
 
     return ({
         'uid': info[1],
@@ -318,11 +322,11 @@ def load_tilt_session(file):
         'end_date': server_end_datetime,
         'name': alias,  # should change to brew/user defined session name
         'data': json_data,
-        'graph': get_tilt_graph_data(chart_id, None, json_data)
+        'graph': get_tilt_graph_data(chart_id, rssi, json_data)
     })
 
 
-def get_tilt_graph_data(chart_id, voltage, session_data):
+def get_tilt_graph_data(chart_id, rssi, session_data):
     temp_data = []
     gravity_data = []
     for data in session_data:
@@ -343,8 +347,8 @@ def get_tilt_graph_data(chart_id, voltage, session_data):
         ],
     }
 
-    if voltage:
-        graph_data.update({'subtitle': {'text': 'Voltage: ' + voltage}})
+    if rssi:
+        graph_data.update({'subtitle': {'text': 'RSSI: ' + str(rssi) + 'dBm'}})
     return graph_data
 
 

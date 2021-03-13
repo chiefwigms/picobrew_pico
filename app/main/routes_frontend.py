@@ -599,7 +599,7 @@ def load_active_tilt_sessions():
         tilt_sessions.append({'alias': active_tilt_sessions[uid].alias,
                                   'uid' : uid,
                                   'active': active_tilt_sessions[uid].active,
-                                  'graph': get_tilt_graph_data(uid, active_tilt_sessions[uid].voltage,
+                                  'graph': get_tilt_graph_data(uid, active_tilt_sessions[uid].rssi,
                                                                    active_tilt_sessions[uid].data)})
     return tilt_sessions
 
@@ -623,7 +623,7 @@ invalid_sessions = {}
 
 def initialize_data():
     global pico_recipes, zymatic_recipes, zseries_recipes, invalid_recipes
-    global brew_sessions, ferm_sessions
+    global brew_sessions, ferm_sessions, iSpindel_sessions, tilt_sessions
 
     # Read initial recipe list on load
     pico_recipes = load_pico_recipes()

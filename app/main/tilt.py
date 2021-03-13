@@ -32,6 +32,11 @@ def get_string(data):
         string += '%02x' % c
     return string
 
+# rssi is is the 2's complement of the calibrated Tx Power
+def get_rssi(data):
+    tx_power=data[0]
+    return -(256-tx_power)
+
 # there may be a better way, but i wasn't sure how to filter out 
 # other devices better than this. The name is currently always 'Tilt'
 # but it seems like a bad idea to just trust that or it could just be
@@ -49,9 +54,9 @@ def tilts(devices):
                     # but add uid and rssi
                     tilts.append({
                         'uid': d.address,
-                        'rssi': get_number(data[-1:]),
+                        'rssi': get_rssi(data[22:23]),
                         'color': TILTS[color_uid],
-                        'timestamp': datetime.now().isoformat(),
+                        'timestamp': datetime.utcnow().isoformat(),
                         'temp': get_number(data[18:20]),    # fahrenheit
                         'gravity': get_number(data[20:22]), # gravity * 1000
                     })
@@ -78,6 +83,3 @@ def run(app, sleep_interval):
         print(e)
         print("Error accessing bluetooth device. Shutting down Tilt thread...")
         return
-
-    
-
