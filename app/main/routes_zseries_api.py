@@ -35,6 +35,7 @@ class SessionType(int, Enum):
     STILL = 11
     COFFEE = 12
     CHILL = 13
+    MANUAL = 14
 
 
 class ZProgramId(int, Enum):
