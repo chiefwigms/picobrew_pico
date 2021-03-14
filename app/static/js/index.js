@@ -102,3 +102,53 @@ function start_iSpindel_fermentation(uid) {
         },
     });
 }
+
+function start_tilt_fermentation(uid) {
+    var session = {}
+    session.active = true
+    $.ajax({
+        url: '/device/' + uid + '/sessions/tilt',
+        type: 'PUT',
+        data: JSON.stringify(session),
+        dataType: "json",
+        processData: false,
+        contentType: "application/json; charset=UTF-8",
+        success: function (data) {
+            showAlert("Success!", "success");
+
+            $("#bstart_" + uid).toggleClass('d-block d-none')
+            $("#bstop_" + uid).toggleClass('d-block d-none')
+            // setTimeout(function () { window.location.href = "/"; }, 2000);
+        },
+        error: function (request, status, error) {
+            showAlert("Error: " + request.responseText, "danger");
+            //setTimeout(function () { window.location.href = "pico_recipes";}, 2000);
+        },
+    });
+
+}
+
+function stop_tilt_fermentation(uid) {
+    var session = {}
+    session.active = false
+    $.ajax({
+        url: '/device/' + uid + '/sessions/tilt',
+        type: 'PUT',
+        data: JSON.stringify(session),
+        dataType: "json",
+        processData: false,
+        contentType: "application/json; charset=UTF-8",
+        success: function (data) {
+            showAlert("Success!", "success");
+            $("#bstart_" + uid).toggleClass('d-block d-none')
+            $("#bstop_" + uid).toggleClass('d-block d-none')
+
+            // until socketio publishes a new "empty" state just force a refresh (which will clear the graphs)
+            setTimeout(function () { window.location.href = "/"; }, 2000);
+        },
+        error: function (request, status, error) {
+            showAlert("Error: " + request.responseText, "danger");
+            //setTimeout(function () { window.location.href = "pico_recipes";}, 2000);
+        },
+    });
+}

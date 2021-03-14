@@ -1,7 +1,7 @@
 import subprocess
 from flask import render_template
 
-from .session_parser import active_brew_sessions, active_ferm_sessions, active_iSpindel_sessions, active_still_sessions
+from .session_parser import active_brew_sessions, active_ferm_sessions, active_iSpindel_sessions, active_tilt_sessions, active_still_sessions
 
 
 def system_info():
@@ -45,6 +45,8 @@ def active_session(uid):
         return active_ferm_sessions[uid]
     elif uid in active_iSpindel_sessions:
         return active_iSpindel_sessions[uid]
+    elif uid in active_tilt_sessions:
+        return active_tilt_sessions[uid]
     elif uid in active_still_sessions:
         return active_still_sessions[uid]
     

@@ -3,6 +3,10 @@ from flask import current_app
 
 
 class MachineType(str, Enum):
+    def __str__(self):
+        return str(self.value)
+
+
     PICOBREW_C = 'PicoBrewC'
     PICOBREW = 'PicoBrew'
     PICOFERM = 'PicoFerm'
@@ -10,6 +14,7 @@ class MachineType(str, Enum):
     ZSERIES = 'ZSeries'
     ZYMATIC = 'Zymatic'
     ISPINDEL = 'iSpindel'
+    TILT = 'Tilt'
 
 
 # server config
@@ -78,6 +83,14 @@ def iSpindel_active_sessions_path():
 
 def iSpindel_archive_sessions_path():
     return current_app.config['SESSIONS_PATH'].joinpath('iSpindel/archive')
+
+
+def tilt_active_sessions_path():
+    return current_app.config['SESSIONS_PATH'].joinpath('tilt/active')
+
+
+def tilt_archive_sessions_path():
+    return current_app.config['SESSIONS_PATH'].joinpath('tilt/archive')
 
 
 def still_active_sessions_path():

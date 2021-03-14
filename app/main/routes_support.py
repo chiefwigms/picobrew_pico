@@ -68,6 +68,17 @@ def support_iSpindel():
     return render_template('support.html', support_object=iSpindel_support)
 
 
+@main.route('/support/tilt')
+def support_tilt():
+    tilt_support = SupportObject()
+    tilt_support.name = 'tilt'
+    tilt_support.faq_path = '/static/support/tilt/tilt.md'
+    tilt_support.instructional_videos_path = '/static/support/tilt/Instructional-Videos.md'
+    tilt_support.misc_media = {
+    }
+    return render_template('support.html', support_object=tilt_support)
+
+
 @main.route('/support/picostill')
 def support_picostill():
     picostill_support = SupportObject()

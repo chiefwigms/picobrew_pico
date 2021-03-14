@@ -1,6 +1,6 @@
 import shutil
 from .config import (MachineType, brew_archive_sessions_path, ferm_archive_sessions_path,
-                     still_archive_sessions_path, iSpindel_archive_sessions_path)
+                     still_archive_sessions_path, iSpindel_archive_sessions_path, tilt_archive_sessions_path)
 
 
 ZYMATIC_LOCATION = {
@@ -138,6 +138,30 @@ class iSpindelSession:
         self.filepath = None
         self.uninit = True
         self.voltage = '-'
+        self.start_time = None
+        self.data = []
+
+
+class TiltSession:
+    def __init__(self):
+        self.file = None
+        self.filepath = None
+        self.alias = ''
+        self.active = False
+        self.uninit = True
+        self.rssi = None
+        self.start_time = None
+        self.data = []
+
+    def cleanup(self):
+        if self.file and self.filepath:
+            self.file.close()
+            shutil.move(str(self.filepath), str(
+                tilt_archive_sessions_path()))
+        self.file = None
+        self.filepath = None
+        self.uninit = True
+        self.rssi = None
         self.start_time = None
         self.data = []
 

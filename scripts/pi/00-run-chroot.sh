@@ -14,12 +14,15 @@ export GIT_SHA='$(git rev-parse --short HEAD)'
 # Enable root login
 #sed -i 's/.*PermitRootLogin.*/PermitRootLogin yes/g' /etc/ssh/sshd_config
 
-echo 'Disabling Bluetooth...'
-systemctl disable bluetooth.service
+# echo 'Enabling serial console support...'
 cat >> /boot/config.txt <<EOF
 enable_uart=1
-dtoverlay=disable-bt
 EOF
+
+echo 'Making bluetooth accessible without being root...'
+setcap cap_net_raw+eip /usr/bin/python3.7
+usermod -a -G bluetooth pi
+systemctl restart dbus
 
 echo 'Load default wpa_supplicant.conf...'
 cat > /boot/wpa_supplicant.conf <<EOF
@@ -69,7 +72,7 @@ echo 'Removing default networking...'
 apt -y --autoremove purge ifupdown dhcpcd5 isc-dhcp-client isc-dhcp-common rsyslog avahi-daemon
 apt-mark hold ifupdown dhcpcd5 isc-dhcp-client isc-dhcp-common rsyslog raspberrypi-net-mods openresolv avahi-daemon libnss-mdns
 echo 'Installing required packages...'
-apt -y install libnss-resolve hostapd dnsmasq dnsutils samba git python3 python3-pip nginx openssh-server
+apt -y install libnss-resolve hostapd dnsmasq dnsutils samba git python3 python3-pip nginx openssh-server bluez
 
 echo 'Installing Picobrew Server...'
 cd /
