@@ -52,10 +52,11 @@ def tilts(devices):
                 if color_uid in TILTS:
                     # maintain same field names as pytilt in case someone wants to use that
                     # but add uid and rssi
+                    color=TILTS[color_uid]
                     tilts.append({
-                        'uid': d.address,
+                        'uid': color + '-' + d.address,
                         'rssi': get_rssi(data[22:23]),
-                        'color': TILTS[color_uid],
+                        'color': color,
                         'timestamp': datetime.utcnow().isoformat(),
                         'temp': get_number(data[18:20]),    # fahrenheit
                         'gravity': get_number(data[20:22]), # gravity * 1000
