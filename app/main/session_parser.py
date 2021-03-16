@@ -4,13 +4,8 @@ from dateutil import tz
 from pathlib import Path
 from flask import current_app
 
-<<<<<<< HEAD
-from .config import brew_active_sessions_path, ferm_active_sessions_path, iSpindel_active_sessions_path, tilt_active_sessions_path
-from .model import PicoBrewSession, PicoFermSession, iSpindelSession, TiltSession
-=======
-from .config import brew_active_sessions_path, ferm_active_sessions_path, still_active_sessions_path, iSpindel_active_sessions_path
-from .model import PicoBrewSession, PicoFermSession, PicoStillSession, iSpindelSession
->>>>>>> refactor and rebase against master branch
+from .config import brew_active_sessions_path, ferm_active_sessions_path, still_active_sessions_path, iSpindel_active_sessions_path, tilt_active_sessions_path
+from .model import PicoBrewSession, PicoFermSession, PicoStillSession, iSpindelSession, TiltSession
 
 file_glob_pattern = "[!._]*.json"
 
