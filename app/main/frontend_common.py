@@ -8,7 +8,7 @@ def system_info():
     try:
         system_info = subprocess.check_output("cat /etc/os-release || sw_vers || systeminfo | findstr /C:'OS'", shell=True)
         system_info = system_info.decode("utf-8")
-    except:
+    except Exception:
         system_info = "Not Supported on this Device"
 
     return system_info
@@ -49,5 +49,5 @@ def active_session(uid):
         return active_tilt_sessions[uid]
     elif uid in active_still_sessions:
         return active_still_sessions[uid]
-    
+
     return None

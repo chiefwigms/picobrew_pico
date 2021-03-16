@@ -12,6 +12,7 @@ BASE_PATH = Path(__file__).parents[1]
 socketio = SocketIO()
 yaml = YAML()
 
+
 def create_dir(dir_path):
     # create the directory and any missing parent directories, if it doesn't already exist
     pathlib.Path(dir_path).mkdir(parents=True, exist_ok=True)
@@ -75,8 +76,8 @@ def create_app(debug=False):
         initialize_data()
 
     if 'aliases' in server_cfg:
-        machine_types = [MachineType.ZSERIES, MachineType.ZYMATIC, MachineType.PICOBREW,
-                         MachineType.PICOBREW_C, MachineType.PICOFERM, MachineType.ISPINDEL,MachineType.TILT]
+        machine_types = [MachineType.ZSERIES, MachineType.ZYMATIC, MachineType.PICOBREW, MachineType.PICOBREW_C,
+                         MachineType.PICOFERM, MachineType.ISPINDEL, MachineType.TILT, MachineType.PICOSTILL]
         for mtype in machine_types:
             aliases = server_cfg['aliases']
             if mtype in aliases and aliases[mtype] is not None:
@@ -96,20 +97,20 @@ def create_app(debug=False):
                             active_tilt_sessions[uid].alias = aliases[mtype][uid]
                         elif mtype == MachineType.PICOSTILL:
                             if uid not in active_still_sessions:
-                                active_still_sessions[uid] = PicoStillSession()
+                                active_still_sessions[uid] = PicoStillSession(uid)
                             active_still_sessions[uid].alias = aliases[mtype][uid]
                         else:
                             if uid not in active_brew_sessions:
                                 active_brew_sessions[uid] = PicoBrewSession(mtype)
                             active_brew_sessions[uid].alias = aliases[mtype][uid]
                             active_brew_sessions[uid].machine_type = mtype
-                            active_brew_sessions[uid].is_pico = True if mtype in [MachineType.PICOBREW, MachineType.PICOBREW_C] else False
+                            active_brew_sessions[uid].is_pico = mtype in [MachineType.PICOBREW, MachineType.PICOBREW_C]
 
     # optional Tilt monitoring
     from .main import tilt
     if 'tilt_monitoring' in server_cfg and server_cfg['tilt_monitoring']:
         sleep_interval = int(server_cfg['tilt_monitoring_interval']) if 'tilt_monitoring_interval' in server_cfg else 10
-        tiltThread = Thread(name='Tilt', target=tilt.run, daemon=True, args=(app,sleep_interval))
+        tiltThread = Thread(name='Tilt', target=tilt.run, daemon=True, args=(app, sleep_interval))
         tiltThread.start()
 
     return app

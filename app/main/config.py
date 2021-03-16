@@ -6,7 +6,6 @@ class MachineType(str, Enum):
     def __str__(self):
         return str(self.value)
 
-
     PICOBREW_C = 'PicoBrewC'
     PICOBREW = 'PicoBrew'
     PICOFERM = 'PicoFerm'
@@ -99,11 +98,3 @@ def tilt_active_sessions_path():
 
 def tilt_archive_sessions_path():
     return current_app.config['SESSIONS_PATH'].joinpath('tilt/archive')
-
-
-def still_active_sessions_path():
-    return current_app.config['SESSIONS_PATH'].joinpath('still/active')
-
-
-def still_archive_sessions_path():
-    return current_app.config['SESSIONS_PATH'].joinpath('still/archive')

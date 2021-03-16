@@ -219,7 +219,7 @@ def update_device_session(uid, session_type):
 
             if session_type == 'still':
                 try:
-                    start_still_polling(session)
+                    session.start_still_polling()
                 except Exception as e:
                     return getattr(e, 'message', e.args[0]), 418
         
@@ -228,33 +228,6 @@ def update_device_session(uid, session_type):
     else:
         current_app.logger.error(f'invalid session type : {session_type}')
         return 'Invalid session type provided \"' + session_type + '\"', 418
-
-
-def start_still_polling(still_session):
-    connect_failure = False
-    try:
-        still_data_uri = 'http://{}/data'.format(still_session.ip_address)
-        current_app.logger.debug('DEBUG: Retrieve PicoStill Data - {}'.format(still_data_uri))
-        r = requests.get(still_data_uri)
-        datastring = r.text.strip()
-    except:
-        datastring      = None
-        connect_failure = True
-
-    if not datastring or datastring[0] != '#':
-        connect_failure = True
-
-    if connect_failure:
-        raise Exception('Connect PicoStill: Failed to connect to PicoStill on address \"' + still_session.ip_address + '\"')
-
-    from .still_polling import new_still_session
-    from .still_polling import FlaskThread
-
-    thread = FlaskThread(target=new_still_session,
-                            args=(still_ip, device_id),
-                            daemon=True)
-    thread.start()
-    still_session.polling_thread = thread
 
 
 ALLOWED_EXTENSIONS = {'json'}
@@ -583,7 +556,7 @@ def load_brew_sessions(uid=None):
 def parse_ferm_session(file):
     try:
         return load_ferm_session(file)
-    except:
+    except Exception:
         current_app.logger.error("ERROR: An exception occurred parsing {}".format(file))
         add_invalid_session("ferm", file)
     
@@ -612,7 +585,7 @@ def parse_iSpindel_session(file):
 def parse_still_session(file):
     try:
         return load_still_session(file)
-    except:
+    except Exception:
         current_app.logger.error("ERROR: An exception occurred parsing {}".format(file))
         add_invalid_session("still", file)
     
@@ -623,7 +596,7 @@ def load_active_still_sessions():
         still_sessions.append({'alias': active_still_sessions[uid].alias,
                               'ipaddr': active_still_sessions[uid].ip_address,
                               'graph': get_still_graph_data(uid, active_still_sessions[uid].name, active_still_sessions[uid].data),
-                              'uid' : uid})
+                              'uid': uid})
     return still_sessions
 
 
@@ -637,7 +610,7 @@ def load_active_iSpindel_sessions():
     iSpindel_sessions = []
     for uid in active_iSpindel_sessions:
         iSpindel_sessions.append({'alias': active_iSpindel_sessions[uid].alias,
-                                  'uid' : uid,
+                                  'uid': uid,
                                   'active': active_iSpindel_sessions[uid].active,
                                   'graph': get_iSpindel_graph_data(uid, active_iSpindel_sessions[uid].voltage,
                                                                    active_iSpindel_sessions[uid].data)})
@@ -653,7 +626,7 @@ def load_iSpindel_sessions():
 def parse_tilt_session(file):
     try:
         return load_tilt_session(file)
-    except:
+    except Exception:
         current_app.logger.error("ERROR: An exception occurred parsing {}".format(file))
         add_invalid_session("tilt", file)
 
@@ -662,7 +635,7 @@ def load_active_tilt_sessions():
     tilt_sessions = []
     for uid in active_tilt_sessions:
         tilt_sessions.append({'alias': active_tilt_sessions[uid].alias,
-                                  'uid' : uid,
+                                  'uid': uid,
                                   'active': active_tilt_sessions[uid].active,
                                   'graph': get_tilt_graph_data(uid, active_tilt_sessions[uid].rssi,
                                                                    active_tilt_sessions[uid].data)})

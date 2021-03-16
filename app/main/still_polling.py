@@ -1,10 +1,9 @@
 import json
 import requests
 
-from . import main
 from .. import socketio
 from flask import current_app
-from .config import still_active_sessions_path, still_archive_sessions_path
+from .config import still_active_sessions_path
 from .model import PicoStillSession
 from .session_parser import active_still_sessions
 
@@ -13,7 +12,8 @@ from datetime import datetime
 from threading import Thread
 
 # Function(s) to initiate a new PicoStill session and poll
-# the device's data URI to build a local distillation session\
+# the device's data URI to build a local distillation session
+
 
 class FlaskThread(Thread):
     def __init__(self, *args, **kwargs):
@@ -21,8 +21,8 @@ class FlaskThread(Thread):
         self.app = current_app._get_current_object()
 
     def run(self):
-      with self.app.app_context():
-        super().run()
+        with self.app.app_context():
+            super().run()
 
 
 def poll_still(still_ip, uid):
@@ -34,14 +34,14 @@ def poll_still(still_ip, uid):
         r = requests.get(still_data_uri)
         datastring = r.text.strip()
         current_app.logger.debug('DEBUG: Still Datastring: {}'.format(datastring))
-    except:
-      return False
+    except Exception:
+        return False
 
     if not datastring or datastring[0] != '#':
-      return False
+        return False
 
     datastring = datastring[1:-1]
-    t1,t2,t3,t4,pres,ok,d1,d2,errmsg = datastring.split(',')
+    t1, t2, t3, t4, pres, ok, d1, d2, errmsg = datastring.split(',')
     time = (datetime.utcnow() - datetime(1970, 1, 1)).total_seconds() * 1000
     session_data = []
     log_data = ''
@@ -96,9 +96,11 @@ def new_still_session(still_ip, device_id):
 # -------- Utility --------
 def create_new_session(uid):
     if uid not in active_still_sessions:
-        active_still_sessions[uid] = PicoStillSession()
+        active_still_sessions[uid] = PicoStillSession(uid)
     active_still_sessions[uid].uninit = False
     active_still_sessions[uid].start_time = datetime.now()
-    active_still_sessions[uid].filepath = still_active_sessions_path().joinpath('{0}#{1}.json'.format(active_still_sessions[uid].start_time.strftime('%Y%m%d_%H%M%S'), uid))
+    start_time_str = active_still_sessions[uid].start_time.strftime('%Y%m%d_%H%M%S')
+    filepath = '{0}#{1}.json'.format(start_time_str, uid)
+    active_still_sessions[uid].filepath = still_active_sessions_path().joinpath(filepath)
     active_still_sessions[uid].file = open(active_still_sessions[uid].filepath, 'w')
     active_still_sessions[uid].file.write('[\n')

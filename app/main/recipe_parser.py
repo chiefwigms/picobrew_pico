@@ -85,7 +85,7 @@ class ZymaticRecipe():
             self.steps.append(step)
         updated_recipe = json.loads(json.dumps(self, default=lambda r: r.__dict__))
         del updated_recipe['name_']
-        
+
         with open(filename, 'w') as f:
             json.dump(updated_recipe, f, indent=4, sort_keys=True)
 
@@ -209,7 +209,7 @@ class ZSeriesRecipe():
 
         with open(filename, 'w') as f:
             json.dump(updated_recipe, f, indent=4, sort_keys=True)
-        
+
         if (old_recipe_file):
             os.remove(old_recipe_file)
 
@@ -345,12 +345,12 @@ class PicoBrewRecipe():
             self.steps.append(step)
         updated_recipe = json.loads(json.dumps(self, default=lambda r: r.__dict__))
         del updated_recipe['name_']
-        
+
         with open(filename, 'w') as f:
             json.dump(updated_recipe, f, indent=4, sort_keys=True)
 
         if (old_recipe_file):
-            os.remove(old_recipe_file)  
+            os.remove(old_recipe_file)
 
 
 def PicoBrewRecipeImport(recipe, rfid=None):

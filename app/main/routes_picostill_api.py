@@ -24,18 +24,20 @@ def process_picostill_firmware(file):
     return send_from_directory(picostill_firmware_path(), file)
 
 
-# Check Firmware: /API/PicoStill/getFirmwareAddress?uid={UID}&version={VERSION}
-#       Response: '#{0}#' where {0} : {URL} = Url of firmware, -1 = No Updates
 picostill_check_firmware_args = {
     'uid': fields.Str(required=True),       # 32 character alpha-numeric serial number
     'version': fields.Str(required=True),   # Current firmware version - i.e. 0.0.30
 }
+
+
+# Check Firmware: /API/PicoStill/getFirmwareAddress?uid={UID}&version={VERSION}
+#       Response: '#{0}#' where {0} : {URL} = Url of firmware, -1 = No Updates
 @main.route('/API/PicoStill/getFirmwareAddress', methods=['GET'])
 @use_args(picostill_check_firmware_args, location='querystring')
 def process_picostill_check_firmware(args):
     uid = args['uid']
     if uid not in active_still_sessions:
-        active_still_sessions[uid] = PicoStillSession()
+        active_still_sessions[uid] = PicoStillSession(uid)
 
     active_still_sessions[uid].ip_address = still_ip_address(request)
 

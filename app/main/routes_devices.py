@@ -1,17 +1,12 @@
 from ruamel.yaml import YAML
 from flask import current_app, request, redirect
-from pathlib import Path
-from os import path
 
 from . import main
 from .frontend_common import active_session, render_template_with_defaults
 from .model import PicoBrewSession, PicoFermSession, PicoStillSession, iSpindelSession, TiltSession
-from .session_parser import (active_brew_sessions, active_ferm_sessions, 
-                                active_iSpindel_sessions, active_tilt_sessions, active_still_sessions)
-from .config import (base_path, server_config, MachineType,
-                        zymatic_recipe_path, zseries_recipe_path, pico_recipe_path,
-                        ferm_archive_sessions_path, brew_archive_sessions_path,
-                        iSpindel_archive_sessions_path, tilt_archive_sessions_path)
+from .session_parser import (active_brew_sessions, active_ferm_sessions,
+                             active_iSpindel_sessions, active_tilt_sessions, active_still_sessions)
+from .config import base_path, server_config, MachineType
 
 
 yaml = YAML()
@@ -38,22 +33,26 @@ def handle_devices():
         # uid and alias are required
         if len(uid) == 0 or len(alias) == 0:
             if len(uid) == 0 and len(alias) == 0:
-                error = f'Machine/Product ID and Alias are required'
+                error = 'Machine/Product ID and Alias are required'
             elif len(uid) == 0:
-                error = f'Machine/Product ID is required'
+                error = 'Machine/Product ID is required'
             else:
-                error = f'Alias is required'
+                error = 'Alias is required'
             current_app.logger.error(error)
-            return render_template_with_defaults('devices.html', error=error,
-                config=server_config(), active_sessions=active_sessions)
+            return render_template_with_defaults('devices.html',
+                                                 error=error,
+                                                 config=server_config(),
+                                                 active_sessions=active_sessions)
 
         # verify uid not already configured
-        if (uid in {**active_brew_sessions, **active_ferm_sessions, **active_iSpindel_sessions, **active_tilt_sessions, **active_still_sessions} 
+        if (uid in {**active_brew_sessions, **active_ferm_sessions, **active_iSpindel_sessions, **active_tilt_sessions, **active_still_sessions}
                 and active_session(uid).alias != ''):
             error = f'Product ID {uid} already configured'
             current_app.logger.error(error)
-            return render_template_with_defaults('devices.html', error=error,
-                config=server_config(), active_sessions=active_sessions)
+            return render_template_with_defaults('devices.html',
+                                                 error=error,
+                                                 config=server_config(),
+                                                 active_sessions=active_sessions)
 
         current_app.logger.debug(f'machine_type: {mtype}; uid: {uid}; alias: {alias}')
 
@@ -74,8 +73,10 @@ def handle_devices():
                 yaml.dump(server_cfg, f)
             error = f'Unexpected Error Writing Configuration File: {e}'
             current_app.logger.error(e)
-            return render_template_with_defaults('devices.html', error=error,
-                config=server_config(), active_sessions=active_sessions)
+            return render_template_with_defaults('devices.html',
+                                                 error=error,
+                                                 config=server_config(),
+                                                 active_sessions=active_sessions)
 
         # ... and into already loaded active sessions
         if mtype is MachineType.PICOFERM:
@@ -84,7 +85,7 @@ def handle_devices():
             active_ferm_sessions[uid].alias = alias
         elif mtype is MachineType.PICOSTILL:
             if uid not in active_still_sessions:
-                active_still_sessions[uid] = PicoStillSession()
+                active_still_sessions[uid] = PicoStillSession(uid)
             active_still_sessions[uid].alias = alias
         elif mtype is MachineType.ISPINDEL:
             if uid not in active_iSpindel_sessions:
@@ -121,8 +122,10 @@ def handle_specific_device(uid):
     if uid not in {**active_brew_sessions, **active_ferm_sessions, **active_iSpindel_sessions, **active_tilt_sessions, **active_still_sessions}:
         error = f'Product ID {uid} not already configured'
         current_app.logger.error(error)
-        return render_template_with_defaults('devices.html', error=error,
-            config=server_config(), active_sessions=active_sessions)
+        return render_template_with_defaults('devices.html',
+                                             error=error,
+                                             config=server_config(),
+                                             active_sessions=active_sessions)
 
     current_app.logger.debug(f'machine_type: {mtype}; uid: {uid}; alias: {alias}')
 
@@ -144,11 +147,13 @@ def handle_specific_device(uid):
             yaml.dump(server_cfg, f)
         error = f'Unexpected Error Writing Configuration File: {e}'
         current_app.logger.error(e)
-        return render_template_with_defaults('devices.html', error=error,
-            config=server_config(), active_sessions=active_sessions)
+        return render_template_with_defaults('devices.html',
+                                             error=error,
+                                             config=server_config(),
+                                             active_sessions=active_sessions)
 
     # ... and change existing active session references to alias
-    if mtype is MachineType.PICOFERM:    
+    if mtype is MachineType.PICOFERM:
         active_ferm_sessions[uid].alias = alias
     elif mtype is MachineType.PICOSTILL:
         active_still_sessions[uid].alias = alias
@@ -163,5 +168,3 @@ def handle_specific_device(uid):
         return '', 204
     else:
         return redirect('/devices')
-
-
