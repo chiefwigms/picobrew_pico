@@ -58,7 +58,7 @@ def tilts(devices):
                     # but add uid and rssi
                     color = TILTS[color_uid]
                     tilts.append({
-                        'uid': color + '-' + d.address,
+                        'uid': color + '-' + d.address.replace(":", "").replace("-", ""),  # remove special characters from the device address
                         'rssi': get_rssi(data[22:23]),
                         'color': color,
                         'timestamp': datetime.utcnow().isoformat(),
