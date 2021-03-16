@@ -114,12 +114,14 @@ class PicoStillSession:
             current_app.logger.debug('DEBUG: Retrieve PicoStill Data - {}'.format(still_data_uri))
             r = requests.get(still_data_uri)
             datastring = r.text.strip()
-        except Exception:
+        except Exception as e:
+            current_app.logger.error(f'exception occured communicating to picostill : {e}')
             datastring = None
             connect_failure = True
 
         if not datastring or datastring[0] != '#':
             connect_failure = True
+            current_app.logger.error(f'received unexpected response string : {datastring}')
 
         if connect_failure:
             raise Exception('Connect PicoStill: Failed to connect to PicoStill on address \"' + self.ip_address + '\"')

@@ -86,14 +86,16 @@
             <img src="/static/img/picostill.svg" atl="picostill" />
           </span>
           {% if still_session.alias is defined and still_session.alias|length %}{{still_session.alias}}{% else %}{{chart_id}}{% endif %}
-          <button class="still-start {{display_start}} btn btn-sm btn-success float-right mr-5" type="button" id="bstart_{{still_session.uid}}"
-              onclick="event.stopPropagation();event.preventDefault();start_monitoring('still', '{{still_session.uid}}');">
-              <i class="fas fa-play-circle"></i> Start Monitoring
-          </button>
-          <button class="still-stop {{display_stop}} btn btn-sm btn-danger float-right mr-5" type="button" id="bstop_{{still_session.uid}}"
-              onclick="event.stopPropagation();event.preventDefault();stop_monitoring('still', '{{still_session.uid}}');">
-              <i class="fas fa-stop-circle"></i> Stop Monitoring
-          </button>
+          {% if still_session.ipaddr %}
+            <button class="still-start {{display_start}} btn btn-sm btn-success float-right mr-5" type="button" id="bstart_{{still_session.uid}}"
+                onclick="event.stopPropagation();event.preventDefault();start_monitoring('still', '{{still_session.uid}}');">
+                <i class="fas fa-play-circle"></i> Start Monitoring
+            </button>
+            <button class="still-stop {{display_stop}} btn btn-sm btn-danger float-right mr-5" type="button" id="bstop_{{still_session.uid}}"
+                onclick="event.stopPropagation();event.preventDefault();stop_monitoring('still', '{{still_session.uid}}');">
+                <i class="fas fa-stop-circle"></i> Stop Monitoring
+            </button>
+          {% endif %}
         </a>
       </h5>
       <div id="c_{{chart_id}}" class="collapse {{show}}" aria-labelledby="h_{{chart_id}}">

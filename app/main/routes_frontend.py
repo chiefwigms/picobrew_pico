@@ -221,6 +221,7 @@ def update_device_session(uid, session_type):
                 try:
                     session.start_still_polling()
                 except Exception as e:
+                    current_app.logger.error('failed to start picostill polling thread')
                     return getattr(e, 'message', e.args[0]), 418
         
 
