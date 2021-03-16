@@ -196,6 +196,8 @@ def update_device_session(uid, session_type):
         session = active_iSpindel_sessions[uid]
     elif session_type == 'tilt':
         session = active_tilt_sessions[uid]
+    elif session_type == 'still':
+        session = active_still_sessions[uid]
     else:
         valid_session = False
 
@@ -215,10 +217,44 @@ def update_device_session(uid, session_type):
         else:
             session.active = True
 
+            if session_type == 'still':
+                try:
+                    start_still_polling(session)
+                except Exception as e:
+                    return getattr(e, 'message', e.args[0]), 418
+        
+
         return '', 204
     else:
         current_app.logger.error(f'invalid session type : {session_type}')
         return 'Invalid session type provided \"' + session_type + '\"', 418
+
+
+def start_still_polling(still_session):
+    connect_failure = False
+    try:
+        still_data_uri = 'http://{}/data'.format(still_session.ip_address)
+        current_app.logger.debug('DEBUG: Retrieve PicoStill Data - {}'.format(still_data_uri))
+        r = requests.get(still_data_uri)
+        datastring = r.text.strip()
+    except:
+        datastring      = None
+        connect_failure = True
+
+    if not datastring or datastring[0] != '#':
+        connect_failure = True
+
+    if connect_failure:
+        raise Exception('Connect PicoStill: Failed to connect to PicoStill on address \"' + still_session.ip_address + '\"')
+
+    from .still_polling import new_still_session
+    from .still_polling import FlaskThread
+
+    thread = FlaskThread(target=new_still_session,
+                            args=(still_ip, device_id),
+                            daemon=True)
+    thread.start()
+    still_session.polling_thread = thread
 
 
 ALLOWED_EXTENSIONS = {'json'}
@@ -344,44 +380,6 @@ def import_zseries_recipe():
     else:
         machine_ids = [uid for uid in active_brew_sessions if active_brew_sessions[uid].machine_type == MachineType.ZSERIES]
         return render_template_with_defaults('import_brewhouse_recipe.html', user_required=False, machine_ids=machine_ids)
-
-
-@main.route('/still_manual', methods=['GET', 'POST'])
-def still_manual():
-    if request.method == 'POST':
-      # FIXME - Placeholder for still testing...
-      if 'stillipaddress' in request.form:
-        still_ip = request.form['stillipaddress']
-        device_id = request.form['stilluid']
-
-        connect_failure = False
-        try:
-            still_data_uri = 'http://{}/data'.format(still_ip)
-            current_app.logger.debug('DEBUG: Retrieve PicoStill Data - {}'.format(still_data_uri))
-            r = requests.get(still_data_uri)
-            datastring = r.text.strip()
-        except:
-            datastring      = None
-            connect_failure = True
-
-        if not datastring or datastring[0] != '#':
-            connect_failure = True
-
-        if connect_failure:
-            return 'Connect PicoStill: Failed to connect to PicoStill on address \"' + still_ip + '\"', 418
-
-        from .still_polling import new_still_session
-        from .still_polling import FlaskThread
-
-        thread = FlaskThread(target=new_still_session,
-                             args=(still_ip, device_id),
-                             daemon=True)
-        thread.start()
-
-        return redirect('/')
-    else:
-      return render_template_with_defaults('still_manual.html',
-                             still_sessions=load_active_still_sessions())
 
 
 def load_zseries_recipes():
@@ -624,7 +622,7 @@ def load_active_still_sessions():
     for uid in active_still_sessions:
         still_sessions.append({'alias': active_still_sessions[uid].alias,
                               'ipaddr': active_still_sessions[uid].ip_address,
-                              'graph': get_still_graph_data(uid, active_still_sessions[uid].data),
+                              'graph': get_still_graph_data(uid, active_still_sessions[uid].name, active_still_sessions[uid].data),
                               'uid' : uid})
     return still_sessions
 

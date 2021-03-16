@@ -53,11 +53,11 @@
           </span>
           {% if ferm_session.alias is defined and ferm_session.alias|length %}{{ferm_session.alias}}{% else %}{{chart_id}}{% endif %}
           <button class="fermentation-start {{display_start}} btn btn-sm btn-success float-right mr-5" type="button" id="bstart_{{ferm_session.uid}}"
-              onclick="event.stopPropagation();event.preventDefault();start_fermentation('{{ferm_session.uid}}');">
+              onclick="event.stopPropagation();event.preventDefault();start_monitoring('ferm', '{{ferm_session.uid}}');">
               <i class="fas fa-play-circle"></i> Start Fermentation
           </button>
           <button class="fermentation-stop {{display_stop}} btn btn-sm btn-danger float-right mr-5" type="button" id="bstop_{{ferm_session.uid}}"
-              onclick="event.stopPropagation();event.preventDefault();stop_fermentation('{{ferm_session.uid}}');">
+              onclick="event.stopPropagation();event.preventDefault();stop_monitoring('ferm', '{{ferm_session.uid}}');">
               <i class="fas fa-stop-circle"></i> Stop Fermentation
           </button>
         </a>
@@ -74,39 +74,56 @@
   </div>
   <div id="accordion">
     {% for still_session in still_sessions %}
+    {% set chart_id = still_session.graph.chart_id %}
+    {% set expanded = 'true' if still_session.active else 'false' %}
+    {% set show = 'show' if still_session.active else '' %}
+    {% set display_start = 'd-none' if still_session.active else 'd-block' %}
+    {% set display_stop = 'd-block' if still_session.active else 'd-none' %}
     <div class="card bg-dark text-white-50">
-      <h5 class="card-header" id="h_{{still_session.graph.chart_id}}">
-        <a class="collapsed" role="button" data-toggle="collapse" href="#c_{{still_session.graph.chart_id}}" data-parent="#accordion" aria-expanded="false" aria-controls="c_{{still_session.graph.chart_id}}">
+      <h5 class="card-header" id="h_{{chart_id}}">
+        <a class="collapsed" role="button" data-toggle="collapse" href="#c_{{chart_id}}" data-parent="#accordion" aria-expanded="{{expanded}}" aria-controls="c_{{chart_id}}">
           <span class="equipment-icon">
             <img src="/static/img/picostill.svg" atl="picostill" />
           </span>
-          {% if still_session.alias is defined and still_session.alias|length %}{{still_session.alias}}{% else %}{{still_session.graph.chart_id}}{% endif %}
+          {% if still_session.alias is defined and still_session.alias|length %}{{still_session.alias}}{% else %}{{chart_id}}{% endif %}
+          <button class="still-start {{display_start}} btn btn-sm btn-success float-right mr-5" type="button" id="bstart_{{still_session.uid}}"
+              onclick="event.stopPropagation();event.preventDefault();start_monitoring('still', '{{still_session.uid}}');">
+              <i class="fas fa-play-circle"></i> Start Monitoring
+          </button>
+          <button class="still-stop {{display_stop}} btn btn-sm btn-danger float-right mr-5" type="button" id="bstop_{{still_session.uid}}"
+              onclick="event.stopPropagation();event.preventDefault();stop_monitoring('still', '{{still_session.uid}}');">
+              <i class="fas fa-stop-circle"></i> Stop Monitoring
+          </button>
         </a>
       </h5>
-      <div id="c_{{still_session.graph.chart_id}}" class="collapse show" aria-labelledby="h_{{still_session.graph.chart_id}}">
+      <div id="c_{{chart_id}}" class="collapse {{show}}" aria-labelledby="h_{{chart_id}}">
         <div class="card-body">
-          <div id="{{still_session.graph.chart_id}}" style="min-width: 320px; height: 400px; margin: 0 auto"></div>
+          <div id="{{chart_id}}" style="min-width: 320px; height: 400px; margin: 0 auto"></div>
           <script>var graph_data={{still_session.graph|tojson}};</script>
           <script src="/static/js/still_graph_socketio.js"></script>
-          {% if still_session.ipaddr is defined and still_session.ipaddr != None and still_session.ipaddr|length%}
+          
+          <!-- TODO (tmack) - the below only works in specific network setups (where your browsing device is on the same network...) -->
+          <!-- better setup would be to proxy all requests through the picobrew_pico service to the local IP address of the Still (according to the server) -->
+          <!-- going to work on this outside of the PicoStill graphing request -->
+
+          <!-- {% if still_session.ipaddr is defined and still_session.ipaddr != None and still_session.ipaddr|length%}
           <div class="card bg-dark text-white-50">
-            <h5 class="card-header" id="h2_{{still_session.graph.chart_id}}">
-              <a class="collapsed" role="button" data-toggle="collapse" href="#c2_{{still_session.graph.chart_id}}" data-parent="#accordion" aria-expanded="false" aria-controls="c2_{{still_session.graph.chart_id}}">
+            <h5 class="card-header" id="h2_{{chart_id}}">
+              <a class="collapsed" role="button" data-toggle="collapse" href="#c2_{{chart_id}}" data-parent="#accordion" aria-expanded="{{expanded}}" aria-controls="c2_{{chart_id}}">
                 Embedded PicoStill UI (iframe)
               </a>
             </h5>
-            <div id="c2_{{still_session.graph.chart_id}}" class="collapse show" aria-labelledby="h2_{{still_session.graph.chart_id}}">
+            <div id="c2_{{chart_id}}" class="collapse show" aria-labelledby="h2_{{chart_id}}">
               <div class="card-body">
                 <iframe src="http://{{still_session.ipaddr}}/data-page"></iframe>
               </div>
             </div>
           </div>
-          {% endif %}
+          {% endif %} -->
         </div>
       </div>
     </div>
     {% endfor %}
-    <!-- <a href="/still_manual">Begin Manual Still Session</a> -->
   </div>
   <div id="accordion">
     {% for iSpindel_session in iSpindel_sessions %}
@@ -123,11 +140,11 @@
           </span>
           {% if iSpindel_session.alias is defined and iSpindel_session.alias|length %}{{iSpindel_session.alias}}{% else %}{{chart_id}}{% endif %}
           <button class="fermentation-start {{display_start}} btn btn-sm btn-success float-right mr-5" type="button" id="bstart_{{iSpindel_session.uid}}"
-              onclick="event.stopPropagation();event.preventDefault();start_iSpindel_fermentation('{{iSpindel_session.uid}}');">
+              onclick="event.stopPropagation();event.preventDefault();start_monitoring('iSpindel', {{iSpindel_session.uid}}');">
               <i class="fas fa-play-circle"></i> Start Fermentation
           </button>
           <button class="fermentation-stop {{display_stop}} btn btn-sm btn-danger float-right mr-5" type="button" id="bstop_{{iSpindel_session.uid}}"
-              onclick="event.stopPropagation();event.preventDefault();stop_iSpindel_fermentation('{{iSpindel_session.uid}}');">
+              onclick="event.stopPropagation();event.preventDefault();stop_monitoring('iSpindel','{{iSpindel_session.uid}}');">
               <i class="fas fa-stop-circle"></i> Stop Fermentation
           </button>
         </a>
@@ -157,11 +174,11 @@
           </span>
           {% if tilt_session.alias is defined and tilt_session.alias|length %}{{tilt_session.alias}}{% else %}{{chart_id}}{% endif %}
           <button class="fermentation-start {{display_start}} btn btn-sm btn-success float-right mr-5" type="button" id="bstart_{{tilt_session.uid}}"
-              onclick="event.stopPropagation();event.preventDefault();start_tilt_fermentation('{{tilt_session.uid}}');">
+              onclick="event.stopPropagation();event.preventDefault();start_monitoring('tilt', '{{tilt_session.uid}}');">
               <i class="fas fa-play-circle"></i> Start Fermentation
           </button>
           <button class="fermentation-stop {{display_stop}} btn btn-sm btn-danger float-right mr-5" type="button" id="bstop_{{tilt_session.uid}}"
-              onclick="event.stopPropagation();event.preventDefault();stop_tilt_fermentation('{{tilt_session.uid}}');">
+              onclick="event.stopPropagation();event.preventDefault();stop_monitoring('tilt', '{{tilt_session.uid}}');">
               <i class="fas fa-stop-circle"></i> Stop Fermentation
           </button>
         </a>

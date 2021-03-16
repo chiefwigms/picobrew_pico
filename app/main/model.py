@@ -84,7 +84,9 @@ class PicoStillSession:
         self.uninit = True
         self.created_at = None
         self.name = 'Waiting To Distill'
+        self.active = False
         self.session = ''   # session guid
+        self.polling_thread = None
         self.data = []
 
     def cleanup(self):
@@ -96,6 +98,8 @@ class PicoStillSession:
         self.uninit = True
         self.created_at = None
         self.name = 'Waiting To Distill'
+        self.active = False
+        self.polling_thread = None
         self.session = ''
         self.data = []
 

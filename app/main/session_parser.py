@@ -249,7 +249,7 @@ def load_still_session(file):
     })
 
 
-def get_still_graph_data(chart_id, session_data):
+def get_still_graph_data(chart_id, name, session_data):
     t1_data = []
     t2_data = []
     t3_data = []
@@ -263,7 +263,7 @@ def get_still_graph_data(chart_id, session_data):
         pres_data.append([data['time'], float(data['pres'])])
     graph_data = {
         'chart_id': chart_id,
-        'title': {'text': 'Distillation/Extraction'},
+        'title': {'text': name},
         'series': [
             {
                 'name': 'Coil Inlet',
