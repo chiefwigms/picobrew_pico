@@ -309,6 +309,7 @@ then
   git pull || true
   # install dependencies and start server
   pip3 install -r requirements.txt
+  ./scripts/pi/post-git-update.sh
 fi
 
 source_sha=${GIT_SHA}

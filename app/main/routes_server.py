@@ -25,6 +25,10 @@ def restart_server():
     os.system('cd {0}; git pull; pip3 install -r requirements.txt'.format(base_path()))
     # TODO: Close file handles for open sessions?
 
+    if platform() == "RaspberryPi":
+        update_script="./scripts/pi/post-git-update.sh"
+        os.system('cd {0}; if [ -f {1} ]; then {1} --allow-reboot; fi'.format(base_path(), update_script))
+
     def restart():
         sleep(2)
         os.execl(sys.executable, *([sys.executable]+sys.argv))
