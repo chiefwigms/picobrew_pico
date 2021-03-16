@@ -246,7 +246,7 @@ def load_still_session(file):
         'name': name,
         'alias': alias,
         'data': json_data,
-        'graph': get_still_graph_data(chart_id, json_data)
+        'graph': get_still_graph_data(chart_id, name, json_data)
     })
 
 
