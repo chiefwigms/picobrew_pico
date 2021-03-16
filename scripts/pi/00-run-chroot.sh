@@ -233,76 +233,17 @@ EOF
 openssl req -x509 -sha256 -newkey rsa:2048 -nodes -keyout /certs/domain.key -days 1825  -out  /certs/domain.crt  -subj "/CN=chiefwigms_Picobrew_Pico CA"
 
 openssl req -newkey rsa:2048 -nodes -subj "/CN=picobrew.com" \
-      -keyout  /certs/server.key -out  /certs/server.csr
+    -keyout  /certs/server.key -out  /certs/server.csr
 
 openssl x509 \
-        -CA /certs/domain.crt -CAkey /certs/domain.key -CAcreateserial \
-       -in /certs/server.csr \
-       -req -days 1825 -out /certs/server.crt -extfile /certs/req.cnf -extensions v3_req
+    -CA /certs/domain.crt -CAkey /certs/domain.key -CAcreateserial \
+    -in /certs/server.csr \
+    -req -days 1825 -out /certs/server.crt -extfile /certs/req.cnf -extensions v3_req
 
 cat /certs/server.crt /certs/domain.crt > /certs/bundle.crt
 
 echo 'Setting up nginx for http and https...'
-cat > /etc/nginx/sites-available/picobrew.com.conf <<EOF
-server {
-    listen 80;
-    server_name www.picobrew.com picobrew.com;
-
-    access_log                  /var/log/nginx/picobrew.access.log;
-    error_log                   /var/log/nginx/picobrew.error.log;
-    
-    location / {
-        aio threads;
-
-        proxy_set_header    Host \$http_host;
-        proxy_pass          http://127.0.0.1:8080;
-    }
-
-    location /socket.io {
-        aio threads;
-        
-        include proxy_params;
-        proxy_http_version 1.1;
-        proxy_buffering off;
-        proxy_set_header Upgrade \$http_upgrade;
-        proxy_set_header Connection "Upgrade";
-        proxy_pass http://127.0.0.1:8080/socket.io;
-    }
-}
-
-server {
-    listen 443 ssl;
-    server_name www.picobrew.com picobrew.com;
-
-    ssl_certificate             /certs/bundle.crt;
-    ssl_certificate_key         /certs/server.key;
-    
-    access_log                  /var/log/nginx/picobrew.access.log;
-    error_log                   /var/log/nginx/picobrew.error.log;
-    
-    location / {
-        aio threads;
-
-        proxy_set_header    Host \$http_host;
-        proxy_set_header    X-Real-IP \$remote_addr;
-        proxy_set_header    X-Forwarded-For \$proxy_add_x_forwarded_for;
-        proxy_set_header    X-Forwarded-Proto \$scheme;
-        proxy_pass          http://127.0.0.1:8080;
-    }
-    
-    location /socket.io {
-        aio threads;
-        
-        include proxy_params;
-        proxy_http_version 1.1;
-        proxy_buffering off;
-        proxy_set_header Upgrade \$http_upgrade;
-        proxy_set_header Connection "Upgrade";
-        proxy_pass http://127.0.0.1:8080/socket.io;
-    }
-}
-EOF
-
+ln -s /picobrew_pico/scripts/pi/picobrew.com.conf /etc/nginx/sites-available/picobrew.com.conf
 ln -s /etc/nginx/sites-available/picobrew.com.conf /etc/nginx/sites-enabled/picobrew.com.conf
 rm /etc/nginx/sites-enabled/default
 
