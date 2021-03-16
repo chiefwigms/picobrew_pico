@@ -482,8 +482,7 @@ def restore_active_still_sessions():
             session.filepath = file
             session.alias = still_session['alias']
             session.start_time = still_session['date']
-            session.active = True
-            session.start_still_polling()
+            session.active = False
 
             session.data = still_session['data']
             session.graph = still_session['graph']
