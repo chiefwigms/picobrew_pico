@@ -9,14 +9,17 @@ chart: {
   events: {
     load: function () {
       var self = this
-      var event_name = 'iSpindel_session_update|' + graph_data.chart_id
+      var event_name = 'still_session_update|' + graph_data.chart_id
       socket.on(event_name, function (event)
       {
           var data = JSON.parse(event);
-          self.setTitle(graph_data.title, {text: 'Voltage: ' + data['voltage'] + 'V'});
+          self.setTitle(graph_data.title, 'Manual Still');
           for (point of data['data']) {
-            self.series[0].addPoint([point.time, point.temp]);
-            self.series[1].addPoint([point.time, point.gravity]);  
+            self.series[0].addPoint([point.time, point.t1]);
+            self.series[1].addPoint([point.time, point.t2]);
+            self.series[2].addPoint([point.time, point.t3]);
+            self.series[3].addPoint([point.time, point.t4]);
+            self.series[4].addPoint([point.time, point.pres]);  
           }
       });
     },
@@ -63,10 +66,10 @@ yAxis: [
     //max: 90
   }, {
     title: {
-      text: 'Specific Gravity'
+      text: 'Pressure (psi)'
     },
-    min: 0.9,
-    //max: 1.1
+    min: 0,
+    //max: 15
     opposite: true
 }],
 

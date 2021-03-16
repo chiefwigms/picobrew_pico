@@ -4,8 +4,9 @@ from dateutil import tz
 from pathlib import Path
 from flask import current_app
 
-from .config import brew_active_sessions_path, ferm_active_sessions_path, iSpindel_active_sessions_path, tilt_active_sessions_path
-from .model import PicoBrewSession, PicoFermSession, iSpindelSession, TiltSession
+from .config import (brew_active_sessions_path, ferm_active_sessions_path, still_active_sessions_path,
+                     iSpindel_active_sessions_path, tilt_active_sessions_path)
+from .model import PicoBrewSession, PicoFermSession, PicoStillSession, iSpindelSession, TiltSession
 
 file_glob_pattern = "[!._]*.json"
 
@@ -230,15 +231,72 @@ def epoch_millis_converter(epoch_ms):
     return datetime_utc.astimezone(tz.tzlocal())
 
 
-def load_iSpindel_session(file):
+def load_still_session(file):
     info = file.stem.split('#')
-    
     # 0 = Date, 1 = Device UID
     json_data = load_session_file(file)
-    
+
+    chart_id = info[0] + '_' + info[1]
+    name = info[1]
+    alias = info[1] if info[1] not in active_still_sessions else active_still_sessions[info[1]].alias
+
+    return ({
+        'uid': info[1],
+        'date': info[0],
+        'name': name,
+        'alias': alias,
+        'data': json_data,
+        'graph': get_still_graph_data(chart_id, json_data)
+    })
+
+
+def get_still_graph_data(chart_id, name, session_data):
+    t1_data = []
+    t2_data = []
+    t3_data = []
+    t4_data = []
+    pres_data = []
+    for data in session_data:
+        t1_data.append([data['time'], float(data['t1'])])
+        t2_data.append([data['time'], float(data['t2'])])
+        t3_data.append([data['time'], float(data['t3'])])
+        t4_data.append([data['time'], float(data['t4'])])
+        pres_data.append([data['time'], float(data['pres'])])
+    graph_data = {
+        'chart_id': chart_id,
+        'title': {'text': name},
+        'series': [
+            {
+                'name': 'Coil Inlet',
+                'data': t1_data
+            }, {
+                'name': 'Coil Outlet',
+                'data': t2_data
+            }, {
+                'name': 'Pot',
+                'data': t3_data
+            }, {
+                'name': 'Ambient',
+                'data': t4_data
+            }, {
+                'name': 'Pressure',
+                'data': pres_data,
+                'yAxis': 1
+            }
+        ],
+    }
+    return graph_data
+
+
+def load_iSpindel_session(file):
+    info = file.stem.split('#')
+
+    # 0 = Date, 1 = Device UID
+    json_data = load_session_file(file)
+
     chart_id = info[0] + '_' + str(info[1])
     alias = info[1] if info[1] not in active_iSpindel_sessions else active_iSpindel_sessions[info[1]].alias
-    
+
     # filename datetime string format "20200615_205946"
     server_start_datetime = datetime.strptime(info[0], '%Y%m%d_%H%M%S')
     # json datetime `timeStr` format "2020-06-15T20:59:46.280731" (UTC) ; 'time' milliseconds from epoch
@@ -291,13 +349,13 @@ def get_iSpindel_graph_data(chart_id, voltage, session_data):
 
 def load_tilt_session(file):
     info = file.stem.split('#')
-    
+
     # 0 = Date, 1 = Device UID
     json_data = load_session_file(file)
-    
+
     chart_id = info[0] + '_' + str(info[1])
     alias = info[1] if info[1] not in active_tilt_sessions else active_tilt_sessions[info[1]].alias
-    
+
     # filename datetime string format "20200615_205946"
     server_start_datetime = datetime.strptime(info[0], '%Y%m%d_%H%M%S')
     # json datetime `timeStr` format "2020-06-15T20:59:46.280731" (UTC) ; 'time' milliseconds from epoch
@@ -407,6 +465,31 @@ def restore_active_ferm_sessions():
             active_ferm_sessions[uid] = session
 
 
+def restore_active_still_sessions():
+    if active_still_sessions == {}:
+        active_still_session_files = list(still_active_sessions_path().glob(file_glob_pattern))
+        for file in active_still_session_files:
+            # print('DEBUG: restore_active_sessions() found {} as an active session'.format(file))
+            still_session = load_still_session(file)
+            # print('DEBUG: restore_active_sessions() {}'.format(still_session))
+            uid = still_session['uid']
+            if uid not in active_still_sessions:
+                active_still_sessions[uid] = PicoStillSession(uid)
+
+            session = active_still_sessions[uid]
+            session.file = open(file, 'a')
+            session.file.flush()
+            session.filepath = file
+            session.alias = still_session['alias']
+            session.start_time = still_session['date']
+            session.active = True
+            session.start_still_polling()
+
+            session.data = still_session['data']
+            session.graph = still_session['graph']
+            active_still_sessions[uid] = session
+
+
 def restore_active_iSpindel_sessions():
     if active_iSpindel_sessions == {}:
         active_iSpindel_session_files = list(iSpindel_active_sessions_path().glob(file_glob_pattern))
@@ -461,5 +544,6 @@ def restore_active_sessions():
     # initialize active sessions during start up
     restore_active_brew_sessions()
     restore_active_ferm_sessions()
+    restore_active_still_sessions()
     restore_active_iSpindel_sessions()
     restore_active_tilt_sessions()

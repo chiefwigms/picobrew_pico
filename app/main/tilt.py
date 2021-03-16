@@ -18,6 +18,7 @@ TILTS = {
     'a495bb80c5b14b44b5121370f02d74de': 'Pink',
 }
 
+
 def get_number(data):
     integer = 0
     multiple = 256
@@ -26,55 +27,58 @@ def get_number(data):
         multiple = 1
     return integer
 
+
 def get_string(data):
     string = ''
     for c in data:
         string += '%02x' % c
     return string
 
+
 # rssi is is the 2's complement of the calibrated Tx Power
 def get_rssi(data):
-    tx_power=data[0]
+    tx_power = data[0]
     return -(256-tx_power)
 
-# there may be a better way, but i wasn't sure how to filter out 
+
+# there may be a better way, but i wasn't sure how to filter out
 # other devices better than this. The name is currently always 'Tilt'
 # but it seems like a bad idea to just trust that or it could just be
 # if d.name.startswith('Tilt'):
 def tilts(devices):
-    tilts=[]
+    tilts = []
     for d in devices:
         if d.metadata['manufacturer_data'] and 76 in d.metadata['manufacturer_data']:
             data = d.metadata['manufacturer_data'][76]
-            #print(get_string(data))
+            # print(get_string(data))
             if bytearray(data[:2]) == bytearray(IBEACON_PROXIMITY_TYPE):
-                color_uid=get_string(data[2:18])
+                color_uid = get_string(data[2:18])
                 if color_uid in TILTS:
                     # maintain same field names as pytilt in case someone wants to use that
                     # but add uid and rssi
-                    color=TILTS[color_uid]
+                    color = TILTS[color_uid]
                     tilts.append({
                         'uid': color + '-' + d.address,
                         'rssi': get_rssi(data[22:23]),
                         'color': color,
                         'timestamp': datetime.utcnow().isoformat(),
-                        'temp': get_number(data[18:20]),    # fahrenheit
-                        'gravity': get_number(data[20:22]), # gravity * 1000
+                        'temp': get_number(data[18:20]),     # fahrenheit
+                        'gravity': get_number(data[20:22]),  # gravity * 1000
                     })
     return tilts
 
 
 async def scan(app):
-    #print("Scanning for tilts...")
+    # print("Scanning for tilts...")
     with app.app_context():
         devices = await BleakScanner.discover(10.0)
         for tilt in tilts(devices):
-            #print(tilt)
+            # print(tilt)
             process_tilt_data(tilt)
 
 
 def run(app, sleep_interval):
-    print ("Starting Tilt collection thread")
+    print("Starting Tilt collection thread")
 
     try:
         while True:

@@ -47,12 +47,12 @@ Highcharts.chart(graph_data.chart_id, {
       //max: 90
     }, {
       title: {
-        text: 'Specific Gravity'
+        text: 'Pressure (psi)'
       },
-      min: 0.9,
-      //max: 1.1
+      min: 0,
+      //max: 15
       opposite: true
   }],
-  
+
   series: graph_data.series,
 });

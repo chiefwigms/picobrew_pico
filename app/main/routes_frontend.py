@@ -5,7 +5,7 @@ import requests
 import socket
 import uuid
 from ruamel.yaml import YAML
-from flask import current_app, make_response, request, send_file, escape
+from flask import current_app, escape, make_response, redirect, request, send_file
 from pathlib import Path
 from os import path
 from werkzeug.utils import secure_filename
@@ -17,8 +17,12 @@ from .frontend_common import render_template_with_defaults
 from .model import PicoBrewSession, PicoFermSession, PicoStillSession, iSpindelSession, TiltSession
 from .recipe_import import import_recipes
 from .recipe_parser import PicoBrewRecipe, PicoBrewRecipeImport, ZymaticRecipe, ZymaticRecipeImport, ZSeriesRecipe
-from .session_parser import load_iSpindel_session, get_iSpindel_graph_data, load_ferm_session, get_ferm_graph_data, get_brew_graph_data, load_brew_session, active_brew_sessions, active_ferm_sessions, active_iSpindel_sessions, active_still_sessions, load_tilt_session, get_tilt_graph_data, active_tilt_sessions
-from .config import base_path, zymatic_recipe_path, zseries_recipe_path, pico_recipe_path, ferm_archive_sessions_path, brew_archive_sessions_path, iSpindel_archive_sessions_path, tilt_archive_sessions_path, MachineType
+from .session_parser import (load_brew_session, load_ferm_session, load_still_session, load_iSpindel_session, load_tilt_session,
+                                get_brew_graph_data, get_ferm_graph_data, get_still_graph_data, get_iSpindel_graph_data, get_tilt_graph_data,
+                                active_brew_sessions, active_ferm_sessions, active_still_sessions, active_iSpindel_sessions, active_tilt_sessions)
+from .config import (base_path, MachineType,
+                        zymatic_recipe_path, zseries_recipe_path, pico_recipe_path, 
+                        brew_archive_sessions_path, ferm_archive_sessions_path, still_archive_sessions_path, iSpindel_archive_sessions_path, tilt_archive_sessions_path)
 
 
 file_glob_pattern = "[!._]*.json"
@@ -30,9 +34,9 @@ yaml = YAML()
 def index():
     return render_template_with_defaults('index.html', brew_sessions=load_active_brew_sessions(),
                            ferm_sessions=load_active_ferm_sessions(),
-                           iSpindel_sessions=load_active_iSpindel_sessions(),
-                           tilt_sessions=load_active_tilt_sessions())
-
+                           still_sessions=load_active_still_sessions(),
+                           tilt_sessions=load_active_tilt_sessions(),
+                           iSpindel_sessions=load_active_iSpindel_sessions())
 
 
 @main.route('/brew_history')
@@ -43,6 +47,11 @@ def brew_history():
 @main.route('/ferm_history')
 def ferm_history():
     return render_template_with_defaults('ferm_history.html', sessions=load_ferm_sessions(), invalid=get_invalid_sessions('ferm'))
+
+
+@main.route('/still_history')
+def still_history():
+    return render_template_with_defaults('still_history.html', sessions=load_still_sessions(), invalid=get_invalid_sessions('still'))
 
 
 @main.route('/iSpindel_history')
@@ -187,6 +196,8 @@ def update_device_session(uid, session_type):
         session = active_iSpindel_sessions[uid]
     elif session_type == 'tilt':
         session = active_tilt_sessions[uid]
+    elif session_type == 'still':
+        session = active_still_sessions[uid]
     else:
         valid_session = False
 
@@ -205,6 +216,14 @@ def update_device_session(uid, session_type):
                     os.remove(session.filepath)
         else:
             session.active = True
+
+            if session_type == 'still':
+                try:
+                    session.start_still_polling()
+                except Exception as e:
+                    current_app.logger.error('failed to start picostill polling thread')
+                    return getattr(e, 'message', e.args[0]), 418
+        
 
         return '', 204
     else:
@@ -538,7 +557,7 @@ def load_brew_sessions(uid=None):
 def parse_ferm_session(file):
     try:
         return load_ferm_session(file)
-    except:
+    except Exception:
         current_app.logger.error("ERROR: An exception occurred parsing {}".format(file))
         add_invalid_session("ferm", file)
     
@@ -561,18 +580,38 @@ def load_ferm_sessions():
 
 
 def parse_iSpindel_session(file):
+    add_invalid_session("iSpindel", file)
+
+
+def parse_still_session(file):
     try:
-        return load_iSpindel_session(file)
-    except:
+        return load_still_session(file)
+    except Exception:
         current_app.logger.error("ERROR: An exception occurred parsing {}".format(file))
-        add_invalid_session("iSpindel", file)
+        add_invalid_session("still", file)
+    
+
+def load_active_still_sessions():
+    still_sessions = []
+    for uid in active_still_sessions:
+        still_sessions.append({'alias': active_still_sessions[uid].alias,
+                              'ipaddr': active_still_sessions[uid].ip_address,
+                              'graph': get_still_graph_data(uid, active_still_sessions[uid].name, active_still_sessions[uid].data),
+                              'uid': uid})
+    return still_sessions
+
+
+def load_still_sessions():
+    files = list(still_archive_sessions_path().glob(file_glob_pattern))
+    still_sessions = [parse_still_session(file) for file in files]
+    return list(filter(lambda x: x != None, still_sessions))
 
 
 def load_active_iSpindel_sessions():
     iSpindel_sessions = []
     for uid in active_iSpindel_sessions:
         iSpindel_sessions.append({'alias': active_iSpindel_sessions[uid].alias,
-                                  'uid' : uid,
+                                  'uid': uid,
                                   'active': active_iSpindel_sessions[uid].active,
                                   'graph': get_iSpindel_graph_data(uid, active_iSpindel_sessions[uid].voltage,
                                                                    active_iSpindel_sessions[uid].data)})
@@ -588,7 +627,7 @@ def load_iSpindel_sessions():
 def parse_tilt_session(file):
     try:
         return load_tilt_session(file)
-    except:
+    except Exception:
         current_app.logger.error("ERROR: An exception occurred parsing {}".format(file))
         add_invalid_session("tilt", file)
 
@@ -597,7 +636,7 @@ def load_active_tilt_sessions():
     tilt_sessions = []
     for uid in active_tilt_sessions:
         tilt_sessions.append({'alias': active_tilt_sessions[uid].alias,
-                                  'uid' : uid,
+                                  'uid': uid,
                                   'active': active_tilt_sessions[uid].active,
                                   'graph': get_tilt_graph_data(uid, active_tilt_sessions[uid].rssi,
                                                                    active_tilt_sessions[uid].data)})
@@ -616,6 +655,8 @@ zseries_recipes = []
 
 brew_sessions = []
 ferm_sessions = []
+still_sessions = []
+iSpindel_sessions = []
 
 invalid_recipes = {}
 invalid_sessions = {}
@@ -623,7 +664,7 @@ invalid_sessions = {}
 
 def initialize_data():
     global pico_recipes, zymatic_recipes, zseries_recipes, invalid_recipes
-    global brew_sessions, ferm_sessions, iSpindel_sessions, tilt_sessions
+    global brew_sessions, ferm_sessions, still_sessions, iSpindel_sessions, tilt_sessions
 
     # Read initial recipe list on load
     pico_recipes = load_pico_recipes()
@@ -633,6 +674,7 @@ def initialize_data():
     # load all archive brew sessions
     brew_sessions = load_active_brew_sessions()
     ferm_sessions = load_active_ferm_sessions()
+    still_sessions = load_active_still_sessions()
     iSpindel_sessions = load_active_iSpindel_sessions()
     tilt_sessions = load_active_tilt_sessions()
 

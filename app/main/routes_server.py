@@ -1,17 +1,12 @@
-import json
 import os
 import re
-import requests
 import shlex
-import socket
 import subprocess
 import sys
 import traceback
 from flask import current_app, make_response, request, redirect, send_file
-from pathlib import Path
 from threading import Thread
 from time import sleep
-from os import path
 
 from . import main
 from .config import base_path
@@ -45,7 +40,7 @@ def restart_system():
     os.system('shutdown -r now')
     # TODO: redirect to a page with alert of restart
     return redirect('/')
-    
+
 
 @main.route('/shutdown_system')
 def shutdown_system():
@@ -244,7 +239,7 @@ def setup():
 def hostname():
     try:
         return subprocess.check_output("hostname", shell=True).decode("utf-8").strip()
-    except:
+    except Exception:
         current_app.logger.warn("current device doesn't support hostname changes")
     return None
 
@@ -259,7 +254,7 @@ def ip_addresses():
         current_app.logger.warn(f"current device doesn't support 'ifconfig' error={error.returncode} output={error.output}")
         command_output = list(filter(None, re.split('\\s', error.output.decode())))
 
-    pat=re.compile(r'\b(?:\d{1,3}\.){3}\d{1,3}\b')
+    pat = re.compile(r'\b(?:\d{1,3}\.){3}\d{1,3}\b')
     ip_addrs = [m.group(0) for s in command_output for m in pat.finditer(s)]
 
     if len(ip_addrs) > 0:
@@ -275,14 +270,14 @@ def accesspoint_credentials():
     try:
         ssid = subprocess.check_output('more /etc/hostapd/hostapd.conf | grep -w ^ssid | awk -F "=" \'{print $2}\'', shell=True)
         psk = subprocess.check_output('more /etc/hostapd/hostapd.conf | grep -w ^wpa_passphrase | awk -F "=" \'{print $2}\'', shell=True)
-        
+
         return {
             'ssid': ssid.decode("utf-8").strip().strip('"'),
             'psk': psk.decode("utf-8").strip().strip('"'),
         }
-    except:
+    except Exception:
         current_app.logger.warn("WARN: failed to retrieve access point information from hostapd")
-        
+
     return {}
 
 
@@ -304,7 +299,7 @@ def wireless_credentials():
         # second filter to the line that contains the text 'bssid'
         # return the value after the '=' in bssid=<value>
         bssid = subprocess.check_output(cmd_template.format(key='bssid') + '| awk -F "=" \'{print $2}\'', shell=True)
-    except:
+    except Exception:
         bssid = None
 
     return { 
@@ -330,14 +325,14 @@ def about():
     try:
         latestMasterSha = subprocess.check_output("cd {0}; git fetch origin && git rev-parse --short origin/master".format(base_path()), shell=True)
         latestMasterSha = latestMasterSha.decode("utf-8")
-    except:
+    except Exception:
         latestMasterSha = "unavailable (check network)"
 
     # query for local file changes
     try:
         localChanges = subprocess.check_output("cd {0}; git fetch origin; git --no-pager diff --name-only".format(base_path()), shell=True)
         localChanges = localChanges.decode("utf-8").strip()
-    except:
+    except Exception:
         localChanges = "unavailable (check network)"
 
     # # capture raspbian pinout
@@ -346,13 +341,13 @@ def about():
     try:
         pinout = subprocess.check_output("pinout", shell=True)
         pinout = pinout.decode("utf-8")
-    except:
+    except Exception:
         pinout = None
 
     image_release = os.environ.get("IMG_RELEASE", None)
     image_variant = os.environ.get("IMG_VARIANT", None)
-    image_version = None if image_release == None else f"{image_release}_{image_variant}" 
+    image_version = None if image_release is None else f"{image_release}_{image_variant}" 
     
     return render_template_with_defaults('about.html', git_version=gitSha, latest_git_sha=latestMasterSha, local_changes=localChanges,
-                           server_info=server_information, os_release=system_info, 
+                           server_info=server_information, os_release=system_info,
                            raspberrypi_info=pinout, raspberrypi_image=image_version)

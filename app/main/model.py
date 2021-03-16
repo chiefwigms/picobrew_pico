@@ -1,7 +1,9 @@
+from flask import current_app
+import requests
 import shutil
+
 from .config import (MachineType, brew_archive_sessions_path, ferm_archive_sessions_path,
                      still_archive_sessions_path, iSpindel_archive_sessions_path, tilt_archive_sessions_path)
-
 
 ZYMATIC_LOCATION = {
     'PassThru': '0',
@@ -76,6 +78,64 @@ class PicoBrewSession:
         self.data = []
 
 
+class PicoStillSession:
+    def __init__(self, uid=None):
+        self.file = None
+        self.filepath = None
+        self.alias = ''
+        self.ip_address = None
+        self.device_id = uid
+        self.uninit = True
+        self.created_at = None
+        self.name = 'Waiting To Distill'
+        self.active = False
+        self.session = ''   # session guid
+        self.polling_thread = None
+        self.data = []
+
+    def cleanup(self):
+        if self.file and self.filepath:
+            self.file.close()
+            shutil.move(str(self.filepath), str(still_archive_sessions_path()))
+        self.file = None
+        self.filepath = None
+        self.uninit = True
+        self.created_at = None
+        self.name = 'Waiting To Distill'
+        self.active = False
+        self.polling_thread = None
+        self.session = ''
+        self.data = []
+
+    def start_still_polling(self):
+        connect_failure = False
+        try:
+            still_data_uri = 'http://{}/data'.format(self.ip_address)
+            current_app.logger.debug('DEBUG: Retrieve PicoStill Data - {}'.format(still_data_uri))
+            r = requests.get(still_data_uri)
+            datastring = r.text.strip()
+        except Exception as e:
+            current_app.logger.error(f'exception occured communicating to picostill : {e}')
+            datastring = None
+            connect_failure = True
+
+        if not datastring or datastring[0] != '#':
+            connect_failure = True
+            current_app.logger.error(f'received unexpected response string : {datastring}')
+
+        if connect_failure:
+            raise Exception('Connect PicoStill: Failed to connect to PicoStill on address \"' + self.ip_address + '\"')
+
+        from .still_polling import new_still_session
+        from .still_polling import FlaskThread
+
+        thread = FlaskThread(target=new_still_session,
+                             args=(self.ip_address, self.device_id),
+                             daemon=True)
+        thread.start()
+        self.polling_thread = thread
+
+
 class PicoFermSession:
     def __init__(self):
         self.file = None
@@ -95,25 +155,6 @@ class PicoFermSession:
         self.filepath = None
         self.uninit = True
         self.voltage = '-'
-        self.start_time = None
-        self.data = []
-
-
-class PicoStillSession:
-    def __init__(self):
-        self.file = None
-        self.filepath = None
-        self.alias = ''
-        self.name = 'Graphing Not Supported Yet'
-        self.start_time = None
-        self.data = []
-
-    def cleanup(self):
-        if self.file and self.filepath:
-            self.file.close()
-            shutil.move(str(self.filepath), str(still_archive_sessions_path()))
-        self.file = None
-        self.filepath = None
         self.start_time = None
         self.data = []
 
