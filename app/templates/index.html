@@ -142,11 +142,11 @@
           </span>
           {% if iSpindel_session.alias is defined and iSpindel_session.alias|length %}{{iSpindel_session.alias}}{% else %}{{chart_id}}{% endif %}
           <button class="fermentation-start {{display_start}} btn btn-sm btn-success float-right mr-5" type="button" id="bstart_{{iSpindel_session.uid}}"
-              onclick="event.stopPropagation();event.preventDefault();start_monitoring('iSpindel', {{iSpindel_session.uid}}');">
+              onclick="event.stopPropagation();event.preventDefault();start_monitoring('iSpindel', '{{iSpindel_session.uid}}');">
               <i class="fas fa-play-circle"></i> Start Fermentation
           </button>
           <button class="fermentation-stop {{display_stop}} btn btn-sm btn-danger float-right mr-5" type="button" id="bstop_{{iSpindel_session.uid}}"
-              onclick="event.stopPropagation();event.preventDefault();stop_monitoring('iSpindel','{{iSpindel_session.uid}}');">
+              onclick="event.stopPropagation();event.preventDefault();stop_monitoring('iSpindel', '{{iSpindel_session.uid}}');">
               <i class="fas fa-stop-circle"></i> Stop Fermentation
           </button>
         </a>
