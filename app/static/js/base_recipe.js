@@ -23,7 +23,7 @@ function recipe_tooltips(machine_type) {
                 if (selected_units == 'imperial') {
                     tip += `[0 - 208] (°F)`;
                 } else {
-                    tip += `[${convert_temperature(0, selected_units)} - ${convert_temperature(100, selected_units)}] (°C)`;
+                    tip += `[${convert_temperature(0, selected_units)} - ${convert_temperature(208, selected_units)}] (°C)`;
                 }
                 break;
             case "step_time":
