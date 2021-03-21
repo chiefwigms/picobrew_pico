@@ -5,6 +5,7 @@ ENV PORT=80
 
 WORKDIR /picobrew_pico
 
+RUN apt-get update && apt-get install -y bluez bluetooth
 RUN pip3 install -U pip
 
 # initialize an empty remote git repository linked folder
