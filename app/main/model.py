@@ -188,6 +188,7 @@ class TiltSession:
         self.file = None
         self.filepath = None
         self.alias = ''
+        self.color = None
         self.active = False
         self.uninit = True
         self.rssi = None

@@ -4,10 +4,11 @@ import re
 import requests
 import socket
 import uuid
-from ruamel.yaml import YAML
+from datetime import datetime
 from flask import current_app, escape, make_response, redirect, request, send_file
-from pathlib import Path
 from os import path
+from pathlib import Path
+from ruamel.yaml import YAML
 from werkzeug.utils import secure_filename
 
 
@@ -533,8 +534,11 @@ def load_active_brew_sessions():
 
     # process brew_sessions from memory
     for uid in active_brew_sessions:
+        current_app.logger.debug(f'date : {active_brew_sessions[uid].created_at}')
         brew_sessions.append({'alias': active_brew_sessions[uid].alias,
+                              'uid': uid,
                               'active': active_brew_sessions[uid].name != 'Waiting To Brew',
+                              'date': active_brew_sessions[uid].created_at or None,
                               'machine_type': active_brew_sessions[uid].machine_type,
                               'graph': get_brew_graph_data(uid, active_brew_sessions[uid].name,
                                                            active_brew_sessions[uid].step,
@@ -568,6 +572,7 @@ def load_active_ferm_sessions():
         ferm_sessions.append({'alias': active_ferm_sessions[uid].alias,
                               'uid': uid,
                               'active': active_ferm_sessions[uid].active,
+                              'date': active_ferm_sessions[uid].start_time or None,
                               'graph': get_ferm_graph_data(uid, active_ferm_sessions[uid].voltage,
                                                            active_ferm_sessions[uid].data)})
     return ferm_sessions
@@ -595,9 +600,11 @@ def load_active_still_sessions():
     still_sessions = []
     for uid in active_still_sessions:
         still_sessions.append({'alias': active_still_sessions[uid].alias,
+                              'uid': uid,
                               'ipaddr': active_still_sessions[uid].ip_address,
-                              'graph': get_still_graph_data(uid, active_still_sessions[uid].name, active_still_sessions[uid].data),
-                              'uid': uid})
+                              'active': active_still_sessions[uid].active,
+                              'date': active_still_sessions[uid].created_at or None,
+                              'graph': get_still_graph_data(uid, active_still_sessions[uid].name, active_still_sessions[uid].data)})
     return still_sessions
 
 
@@ -613,6 +620,7 @@ def load_active_iSpindel_sessions():
         iSpindel_sessions.append({'alias': active_iSpindel_sessions[uid].alias,
                                   'uid': uid,
                                   'active': active_iSpindel_sessions[uid].active,
+                                  'date': active_iSpindel_sessions[uid].created_at or None,
                                   'graph': get_iSpindel_graph_data(uid, active_iSpindel_sessions[uid].voltage,
                                                                    active_iSpindel_sessions[uid].data)})
     return iSpindel_sessions
@@ -637,7 +645,9 @@ def load_active_tilt_sessions():
     for uid in active_tilt_sessions:
         tilt_sessions.append({'alias': active_tilt_sessions[uid].alias,
                                   'uid': uid,
+                                  'color': active_tilt_sessions[uid].color,
                                   'active': active_tilt_sessions[uid].active,
+                                  'date': active_tilt_sessions[uid].start_time or None,
                                   'graph': get_tilt_graph_data(uid, active_tilt_sessions[uid].rssi,
                                                                    active_tilt_sessions[uid].data)})
     return tilt_sessions
