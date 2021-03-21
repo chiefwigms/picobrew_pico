@@ -579,10 +579,6 @@ def load_ferm_sessions():
     return list(filter(lambda x: x != None, ferm_sessions))
 
 
-def parse_iSpindel_session(file):
-    add_invalid_session("iSpindel", file)
-
-
 def parse_still_session(file):
     try:
         return load_still_session(file)
@@ -605,6 +601,14 @@ def load_still_sessions():
     files = list(still_archive_sessions_path().glob(file_glob_pattern))
     still_sessions = [parse_still_session(file) for file in files]
     return list(filter(lambda x: x != None, still_sessions))
+
+
+def parse_iSpindel_session(file):
+    try:
+        return load_iSpindel_session(file)
+    except:
+        current_app.logger.error("ERROR: An exception occurred parsing {}".format(file))
+        add_invalid_session("iSpindel", file)
 
 
 def load_active_iSpindel_sessions():
