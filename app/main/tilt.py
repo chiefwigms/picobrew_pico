@@ -68,23 +68,33 @@ def tilts(devices):
     return tilts
 
 
-async def scan(app):
-    # print("Scanning for tilts...")
+async def scan(app, interval):
     with app.app_context():
+        # app.logger.debug("Scanning for tilts...")
         devices = await BleakScanner.discover(10.0)
-        for tilt in tilts(devices):
-            # print(tilt)
-            process_tilt_data(tilt)
+        try:
+            tilts_found = tilts(devices)
+            for tilt in tilts_found:
+                # app.logger.debug(tilt)
+                process_tilt_data(tilt)
+
+            app.logger.debug(f"found {len(tilts_found)} tilt(s)")
+        except Exception as e:
+            app.logger.error(f"error occurred parsing ble broadcasts - {e}")
+            
+
+async def start_infinite_scan(app, interval):
+    while True: 
+        await scan(app, interval)
+        # pause and rescan for available tilts after specified interval
+        time.sleep(interval)
 
 
 def run(app, sleep_interval):
-    print("Starting Tilt collection thread")
-
+    app.logger.info("Starting Tilt collection thread")
     try:
-        while True:
-            asyncio.run(scan(app))
-            time.sleep(sleep_interval)
+        asyncio.run(start_infinite_scan(app, sleep_interval))
     except Exception as e:
-        print(e)
-        print("Error accessing bluetooth device. Shutting down Tilt thread...")
+        app.logger.error(e)
+        app.logger.error("Error accessing bluetooth device. Shutting down Tilt thread...")
         return
