@@ -225,9 +225,8 @@ def get_ferm_graph_data(chart_id, voltage, session_data):
 
 
 def epoch_millis_converter(epoch_ms):
-    epoch_ms_datetime = datetime.fromtimestamp(float(epoch_ms / 1000))
-    datetime_utc = datetime.utcfromtimestamp(float(epoch_ms_datetime.strftime("%s")))
-    datetime_utc = datetime_utc.replace(tzinfo=tz.tzutc())
+    epoch_s, differencial_ms = divmod(epoch_ms, 1000.0)
+    datetime_utc = datetime.fromtimestamp(epoch_s, tz.tzutc())
     return datetime_utc.astimezone(tz.tzlocal())
 
 
