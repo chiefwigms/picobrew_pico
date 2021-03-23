@@ -1,5 +1,5 @@
-from .recipe_import import import_recipes, import_recipes_classic, ImportException
-from .config import MachineType
+from app.main.recipe_import import import_recipes, import_recipes_classic, ImportException
+from app.main.config import MachineType
 import unittest
 import mock
 from flask import Flask
