@@ -262,11 +262,10 @@ def dirty_sessions_since_clean(uid):
     for s in brew_sessions:
         session_name = s.get('name')
         
-        if (session_name == "CLEAN" or session_name == "DEEP CLEAN"):
+        if (session_name.upper() in ["CLEAN", "DEEP CLEAN"]):
             clean_found = True
 
-
-        if (not clean_found and session_name not in ["RINSE", "CLEAN", "DEEP CLEAN", "RACK", "DRAIN"]):
+        if (not clean_found and session_name.upper() not in ["RINSE", "CLEAN", "DEEP CLEAN", "RACK", "DRAIN"]):
             post_clean_sessions.append(s)
 
     return len(post_clean_sessions)
