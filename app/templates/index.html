@@ -177,7 +177,7 @@
       <h5 class="card-header" id="h_{{chart_id}}">
         <a class="collapsed" role="button" data-toggle="collapse" href="#c_{{chart_id}}" data-parent="#accordion" aria-expanded="{{expanded}}" aria-controls="c_{{chart_id}}">
           <span class="equipment-icon">
-            <img src="/static/img/tilt.svg" atl="ispindle">
+            <img src="/static/img/iSpindel.svg" atl="ispindle">
           </span>
           {% if iSpindel_session.alias is defined and iSpindel_session.alias|length %}{{iSpindel_session.alias}}{% else %}{{chart_id}}{% endif %}
           <button class="fermentation-start {{display_start}} btn btn-sm btn-success float-right mr-5" type="button" id="bstart_{{iSpindel_session.uid}}"
@@ -225,7 +225,7 @@
       <h5 class="card-header" id="h_{{chart_id}}">
         <a class="collapsed" role="button" data-toggle="collapse" href="#c_{{chart_id}}" data-parent="#accordion" aria-expanded="{{expanded}}" aria-controls="c_{{chart_id}}">
           <span class="equipment-icon">
-            <img src="/static/img/tilt.svg" atl="tilt">
+            <img src="/static/img/tilt%20logo_2color.svg" atl="tilt">
           </span>
           {% if tilt_session.color %}
           <span class="badge badge-secondary ml-1" style="min-width: 70px; background-color: {{tilt_session.color}} !important; color: {{text_color}} !important;">{{tilt_session.color}}</span>
