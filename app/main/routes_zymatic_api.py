@@ -120,7 +120,7 @@ def process_recover_session(args):
 session_error_args = {
     'machine': fields.Str(required=True),       # 12 character alpha-numeric Product ID
     'session': fields.Str(required=True),       # 32 character alpha-numeric session
-    'code': fields.Int(required=True),          # Int Error Code
+    'errorcode': fields.Int(required=True),     # Int Error Code
 }
 @main.route('/API/sessionerror')
 @use_args(session_error_args, location='querystring')
