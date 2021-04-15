@@ -21,7 +21,8 @@ arg_parser = FlaskParser()
 #   PYTILT_URL=<your picobrew_pico server>/API/tilt
 # and it will work without modifications
 class TiltSchema(Schema):
-    color = fields.Str(required=True),      # device ID
+    color = fields.Str(required=True),      # device ID (as the color of the device, limitation of pytilt)
+    uid = fields.Str(required=False),       # device ID (unique per device radio, currently not supported by pytilt)
     temp = fields.Float(required=True),     # device temperature in Celcius
     gravity = fields.Int(required=True),    # calculated specific gravity
     timestamp = fields.Str(required=True),  # time sample taken in ISO format e.g '2021-03-06T16:25:42.823122'
@@ -48,6 +49,8 @@ def process_tilt_data(data):
 
         if uid not in active_tilt_sessions:
             active_tilt_sessions[uid] = TiltSession()
+            if data['color']:
+                active_tilt_sessions[uid].color = data['color']
 
         if active_tilt_sessions[uid].active:
             # initialize session and session files

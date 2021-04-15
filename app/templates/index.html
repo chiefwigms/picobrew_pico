@@ -29,7 +29,20 @@
         </a>
       </h5>
       <div id="c_{{chart_id}}" class="collapse {{show}}" aria-labelledby="h_{{chart_id}}">
-        <div class="card-body">
+        <div class="card-body text-white">
+          <div class="row">
+            <div class="col-sm">
+              <div class="text-white-50">Machine</div>
+              <div>{% if brew_session.alias is defined and brew_session.alias|length %}{{brew_session.alias}} ({{brew_session.uid}}){% else %}{{brew_session.uid}}{% endif %}</div>
+            </div>
+            <div class="col-sm">
+              {% if brew_session.date %}
+              <div class="text-white-50">Date Started</div>
+              <div>{{brew_session.date.strftime('%A, %b %e %Y %H:%M:%S')}}</div>
+              {% endif %}
+            </div>
+          </div>
+          <div class="row">&nbsp;</div>
           <div id="{{chart_id}}" style="min-width: 320px; height: 400px; margin: 0 auto"></div>
           <script>var graph_data={{brew_session.graph|tojson}};</script>
           <script src="/static/js/brew_graph_socketio.js"></script>
@@ -63,7 +76,20 @@
         </a>
       </h5>
       <div id="c_{{chart_id}}" class="collapse {{show}}" aria-labelledby="h_{{chart_id}}">
-        <div class="card-body">
+        <div class="card-body text-white">
+          <div class="row">
+            <div class="col-sm">
+              <div class="text-white-50">Device</div>
+              <div>{% if ferm_session.alias is defined and ferm_session.alias|length %}{{ferm_session.alias}} ({{ferm_session.uid}}){% else %}{{ferm_session.uid}}{% endif %}</div>
+            </div>
+            <div class="col-sm">
+              {% if ferm_session.date %}
+              <div class="text-white-50">Date Started</div>
+              <div>{{ferm_session.date.strftime('%A, %b %e %Y %H:%M:%S')}}</div>
+              {% endif %}
+            </div>
+          </div>
+          <div class="row">&nbsp;</div>
           <div id="{{chart_id}}" style="min-width: 320px; height: 400px; margin: 0 auto"></div>
           <script>var graph_data={{ferm_session.graph|tojson}};</script>
           <script src="/static/js/ferm_graph_socketio.js"></script>
@@ -99,7 +125,20 @@
         </a>
       </h5>
       <div id="c_{{chart_id}}" class="collapse {{show}}" aria-labelledby="h_{{chart_id}}">
-        <div class="card-body">
+        <div class="card-body text-white">
+          <div class="row">
+            <div class="col-sm">
+              <div class="text-white-50">Machine</div>
+              <div>{% if still_session.alias is defined and still_session.alias|length %}{{still_session.alias}} ({{still_session.uid}}){% else %}{{still_session.uid}}{% endif %}</div>
+            </div>
+            <div class="col-sm">
+              {% if still_session.date %}
+              <div class="text-white-50">Date Started</div>
+              <div>{{still_session.date.strftime('%A, %b %e %Y %H:%M:%S')}}</div>
+              {% endif %}
+            </div>
+          </div>
+          <div class="row">&nbsp;</div>
           <div id="{{chart_id}}" style="min-width: 320px; height: 400px; margin: 0 auto"></div>
           <script>var graph_data={{still_session.graph|tojson}};</script>
           <script src="/static/js/still_graph_socketio.js"></script>
@@ -138,7 +177,7 @@
       <h5 class="card-header" id="h_{{chart_id}}">
         <a class="collapsed" role="button" data-toggle="collapse" href="#c_{{chart_id}}" data-parent="#accordion" aria-expanded="{{expanded}}" aria-controls="c_{{chart_id}}">
           <span class="equipment-icon">
-            <img src="/static/img/tilt.svg" atl="ispindle">
+            <img src="/static/img/iSpindel.svg" atl="ispindle">
           </span>
           {% if iSpindel_session.alias is defined and iSpindel_session.alias|length %}{{iSpindel_session.alias}}{% else %}{{chart_id}}{% endif %}
           <button class="fermentation-start {{display_start}} btn btn-sm btn-success float-right mr-5" type="button" id="bstart_{{iSpindel_session.uid}}"
@@ -152,7 +191,20 @@
         </a>
       </h5>
       <div id="c_{{chart_id}}" class="collapse {{show}}" aria-labelledby="h_{{chart_id}}">
-        <div class="card-body">
+        <div class="card-body text-white">
+          <div class="row">
+            <div class="col-sm">
+              <div class="text-white-50">Device</div>
+              <div>{% if iSpindel_session.alias is defined and iSpindel_session.alias|length %}{{iSpindel_session.alias}} ({{iSpindel_session.uid}}){% else %}{{iSpindel_session.uid}}{% endif %}</div>
+            </div>
+            <div class="col-sm">
+              {% if iSpindel_session.date %}
+              <div class="text-white-50">Date Started</div>
+              <div>{{iSpindel_session.date.strftime('%A, %b %e %Y %H:%M:%S')}}</div>
+              {% endif %}
+            </div>
+          </div>
+          <div class="row">&nbsp;</div>
           <div id="{{chart_id}}" style="min-width: 320px; height: 400px; margin: 0 auto"></div>
           <script>var graph_data={{iSpindel_session.graph|tojson}};</script>
           <script src="/static/js/iSpindel_graph_socketio.js"></script>
@@ -168,12 +220,16 @@
     {% set show = 'show' if tilt_session.active else '' %}
     {% set display_start = 'd-none' if tilt_session.active else 'd-block' %}
     {% set display_stop = 'd-block' if tilt_session.active else 'd-none' %}
+    {% set text_color = 'black' if tilt_session.color in ['Pink', 'Yellow'] else 'white' %}
     <div class="card bg-dark text-white-50">
       <h5 class="card-header" id="h_{{chart_id}}">
         <a class="collapsed" role="button" data-toggle="collapse" href="#c_{{chart_id}}" data-parent="#accordion" aria-expanded="{{expanded}}" aria-controls="c_{{chart_id}}">
           <span class="equipment-icon">
             <img src="/static/img/tilt.svg" atl="tilt">
           </span>
+          {% if tilt_session.color %}
+          <span class="badge badge-secondary ml-1" style="min-width: 70px; background-color: {{tilt_session.color}} !important; color: {{text_color}} !important;">{{tilt_session.color}}</span>
+          {% endif %}
           {% if tilt_session.alias is defined and tilt_session.alias|length %}{{tilt_session.alias}}{% else %}{{chart_id}}{% endif %}
           <button class="fermentation-start {{display_start}} btn btn-sm btn-success float-right mr-5" type="button" id="bstart_{{tilt_session.uid}}"
               onclick="event.stopPropagation();event.preventDefault();start_monitoring('tilt', '{{tilt_session.uid}}');">
@@ -186,7 +242,25 @@
         </a>
       </h5>
       <div id="c_{{chart_id}}" class="collapse {{show}}" aria-labelledby="h_{{chart_id}}">
-        <div class="card-body">
+        <div class="card-body text-white">
+          <div class="row">
+            <div class="col-sm">
+              <div class="text-white-50">Device</div>
+              <div>{% if tilt_session.alias is defined and tilt_session.alias|length %}{{tilt_session.alias}} ({{tilt_session.uid}}){% else %}{{tilt_session.uid}}{% endif %}</div>
+              <div>
+                {% if tilt_session.color %}
+                <span class="badge badge-secondary ml-1" style="min-width: 70px; background-color: {{tilt_session.color}} !important; color: {{text_color}} !important;">{{tilt_session.color}}</span>
+                {% endif %}
+              </div>
+            </div>
+            <div class="col-sm">
+              {% if tilt_session.date %}
+              <div class="text-white-50">Date Started</div>
+              <div>{{tilt_session.date.strftime('%A, %b %e %Y %H:%M:%S')}}</div>
+              {% endif %}
+            </div>
+          </div>
+          <div class="row">&nbsp;</div>
           <div id="{{chart_id}}" style="min-width: 320px; height: 400px; margin: 0 auto"></div>
           <script>var graph_data={{tilt_session.graph|tojson}};</script>
           <script src="/static/js/tilt_graph_socketio.js"></script>

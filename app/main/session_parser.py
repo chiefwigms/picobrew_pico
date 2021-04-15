@@ -425,6 +425,7 @@ def restore_active_brew_sessions():
             session.file.flush()
             session.filepath = file
             session.created_at = brew_session['date']
+            current_app.logger.debug(f'current created_at : {session.created_at}')
             session.name = brew_session['name']
             session.type = brew_session['type']
             session.session = brew_session['session']                   # session guid
