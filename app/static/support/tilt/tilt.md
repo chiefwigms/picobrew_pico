@@ -32,3 +32,5 @@ Perform the following steps:
 The Tilt website is pretty comprehensive and has additional guides at [TiltHydrometer.com](https://tilthydrometer.com/pages/guide)
 
 That's it! Have fun monitoring your fermentation and go make some great beer!
+
+*Tilt and the associated bottlecap logo are trademarks of Baron Brew Equipment and is not associated with the production of this software.*

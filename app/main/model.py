@@ -1,6 +1,7 @@
 from flask import current_app
 import requests
 import shutil
+import json
 
 from .config import (MachineType, brew_archive_sessions_path, ferm_archive_sessions_path,
                      still_archive_sessions_path, iSpindel_archive_sessions_path, tilt_archive_sessions_path)
@@ -211,7 +212,16 @@ class TiltSession:
 class SupportObject:
     def __init__(self):
         self.name = None
-        self.manual_path = None
-        self.faq_path = None
-        self.instructional_videos_path = None
+        self.logo = None
+        self.manual = None
+        self.faq = None
+        self.instructional_videos = None
         self.misc_media = None
+
+    def toJSON(self):
+        return json.dumps(self, default=lambda o: o.__dict__, indent=4)
+
+class SupportMedia:
+    def __init__(self, path, owner="Picobrew"):
+        self.path = path
+        self.owner = owner

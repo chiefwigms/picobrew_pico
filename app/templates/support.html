@@ -1,25 +1,26 @@
 <script src='/static/js/showdown/showdown.min.js'></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        if ('{{support_object.manual_path}}' != 'None') {
-            getPdf('{{support_object.manual_path}}', 'iframe#manual');
+        var support_object = JSON.parse({{support_object_js|tojson|safe}})
+        if (support_object.manual) {
+            getPdf(support_object.manual.path, 'iframe#manual');
         }
-        if ('{{support_object.faq_path}}' != 'None') {
-            getMarkdown('{{support_object.faq_path}}', 'faq');
+        if (support_object.faq) {
+            getMarkdown(support_object.faq.path, 'faq');
         }
-        if ('{{support_object.instructional_videos_path}}' != 'None') {
-            getMarkdown('{{support_object.instructional_videos_path}}', 'instructional');
+        if (support_object.instructional_videos) {
+            getMarkdown(support_object.instructional_videos.path, 'instructional');
         }
-        if ('{{support_object.misc_media|tojson}}' != 'None') {
-            var data = JSON.parse('{{support_object.misc_media|tojson}}');
+        if (support_object.misc_media) {
+            var data = support_object.misc_media;
             for (var key in data) {
                 var frameKey = key.replace(/ /g, '_')
-                var media = data[key]
-                if (media.split('.').pop() == 'pdf') {
-                    getPdf(media, '#'+frameKey);
+                var path = data[key].path
+                if (path.split('.').pop() == 'pdf') {
+                    getPdf(path, '#'+frameKey);
                 }
-                if (media.split('.').pop() == 'md') {
-                    getMarkdown(media, frameKey);
+                if (path.split('.').pop() == 'md') {
+                    getMarkdown(path, frameKey);
                 }
             }
         }
@@ -53,7 +54,16 @@
 {% extends 'base.html' %}
 {% block content %}
 <div class='text-white'>
-    <h2>{{support_object.name}}</h2>
+    <h2>
+        {% if support_object.logo != None %}
+        <span class="equipment-icon">
+            <img src="{{support_object.logo}}" atl="{{support_object.name}}" style="max-height: 2em;">
+        </span>
+        {% endif %}
+        {{support_object.name}}
+    </h2>
+    <br />
+    <hr />
 
     <div class="container">
         {% if support_object.name == "KegSmarts" %}
@@ -61,18 +71,19 @@
             This device type is currently not supported by this server
         </div>
         {% endif %}
-        <div id=alert class='show w-75 mx-auto alert text-center alert-warning'>
-            All support documentation included in server at this time are direct copies from Picobrew.com in the off chance that Picobrew.com isn't available in the future. At a later time the server will come with its own documentation as well as community source device documentation.
-        </div>
     </div>
 
     <div id="accordion">
-        {% if support_object.manual_path != None %}
+        {% if support_object.manual != None %}
+            {% set badge_class = 'badge-warning' if support_object.manual.owner == "Picobrew" else 'badge-primary' %}
             <div class="card bg-dark text-white">
                 <h5 class="card-header" id="h_support_manual">
                     <a class="collapsed" role="button" data-toggle="collapse" href="#c_support_manual"
                         data-parent="#accordion" aria-expanded="false" aria-controls="c_support_manual">
-                        Manual</a></h5>
+                        Manual
+                        <span class="badge {{badge_class}} ml-1" style="min-width: 70px;">{{support_object.manual.owner}}</span>
+                    </a>
+                </h5>
                 <div id="c_support_manual" class="collapse" aria-labelledby="h_support_manual">
                     <div class="card-body">
                         <div class="row">
@@ -85,15 +96,19 @@
                     </div>
                 </div>
             </div>
-        {% endif %}
-        {% if support_object.faq_path != None %}
             <br />
             <hr />
+        {% endif %}
+        {% if support_object.faq != None %}
+            {% set badge_class = 'badge-warning' if support_object.faq.owner == "Picobrew" else 'badge-primary' %}
             <div class="card bg-dark text-white">
                 <h5 class="card-header" id="h_faq">
                     <a class="collapsed" role="button" data-toggle="collapse" href="#c_faq"
                         data-parent="#accordion" aria-expanded="false" aria-controls="c_faq">
-                        FAQ</a></h5>
+                        FAQ
+                        <span class="badge {{badge_class}} ml-1" style="min-width: 70px;">{{support_object.faq.owner}}</span>
+                    </a>
+                </h5>
                 <div id="c_faq" class="collapse" aria-labelledby="h_faq">
                     <div class="card-body">
                         <div class="row">
@@ -104,15 +119,19 @@
                     </div>
                 </div>
             </div>
-        {% endif %}
-        {% if support_object.instructional_videos_path != None %}
             <br />
             <hr />
+        {% endif %}
+        {% if support_object.instructional_videos != None %}
+            {% set badge_class = 'badge-warning' if support_object.instructional_videos.owner == "Picobrew" else 'badge-primary' %}
             <div class="card bg-dark text-white">
                 <h5 class="card-header" id="h_faq">
                     <a class="collapsed" role="button" data-toggle="collapse" href="#c_instructional"
                         data-parent="#accordion" aria-expanded="false" aria-controls="c_instructional">
-                        Instructional Videos</a></h5>
+                        Instructional Videos
+                        <span class="badge {{badge_class}} ml-1" style="min-width: 70px;">{{support_object.instructional_videos.owner}}</span>
+                    </a>
+                </h5>
                 <div id="c_instructional" class="collapse" aria-labelledby="h_faq">
                     <div class="card-body">
                         <div class="row">
@@ -123,17 +142,20 @@
                     </div>
                 </div>
             </div>
-        {% endif %}
-        {% if support_object.misc_media != None %}
             <br />
             <hr />
-
-            {% for key, segment in support_object.misc_media.items() %}    
+        {% endif %}
+        {% if support_object.misc_media != None %}
+            {% for key, value in support_object.misc_media.items() %}
+                {% set segment = value.path %}
+                {% set badge_class = 'badge-warning' if value.owner == "Picobrew" else 'badge-primary' %}
                 <div class="card bg-dark text-white">
                     <h5 class="card-header" id="h_{{key.replace(' ', '_')}}">
                         <a class="collapsed" role="button" data-toggle="collapse" href="#c_{{key.replace(' ', '_')}}"
                             data-parent="#accordion" aria-expanded="false" aria-controls="c_{{key.replace(' ', '_')}}">
-                            {{key}}</a>
+                            {{key}}
+                            <span class="badge {{badge_class}} ml-1" style="min-width: 70px;">{{value.owner}}</span>
+                        </a>
                     </h5>
                     <div id="c_{{key.replace(' ', '_')}}" class="collapse" aria-labelledby="h_{{key.replace(' ', '_')}}">
                         <div class="card-body">
@@ -164,6 +186,12 @@
             {% endfor %}
         {% endif %}
     </div>
+
+    {% if support_object.trademark_attribution %}
+        <br />
+        <hr />
+        <div class="text-muted">{{support_object.trademark_attribution}}</div>
+    {% endif %}
 
 </div>
 {% endblock %}
