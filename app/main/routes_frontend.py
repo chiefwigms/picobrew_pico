@@ -624,7 +624,7 @@ def load_active_iSpindel_sessions():
         iSpindel_sessions.append({'alias': active_iSpindel_sessions[uid].alias,
                                   'uid': uid,
                                   'active': active_iSpindel_sessions[uid].active,
-                                  'date': active_iSpindel_sessions[uid].created_at or None,
+                                  'date': active_iSpindel_sessions[uid].start_time or None,
                                   'graph': get_iSpindel_graph_data(uid, active_iSpindel_sessions[uid].voltage,
                                                                    active_iSpindel_sessions[uid].data)})
     return iSpindel_sessions
