@@ -64,23 +64,27 @@ if [ -f /proc/device-tree/model ] && grep -iq raspberry /proc/device-tree/model;
             fi
         fi
     else
-        echo Bluetooth already enabled at OS level
+        echo "Bluetooth already enabled at OS level"
     fi
 
     # older raspberry-pi images had a baked in nginx configuration
     # so need to remove and symlink the source controlled nginx configuration file.
     # This requires a restart of the nginx process to take effect.
-    if [[ -L "/etc/nginx/sites-available/picobrew.com.conf" ]]; then
-        echo "Symlink for picobrew.com.conf exists; nothing to do here"
-    else
-        echo "Backup provided nginx configuration"
-        mv "/etc/nginx/sites-available/picobrew.com.conf" "/etc/nginx/sites-available/picobrew.com.conf.bak"
-        
-        echo "Create symlink to the source controlled configuration file"
-        ln -s /picobrew_pico/scripts/pi/picobrew.com.conf /etc/nginx/sites-available/picobrew.com.conf
+    if systemctl --all --type service | grep "nginx.service" ; then
+        if [[ -L "/etc/nginx/sites-available/picobrew.com.conf" ]]; then
+            echo "Symlink for picobrew.com.conf exists; nothing to do here"
+        else
+            echo "Backup provided nginx configuration"
+            mv "/etc/nginx/sites-available/picobrew.com.conf" "/etc/nginx/sites-available/picobrew.com.conf.bak"
 
-        echo "Restarting Nginx Process"
-        sudo systemctl restart nginx
+            echo "Create symlink to the source controlled configuration file"
+            ln -s /picobrew_pico/scripts/pi/picobrew.com.conf /etc/nginx/sites-available/picobrew.com.conf
+
+            echo "Restarting Nginx Process"
+            sudo systemctl restart nginx
+        fi
+    else
+        echo "nginx not installed/configured - skipping upgrade of nginx configuration"
     fi
 fi
 
