@@ -13,7 +13,7 @@ from werkzeug.utils import secure_filename
 
 
 from . import main
-from .config import MachineType, base_path, server_config
+from .config import MachineType, SessionType, base_path, server_config
 from .frontend_common import render_template_with_defaults
 from .model import PicoBrewSession, PicoFermSession, PicoStillSession, iSpindelSession, TiltSession
 from .recipe_import import import_recipes
@@ -44,27 +44,27 @@ def index():
 
 @main.route('/brew_history')
 def brew_history():
-    return render_template_with_defaults('brew_history.html', sessions=load_brew_sessions(), invalid=get_invalid_sessions('brew'))
+    return render_template_with_defaults('session_history.html', session_type=SessionType.BREW, sessions=load_brew_sessions(), invalid=get_invalid_sessions('brew'))
 
 
 @main.route('/ferm_history')
 def ferm_history():
-    return render_template_with_defaults('ferm_history.html', sessions=load_ferm_sessions(), invalid=get_invalid_sessions('ferm'))
+    return render_template_with_defaults('session_history.html', session_type=SessionType.PICOFERM, sessions=load_ferm_sessions(), invalid=get_invalid_sessions('ferm'))
 
 
 @main.route('/still_history')
 def still_history():
-    return render_template_with_defaults('still_history.html', sessions=load_still_sessions(), invalid=get_invalid_sessions('still'))
+    return render_template_with_defaults('session_history.html', session_type=SessionType.PICOSTILL, sessions=load_still_sessions(), invalid=get_invalid_sessions('still'))
 
 
 @main.route('/iSpindel_history')
 def iSpindel_history():
-    return render_template_with_defaults('iSpindel_history.html', sessions=load_iSpindel_sessions(), invalid=get_invalid_sessions('iSpindel'))
+    return render_template_with_defaults('session_history.html', session_type=SessionType.ISPINDEL, sessions=load_iSpindel_sessions(), invalid=get_invalid_sessions('iSpindel'))
 
 
 @main.route('/tilt_history')
 def tilt_history():
-    return render_template_with_defaults('tilt_history.html', sessions=load_tilt_sessions(), invalid=get_invalid_sessions('tilt'))
+    return render_template_with_defaults('session_history.html', session_type=SessionType.TILT, sessions=load_tilt_sessions(), invalid=get_invalid_sessions('tilt'))
 
 
 @main.route('/zymatic_recipes')

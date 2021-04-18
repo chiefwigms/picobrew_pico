@@ -250,9 +250,19 @@ def load_still_session(file):
     name = info[1]
     alias = info[1] if info[1] not in active_still_sessions else active_still_sessions[info[1]].alias
 
+    # filename datetime string format "20200615_205946"
+    server_start_datetime = datetime.strptime(info[0], '%Y%m%d_%H%M%S')
+    # json datetime `timeStr` format "2020-06-15T20:59:46.280731" (UTC) ; 'time' milliseconds from epoch
+    server_end_datetime = datetime.strptime(info[0], '%Y%m%d_%H%M%S')
+    if len(json_data) > 0:
+        # set server end datetime to last data log entry
+        server_end_datetime = epoch_millis_converter(json_data[-1]['time'])
+
+
     return ({
         'uid': info[1],
-        'date': info[0],
+        'date': server_start_datetime,
+        'end_date': server_end_datetime,
         'name': name,
         'alias': alias,
         'data': json_data,
