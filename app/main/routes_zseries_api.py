@@ -398,7 +398,7 @@ def create_session(token, body):
 
     active_session.session = session_guid
     active_session.id = session_id
-    active_session.created_at = datetime.utcnow().isoformat()
+    active_session.created_at = datetime.utcnow()
     active_session.name = recipe.name if recipe else body['Name']
     active_session.type = body['SessionType']
 
@@ -424,7 +424,7 @@ def create_session(token, body):
     ret = {
         "Active": False,
         "ClosingDate": None,
-        "CreationDate": active_session.created_at,
+        "CreationDate": active_session.created_at.isoformat(),
         "Deleted": False,
         "DurationSec": body['DurationSec'],
         "FirmwareVersion": body['FirmwareVersion'],
@@ -531,7 +531,7 @@ def close_session(uid, session_id, body):
     ret = {
         "Active": False,
         "ClosingDate": datetime.utcnow().isoformat(),
-        "CreationDate": active_session.created_at,
+        "CreationDate": active_session.created_at.isoformat(),
         "Deleted": False,
         "DurationSec": body['DurationSec'],
         "FirmwareVersion": body['FirmwareVersion'],
