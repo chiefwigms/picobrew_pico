@@ -13,7 +13,7 @@ from . import main
 from .config import MachineType, brew_active_sessions_path, zseries_firmware_path
 from .firmware import firmware_filename, firmware_upgrade_required, minimum_firmware
 from .model import PicoBrewSession
-from .routes_frontend import get_zseries_recipes, load_brew_sessions
+from .routes_frontend import get_zseries_recipes, parse_brew_session, list_brew_session_files, load_brew_sessions
 from .session_parser import active_brew_sessions
 from .units import convert_temp
 
@@ -195,11 +195,12 @@ def process_zstate(args):
 
 
 def dirty_sessions_since_clean(uid):
-    brew_sessions = get_archived_sessions_by_machine(uid)
+    brew_session_files = list_brew_session_files(uid)
     post_clean_sessions = []
     clean_found = False
-    for s in brew_sessions:
-        session_type = SessionType(s['type'])
+
+    for s in brew_session_files:
+        session_type = SessionType(session_type_from_filename(s))
         if (session_type == SessionType.CLEAN):
             clean_found = True
 
@@ -210,15 +211,12 @@ def dirty_sessions_since_clean(uid):
 
 
 def last_session_type(uid):
-    brew_sessions = get_archived_sessions_by_machine(uid)
+    brew_sessions = list_brew_session_files(uid)
 
     if len(brew_sessions) == 0:
         return SessionType.CLEAN
     else:
-        last_session = brew_sessions[0]
-        # just assume last session was a rinse session (session after a brew)
-        session_type = SessionType(last_session['type']) if last_session['type'] is not None else SessionType.RINSE
-        return session_type
+        return SessionType(session_type_from_filename(brew_sessions[0])) or SessionType.RINSE
 
 
 def resumable_session_id(uid):
@@ -660,7 +658,7 @@ def get_recipe_by_name(recipe_name):
 
 
 def increment_session_id(uid):
-    return len(get_archived_sessions_by_machine(uid)) + (1 if active_brew_sessions[uid].session != '' else 1)
+    return len(list_brew_session_files(uid)) + (1 if active_brew_sessions[uid].session != '' else 1)
 
 
 def get_machine_by_session(session_id):
@@ -670,3 +668,14 @@ def get_machine_by_session(session_id):
 def get_archived_sessions_by_machine(uid):
     brew_sessions = load_brew_sessions(uid=uid)
     return brew_sessions
+
+
+def session_type_from_filename(filename):
+    info = filename.stem.split('#')
+    session_type = SessionType.BEER
+    try:
+        if len(info) > 4:
+            session_type = int(info[4])
+    except Exception as error:
+        current_app.logger.warn("error occurred reading {}".format(filename),)
+    return session_type
