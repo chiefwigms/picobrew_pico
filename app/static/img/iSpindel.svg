@@ -1,14 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Generator: Adobe Illustrator 23.0.2, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
-<svg version="1.1" id="tilt-svg" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px"
-	 y="0px" viewBox="0 0 147 155" style="enable-background:new 0 0 147 155;" xml:space="preserve">
-<style type="text/css">
-	.st0{fill:none;stroke:#ffffff;stroke-width:1.5;}
-	.st1{font-family:'MyriadPro-Regular';}
-	.st2{font-size:21px;}
-</style>
-<title>Tilt</title>
-<path class="st0" d="M102.5,57.5l-35.1,55.8c-5.3,8.5-18,13.2-26.5,7.9l-0.9-0.6c-8.5-5.3-9.6-18.8-4.3-27.3l35.1-55.8
-	c5.3-8.5,18-13.2,26.5-7.9l0.9,0.6C106.7,35.6,107.8,49,102.5,57.5z"/>
-<text transform="matrix(1 0 0 1 63.8916 80.4424)" class="st1 st2">T</text>
+<!-- Generator: Adobe Illustrator 25.2.1, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+<svg id="iSpindel" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 76.3 112.03">
+    <defs>
+        <style>.cls-1,.cls-2{fill:none;stroke:#fff;}.cls-1{stroke-width:0.75px;}.cls-2{stroke-width:1.5px;}</style>
+    </defs>
+    <line class="cls-1" x1="48.76" y1="3.74" x2="44.86" y2="12.04" />
+    <line class="cls-1" x1="44.06" y1="1.54" x2="40.16" y2="9.84" />
+    <line class="cls-1" x1="53.56" y1="5.94" x2="49.66" y2="14.34" />
+    <line class="cls-1" x1="58.26" y1="8.14" x2="54.46" y2="16.54" />
+    <line class="cls-1" x1="63.06" y1="10.44" x2="59.16" y2="18.74" />
+    <line class="cls-1" x1="67.86" y1="12.64" x2="63.96" y2="20.94" />
+    <line class="cls-1" x1="72.56" y1="14.84" x2="68.76" y2="23.14" />
+    <path class="cls-2" d="M75.1,35.9l36.3,16.9M76,39.8l31.7,14.8M74.5,42.9l31.7,14.8m2.3-2.7-.7-.3,1.3-2.9,2.4,1.1,2.6-5.6a3,3,0,0,0-1.5-4L81.7,28.9a3,3,0,0,0-4,1.5L75.1,36l2.2,1L76,39.9l-.7-.3a1.77,1.77,0,0,0-2.3.8,1.8,1.8,0,0,0,.8,2.3l.7.3L41,114.8h0a17.5,17.5,0,0,0,31.7,14.8h0l33.5-71.8.7.3a1.77,1.77,0,0,0,2.3-.8A1.67,1.67,0,0,0,108.5,55Z" transform="translate(-38.84 -27.86)" />
+    <path class="cls-1" d="M74.1,121.3l-.6-.3,3-6.5-2.7-1.3,14.9-32,2.7,1.3,8.8-18.8.6.3a1.34,1.34,0,0,0,1.2-2.4l-.6-.3,1.1-2.4L76.1,46.6,75,49l-.6-.3a1.34,1.34,0,1,0-1.2,2.4l.6.3L65,70.2l2.7,1.3-14.9,32-2.7-1.3-3,6.5-.6-.3a1.34,1.34,0,0,0-1.2,2.4l.6.3-.9,1.8a14.56,14.56,0,0,0,4.7,18c0,.1-.1.1-.1.2-1.9,4-.9,4.8.4,5.4s2.5.8,4.4-3.2a.35.35,0,0,1,.1-.2,14.57,14.57,0,0,0,16.8-7.9l.9-1.8.6.3a1.44,1.44,0,0,0,1.8-.6A1.14,1.14,0,0,0,74.1,121.3Z" transform="translate(-38.84 -27.86)" />
 </svg>
