@@ -117,7 +117,7 @@ class PicoStillSession:
             r = requests.get(still_data_uri)
             datastring = r.text.strip()
         except Exception as e:
-            current_app.logger.error(f'exception occured communicating to picostill {still_dataa_uri} : {e}')
+            current_app.logger.error(f'exception occured communicating to picostill {still_data_uri} : {e}')
             failure_message = f'unable to estaablish successful connection to {still_data_uri}'
             datastring = None
             connect_failure = True
