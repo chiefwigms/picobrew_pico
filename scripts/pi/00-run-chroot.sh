@@ -142,7 +142,6 @@ cat > /etc/systemd/system/update_wpa_supplicant.service <<EOF
 [Unit]
 Description=Copy user wpa_supplicant.conf
 ConditionPathExists=/boot/wpa_supplicant.conf
-Before=ap-bring-up.service
 
 [Service]
 Type=oneshot
@@ -202,6 +201,7 @@ EOF
 
 echo 'Setting up dnsmasq...'
 cat >> /etc/dnsmasq.conf <<EOF
+domain=picobrew.local
 address=/picobrew.com/${AP_IP}
 address=/www.picobrew.com/${AP_IP}
 server=8.8.8.8

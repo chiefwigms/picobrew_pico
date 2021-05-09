@@ -29,6 +29,7 @@ def handle_devices():
         mtype = MachineType(request.form['machine_type'])
         uid = str(request.form['uid']).strip()
         alias = str(request.form['alias']).strip()
+        ip_addr = request.form['ip_addr'] if 'ip_addr' in request.form else None
 
         # uid and alias are required
         if len(uid) == 0 or len(alias) == 0:
@@ -87,6 +88,7 @@ def handle_devices():
             if uid not in active_still_sessions:
                 active_still_sessions[uid] = PicoStillSession(uid)
             active_still_sessions[uid].alias = alias
+            active_still_sessions[uid].ip_address = ip_addr
         elif mtype is MachineType.ISPINDEL:
             if uid not in active_iSpindel_sessions:
                 active_iSpindel_sessions[uid] = iSpindelSession()
@@ -117,6 +119,7 @@ def handle_specific_device(uid):
     # updated already registered device alias
     mtype = MachineType(request.form['machine_type'])
     alias = request.form['alias'] if 'alias' in request.form else ''
+    ip_addr = request.form['ip_addr'] if 'ip_addr' in request.form else None
 
     # verify uid is already configured
     if uid not in {**active_brew_sessions, **active_ferm_sessions, **active_iSpindel_sessions, **active_tilt_sessions, **active_still_sessions}:
@@ -157,6 +160,7 @@ def handle_specific_device(uid):
         active_ferm_sessions[uid].alias = alias
     elif mtype is MachineType.PICOSTILL:
         active_still_sessions[uid].alias = alias
+        active_still_sessions[uid].ip_address = ip_addr
     elif mtype is MachineType.ISPINDEL:
         active_iSpindel_sessions[uid].alias = alias
     elif mtype is MachineType.TILT:

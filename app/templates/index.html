@@ -112,7 +112,7 @@
             <img src="/static/img/picostill.svg" atl="picostill" />
           </span>
           {% if still_session.alias is defined and still_session.alias|length %}{{still_session.alias}}{% else %}{{chart_id}}{% endif %}
-          {% if still_session.ipaddr %}
+          {% if still_session.ip_address %}
             <button class="still-start {{display_start}} btn btn-sm btn-success float-right mr-5" type="button" id="bstart_{{still_session.uid}}"
                 onclick="event.stopPropagation();event.preventDefault();start_monitoring('still', '{{still_session.uid}}');">
                 <i class="fas fa-play-circle"></i> Start Monitoring
@@ -129,7 +129,9 @@
           <div class="row">
             <div class="col-sm">
               <div class="text-white-50">Machine</div>
-              <div>{% if still_session.alias is defined and still_session.alias|length %}{{still_session.alias}} ({{still_session.uid}}){% else %}{{still_session.uid}}{% endif %}</div>
+              <div>
+                {% if still_session.alias is defined and still_session.alias|length %}{{still_session.alias}} ({{still_session.uid}}){% else %}{{still_session.uid}}{% endif %}
+              </div>
             </div>
             <div class="col-sm">
               {% if still_session.date %}
@@ -143,24 +145,27 @@
           <script>var graph_data={{still_session.graph|tojson}};</script>
           <script src="/static/js/still_graph_socketio.js"></script>
           
-          <!-- TODO (tmack) - the below only works in specific network setups (where your browsing device is on the same network...) -->
-          <!-- better setup would be to proxy all requests through the picobrew_pico service to the local IP address of the Still (according to the server) -->
-          <!-- going to work on this outside of the PicoStill graphing request -->
-
-          <!-- {% if still_session.ipaddr is defined and still_session.ipaddr != None and still_session.ipaddr|length%}
+          <!-- render an iframe of the embedded ui of the picostill -->
+          {% if still_session.ip_address %}
+          {% set ip = still_session.ip_address %}
           <div class="card bg-dark text-white-50">
             <h5 class="card-header" id="h2_{{chart_id}}">
               <a class="collapsed" role="button" data-toggle="collapse" href="#c2_{{chart_id}}" data-parent="#accordion" aria-expanded="{{expanded}}" aria-controls="c2_{{chart_id}}">
                 Embedded PicoStill UI (iframe)
-              </a>
             </h5>
             <div id="c2_{{chart_id}}" class="collapse show" aria-labelledby="h2_{{chart_id}}">
               <div class="card-body">
-                <iframe src="http://{{still_session.ipaddr}}/data-page"></iframe>
+                {% if platform is defined and platform == "RaspberryPi" %}
+                <a href="//embedded-content/data-page?ip={{ip}}">{{still_session.alias}}'s Data Page</a>
+                <iframe src="//embedded-content/data-page?ip={{ip}}" width="100%" height="500em"></iframe>
+                {% else %}
+                <a href="http://{{ip}}/data-page" target="_blank" rel="noopener noreferrer">{{still_session.alias}}'s Data Page</a>
+                <iframe src="http://{{ip}}/data-page" width="100%" height="500em"></iframe>
+                {% endif %}
               </div>
             </div>
           </div>
-          {% endif %} -->
+          {% endif %}
         </div>
       </div>
     </div>
