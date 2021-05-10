@@ -222,14 +222,14 @@ def update_device_session(uid, session_type):
                 try:
                     session.start_still_polling()
                 except Exception as e:
-                    current_app.logger.error('failed to start picostill polling thread')
+                    current_app.logger.error(f'exception occured : {e}')
                     return getattr(e, 'message', e.args[0]), 418
         
 
         return '', 204
     else:
         current_app.logger.error(f'invalid session type : {session_type}')
-        return 'Invalid session type provided \"' + session_type + '\"', 418
+        return f'Invalid session type provided {session_type}', 418
 
 
 ALLOWED_EXTENSIONS = {'json'}
@@ -603,7 +603,7 @@ def load_active_still_sessions():
     for uid in active_still_sessions:
         still_sessions.append({'alias': active_still_sessions[uid].alias,
                               'uid': uid,
-                              'ipaddr': active_still_sessions[uid].ip_address,
+                              'ip_address': active_still_sessions[uid].ip_address,
                               'active': active_still_sessions[uid].active,
                               'date': active_still_sessions[uid].created_at or None,
                               'graph': get_still_graph_data(uid, active_still_sessions[uid].name, active_still_sessions[uid].data)})

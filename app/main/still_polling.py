@@ -3,7 +3,7 @@ import requests
 
 from .. import socketio
 from flask import current_app
-from .config import still_active_sessions_path
+from .config import still_active_sessions_path, server_cfg
 from .model import PicoStillSession
 from .session_parser import active_still_sessions
 
@@ -66,8 +66,6 @@ def poll_still(still_ip, uid):
 
 
 def new_still_session(still_ip, device_id):
-    global connection_failures
-
     connection_failures = 0
     uid = device_id
     if uid not in active_still_sessions or active_still_sessions[uid].uninit:
@@ -85,7 +83,9 @@ def new_still_session(still_ip, device_id):
             current_app.logger.debug("DEBUG: Connection failure {}".format(connection_failures))
         else:
             connection_failures = 0
-        sleep(60)
+
+        sleep_interval = int(server_cfg().get('still_monitoring_interval', 60))
+        sleep(sleep_interval)
 
     # If we've had 3 failures, clean up our session and end it.
     active_still_sessions[uid].file.write('\n]\n')

@@ -110,22 +110,25 @@ class PicoStillSession:
 
     def start_still_polling(self):
         connect_failure = False
+        failure_message = None
+        still_data_uri = 'http://{}/data'.format(self.ip_address)
         try:
-            still_data_uri = 'http://{}/data'.format(self.ip_address)
             current_app.logger.debug('DEBUG: Retrieve PicoStill Data - {}'.format(still_data_uri))
             r = requests.get(still_data_uri)
             datastring = r.text.strip()
         except Exception as e:
-            current_app.logger.error(f'exception occured communicating to picostill : {e}')
+            current_app.logger.error(f'exception occured communicating to picostill {still_data_uri} : {e}')
+            failure_message = f'unable to estaablish successful connection to {still_data_uri}'
             datastring = None
             connect_failure = True
 
         if not datastring or datastring[0] != '#':
             connect_failure = True
-            current_app.logger.error(f'received unexpected response string : {datastring}')
+            failure_message = f'received unexpected response string from {still_data_uri}'
+            current_app.logger.error(f'{failure_message} : {datastring}')
 
         if connect_failure:
-            raise Exception('Connect PicoStill: Failed to connect to PicoStill on address \"' + self.ip_address + '\"')
+            raise Exception(f'Failed to Start PicoStill Monitoring: {failure_message}')
 
         from .still_polling import new_still_session
         from .still_polling import FlaskThread

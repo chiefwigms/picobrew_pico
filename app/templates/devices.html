@@ -6,6 +6,17 @@
   <script src="/static/js/highcharts/exporting.js"></script>
   <script src="/static/js/highcharts/dark-unica.js"></script>
   <script src="/static/js/devices.js"></script>
+  <script>
+    $(document).ready(function () {
+      $("#machine_type_new").change(function () {
+        var value = $("#machine_type_new option:selected").val();
+        if (value == "PicoStill") {
+          var ipAddrDiv = $("#ip_addr_entry")
+          ipAddrDiv.slideDown().toggleClass("d-none d-block")
+        }
+      });
+    });
+  </script>
   <div id="accordion">
     <div class="row bg-dark text-white-50">
       <div class="col-sm-12">
@@ -39,6 +50,11 @@
             <input type="text" class="form-control form-control-sm" name="alias" id="alias_new"
               placeholder="BrewHaus Alias" value="">
         </div>
+        <div id="ip_addr_entry" class="form-row form-group d-none">
+          <label for="ip_addr_new">IP Address</label>
+          <input type="text" class="form-control form-control-sm" name="ip_addr" id="ip_addr_new"
+            placeholder="192.168.72.108" value="">
+        </div>
         <div class="form-row form-group">
             <button type="submit" class="btn btn-primary">Save</button>
         </div>
@@ -59,10 +75,11 @@
       <p>No devices configured</p>
       {% else %}
       {% for uid in config['aliases'][machine_type] %}
+      {% set alias = config['aliases'][machine_type][uid] %}
       <div class="card bg-dark text-white-50">
         <h5 class="card-header" id="h_{{uid}}">
           <a class="collapsed" role="button" data-toggle="collapse" href="#c_{{uid}}" data-parent="#accordion" aria-expanded="false" aria-controls="c_{{uid}}">
-            {{config['aliases'][machine_type][uid]}}
+            {{alias}}
             <button class="btn btn-sm btn-danger float-right mr-5" type="button" id="bdelete_{{uid}}"
                 onclick="event.stopPropagation();event.preventDefault();delete_device('{{machine_type}}', '{{uid}}');">
                 <i class="fas fa-trash"></i>
@@ -87,10 +104,19 @@
                 placeholder="Product ID (Username > Settings > Equipment)" value="{{uid}}" readonly>
           </div>
           <div class="form-row form-group">
-            <label for="alias_{{config['aliases'][machine_type][uid]}}">Alias</label>
-            <input type="text" class="form-control form-control-sm" name="alias" id="alias_{{config['aliases'][machine_type][uid]}}"
-                placeholder="BrewHaus Alias" value="{{config['aliases'][machine_type][uid]}}">
+            <label for="alias_{{uid}}">Alias</label>
+            <input type="text" class="form-control form-control-sm" name="alias" id="alias_{{uid}}"
+                placeholder="BrewHaus Alias" value="{{alias}}">
           </div>
+          {% if machine_type == 'PicoStill' %}
+          {% set active_session = active_sessions['still'][uid] %}
+          {% set ip_address = active_session.ip_address if active_session.ip_address != None and active_session.ip_address|length else "" %}
+          <div class="form-row form-group">
+            <label for="ip_addr_{{uid}}">IP Address</label>
+            <input type="text" class="form-control form-control-sm" name="ip_addr" id="ip_addr_{{uid}}"
+              placeholder="192.168.72.108" value="{{ip_address}}">
+          </div>
+          {% endif %}
           <div class="form-row form-group">
             <button type="submit" class="btn btn-primary">Save</button>
           </div>
