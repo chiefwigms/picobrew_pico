@@ -7,4 +7,4 @@ requests==2.25.0
 mock==4.0.3
 python-dateutil==2.8.1
 bleak==0.10.0
-eventlet==0.30.2
+eventlet==0.31.0
