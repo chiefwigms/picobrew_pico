@@ -1,0 +1,65 @@
+{
+    "id": 13,
+    "name": "Base Recipe - American Amber Ale",
+    "name_escaped": "Base_Recipe_-_American_Amber_Ale",
+    "notes": "### [Base Recipe] A Dark, balanced, full-bodied American Amber Ale\n\n**OG**: 1.069   **FG**: 1.01\n**ABV**: ~8.1%    **IBU**: ~37\n\n**SRM**: 24.0   **Batch Size**: 2.5 Gal   **Start Water**: 3.65 Gal (30.44 lbs)\n\n#### Grain Bill (total weight: 8.73lb)\n\n| Grain/Sugar  | Weight | Color (\u00b0Lovibond) | Gravity | Notes | \n| ------------------- | ------- | ------------- |\n| American Two-Row Pale | 7lb | 1.8\u00b0L | 1.0368 |\n| German Munich | .5lb | 8\u00b0L | 1.0366 |\n| American Crystal 40L | .5lb | 40\u00b0L | 1.034 |\n| American Crystal 120L | .3lb | 120\u00b0L | 1.033 |\n| American Chocolate | .2lb | 350\u00b0L | 1.0276 |\n| American Victory | .3lb | 25\u00b0L | 1.0336 |\n  \n#### Hop Schedule\n  \n| Variety/Adjunct  | Weight | Alpha Acid (AA%) | Notes | \n| ------------- | -----: | ----- |\n| Magnum | 7.08g (.35oz) | 13.5% | @ 60m |\n| Cascade | 7.08g (.35oz) | 7.1% | @ 10m |\n| Centennial | 7.08g (.35oz) | 9.3% | @ 10m |\n| Cascade | 7.08g (.35oz) | 7.1% | @ 1m |\n| Centennial | 7.08g (.35oz) | 9.3% | @ 1m |\n\n##### Optional Additions/Customizations\nThis beer may also be dry hopped post fermentation with 1/2 ounce each of Cascade* and Centennial* hops for 5-8 days at room temperature for a more hop forward aroma.\n*not included in the recipe / ingredient instructions.\n  \n  \n##### Fermentation\nFermentis (US-05) - SafAle - 78-82% attenuation, 62-82\u00b0F, pitch temp 65\u00b0F\n  \n| Purpose  | Temp | Time | \n| ------------- | -----: | ----- |\n| Primary | 68\u00b0F | 10d |\n| Cold Crash | 38-42\u00b0F  | 1-3d |",
+    "start_water": 13.1,
+    "steps": [
+        {
+            "drain_time": 0,
+            "location": "PassThru",
+            "name": "Heat Water",
+            "step_time": 0,
+            "temperature": 152
+        },
+        {
+            "drain_time": 8,
+            "location": "Mash",
+            "name": "Single Infusion",
+            "step_time": 90,
+            "temperature": 152
+        },
+        {
+            "drain_time": 0,
+            "location": "PassThru",
+            "name": "Heat to Boil",
+            "step_time": 0,
+            "temperature": 207
+        },
+        {
+            "drain_time": 0,
+            "location": "Adjunct1",
+            "name": "Hops 1",
+            "step_time": 50,
+            "temperature": 207
+        },
+        {
+            "drain_time": 0,
+            "location": "Adjunct1",
+            "name": "Hops 2",
+            "step_time": 9,
+            "temperature": 207
+        },
+        {
+            "drain_time": 10,
+            "location": "Adjunct1",
+            "name": "Hops 3",
+            "step_time": 1,
+            "temperature": 207
+        },
+        {
+            "drain_time": 0,
+            "location": "Pause",
+            "name": "Connect Chiller",
+            "step_time": 0,
+            "temperature": 0
+        },
+        {
+            "drain_time": 10,
+            "location": "PassThru",
+            "name": "Chill",
+            "step_time": 10,
+            "temperature": 65
+        }
+    ]
+}

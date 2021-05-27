@@ -1,0 +1,51 @@
+{
+    "id": 12,
+    "name": "Base Recipe - American Lager",
+    "name_escaped": "Base_Recipe_-_American_Lager",
+    "notes": "### [Base Recipe] A golden, balanced, Saison\n\n**OG**: 1.055   **FG**: 1.013\n**ABV**: ~5.7%    **IBU**: ~13\n\n**SRM**: 3.0   **Batch Size**: 2.5 Gal   **Start Water**: 3.36 Gal (28.02 lbs)\n\n#### Grain Bill (total weight: 8.73lb)\n\n| Grain/Sugar  | Weight | Color (\u00b0Lovibond) | Gravity | Notes | \n| ------------------- | ------- | ------------- |\n| American Two-Row Pale | 5lb | 1.8\u00b0L | 1.0368 |\n| Flaked Corn | 1lb | 0.55\u00b0L | 1.0396 |\n  \n#### Hop Schedule\n  \n| Variety/Adjunct  | Weight | Alpha Acid (AA%) | Notes | \n| ------------- | -----: | ----- |\n| Tettnanger | 7.08g (.35oz) | 6.1% | @ 60m |\n\n##### Optional Additions/Customizations\nFlaked rice is interchangeable with flaked maize in equal amounts.\nFermentation should last 30 days. Remove from cold fermentation and bring to room temp for 3 days (Diacetyl Rest).\nCrash cool to 32F, then rack off yeast. Allow to lager for 4 - 6 weeks before carbonating.\nRecipe created by Annie Johnson.\n  \n  \n##### Fermentation\nWhite Labs (WLP840) - American Lager Yeast - 75-80% attenuation, 50-55\u00b0F, pitch temp 53\u00b0F\n  \n| Purpose  | Temp | Time | \n| ------------- | -----: | ----- |\n| Primary | 53\u00b0F | 30d |\n| Diacetyl Rest | 68-72\u00b0F | 3d |\n| Cold Crash | 32-36\u00b0F  | 1-3d |\n| Lagering | 32-36\u00b0F | 4-6w (before carbonating) |",
+    "start_water": 13.1,
+    "steps": [
+        {
+            "drain_time": 0,
+            "location": "PassThru",
+            "name": "Heat Water",
+            "step_time": 0,
+            "temperature": 152
+        },
+        {
+            "drain_time": 8,
+            "location": "Mash",
+            "name": "Single Infusion",
+            "step_time": 90,
+            "temperature": 152
+        },
+        {
+            "drain_time": 0,
+            "location": "PassThru",
+            "name": "Heat to Boil",
+            "step_time": 0,
+            "temperature": 207
+        },
+        {
+            "drain_time": 10,
+            "location": "Adjunct1",
+            "name": "Hops 1",
+            "step_time": 60,
+            "temperature": 207
+        },
+        {
+            "drain_time": 0,
+            "location": "Pause",
+            "name": "Connect Chiller",
+            "step_time": 0,
+            "temperature": 0
+        },
+        {
+            "drain_time": 10,
+            "location": "PassThru",
+            "name": "Chill",
+            "step_time": 10,
+            "temperature": 53
+        }
+    ]
+}

@@ -1,0 +1,65 @@
+{
+    "id": 19,
+    "name": "Base Recipe - Imperial Stout",
+    "name_escaped": "Base_Recipe_-_Imperial_Stout",
+    "notes": "### [Base Recipe] A Dark, hoppy, full-bodied American Stout\n\n**OG**: 1.065   **FG**: 1.012\n**ABV**: ~7.3%    **IBU**: ~48\n\n**SRM**: 34.0   **Batch Size**: 2.5 Gal   **Start Water**: 3.61 Gal (30.11 lbs)\n\n#### Grain Bill (total weight: 8.73lb)\n\n| Grain/Sugar  | Weight | Color (\u00b0Lovibond) | Gravity | Notes | \n| ------------------- | ------- | ------------- |\n| American Two-Row Pale | 6lb | 1.8\u00b0L | 1.0368 |\n| American Chocolate | .35lb | 350\u00b0L | 1.0276 |\n| American Roasted Barley | .24lb | 300\u00b0L | 1.033 |\n| American Crystal 80L | .35lb | 80\u00b0L | 1.034 |\n| Flaked Oats | .25lb | 2.2\u00b0L | 1.0327 |\n| German Munich | 1lb | 8\u00b0L | 1.0366 |\n  \n#### Hop Schedule\n  \n| Variety/Adjunct  | Weight | Alpha Acid (AA%) | Notes | \n| ------------- | -----: | ----- |\n| Horizon | 11.34g (.4oz) | 12.5% | @ 60m |\n| Cascade | 24.1g (.85oz) | 7.1% | @ 15m |\n| Goldings | 24.1g (.85oz) | 5% | @ 5m |\n\n##### Optional Additions/Customizations\n  \n  \n##### Fermentation\nFermentis (US-05) - SafAle - 78-82% attenuation, 64-82\u00b0F, pitch temp 65\u00b0F\n  \n| Purpose  | Temp | Time | \n| ------------- | -----: | ----- |\n| Primary | 68\u00b0F | 10d |\n| Cold Crash | 44-46\u00b0F  | 1-3d |",
+    "start_water": 13.1,
+    "steps": [
+        {
+            "drain_time": 0,
+            "location": "PassThru",
+            "name": "Heat Water",
+            "step_time": 0,
+            "temperature": 152
+        },
+        {
+            "drain_time": 8,
+            "location": "Mash",
+            "name": "Single Infusion",
+            "step_time": 90,
+            "temperature": 152
+        },
+        {
+            "drain_time": 0,
+            "location": "PassThru",
+            "name": "Heat to Boil",
+            "step_time": 0,
+            "temperature": 207
+        },
+        {
+            "drain_time": 0,
+            "location": "Adjunct1",
+            "name": "Hops 1",
+            "step_time": 50,
+            "temperature": 207
+        },
+        {
+            "drain_time": 0,
+            "location": "Adjunct1",
+            "name": "Hops 2",
+            "step_time": 9,
+            "temperature": 207
+        },
+        {
+            "drain_time": 10,
+            "location": "Adjunct1",
+            "name": "Hops 3",
+            "step_time": 1,
+            "temperature": 207
+        },
+        {
+            "drain_time": 0,
+            "location": "Pause",
+            "name": "Connect Chiller",
+            "step_time": 0,
+            "temperature": 0
+        },
+        {
+            "drain_time": 10,
+            "location": "PassThru",
+            "name": "Chill",
+            "step_time": 10,
+            "temperature": 65
+        }
+    ]
+}

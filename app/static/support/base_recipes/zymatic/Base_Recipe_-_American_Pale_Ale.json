@@ -1,0 +1,58 @@
+{
+    "id": 15,
+    "name": "Base Recipe - American Pale Ale",
+    "name_escaped": "Base_Recipe_-_American_Pale_Ale",
+    "notes": "### [Base Recipe] A golden, balanced, full-bodied American Pale Ale\n\n**OG**: 1.062   **FG**: 1.015\n**ABV**: ~6.4%    **IBU**: ~40\n\n**SRM**: 7.0   **Batch Size**: 2.5 Gal   **Start Water**: 3.5 Gal (29.19 lbs)\n\n#### Grain Bill (total weight: 7.35lb)\n\n| Grain/Sugar  | Weight | Color (\u00b0Lovibond) | Gravity | Notes | \n| ------------------- | ------- | ------------- |\n| American Two-Row Pale | 7lb | 1.8\u00b0L | 1.0368 |\n| American Crystal 40L | .35lb | 40\u00b0L | 1.034 |\n\n  \n#### Hop Schedule\n  \n| Variety/Adjunct  | Weight | Alpha Acid (AA%) | Notes | \n| ------------- | -----: | ----- |\n| Magnum | 7.94g (.28oz) | 13.5% | @ 60m |\n| Perle | 7.94g (.28oz) | 8.9% | @ 60m |\n| Cascade | 15.87g (.56oz) | 7.1% | @5m |\n\n##### Optional Additions/Customizations\n  \n  \n##### Fermentation\nWhite Labs (WLP001) - California Ale - 73-80% attenuation, 68-73\u00b0F, pitch temp 71\u00b0F\n  \n| Purpose  | Temp | Time | \n| ------------- | -----: | ----- |\n| Primary | 68\u00b0F | 10d |\n| Cold Crash | 44-46\u00b0F  | 1-3d |",
+    "start_water": 13.1,
+    "steps": [
+        {
+            "drain_time": 0,
+            "location": "PassThru",
+            "name": "Heat Water",
+            "step_time": 0,
+            "temperature": 152
+        },
+        {
+            "drain_time": 8,
+            "location": "Mash",
+            "name": "Single Infusion",
+            "step_time": 90,
+            "temperature": 152
+        },
+        {
+            "drain_time": 0,
+            "location": "PassThru",
+            "name": "Heat to Boil",
+            "step_time": 0,
+            "temperature": 207
+        },
+        {
+            "drain_time": 0,
+            "location": "Adjunct1",
+            "name": "Hops 1",
+            "step_time": 55,
+            "temperature": 207
+        },
+        {
+            "drain_time": 10,
+            "location": "Adjunct1",
+            "name": "Hops 2",
+            "step_time": 5,
+            "temperature": 207
+        },
+        {
+            "drain_time": 0,
+            "location": "Pause",
+            "name": "Connect Chiller",
+            "step_time": 0,
+            "temperature": 0
+        },
+        {
+            "drain_time": 10,
+            "location": "PassThru",
+            "name": "Chill",
+            "step_time": 10,
+            "temperature": 71
+        }
+    ]
+}

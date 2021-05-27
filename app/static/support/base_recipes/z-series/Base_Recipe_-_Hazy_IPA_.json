@@ -1,0 +1,65 @@
+{
+    "id": 8,
+    "name": "Base Recipe - Hazy IPA ",
+    "name_escaped": "Base_Recipe_-_Hazy_IPA_",
+    "notes": "### [Base Recipe] A pale, hoppy, full-bodied Specialty IPA\n\n**OG**: 1.066   **FG**: 1.016\n**ABV**: ~6.8%    **IBU**: ~53\n\n**SRM**: 5.0   **Batch Size**: 2.5 Gal   **Start Water**: 3.67 Gal (30.61 lbs)\n\n#### Grain Bill (total weight: 8.73lb)\n\n| Grain/Sugar  | Weight | Color (pts) | Potential Gravity | Notes | \n| ------------------- | ------- | ------------- |\n| American Two-Row Pale | 7lb | 3.96 Lovibond | 55.43% |\n| Flaked Oats | 1.5lb | 1.03 Lovibond | 10.56% |  \n  \n#### Hop Schedule\n  \n| Variety/Adjunct  | Weight | Alpha Acid (AA%) | Notes | \n| ------------- | -----: | ----- |\n| El Dorado | 14.175g (.5oz) | 15% | @ 15m |\n| Hallertau | 28.35g (1oz) | 3.1% | @ 10m (10m) |\n| Centennial | 28.35g (1oz) | 9.3% | @ 9m (9m) |\n| Nelson Sauvin | 14.17g (.5oz) | 11% | @ 9m (9m) |  \n| Nelson Sauvin | 14.17g (.5oz) | 11% | for 5d post fermentation |  \n\n\n##### Optional Additions\nN/A\n  \n  \n##### Fermentation\nLallemand West Coast Ale (BRY-97) - 73-77% attenuation, 59-72\u00b0F, pitch temp 65\u00b0F\n  \n| Purpose  | Temp | Time | \n| ------------- | -----: | ----- |\n| Primary | 68\u00b0F | 10d (until SG levels off) |\n| Dry Hop | 68\u00b0F  | 5d |\n| Cold Crash | 38-42\u00b0F  | 1-3d |",
+    "start_water": 13.1,
+    "steps": [
+        {
+            "drain_time": 0,
+            "location": "PassThru",
+            "name": "Heat Water",
+            "step_time": 0,
+            "temperature": 152
+        },
+        {
+            "drain_time": 8,
+            "location": "Mash",
+            "name": "Single Infusion",
+            "step_time": 90,
+            "temperature": 152
+        },
+        {
+            "drain_time": 0,
+            "location": "PassThru",
+            "name": "Heat to Boil",
+            "step_time": 0,
+            "temperature": 207
+        },
+        {
+            "drain_time": 0,
+            "location": "Adjunct1",
+            "name": "Hops 1",
+            "step_time": 5,
+            "temperature": 207
+        },
+        {
+            "drain_time": 0,
+            "location": "Adjunct2",
+            "name": "Hops 2",
+            "step_time": 1,
+            "temperature": 207
+        },
+        {
+            "drain_time": 10,
+            "location": "Adjunct3",
+            "name": "Hops 3",
+            "step_time": 9,
+            "temperature": 207
+        },
+        {
+            "drain_time": 0,
+            "location": "Pause",
+            "name": "Connect Chiller",
+            "step_time": 0,
+            "temperature": 0
+        },
+        {
+            "drain_time": 10,
+            "location": "PassThru",
+            "name": "Chill",
+            "step_time": 10,
+            "temperature": 65
+        }
+    ]
+}

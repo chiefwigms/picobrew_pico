@@ -1,0 +1,65 @@
+{
+    "id": 16,
+    "name": "Base Recipe - Irish Red Ale",
+    "name_escaped": "Base_Recipe_-_Irish_Red_Ale",
+    "notes": "### [Base Recipe] A brown, balanced, full-bodied Irish Red Ale\n\n**OG**: 1.068   **FG**: 1.014\n**ABV**: ~7.5%    **IBU**: ~37\n\n**SRM**: 15.0   **Batch Size**: 2.5 Gal   **Start Water**: 3.6 Gal (30.02 lbs)\n\n#### Grain Bill (total weight: 8.5lb)\n\n| Grain/Sugar  | Weight | Color (\u00b0Lovibond) | Gravity | Notes | \n| ------------------- | ------- | ------------- |\n| American Two-Row Pale | 7.5lb | 1.8\u00b0L | 1.0368 |\n| American Crystal 120L | .2lb | 120\u00b0L | 1.033 |\n| American Victory | .25lb | 25\u00b0L | 1.0336 |\n| German Munich | .5lb | 8\u00b0L | 1.0366 |\n| German Carafa Special | .05lb | 600\u00b0L | 1.0297 |\n  \n#### Hop Schedule\n  \n| Variety/Adjunct  | Weight | Alpha Acid (AA%) | Notes | \n| ------------- | -----: | ----- |\n| Warrior | 9.07g (.32oz) | 13.5% | @ 60m |\n| Cascade | 9.07g (.32oz) | 7.1% | @ 20m |\n| Cascade | 9.07g (.32oz) | 7.1% | @ 5m |\n\n##### Optional Additions/Customizations\n\n \n##### Fermentation\nFermentis (US-04) - SafAle - 75-85% attenuation, 59-68\u00b0F, pitch temp 64\u00b0F\n  \n| Purpose  | Temp | Time | \n| ------------- | -----: | ----- |\n| Primary | 68\u00b0F | 10d |\n| Cold Crash | 38-42\u00b0F  | 1-3d |",
+    "start_water": 13.1,
+    "steps": [
+        {
+            "drain_time": 0,
+            "location": "PassThru",
+            "name": "Heat Water",
+            "step_time": 0,
+            "temperature": 152
+        },
+        {
+            "drain_time": 8,
+            "location": "Mash",
+            "name": "Single Infusion",
+            "step_time": 90,
+            "temperature": 152
+        },
+        {
+            "drain_time": 0,
+            "location": "PassThru",
+            "name": "Heat to Boil",
+            "step_time": 0,
+            "temperature": 207
+        },
+        {
+            "drain_time": 0,
+            "location": "Adjunct1",
+            "name": "Hops 1",
+            "step_time": 40,
+            "temperature": 207
+        },
+        {
+            "drain_time": 0,
+            "location": "Adjunct1",
+            "name": "Hops 2",
+            "step_time": 15,
+            "temperature": 207
+        },
+        {
+            "drain_time": 10,
+            "location": "Adjunct1",
+            "name": "Hops 3",
+            "step_time": 5,
+            "temperature": 207
+        },
+        {
+            "drain_time": 0,
+            "location": "Pause",
+            "name": "Connect Chiller",
+            "step_time": 0,
+            "temperature": 0
+        },
+        {
+            "drain_time": 10,
+            "location": "PassThru",
+            "name": "Chill",
+            "step_time": 10,
+            "temperature": 64
+        }
+    ]
+}
