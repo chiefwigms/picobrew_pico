@@ -1,0 +1,65 @@
+{
+    "id": 14,
+    "name": "Base Recipe - American Porter",
+    "name_escaped": "Base_Recipe_-_American_Porter",
+    "notes": "### [Base Recipe] A Black, balanced, full-bodied American Porter\n\n**OG**: 1.066   **FG**: 1.017\n**ABV**: ~6.8%    **IBU**: ~42\n\n**SRM**: 54.0   **Batch Size**: 2.5 Gal   **Start Water**: 3.59 Gal (29.94 lbs)\n\n#### Grain Bill (total weight: 8.73lb)\n\n| Grain/Sugar  | Weight | Color (\u00b0Lovibond) | Gravity | Notes | \n| ------------------- | ------- | ------------- |\n| Maris Otter Ale Malt | 3.5lb | 4\u00b0L | 1.036 |\n| American Two-Row Pale | 3lb | 1.8\u00b0L | 1.0368 |\n| American Special Roast | .375lb | 40\u00b0L | 1.0327 |\n| British Pale Chocolate | .3lb | 200\u00b0L | 1.0336 |\n| British Brown | .25lb | 70\u00b0L | 1.0316 |\n| American Crystal 120L | .2lb | 120\u00b0L | 1.033 |\n| German Carafa Chocolate Malt | .35lb | 525\u00b0L | 1.0297 |\n| American Roasted Barley | .5lb | 300\u00b0L | 1.033 |\n\n  \n#### Hop Schedule\n  \n| Variety/Adjunct  | Weight | Alpha Acid (AA%) | Notes | \n| ------------- | -----: | ----- |\n| Magnum | 14.17g (.5oz) | 13.5% | @ 60m |\n| East Kent Goldings | 7.08g (.25oz) | 5% | @ 30m |\n\n##### Optional Additions/Customizations\n  \n  \n##### Fermentation\nWyeast (1764) - Pacman - 72-78% attenuation, 60-72\u00b0F, pitch temp 66\u00b0F\n  \n| Purpose  | Temp | Time | \n| ------------- | -----: | ----- |\n| Primary | 68\u00b0F | 10d |\n| Cold Crash | 44-46\u00b0F  | 1-3d |",
+    "start_water": 13.1,
+    "steps": [
+        {
+            "drain_time": 0,
+            "location": "PassThru",
+            "name": "Heat Water",
+            "step_time": 0,
+            "temperature": 152
+        },
+        {
+            "drain_time": 8,
+            "location": "Mash",
+            "name": "Single Infusion",
+            "step_time": 90,
+            "temperature": 152
+        },
+        {
+            "drain_time": 0,
+            "location": "PassThru",
+            "name": "Heat to Boil",
+            "step_time": 0,
+            "temperature": 207
+        },
+        {
+            "drain_time": 0,
+            "location": "Adjunct1",
+            "name": "Hops 1",
+            "step_time": 50,
+            "temperature": 207
+        },
+        {
+            "drain_time": 0,
+            "location": "Adjunct1",
+            "name": "Hops 2",
+            "step_time": 9,
+            "temperature": 207
+        },
+        {
+            "drain_time": 10,
+            "location": "Adjunct1",
+            "name": "Hops 3",
+            "step_time": 1,
+            "temperature": 207
+        },
+        {
+            "drain_time": 0,
+            "location": "Pause",
+            "name": "Connect Chiller",
+            "step_time": 0,
+            "temperature": 0
+        },
+        {
+            "drain_time": 10,
+            "location": "PassThru",
+            "name": "Chill",
+            "step_time": 10,
+            "temperature": 66
+        }
+    ]
+}

@@ -29,6 +29,7 @@ def support_pico_c():
     pico_c_support.faq = SupportMedia('/static/support/pico-c/Frequently-Asked-Questions.md')
     pico_c_support.instructional_videos = SupportMedia('/static/support/pico-c/Instructional-Videos.md')
     pico_c_support.misc_media = {
+        'Base Recipes': SupportMedia('/static/support/legacy/pico-s/Base-Recipes.md', community_owner),
         'DIY Cleaning Bucket': SupportMedia('/static/support/pico-c/DIY_CleaningBucket.pdf'),
         'Cold Brew': SupportMedia('/static/support/pico-c/PicoC_ColdBrew.pdf'),
         'Manual Brew': SupportMedia('/static/support/pico-c/PicoC_ManualBrew.pdf'),
@@ -48,6 +49,7 @@ def support_pico_pro():
     pico_pro_support.faq = SupportMedia('/static/support/pico-pro/Frequently-Asked-Questions.md')
     pico_pro_support.instructional_videos = SupportMedia('/static/support/pico-pro/Instructional-Videos.md')
     pico_pro_support.misc_media = {
+        'Base Recipes': SupportMedia('/static/support/legacy/pico-s/Base-Recipes.md', community_owner),
         'Cold Brew': SupportMedia('/static/support/pico-pro/PicoPro_ColdBrew.pdf'),
         'Manual Brew': SupportMedia('/static/support/pico-pro/PicoPro_ManualBrew.pdf'),
         'Sous Vide': SupportMedia('/static/support/pico-pro/Pico_SousVide.pdf'),
@@ -122,6 +124,7 @@ def support_z_series():
     z_series_support.manual = SupportMedia('/static/support/z-series/ZN_AssemblyGuide.pdf')
     z_series_support.faq = SupportMedia('/static/support/z-series/Frequently-Asked-Questions.md')
     z_series_support.misc_media = {
+        'Base Recipes': SupportMedia('/static/support/z-series/Base-Recipes.md', community_owner),
         'Quick Start': SupportMedia('/static/support/z-series/Z_QuickStart.pdf'),
         'Bottling Kit': SupportMedia('/static/support/z-series/Z_BottlingKit.pdf'),
         'Draft Kit': SupportMedia('/static/support/z-series/Z_DraftKit.pdf'),
@@ -173,6 +176,7 @@ def support_pico_s():
     pico_s_support.faq = SupportMedia('/static/support/legacy/pico-s/Frequently-Asked-Questions.md')
     pico_s_support.instructional_videos = SupportMedia('/static/support/legacy/pico-s/Instructional-Videos.md')
     pico_s_support.misc_media = {
+        'Base Recipes': SupportMedia('/static/support/legacy/pico-s/Base-Recipes.md', community_owner),
         'Troubleshooting': SupportMedia('/static/support/legacy/legacy/pico-s/Pico_Troubleshooting.pdf'),
     }
     return render_support_template(pico_s_support)
@@ -188,6 +192,7 @@ def support_zymatic():
     zymatic_support.faq = SupportMedia('/static/support/legacy/zymatic/Frequently-Asked-Questions.md')
     zymatic_support.instructional_videos = SupportMedia('/static/support/legacy/zymatic/Instructional-Videos.md')
     zymatic_support.misc_media = {
+        'Base Recipes': SupportMedia('/static/support/legacy/zymatic/Base-Recipes.md', community_owner),
         'Firmware': SupportMedia('/static/support/legacy/zymatic/Firmware.md'),
         'Firmware-Installation': SupportMedia('/static/support/legacy/zymatic/Firmware-Installation.md'),
         'Maintenance': SupportMedia('/static/support/legacy/zymatic/Maintenance.md'),

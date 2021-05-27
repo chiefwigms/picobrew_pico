@@ -1,0 +1,51 @@
+{
+    "id": 9,
+    "name": "Base Recipe - Weissbier",
+    "name_escaped": "Base_Recipe_-_Weissbier",
+    "notes": "### [Base Recipe] A pale, very sweet, medium-bodied Weizen/Weissbier\n\n**OG**: 1.059   **FG**: 1.015\n**ABV**: ~5.9%    **IBU**: ~6\n\n**SRM**: 4.0   **Batch Size**: 2.5 Gal   **Start Water**: 3.39 Gal (28.27 lbs)\n\n#### Grain Bill (total weight: 8.73lb)\n\n| Grain/Sugar  | Weight | Color (pts) | Potential Gravity | Notes | \n| ------------------- | ------- | ------------- |\n| German Pilsener | 3.22lb | 1.85 Lovibond | 29.18% |\n| German Wheat | 3.22lb | 2.15 Lovibond | 29.82% |  \n  \n#### Hop Schedule\n  \n| Variety/Adjunct  | Weight | Alpha Acid (AA%) | Notes | \n| ------------- | -----: | ----- |\n| Hallertau | 9.92g (.35oz) | 3.1% | @ 60m |\n\n##### Optional Additions\nN/A\n  \n  \n##### Fermentation\nWhite Labs (WLP300) - Hefeweizen Ale - 72-76% attenuation, 68-72\u00b0F, pitch temp 70\u00b0F\n  \n| Purpose  | Temp | Time | \n| ------------- | -----: | ----- |\n| Primary | 68\u00b0F | 10d (until SG levels off) |\n| Dry Hop | 68\u00b0F  | 5d |\n| Cold Crash | 38-42\u00b0F  | 1-3d |",
+    "start_water": 13.1,
+    "steps": [
+        {
+            "drain_time": 0,
+            "location": "PassThru",
+            "name": "Heat Water",
+            "step_time": 0,
+            "temperature": 152
+        },
+        {
+            "drain_time": 8,
+            "location": "Mash",
+            "name": "Single Infusion",
+            "step_time": 90,
+            "temperature": 152
+        },
+        {
+            "drain_time": 0,
+            "location": "PassThru",
+            "name": "Heat to Boil",
+            "step_time": 0,
+            "temperature": 207
+        },
+        {
+            "drain_time": 10,
+            "location": "Adjunct1",
+            "name": "Hops 1",
+            "step_time": 60,
+            "temperature": 207
+        },
+        {
+            "drain_time": 0,
+            "location": "Pause",
+            "name": "Connect Chiller",
+            "step_time": 0,
+            "temperature": 0
+        },
+        {
+            "drain_time": 10,
+            "location": "PassThru",
+            "name": "Chill",
+            "step_time": 10,
+            "temperature": 70
+        }
+    ]
+}

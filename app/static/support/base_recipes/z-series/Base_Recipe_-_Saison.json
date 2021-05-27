@@ -1,0 +1,65 @@
+{
+    "id": 10,
+    "name": "Base Recipe - Saison",
+    "name_escaped": "Base_Recipe_-_Saison",
+    "notes": "### [Base Recipe] A golden, balanced, Saison\n\n**OG**: 1.075   **FG**: 1.011\n**ABV**: ~8.8%    **IBU**: ~34\n\n**SRM**: 10.0   **Batch Size**: 2.5 Gal   **Start Water**: 3.63 Gal (30.27 lbs)\n\n#### Grain Bill (total weight: 8.73lb)\n\n| Grain/Sugar  | Weight | Color (\u00b0Lovibond) | Gravity | Notes | \n| ------------------- | ------- | ------------- |\n| Belgian Pils | 5.07lb | 1.5\u00b0L | 1.036 |\n| Belgian Wheat | 1.279lb | 1.9\u00b0L | 1.037 |\n| German Vienna | 2.54lb | 3.5\u00b0L | 1.036 |  \n| German Carafa Special | 0.044lb | 600\u00b0L | 1.0297 |  \n| Candi Sugar | 0.5lb | 1.1\u00b0L | 1.045 | Add during boil\n  \n#### Hop Schedule\n  \n| Variety/Adjunct  | Weight | Alpha Acid (AA%) | Notes | \n| ------------- | -----: | ----- |\n| Belma | 11.06g (.39oz) | 11.6% | @ 60m (40m) |\n| Belma | 5.39g (.19oz) | 11.6% | @ 20m (15m) |\n| Belma | 11.06g (.39oz) | 11.6% | @ 5m (5m) |\n\n##### Optional Additions/Customizations\nMidnight Wheat, Roasted Barley or some other 400L plus grain can be used in place of the Carafa - this small amount just adds the signature orange hue to the Saison.\n  \n  \n##### Fermentation\nWhite Labs (WLP565) - Belgian Saison I - 65-75% attenuation, 68-75\u00b0F, pitch temp 72\u00b0F\n  \n| Purpose  | Temp | Time | \n| ------------- | -----: | ----- |\n| Primary | 68\u00b0F | 10d (until SG levels off) |\n| Dry Hop | 68\u00b0F  | 5d |\n| Cold Crash | 38-42\u00b0F  | 1-3d |",
+    "start_water": 13.1,
+    "steps": [
+        {
+            "drain_time": 0,
+            "location": "PassThru",
+            "name": "Heat Water",
+            "step_time": 0,
+            "temperature": 152
+        },
+        {
+            "drain_time": 8,
+            "location": "Mash",
+            "name": "Single Infusion",
+            "step_time": 90,
+            "temperature": 152
+        },
+        {
+            "drain_time": 0,
+            "location": "PassThru",
+            "name": "Heat to Boil",
+            "step_time": 0,
+            "temperature": 207
+        },
+        {
+            "drain_time": 0,
+            "location": "Adjunct1",
+            "name": "Hops 1",
+            "step_time": 40,
+            "temperature": 207
+        },
+        {
+            "drain_time": 0,
+            "location": "Adjunct2",
+            "name": "Hops 2",
+            "step_time": 15,
+            "temperature": 207
+        },
+        {
+            "drain_time": 10,
+            "location": "Adjunct3",
+            "name": "Hops 3",
+            "step_time": 5,
+            "temperature": 207
+        },
+        {
+            "drain_time": 0,
+            "location": "Pause",
+            "name": "Connect Chiller",
+            "step_time": 0,
+            "temperature": 0
+        },
+        {
+            "drain_time": 10,
+            "location": "PassThru",
+            "name": "Chill",
+            "step_time": 10,
+            "temperature": 72
+        }
+    ]
+}

@@ -1,0 +1,65 @@
+{
+    "id": 18,
+    "name": "Base Recipe - American IPA",
+    "name_escaped": "Base_Recipe_-_American_IPA",
+    "notes": "### [Base Recipe] A pale, intensely bitter, full-bodied American IPA\n\n**OG**: 1.065   **FG**: 1.009\n**ABV**: ~7.6%    **IBU**: ~70\n\n**SRM**: 6.0   **Batch Size**: 2.5 Gal   **Start Water**: 3.6 Gal (30.02 lbs)\n\n#### Grain Bill (total weight: 8lb)\n\n| Grain/Sugar  | Weight | Color (\u00b0Lovibond) | Gravity | Notes | \n| ------------------- | ------- | ------------- |\n| American Two-Row Pale | 7lb | 1.8\u00b0L | 1.0368 |\n| German Munich | 1lb | 8\u00b0L | 1.0366 |\n\n  \n#### Hop Schedule\n  \n| Variety/Adjunct  | Weight | Alpha Acid (AA%) | Notes | \n| ------------- | -----: | ----- |\n| Magnum | 7.94g (.25oz) | 13.5% | @ 60m |\n| Galaxy | 7.94g (1oz) | 13.5% | @ 10m |\n| Galaxy | 7.94g (1oz) | 13.5% | @ 9m |\n\n\n##### Optional Additions/Customizations\n  \n  \n##### Fermentation\nFermentis (US-05) - SafAle - 78-82% attenuation, 64-82\u00b0F, pitch temp 65\u00b0F\n  \n| Purpose  | Temp | Time | \n| ------------- | -----: | ----- |\n| Primary | 68\u00b0F | 10d |\n| Cold Crash | 44-46\u00b0F  | 1-3d |",
+    "start_water": 13.1,
+    "steps": [
+        {
+            "drain_time": 0,
+            "location": "PassThru",
+            "name": "Heat Water",
+            "step_time": 0,
+            "temperature": 152
+        },
+        {
+            "drain_time": 8,
+            "location": "Mash",
+            "name": "Single Infusion",
+            "step_time": 90,
+            "temperature": 152
+        },
+        {
+            "drain_time": 0,
+            "location": "PassThru",
+            "name": "Heat to Boil",
+            "step_time": 0,
+            "temperature": 207
+        },
+        {
+            "drain_time": 0,
+            "location": "Adjunct1",
+            "name": "Hops 1",
+            "step_time": 50,
+            "temperature": 207
+        },
+        {
+            "drain_time": 10,
+            "location": "Adjunct1",
+            "name": "Hops 2",
+            "step_time": 1,
+            "temperature": 207
+        },
+        {
+            "drain_time": 10,
+            "location": "Adjunct1",
+            "name": "New Step",
+            "step_time": 9,
+            "temperature": 207
+        },
+        {
+            "drain_time": 0,
+            "location": "Pause",
+            "name": "Connect Chiller",
+            "step_time": 0,
+            "temperature": 0
+        },
+        {
+            "drain_time": 10,
+            "location": "PassThru",
+            "name": "Chill",
+            "step_time": 10,
+            "temperature": 65
+        }
+    ]
+}

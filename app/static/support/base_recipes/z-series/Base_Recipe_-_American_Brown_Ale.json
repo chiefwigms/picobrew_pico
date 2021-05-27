@@ -1,0 +1,72 @@
+{
+    "id": 11,
+    "name": "Base Recipe - American Brown Ale",
+    "name_escaped": "Base_Recipe_-_American_Brown_Ale",
+    "notes": "### [Base Recipe] A Dark, hoppy, medium-bodied American Brown Ale\n\n**OG**: 1.058   **FG**: 1.014\n**ABV**: ~5.9%    **IBU**: ~49\n\n**SRM**: 23.0   **Batch Size**: 2.5 Gal   **Start Water**: 3.55 Gal (29.61 lbs)\n\n#### Grain Bill (total weight: 7lb)\n\n| Grain/Sugar  | Weight | Color (\u00b0Lovibond) | Potential Gravity | Notes | \n| ------------------- | ------- | ------------- |\n| American Two-Row Pale | 5lb | 1.8\u00b0L | 1.0368 |\n| Belgian Carapils | 0.5lb | 8.0\u00b0L | 1.033 | \n| American Crystal 40L | 0.5lb | 40.0\u00b0L | 1.034 |  \n| American Chocolate | 0.25lb | 350\u00b0L | 1.0276 |  \n| American Wheat | 0.5lb | 1.65\u00b0L | 1.0385 |  \n| British Brown | 0.25lb | 70\u00b0L | 1.0316 |  \n  \n#### Hop Schedule\n  \n| Variety/Adjunct  | Weight | Alpha Acid (AA%) | Notes | \n| ------------- | -----: | ----- |\n| Northern Brewer | 14.17g (.5oz) | 6.9% | @ 60m (45m) |\n| Northern Brewer | 14.17g (.5oz) | 6.9% | @ 15m (5m) |\n| Cascade | 28.34g (1oz) | 7.1% | @ 10m (8m) |\n| Cascade | 14.17g (.5oz) | 7.1% | @ 2m (2m) |\n| Centennial | 14.17g (.5oz) | 9.3% | @ 2m (2m) |\n| Cascade | 28.34g (1oz) | 7.1% | Dry Hop for 5-7d after Fermentation |\n| Centennial | 28.34g (1oz) | 9.3% | Dry Hop for 5-7d after Fermentation |\n\n##### Optional Additions\nN/A\n  \n  \n##### Fermentation\nLallemand (BRY-97) - West Coast Ale - 73-77% attenuation, 59-72\u00b0F, pitch temp 65\u00b0F\n  \n| Purpose  | Temp | Time | \n| ------------- | -----: | ----- |\n| Primary | 68\u00b0F | 10d (until SG levels off) |\n| Dry Hop | 68\u00b0F  | 5-7d |\n| Cold Crash | 38-42\u00b0F  | 1-3d |",
+    "start_water": 13.1,
+    "steps": [
+        {
+            "drain_time": 0,
+            "location": "PassThru",
+            "name": "Heat Water",
+            "step_time": 0,
+            "temperature": 152
+        },
+        {
+            "drain_time": 8,
+            "location": "Mash",
+            "name": "Single Infusion",
+            "step_time": 90,
+            "temperature": 152
+        },
+        {
+            "drain_time": 0,
+            "location": "PassThru",
+            "name": "Heat to Boil",
+            "step_time": 0,
+            "temperature": 207
+        },
+        {
+            "drain_time": 0,
+            "location": "Adjunct1",
+            "name": "Hops 1",
+            "step_time": 45,
+            "temperature": 207
+        },
+        {
+            "drain_time": 0,
+            "location": "Adjunct2",
+            "name": "Hops 2",
+            "step_time": 5,
+            "temperature": 207
+        },
+        {
+            "drain_time": 0,
+            "location": "Adjunct3",
+            "name": "Hops 3",
+            "step_time": 8,
+            "temperature": 207
+        },
+        {
+            "drain_time": 10,
+            "location": "Adjunct4",
+            "name": "Hops 4",
+            "step_time": 2,
+            "temperature": 207
+        },
+        {
+            "drain_time": 0,
+            "location": "Pause",
+            "name": "Connect Chiller",
+            "step_time": 0,
+            "temperature": 0
+        },
+        {
+            "drain_time": 10,
+            "location": "PassThru",
+            "name": "Chill",
+            "step_time": 10,
+            "temperature": 65
+        }
+    ]
+}

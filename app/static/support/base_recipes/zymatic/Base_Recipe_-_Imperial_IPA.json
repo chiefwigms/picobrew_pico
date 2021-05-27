@@ -1,0 +1,107 @@
+{
+    "id": 17,
+    "name": "Base Recipe - Imperial IPA",
+    "name_escaped": "Base_Recipe_-_Hazy_IPA__(copy_1)",
+    "notes": "### [Base Recipe] A golden, intensely bitter, Imperial IPA\n\n**OG**: 1.092   **FG**: 1.022\n**ABV**: ~10.0%    **IBU**: ~109\n\n**SRM**: 7.0   **Batch Size**: 2.5 Gal   **Start Water**: 3.74 Gal (31.19 lbs)\n\n#### Grain Bill (total weight: 9lb malt + 2lb DME)\n\n| Grain/Sugar  | Weight | Color (\u00b0Lovibond) | Potential Gravity | Notes | \n| ------------------- | ------- | ------------- |\n| American Two-Row Pale | 7.5lb | 3.96\u00b0L | 1.0368 |\n| German Munich | 1lb | 8\u00b0L | 1.0366 |  \n| American Wheat | .5lb | 1.65\u00b0L | 1.0385 |  \n| Light Dry Malt Extract | 2lb | 1.9\u00b0L | 1.0437 |  \n  \n#### Hop Schedule\n  \n| Variety/Adjunct  | Weight | Alpha Acid (AA%) | Notes | \n| ------------- | -----: | ----- |\n| Magnum | 19.85g (.7oz) | 13.5% | @ 60m |\n| Chinook | 42.52g (1.5oz) | 12% | @ 15m |\n| Simcoe | 42.52g (1.5oz) | 13% | @ 10m |\n\n##### Optional Additions\nN/A\n  \n  \n##### Fermentation\nWhite Labs (WLP001) - California Ale - 73-80% attenuation, 68-73\u00b0F, pitch temp 71\u00b0F\n  \n| Purpose  | Temp | Time | \n| ------------- | -----: | ----- |\n| Primary | 68\u00b0F | 10d (until SG levels off) |\n| Dry Hop | 68\u00b0F  | 5d |\n| Cold Crash | 38-42\u00b0F  | 1-3d |",
+    "start_water": 13.1,
+    "steps": [
+        {
+            "drain_time": 0,
+            "location": "PassThru",
+            "name": "Heat to Dough In",
+            "step_time": 0,
+            "temperature": 102
+        },
+        {
+            "drain_time": 8,
+            "location": "Mash",
+            "name": "Dough In",
+            "step_time": 20,
+            "temperature": 102
+        },
+        {
+            "drain_time": 0,
+            "location": "PassThru",
+            "name": "Heat to Mash 1",
+            "step_time": 0,
+            "temperature": 152
+        },
+        {
+            "drain_time": 8,
+            "location": "Mash",
+            "name": "Mash 1",
+            "step_time": 30,
+            "temperature": 152
+        },
+        {
+            "drain_time": 0,
+            "location": "PassThru",
+            "name": "Heat to Mash 2",
+            "step_time": 0,
+            "temperature": 154
+        },
+        {
+            "drain_time": 8,
+            "location": "Mash",
+            "name": "Mash 2",
+            "step_time": 60,
+            "temperature": 154
+        },
+        {
+            "drain_time": 0,
+            "location": "Mash",
+            "name": "Heat to Mash Out",
+            "step_time": 0,
+            "temperature": 175
+        },
+        {
+            "drain_time": 8,
+            "location": "Mash",
+            "name": "Mash Out",
+            "step_time": 15,
+            "temperature": 175
+        },
+        {
+            "drain_time": 0,
+            "location": "PassThru",
+            "name": "Heat to Boil",
+            "step_time": 0,
+            "temperature": 207
+        },
+        {
+            "drain_time": 0,
+            "location": "Adjunct1",
+            "name": "Hops 1",
+            "step_time": 45,
+            "temperature": 207
+        },
+        {
+            "drain_time": 0,
+            "location": "Adjunct2",
+            "name": "Hops 2",
+            "step_time": 5,
+            "temperature": 207
+        },
+        {
+            "drain_time": 10,
+            "location": "Adjunct3",
+            "name": "Hops 3",
+            "step_time": 10,
+            "temperature": 207
+        },
+        {
+            "drain_time": 0,
+            "location": "Pause",
+            "name": "Connect Chiller",
+            "step_time": 0,
+            "temperature": 0
+        },
+        {
+            "drain_time": 10,
+            "location": "PassThru",
+            "name": "Chill",
+            "step_time": 10,
+            "temperature": 71
+        }
+    ]
+}
