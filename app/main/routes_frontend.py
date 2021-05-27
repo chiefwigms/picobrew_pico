@@ -78,13 +78,8 @@ def new_zymatic_recipe():
     if request.method == 'POST':
         recipe = request.get_json()
         recipe['id'] = uuid.uuid4().hex[:32]
-        filename = zymatic_recipe_path().joinpath('{}.json'.format(recipe['name'].replace(' ', '_')))
-        if not filename.exists():
-            with open(filename, "w") as file:
-                json.dump(recipe, file, indent=4, sort_keys=True)
-            return '', 204
-        else:
-            return 'Recipe Exists!', 418
+        filename = build_recipe_filename(zymatic_recipe_path(), recipe['name'])
+        return write_recipe_file(filename, recipe)
     else:
         return render_template_with_defaults('new_zymatic_recipe.html')
 
@@ -167,13 +162,8 @@ def new_zseries_recipe_save():
     recipe = request.get_json()
     recipe['id'] = increment_zseries_recipe_id()
     recipe['start_water'] = recipe.get('start_water', 13.1)
-    filename = zseries_recipe_path().joinpath('{}.json'.format(recipe['name'].replace(' ', '_')))
-    if not filename.exists():
-        with open(filename, "w") as file:
-            json.dump(recipe, file, indent=4, sort_keys=True)
-        return '', 204
-    else:
-        return 'Recipe Exists!', 418
+    filename = build_recipe_filename(zseries_recipe_path(), recipe['name'])
+    return write_recipe_file(filename, recipe)
 
 
 @main.route('/update_zseries_recipe', methods=['POST'])
@@ -437,13 +427,8 @@ def new_pico_recipe():
     if request.method == 'POST':
         recipe = request.get_json()
         recipe['id'] = uuid.uuid4().hex[:14]
-        filename = pico_recipe_path().joinpath('{}.json'.format(recipe['name'].replace(' ', '_')))
-        if not filename.exists():
-            with open(filename, "w") as file:
-                json.dump(recipe, file, indent=4, sort_keys=True)
-            return '', 204
-        else:
-            return 'Recipe Exists!', 418
+        filename = build_recipe_filename(pico_recipe_path(), recipe['name'])
+        return write_recipe_file(filename, recipe)
     else:
         return render_template_with_defaults('new_pico_recipe.html')
 
@@ -527,6 +512,19 @@ def add_invalid_session(sessionType, file):
     if sessionType not in invalid_sessions:
         invalid_sessions[sessionType] = set()
     invalid_sessions.get(sessionType).add(file)
+
+
+def build_recipe_filename(recipe_path, recipe_name):
+    return recipe_path.joinpath('{}.json'.format(recipe_name.strip().replace(' ', '_')))
+
+
+def write_recipe_file(filename, recipe):
+    if not filename.exists():
+        with open(filename, "w") as file:
+            json.dump(recipe, file, indent=4, sort_keys=True)
+        return '', 204
+    else:
+        return 'Recipe Exists!', 418
 
 
 def load_active_brew_sessions():
