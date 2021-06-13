@@ -1,18 +1,19 @@
 const fixedRows = 3;
 var isDataLoading;
 
-function rowIsEditable(cell) {
+function rowIsEditable(cell,plus) {
     var pos = cell.getTable().getRowPosition(cell.getRow(),true);
+    pos += plus ? 1 : 0;
     return (pos < fixedRows) ? false : true;
 }
 var editCheck = function (cell) {
-    return rowIsEditable(cell);
+    return rowIsEditable(cell,false);
 }
 var plusIcon = function (cell, formatterParams) {
-    return rowIsEditable(cell) ? "<i class='far fa-plus-square fa-lg'></i>" : "";
+    return rowIsEditable(cell,true) ? "<i class='far fa-plus-square fa-lg'></i>" : "";
 }
 var minusIcon = function (cell, formatterParams) {
-    return rowIsEditable(cell) ? "<i class='far fa-minus-square fa-lg'></i>" : "";
+    return rowIsEditable(cell,false) ? "<i class='far fa-minus-square fa-lg'></i>" : "";
 }
 function showAlert(msg, type) {
     $('#alert').html("<div class='w-100 alert text-center alert-" + type + "'>" + msg + "</div>");
@@ -140,7 +141,7 @@ var recipe_table = {
         {
             formatter: plusIcon, field: "add_step", width: 49, hozAlign: "center",
             cellClick: function (e, cell) {
-                if (rowIsEditable(cell)) {
+                if (rowIsEditable(cell,true)) {
                     var newRowData = Object.assign({}, cell.getRow().getData());
                     newRowData.name = "New Step";
                     newRowData.id = getMaxID(cell)+1;
@@ -151,11 +152,8 @@ var recipe_table = {
         {
             formatter: minusIcon, field: "remove_step", width: 49, hozAlign: "center",
             cellClick: function (e, cell) {
-                if (rowIsEditable(cell)) {
+                if (rowIsEditable(cell,false)) {
                     cell.getRow().delete();
-                    if (cell.getTable().getRows().length==fixedRows) {
-                        cell.getTable().addRow(Object.assign({},default_data[fixedRows]));
-                    }
                 }
             }
         },
