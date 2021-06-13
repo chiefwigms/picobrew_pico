@@ -610,7 +610,7 @@ def load_active_still_sessions():
 
 def load_still_sessions():
     files = list(still_archive_sessions_path().glob(file_glob_pattern))
-    still_sessions = [parse_still_session(file) for file in files]
+    still_sessions = [parse_still_session(file) for file in sorted(files, reverse=True)]
     return list(filter(lambda x: x != None, still_sessions))
 
 
