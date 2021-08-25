@@ -50,6 +50,9 @@ def recover_incomplete_session(raw_data, filename):
     elif raw_data.endswith(','):
         # open trailing comma
         recovered_session = raw_data[:-1] + '\n]\n'
+    elif raw_data.endswith('\x00'):
+        # corrupted file (trailing nulls with open comma)
+        recovered_session = raw_data.rstrip("\x00")[:-1] + '\n]\n'
 
     return recovered_session
 
