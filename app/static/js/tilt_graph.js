@@ -4,8 +4,6 @@ Highcharts.setOptions({
     }
 });
 	  
-var TickAmountValue = 7;
-
 Highcharts.chart(graph_data.chart_id, {
   chart: {
     type: 'spline',
@@ -59,6 +57,7 @@ Highcharts.chart(graph_data.chart_id, {
       title: {
         text: 'Temperature (F)'
       },
+	  
 	  tickPositioner: function () {
         var positions = [],
         tick = Math.floor(this.dataMin),
@@ -76,8 +75,26 @@ Highcharts.chart(graph_data.chart_id, {
       title: {
         text: 'Specific Gravity'
       },
-	  tickAmount: TickAmountValue,
-	  tickInterval: 0.01,
+	  
+	  labels: {
+        format: '{value:,.3f}'
+	  },
+	  
+	  tickPositioner: function () {
+        var positions = [],
+        maxTick = this.dataMax * 1000,
+        step = (maxTick - this.dataMin * 1000) / (TickAmountValue - 1),
+        tick = this.dataMin * 1000 - 1;
+
+        if (this.dataMax !== null && this.dataMin !== null) {
+          while (tick <= maxTick) {
+            positions.push(tick/1000);
+            tick += step;
+          }
+        }
+        return positions;
+	  },
+	  
       opposite: true
   }],
   
