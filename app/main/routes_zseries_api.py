@@ -396,7 +396,7 @@ def create_session(token, body):
 
     active_session.session = session_guid
     active_session.id = session_id
-    active_session.created_at = datetime.utcnow()
+    active_session.created_at = datetime.now()
     active_session.name = recipe.name if recipe else body['Name']
     active_session.type = body['SessionType']
 
