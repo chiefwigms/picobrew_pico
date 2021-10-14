@@ -10,7 +10,8 @@ from .. import socketio
 from .config import iSpindel_active_sessions_path
 from .model import iSpindelSession
 from .session_parser import active_iSpindel_sessions
-from .units import convert_temp
+from .units import convert_temp, epoch_time, excel_date
+from .webhook import send_webhook
 
 
 arg_parser = FlaskParser()
@@ -44,11 +45,11 @@ def process_iSpindel_data(data):
         if active_iSpindel_sessions[uid].uninit:
             create_new_session(uid)
 
-        time = ((datetime.utcnow() - datetime(1970, 1, 1)).total_seconds() * 1000)
+        time = datetime.utcnow()
         session_data = []
         log_data = ''
         point = {
-            'time': time,
+            'time': epoch_time(time),
             'temp': data['temperature'] if data['temp_units'] == 'F' else convert_temp(data['temperature'], 'F'),
             'gravity': data['gravity'],
         }
@@ -56,6 +57,18 @@ def process_iSpindel_data(data):
         session_data.append(point)
         log_data += '\n\t{},'.format(json.dumps(point))
 
+        # send data to configured webhooks (logging error and tracking individual status)
+        for webhook in active_iSpindel_sessions[uid].webhooks:
+            # translate point into Tilt-like webhook data payload
+            webhook_data = {
+                'Timepoint': excel_date(time),
+                'Temp': point['temp'],
+                'SG': point['gravity'],
+                'color': data['name']
+            }
+            # send and update status of webhook
+            send_webhook(webhook, webhook_data)
+        
         active_iSpindel_sessions[uid].data.extend(session_data)
         active_iSpindel_sessions[uid].voltage = str(data['battery']) + 'V'
 

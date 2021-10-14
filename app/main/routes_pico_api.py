@@ -12,6 +12,8 @@ from .firmware import firmware_filename, minimum_firmware, firmware_upgrade_requ
 from .model import PicoBrewSession, PICO_SESSION
 from .routes_frontend import get_pico_recipes
 from .session_parser import active_brew_sessions, dirty_sessions_since_clean
+from .units import epoch_time
+from .webhook import send_webhook
 
 
 arg_parser = FlaskParser()
@@ -202,16 +204,33 @@ def process_log(args):
     uid = args['uid']
     if uid not in active_brew_sessions or active_brew_sessions[uid].name == 'Waiting To Brew':
         create_new_session(uid, args['sesId'], args['sesType'])
-    session_data = {'time': ((datetime.utcnow() - datetime(1970, 1, 1)).total_seconds() * 1000),
+
+    log_date = datetime.utcnow()
+    session_data = {'time': epoch_time(log_date),
                     'timeLeft': args['timeLeft'],
                     'step': args['step'],
                     'wort': args['wort'],
                     'therm': args['therm'],
                     }
+
     event = None
     if 'event' in args:
         event = args['event']
         session_data.update({'event': event})
+
+    # send data to configured webhooks (logging error and tracking individual status)
+    for webhook in active_brew_sessions[uid].webhooks:
+        webhook_data = {
+            # 'ErrorCode': session_data['board'],
+            'Event': event,
+            # 'ShuttleScaler': session_data['heat1'],
+            'ThermoBlockTemp': session_data['therm'],
+            'WortTemp': session_data['wort'],
+        }
+        
+        # send and update status of webhook
+        send_webhook(webhook, webhook_data)
+
     active_brew_sessions[uid].step = args['step']
     active_brew_sessions[uid].data.append(session_data)
     graph_update = json.dumps({'time': session_data['time'],

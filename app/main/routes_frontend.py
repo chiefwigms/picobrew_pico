@@ -1,7 +1,9 @@
+import csv
+import io
 import json
 import os
 import uuid
-from datetime import timedelta
+from datetime import datetime, timedelta
 from flask import current_app, escape, make_response, request, send_file, render_template
 from pathlib import Path
 from ruamel.yaml import YAML
@@ -20,7 +22,8 @@ from .session_parser import (_paginate_sessions, list_session_files,
                              dirty_sessions_since_clean, last_session_metadata, BrewSessionType,
                              get_brew_graph_data, get_ferm_graph_data, get_still_graph_data, get_iSpindel_graph_data, get_tilt_graph_data,
                              active_brew_sessions, active_ferm_sessions, active_still_sessions, active_iSpindel_sessions, active_tilt_sessions,
-                             add_invalid_session, get_invalid_sessions, load_brew_sessions)
+                             add_invalid_session, get_invalid_sessions, load_brew_session, load_brew_sessions)
+from .webhook import Webhook
 
 
 file_glob_pattern = "[!._]*.json"
@@ -211,17 +214,7 @@ def update_zseries_recipe():
 @main.route('/device/<uid>/sessions/<session_type>', methods=['PUT'])
 def update_device_session(uid, session_type):
     update = request.get_json()
-    valid_session = True
-    if session_type == 'ferm':
-        session = active_ferm_sessions[uid]
-    elif session_type == 'iSpindel':
-        session = active_iSpindel_sessions[uid]
-    elif session_type == 'tilt':
-        session = active_tilt_sessions[uid]
-    elif session_type == 'still':
-        session = active_still_sessions[uid]
-    else:
-        valid_session = False
+    session, valid_session = active_session(uid, session_type)
 
     if valid_session:
         if update['active'] == False:
@@ -258,6 +251,27 @@ ALLOWED_EXTENSIONS = {'json'}
 def allowed_extension(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+
+@main.route('/device/<uid>/sessions/<session_type>/webhooks', methods=['POST'])
+def update_session_webhooks(uid, session_type):
+    body = request.get_json()
+    
+    # current_app.logger.error(f'request_body : {webhooks}')
+    session, valid_session = active_session(uid, session_type)
+
+    if valid_session:
+        # save/update webhook definition(s)
+        webhooks = []
+        for webhook in body['webhooks']:
+            webhooks.append(Webhook(webhook['url'], webhook['enabled']))
+
+        session.webhooks = webhooks
+        current_app.logger.debug(f'configured {len(session.webhooks)} webhook to the active {session_type} session {uid}')
+        return 'configuration of webhooks successful', 200
+    else:
+        current_app.logger.error(f'unable to locate valid active session : {session_type} and {uid}')
+        return f'Invalid session type or device id provided {session_type}, {uid}', 418
 
 
 def recipe_dirpath(machine_type):
@@ -323,8 +337,8 @@ def download_recipe(machine_type, id, name):
     return f'Download Recipe: Failed to find recipe id "{id}" with name "{name}"', 418
 
 
-@main.route('/sessions/<session_type>/<filename>', methods=['GET'])
-def download_session(session_type, filename):
+@main.route('/sessions/<session_type>/<filename>.<extension>', methods=['GET'])
+def download_session(session_type, filename, extension):
     session_dirpath = ""
     if session_type == "brew":
         session_dirpath = brew_archive_sessions_path()
@@ -341,11 +355,90 @@ def download_session(session_type, filename):
     filepath = session_dirpath.joinpath(filename)
 
     for f in files:
-        if f.name == filename:
-            response = make_response(send_file(filepath))
-            # custom content-type will force a download vs rendering with window.location
-            response.headers['Content-Type'] = 'application/octet-stream'
-            return response
+        if f.stem == filename:
+            if extension == "json":
+                response = make_response(send_file(f'{filepath}.json'))
+                # custom content-type will force a download vs rendering with window.location
+                response.headers['Content-Type'] = 'application/octet-stream'
+                return response
+            elif extension == "csv":
+                session = load_brew_session(f)
+
+                output = io.StringIO()
+                writer = csv.writer(output)
+
+                data_map = dict()
+                if session['is_pico']:  # pico
+                    data_map = {
+                        "#PicoSessionID": "SessionID",
+                        "PicoSessionLogID": "SessionLogID", # not in JSON data
+                        "LogDate": "timeStr",
+                        "WorkTemp": "wort",
+                        "ThermoBlockTemp": "therm",
+                        "Event": "event",
+                        "ErrorCode": "errorCode",
+                        "ShuttleScaler": None,
+                    }
+                elif len(session['data']) >= 2 and 'board' in session['data'][1]:    # zymatic
+                    data_map = {
+                        "#SessionID": "SessionID",
+                        "SessionLogID": "SessionLogID",  # not in JSON data
+                        "Date": "timeStr",
+                        "Event": "event",
+                        "Heat": "heat1",
+                        "Wort": "wort",
+                        "Board": "board",
+                        "Heat2": "heat2",
+                    }
+                elif len(session['data']) >= 1 and 'ambient' in session['data'][0]:  # zseries
+                    data_map = {
+                        "#ZSessionID": "SessionID",
+                        "ID": "SessionLogID",  # not in JSON data
+                        "LogDate": "timeStr",
+                        "StepName": "step",
+                        "TargetTemp": "target",
+                        "WortTemp": "wort",
+                        "ThermoBlockTemp": "therm",
+                        "AmbientTemp": "ambient",
+                        "DrainTemp": "drain",
+                        "ValvePosition": "position",
+                        "KegPumpOn": False,
+                        "DrainPumpOn": False,
+                        "ErrorCode": 0,
+                        "PauseReason": 0,
+                        "rssi": 0,
+                        "netSend": 0,
+                        "netWait": 0,
+                        "netRecv": 0
+                    }
+
+                writer.writerow(data_map.keys())
+                
+                for index, log_data in enumerate(session['data']):
+                    data = []
+                    for key, data_key in data_map.items():
+                        if data_key == "SessionID":  # not in log data
+                            data.append(session['session'])
+                        elif data_key == "SessionLogID":  # not in log data
+                            data.append(index)
+                        elif data_key == "timeStr":
+                            log_time = datetime.strptime(log_data[data_key], '%Y-%m-%dT%H:%M:%S.%f')
+                            data.append(log_time.strftime("%m/%d/%Y %H:%M:%S %p"))
+                        elif type(data_key) is not str:
+                            data.append(data_key)
+                        elif type(data_key) is str:
+                            data.append(log_data[data_key])
+                    
+                    # add data to csv
+                    writer.writerow(data)
+                    
+                response = make_response(output.getvalue())
+                response.headers["Content-Disposition"] = f'attachment; filename={filename}.{extension}'
+                response.headers["Content-type"] = "text/html"
+                return response
+            else:
+                return f'Download Session: Failed due to unsupported file extension "{extension}"', 418
+
     return f'Download Session: Failed to find session with filename "{filename}"', 418
 
 
@@ -561,7 +654,8 @@ def load_active_brew_sessions():
                               'graph': get_brew_graph_data(uid, active_brew_sessions[uid].name,
                                                            active_brew_sessions[uid].step,
                                                            active_brew_sessions[uid].data,
-                                                           active_brew_sessions[uid].is_pico)}
+                                                           active_brew_sessions[uid].is_pico),
+                              'webhooks': active_brew_sessions[uid].webhooks}
 
         if len(session_data) > 0:
             if 'timeLeft' in session_data[-1]:
@@ -599,7 +693,8 @@ def load_active_ferm_sessions():
                               'active': active_ferm_sessions[uid].active,
                               'date': active_ferm_sessions[uid].start_time or None,
                               'graph': get_ferm_graph_data(uid, active_ferm_sessions[uid].voltage,
-                                                           active_ferm_sessions[uid].data)})
+                                                           active_ferm_sessions[uid].data),
+                              'webhooks': active_ferm_sessions[uid].webhooks})
     return ferm_sessions
 
 
@@ -624,11 +719,13 @@ def load_active_still_sessions():
     still_sessions = []
     for uid in active_still_sessions:
         still_sessions.append({'alias': active_still_sessions[uid].alias,
-                              'uid': uid,
-                              'ip_address': active_still_sessions[uid].ip_address,
-                              'active': active_still_sessions[uid].active,
-                              'date': active_still_sessions[uid].created_at or None,
-                              'graph': get_still_graph_data(uid, active_still_sessions[uid].name, active_still_sessions[uid].data)})
+                               'uid': uid,
+                               'ip_address': active_still_sessions[uid].ip_address,
+                               'active': active_still_sessions[uid].active,
+                               'date': active_still_sessions[uid].created_at or None,
+                               'graph': get_still_graph_data(uid, active_still_sessions[uid].name,
+                                                             active_still_sessions[uid].data),
+                               'webhooks': active_still_sessions[uid].webhooks})
     return still_sessions
 
 
@@ -657,7 +754,8 @@ def load_active_iSpindel_sessions():
                                   'active': active_iSpindel_sessions[uid].active,
                                   'date': active_iSpindel_sessions[uid].start_time or None,
                                   'graph': get_iSpindel_graph_data(uid, active_iSpindel_sessions[uid].voltage,
-                                                                   active_iSpindel_sessions[uid].data)})
+                                                                   active_iSpindel_sessions[uid].data),
+                                  'webhooks': active_iSpindel_sessions[uid].webhooks})
     return iSpindel_sessions
 
 
@@ -681,12 +779,13 @@ def load_active_tilt_sessions():
     tilt_sessions = []
     for uid in active_tilt_sessions:
         tilt_sessions.append({'alias': active_tilt_sessions[uid].alias,
-                                  'uid': uid,
-                                  'color': active_tilt_sessions[uid].color,
-                                  'active': active_tilt_sessions[uid].active,
-                                  'date': active_tilt_sessions[uid].start_time or None,
-                                  'graph': get_tilt_graph_data(uid, active_tilt_sessions[uid].rssi,
-                                                                   active_tilt_sessions[uid].data)})
+                              'uid': uid,
+                              'color': active_tilt_sessions[uid].color,
+                              'active': active_tilt_sessions[uid].active,
+                              'date': active_tilt_sessions[uid].start_time or None,
+                              'graph': get_tilt_graph_data(uid, active_tilt_sessions[uid].rssi,
+                                                           active_tilt_sessions[uid].data),
+                              'webhooks': active_tilt_sessions[uid].webhooks})
     return tilt_sessions
 
 
@@ -739,3 +838,19 @@ def increment_zseries_recipe_id():
         recipe_id += 1
 
     return recipe_id
+
+
+def active_session(uid, session_type):
+    session = None
+    if session_type == 'brew':
+        session = active_brew_sessions[uid]
+    elif session_type == 'ferm':
+        session = active_ferm_sessions[uid]
+    elif session_type == 'iSpindel':
+        session = active_iSpindel_sessions[uid]
+    elif session_type == 'tilt':
+        session = active_tilt_sessions[uid]
+    elif session_type == 'still':
+        session = active_still_sessions[uid]
+    
+    return session, session != None

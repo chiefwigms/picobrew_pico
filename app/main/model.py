@@ -61,6 +61,7 @@ class PicoBrewSession:
         self.remaining_time = None
         self.is_pico = True if machineType in [MachineType.PICOBREW, MachineType.PICOBREW_C] else False
         self.data = []
+        self.webhooks = []
 
     def cleanup(self):
         if self.file and self.filepath:
@@ -77,6 +78,7 @@ class PicoBrewSession:
         self.recovery = ''
         self.remaining_time = None
         self.data = []
+        self.webhooks = []
 
 
 class PicoStillSession:
@@ -93,6 +95,7 @@ class PicoStillSession:
         self.session = ''   # session guid
         self.polling_thread = None
         self.data = []
+        self.webhooks = []
 
     def cleanup(self):
         if self.file and self.filepath:
@@ -107,6 +110,7 @@ class PicoStillSession:
         self.polling_thread = None
         self.session = ''
         self.data = []
+        self.webhooks = []
 
     def start_still_polling(self):
         connect_failure = False
@@ -150,6 +154,7 @@ class PicoFermSession:
         self.voltage = '-'
         self.start_time = None
         self.data = []
+        self.webhooks = []
 
     def cleanup(self):
         if self.file and self.filepath:
@@ -161,6 +166,7 @@ class PicoFermSession:
         self.voltage = '-'
         self.start_time = None
         self.data = []
+        self.webhooks = []
 
 
 class iSpindelSession:
@@ -173,6 +179,7 @@ class iSpindelSession:
         self.voltage = '-'
         self.start_time = None
         self.data = []
+        self.webhooks = []
 
     def cleanup(self):
         if self.file and self.filepath:
@@ -185,6 +192,7 @@ class iSpindelSession:
         self.voltage = '-'
         self.start_time = None
         self.data = []
+        self.webhooks = []
 
 
 class TiltSession:
@@ -198,6 +206,7 @@ class TiltSession:
         self.rssi = None
         self.start_time = None
         self.data = []
+        self.webhooks = []
 
     def cleanup(self):
         if self.file and self.filepath:
@@ -210,7 +219,14 @@ class TiltSession:
         self.rssi = None
         self.start_time = None
         self.data = []
+        self.webhooks = []
 
+
+class Webhook:
+    def __init__(self, url=None, enabled=None, status="disabled"):
+        self.url = url
+        self.enabled = enabled
+        self.status = status if not enabled and status == "disabled" else "enabled"
 
 class SupportObject:
     def __init__(self):

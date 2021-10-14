@@ -15,8 +15,8 @@ from .model import PicoBrewSession
 from .routes_frontend import get_zseries_recipes
 from .session_parser import (active_brew_sessions, dirty_sessions_since_clean, get_machine_by_session,
                              increment_session_id, last_session_type, ZSessionType)
-from .units import convert_temp
-
+from .units import convert_temp, epoch_time
+from .webhook import send_webhook
 
 arg_parser = FlaskParser()
 seed(1)
@@ -430,7 +430,7 @@ def update_session_log(token, body):
     active_session.step = body['StepName']
     log_time = datetime.utcnow()
     session_data = {
-        'time': ((log_time - datetime(1970, 1, 1)).total_seconds() * 1000),
+        'time': epoch_time(log_time),
         'timeStr': log_time.isoformat(),
         'timeLeft': body['SecondsRemaining'],
         'step': body['StepName'],
@@ -443,6 +443,16 @@ def update_session_log(token, body):
         'recovery': body['StepName'],
         'position': body['ValvePosition']
     }
+
+    # send data to configured webhooks (logging error and tracking individual status)
+    for webhook in active_session.webhooks:
+        webhook_data = dict(body)   # copy original payload
+        webhook_data['DrainPumpOn'] = body['DrainPumpOn'] == 1
+        webhook_data['KegPumpOn'] = body['KegPumpOn'] == 1
+        del webhook_data['ZSessionID']
+
+        # send and update status of webhook
+        send_webhook(webhook, webhook_data)
 
     event = None
     if active_session in events and len(events[active_session]) > 0:

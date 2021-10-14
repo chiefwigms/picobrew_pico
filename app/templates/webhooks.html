@@ -1,0 +1,55 @@
+<div class="row">
+  <div class="col">
+    <div class="text-white-50 mb-2">Webhooks / Integrations <a href="#f_{{chart_id}}" class="ml-2" data-toggle="collapse">show/hide</a></div>
+  </div>
+</div>
+<div class="row">
+  <div class="col">
+    <form class="row collapse" id="f_{{chart_id}}" action=>
+      <input type="hidden" value="{{session.uid}}" id="{{chart_id}}_device_uid">
+      <input type="hidden" value="{{chart_id}}" id="{{chart_id}}_chart_id">
+      <input type="hidden" value="{{session_type}}" id="{{chart_id}}_session_type">
+      <input type="hidden" value="{{session.webhooks|length}}" class="total_integrations" id="{{chart_id}}_total_integrations">
+      <div class="col-auto col-sm-10 new_integrations">
+        {% for webhook in session.webhooks %}
+          <div class="form-row mb-2 integration" id="integration_{{chart_id}}_{{loop.index0}}">
+            <div class="col-auto col-sm-8">
+                <label class="sr-only" for="inlineFormInput">Integration URL</label>
+                <input type="text" class="form-control form-control-sm webhook_url" id="url_{{chart_id}}_{{loop.index0}}" placeholder="crafter.pilotbatchbrewing.com/logsessions/<uuid>" value="{{webhook.url}}" data-chart-id="{{chart_id}}">
+            </div>
+            <div class="col-auto">
+                <div class="form-check">
+                  {% set webhook_enabled = 'checked' if webhook.enabled else '' %}
+                  <input class="form-check-input" type="checkbox" id="enabled_{{chart_id}}_{{loop.index0}}" {{webhook_enabled}} data-chart-id="{{chart_id}}">
+                  <label class="form-check-label" for="autoSizingCheck">
+                      Enabled
+                  </label>
+                </div>
+            </div>
+            <div class="col-auto">
+                <!-- secondary=disabled, info=enabled, success=success, danger=error -->
+                {% set badge_status_map = {"disabled": "secondary", "enabled": "info", "success": "success", "error": "danger"} %}
+                {% set badge_type = badge_status_map[webhook.status] %}
+                <span class="badge badge-{{badge_type}}" id="status_{{chart_id}}_{{loop.index0}}">{{webhook.status}}</span>
+            </div>
+            <div class="col-auto"></div>
+            <div class="col-auto">
+                <button class="btn btn-sm btn-danger" type="button" id="bdelete_{{chart_id}}_{{loop.index0}}"
+                    onclick="event.stopPropagation();event.preventDefault();delete_integration('${parentId}', 'integration_{{chart_id}}_{{loop.index0}}');">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+      <div class="col-auto col-sm-2">
+        <button class="btn btn-sm btn-success ml-2 save_integrations" style="display: none" id="bsave_{{chart_id}}" onclick="event.stopPropagation();event.preventDefault();">
+          <i class="far fa-save fa-lg"></i>
+        </button>
+        <button class="btn btn-sm btn-secondary ml-2" role="button" id="badd_{{chart_id}}" onclick="event.stopPropagation();event.preventDefault();add_integration('{{chart_id}}')">
+          <i class="fas fa-plus"></i> Add
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

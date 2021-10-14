@@ -1,11 +1,11 @@
-function delete_server_file(filename, type, redirectHref){
+function delete_server_file(filename, mtype, redirectHref){
     if (confirm("Are you sure?")){
 		$.ajax({
 			url: 'delete_file',
 			type: 'POST',
             data: JSON.stringify({
                 filename: filename,
-                type: type
+                type: mtype
             }),
             dataType: "json",
             processData: false,
@@ -22,8 +22,8 @@ function delete_server_file(filename, type, redirectHref){
     }
 };
 
-function download_server_session(filename, type){
-    window.location = '/sessions/' + type + '/' + escape(filename);
+function download_server_session(filename, mtype, filetype="json"){
+    window.location = `/sessions/${mtype}/${escape(filename)}.${filetype}`;
 };
 
 function upload_recipe_file(machineType, file, redirectUrl) {
