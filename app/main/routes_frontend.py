@@ -4,7 +4,7 @@ import re
 import requests
 import socket
 import uuid
-from datetime import datetime
+from datetime import datetime, timedelta
 from flask import current_app, escape, make_response, redirect, request, send_file
 from os import path
 from pathlib import Path
@@ -19,11 +19,13 @@ from .model import PicoBrewSession, PicoFermSession, PicoStillSession, iSpindelS
 from .recipe_import import import_recipes
 from .recipe_parser import PicoBrewRecipe, PicoBrewRecipeImport, ZymaticRecipe, ZymaticRecipeImport, ZSeriesRecipe
 from .session_parser import (load_brew_session, load_ferm_session, load_still_session, load_iSpindel_session, load_tilt_session,
-                                get_brew_graph_data, get_ferm_graph_data, get_still_graph_data, get_iSpindel_graph_data, get_tilt_graph_data,
-                                active_brew_sessions, active_ferm_sessions, active_still_sessions, active_iSpindel_sessions, active_tilt_sessions)
+                             dirty_sessions_since_clean, last_session_metadata, list_brew_session_files, BrewSessionType, load_session_file,
+                             get_brew_graph_data, get_ferm_graph_data, get_still_graph_data, get_iSpindel_graph_data, get_tilt_graph_data,
+                             active_brew_sessions, active_ferm_sessions, active_still_sessions, active_iSpindel_sessions, active_tilt_sessions,
+                             add_invalid_session, load_brew_sessions)
 from .config import (base_path, MachineType,
-                        zymatic_recipe_path, zseries_recipe_path, pico_recipe_path, 
-                        brew_archive_sessions_path, ferm_archive_sessions_path, still_archive_sessions_path, iSpindel_archive_sessions_path, tilt_archive_sessions_path)
+                     zymatic_recipe_path, zseries_recipe_path, pico_recipe_path,
+                     brew_archive_sessions_path, ferm_archive_sessions_path, still_archive_sessions_path, iSpindel_archive_sessions_path, tilt_archive_sessions_path)
 
 
 file_glob_pattern = "[!._]*.json"
@@ -493,25 +495,9 @@ def get_pico_recipes():
     return pico_recipes
 
 
-def parse_brew_session(file):
-    try:
-        return load_brew_session(file)
-    except Exception as e:
-        current_app.logger.error("An exception occurred parsing {}".format(file))
-        current_app.logger.error(e)
-        add_invalid_session("brew", file)
-
-
 def get_invalid_sessions(sessionType):
     global invalid_sessions
     return invalid_sessions.get(sessionType, set())
-
-
-def add_invalid_session(sessionType, file):
-    global invalid_sessions
-    if sessionType not in invalid_sessions:
-        invalid_sessions[sessionType] = set()
-    invalid_sessions.get(sessionType).add(file)
 
 
 def build_recipe_filename(recipe_path, recipe_name):
@@ -532,8 +518,9 @@ def load_active_brew_sessions():
 
     # process brew_sessions from memory
     for uid in active_brew_sessions:
-        current_app.logger.debug(f'date : {active_brew_sessions[uid].created_at}')
-        brew_sessions.append({'alias': active_brew_sessions[uid].alias,
+        # current_app.logger.debug(f'date : {active_brew_sessions[uid].created_at}')
+        session_data = active_brew_sessions[uid].data
+        brew_session = {'alias': active_brew_sessions[uid].alias,
                               'uid': uid,
                               'active': active_brew_sessions[uid].name != 'Waiting To Brew',
                               'date': active_brew_sessions[uid].created_at or None,
@@ -541,25 +528,26 @@ def load_active_brew_sessions():
                               'graph': get_brew_graph_data(uid, active_brew_sessions[uid].name,
                                                            active_brew_sessions[uid].step,
                                                            active_brew_sessions[uid].data,
-                                                           active_brew_sessions[uid].is_pico)})
+                                                           active_brew_sessions[uid].is_pico)}
+
+        if len(session_data) > 0:
+            if 'timeLeft' in session_data[-1]:
+                brew_session.update({'time_remaining': timedelta(seconds=session_data[-1]['timeLeft'])})
+
+        # include last session info and num dirty sessions since last clean
+        dirty_since_clean = dirty_sessions_since_clean(uid, active_brew_sessions[uid].machine_type)
+        # current_app.logger.error("ERROR: Num dirty sessions {}".format(dirty_since_clean))
+        last_session_type, last_session_name = last_session_metadata(uid, active_brew_sessions[uid].machine_type)
+        brew_session.update({
+            'last_session': {
+                'type': BrewSessionType(last_session_type.name).name,
+                'name': last_session_name,
+            },
+            'dirty_sessions_since_clean': dirty_since_clean
+        })
+
+        brew_sessions.append(brew_session)
     return brew_sessions
-
-
-def load_brew_sessions(uid=None):
-    files = list_brew_session_files(uid)
-
-    brew_sessions = [parse_brew_session(file) for file in files]
-    return list(filter(lambda x: x != None, brew_sessions))
-
-
-def list_brew_session_files(uid=None):
-    files = []
-    if uid:
-        files = list(brew_archive_sessions_path().glob("*#{}*.json".format(uid)))
-    else:
-        files = list(brew_archive_sessions_path().glob(file_glob_pattern))
-
-    return sorted(files, reverse=True)
 
 
 def parse_ferm_session(file):

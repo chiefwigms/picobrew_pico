@@ -91,36 +91,79 @@
             </button>
           </a>
         </h5>
-        <form id="c_{{uid}}" class="collapse card-body col-sm-5" aria-labelledby="h_{{uid}}"
-          action="/devices/{{uid}}" method="POST">
-          <div class="form-row form-group">
-            <label for="machine_type_{{uid}}">Machine Type</label>
-            <input type="text" class="form-control form-control-sm" name="machine_type" id="machine_type_{{uid}}"
-                placeholder="Machine Type" value="{{machine_type}}" readonly>
+
+        <div id="c_{{uid}}" class="collapse card-body">
+          <div class="row">
+            <form class="col-sm-4" aria-labelledby="h_{{uid}}"
+            action="/devices/{{uid}}" method="POST">
+              <div class="form-row form-group">
+                <label for="machine_type_{{uid}}">Machine Type</label>
+                <input type="text" class="form-control form-control-sm" name="machine_type" id="machine_type_{{uid}}"
+                    placeholder="Machine Type" value="{{machine_type}}" readonly>
+              </div>
+              <div class="form-row form-group">
+                <label for="uid_{{uid}}">Machine/Product ID</label>
+                <input type="text" class="form-control form-control-sm" name="uid" id="uid_{{uid}}"
+                    placeholder="Product ID (Username > Settings > Equipment)" value="{{uid}}" readonly>
+              </div>
+              <div class="form-row form-group">
+                <label for="alias_{{uid}}">Alias</label>
+                <input type="text" class="form-control form-control-sm" name="alias" id="alias_{{uid}}"
+                    placeholder="BrewHaus Alias" value="{{alias}}">
+              </div>
+              {% if machine_type == 'PicoStill' %}
+              {% set active_session = active_sessions['still'][uid] %}
+              {% set ip_address = active_session.ip_address if active_session.ip_address != None and active_session.ip_address|length else "" %}
+              <div class="form-row form-group">
+                <label for="ip_addr_{{uid}}">IP Address</label>
+                <input type="text" class="form-control form-control-sm" name="ip_addr" id="ip_addr_{{uid}}"
+                  placeholder="192.168.72.108" value="{{ip_address}}">
+              </div>
+              {% endif %}
+              <div class="form-row form-group">
+                <button type="submit" class="btn btn-primary">Save</button>
+              </div>
+            </form>
+            {% if machine_type == 'ZSeries' or machine_type == 'Zymatic' or machine_type == 'PicoBrewC' or machine_type == 'PicoBrew' %}
+              {% set stats = machine_stats[uid] %}
+              {% if stats %}
+              <div class="col-sm-4"></div>
+              <div class="col-sm-4">
+                <div class="text-white-50">Total Sessions</div>
+                <input type="text" class="form-control form-control-sm form-control-plaintext" readonly value="{{stats.total_sessions}}" />
+                {% if stats.dirty_sessions_since_clean %}
+                  <div>&nbsp;</div>
+                  <div class="text-white-50">Dirty Sessions</div>
+                  <div class="form-inline">
+                    <div class="form-group col-sm-1 pl-0">
+                      <input type="text" class="form-control form-control-sm form-control-plaintext" style="max-width: 2em;" readonly value="{{stats.dirty_sessions_since_clean}}" />
+                    </div>
+                    {% if stats.dirty_sessions_since_clean >= 3 %}
+                      {% set badge_color="warning" %}
+                      {% if stats.dirty_sessions_since_clean > 3 %}
+                        {% set badge_color="danger" %}
+                      {% endif %}
+                      <div class="form-group col-sm-2" style="max-width: fit-content;">
+                        <span class="badge badge-{{badge_color}} ml-2">Needs Cleaning</span>
+                      </div>
+                    {% endif %}
+                  </div>
+                {% endif %}
+                {% if stats.last_session %}
+                  {% set badge_color = "primary" %}
+                  {% if stats.last_session.type == "CLEAN" or stats.last_session.type == "RINSE" or stats.last_session.type == "STILL" or stats.last_session.type == "DEEP CLEAN" %}
+                  {% set badge_color = "success" %}
+                  {% endif %}
+                  <div>&nbsp;</div>
+                  <div class="text-white-50">Last Session <span class="badge badge-{{badge_color}} ml-2">{{stats.last_session.type}}</span></div>
+                  <textarea class="form-control form-control-sm form-control-plaintext" readonly>{{stats.last_session.name}}</textarea>
+                {% endif %}
+              </div>
+              {% endif %}
+            {% endif %}
           </div>
-          <div class="form-row form-group">
-            <label for="uid_{{uid}}">Machine/Product ID</label>
-            <input type="text" class="form-control form-control-sm" name="uid" id="uid_{{uid}}"
-                placeholder="Product ID (Username > Settings > Equipment)" value="{{uid}}" readonly>
-          </div>
-          <div class="form-row form-group">
-            <label for="alias_{{uid}}">Alias</label>
-            <input type="text" class="form-control form-control-sm" name="alias" id="alias_{{uid}}"
-                placeholder="BrewHaus Alias" value="{{alias}}">
-          </div>
-          {% if machine_type == 'PicoStill' %}
-          {% set active_session = active_sessions['still'][uid] %}
-          {% set ip_address = active_session.ip_address if active_session.ip_address != None and active_session.ip_address|length else "" %}
-          <div class="form-row form-group">
-            <label for="ip_addr_{{uid}}">IP Address</label>
-            <input type="text" class="form-control form-control-sm" name="ip_addr" id="ip_addr_{{uid}}"
-              placeholder="192.168.72.108" value="{{ip_address}}">
-          </div>
-          {% endif %}
-          <div class="form-row form-group">
-            <button type="submit" class="btn btn-primary">Save</button>
-          </div>
-        </form>
+        </div>
+
       </div>
       {% endfor %}
       {% endif %}

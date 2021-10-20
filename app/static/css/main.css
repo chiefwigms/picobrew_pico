@@ -60,3 +60,11 @@ p.mr-8 table {
   margin-top: 0;
   margin-bottom: 1rem;
 }
+
+textarea[readonly].form-control-plaintext,
+input[readonly].form-control-plaintext {
+  background-color: transparent;
+  border: transparent;
+  font-size: 1em;
+  color: #fff;
+}

@@ -35,12 +35,54 @@
               <div class="text-white-50">Machine</div>
               <div>{% if brew_session.alias is defined and brew_session.alias|length %}{{brew_session.alias}} ({{brew_session.uid}}){% else %}{{brew_session.uid}}{% endif %}</div>
             </div>
-            <div class="col-sm">
-              {% if brew_session.date %}
-              <div class="text-white-50">Date Started</div>
-              <div>{{brew_session.date.strftime('%A, %b %e %Y %H:%M:%S')}}</div>
-              {% endif %}
-            </div>
+            {% if brew_session.dirty_sessions_since_clean %}
+              <div class="col-sm">
+                <div class="text-white-50">Dirty Sessions</div>
+                {% if brew_session.dirty_sessions_since_clean < 3 %}
+                  <div>{{brew_session.dirty_sessions_since_clean}}</div>
+                {% else %}
+                {% set badge_color="warning" %}
+                {% if brew_session.dirty_sessions_since_clean > 3 %}
+                  {% set badge_color="danger" %}
+                {% endif %}
+                <div>
+                  <button disabled type="button" class="btn btn-{{badge_color}}">
+                    Needs Cleaning <span class="badge badge-light">{{brew_session.dirty_sessions_since_clean}}</span>
+                    <span span class="sr-only">dirty sessions</span>
+                  </button>
+                </div>
+                {% endif %}
+              </div>
+            {% endif %}
+            {% if brew_session.last_session %}
+              <div class="col-sm">
+                {% set badge_color = "primary" %}
+                {% if brew_session.last_session.type == "CLEAN" or brew_session.last_session.type == "RINSE" or brew_session.last_session.type == "STILL" or brew_session.last_session.type == "DEEP CLEAN" %}
+                {% set badge_color = "success" %}
+                {% endif %}
+                <div class="text-white-50">Last Session <span class="badge badge-{{badge_color}} ml-2">{{brew_session.last_session.type}}</span></div>
+                <div>{{brew_session.last_session.name}}</div>
+              </div>
+            {% endif %}
+            <!-- Need to figure out best way to calculate time_remaining, as this is reported per step from the Z?
+            {% if brew_session.time_remaining %}
+              <div class="col-sm">
+                <div class="text-white-50">Time Remaining</div>
+                <div>{{brew_session.time_remaining}}</div>
+              </div>
+            {% endif %} -->
+            {% if brew_session.date %}
+              <div class="col-sm">
+                <div class="text-white-50">Date Started</div>
+                <div>{{brew_session.date.strftime('%A, %b %e %Y %H:%M:%S')}}</div>
+              </div>
+            {% endif %}
+            {% if brew_session.end_date %}
+              <div class="col-sm">
+                <div class="text-white-50">Date Ended</div>
+                <div>{{brew_session.end_date.strftime('%A, %b %e %Y %H:%M:%S')}}</div>
+              </div>
+            {% endif %}
           </div>
           <div class="row">&nbsp;</div>
           <div id="{{chart_id}}" style="min-width: 320px; height: 400px; margin: 0 auto"></div>
