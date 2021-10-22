@@ -4,8 +4,9 @@ from flask import current_app, request, redirect
 from . import main
 from .frontend_common import active_session, render_template_with_defaults
 from .model import PicoBrewSession, PicoFermSession, PicoStillSession, iSpindelSession, TiltSession
-from .session_parser import (active_brew_sessions, active_ferm_sessions,
-                             active_iSpindel_sessions, active_tilt_sessions, active_still_sessions)
+from .session_parser import (BrewSessionType, active_brew_sessions, active_ferm_sessions,
+                             active_iSpindel_sessions, active_tilt_sessions, active_still_sessions,
+                             list_brew_session_files, dirty_sessions_since_clean, last_session_metadata)
 from .config import base_path, server_config, MachineType
 
 
@@ -22,7 +23,26 @@ def handle_devices():
         'tilt': active_tilt_sessions,
         'still': active_still_sessions
     }
-    current_app.logger.debug(server_config())
+    # current_app.logger.debug(server_config())
+
+    machine_stats = {}
+    if len(active_brew_sessions) > 0:
+        for uid in active_brew_sessions:
+            machine_stats[uid] = {}
+            session = active_brew_sessions[uid]
+
+            # add last session and dirty session count
+            last_session_type, last_session_name = last_session_metadata(uid, session.machine_type)
+            machine_stats[uid].update({
+                'last_session': {
+                    'type': BrewSessionType(last_session_type.name).value,
+                    'name': last_session_name,
+                },
+                'dirty_sessions_since_clean': dirty_sessions_since_clean(uid, session.machine_type)
+            })
+
+            # add total session count
+            machine_stats[uid].update({'total_sessions': len(list_brew_session_files(uid))})
 
     # register device alias and type
     if request.method == 'POST':
@@ -43,7 +63,8 @@ def handle_devices():
             return render_template_with_defaults('devices.html',
                                                  error=error,
                                                  config=server_config(),
-                                                 active_sessions=active_sessions)
+                                                 active_sessions=active_sessions,
+                                                 machine_stats=machine_stats)
 
         # verify uid not already configured
         if (uid in {**active_brew_sessions, **active_ferm_sessions, **active_iSpindel_sessions, **active_tilt_sessions, **active_still_sessions}
@@ -53,7 +74,8 @@ def handle_devices():
             return render_template_with_defaults('devices.html',
                                                  error=error,
                                                  config=server_config(),
-                                                 active_sessions=active_sessions)
+                                                 active_sessions=active_sessions,
+                                                 machine_stats=machine_stats)
 
         current_app.logger.debug(f'machine_type: {mtype}; uid: {uid}; alias: {alias}')
 
@@ -77,7 +99,8 @@ def handle_devices():
             return render_template_with_defaults('devices.html',
                                                  error=error,
                                                  config=server_config(),
-                                                 active_sessions=active_sessions)
+                                                 active_sessions=active_sessions,
+                                                 machine_stats=machine_stats)
 
         # ... and into already loaded active sessions
         if mtype is MachineType.PICOFERM:
@@ -103,7 +126,7 @@ def handle_devices():
             active_brew_sessions[uid].is_pico = True if mtype in [MachineType.PICOBREW, MachineType.PICOBREW_C] else False
             active_brew_sessions[uid].alias = alias
 
-    return render_template_with_defaults('devices.html', config=server_config(), active_sessions=active_sessions)
+    return render_template_with_defaults('devices.html', config=server_config(), active_sessions=active_sessions, machine_stats=machine_stats)
 
 
 @main.route('/devices/<uid>', methods=['POST', 'DELETE'])

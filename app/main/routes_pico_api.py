@@ -10,8 +10,9 @@ from . import main
 from .config import MachineType, brew_active_sessions_path, pico_firmware_path
 from .firmware import firmware_filename, minimum_firmware, firmware_upgrade_required
 from .model import PicoBrewSession, PICO_SESSION
-from .routes_frontend import get_pico_recipes, load_brew_sessions, list_brew_session_files
-from .session_parser import active_brew_sessions
+from .routes_frontend import get_pico_recipes
+from .session_parser import active_brew_sessions, list_brew_session_files, load_brew_sessions, dirty_sessions_since_clean
+
 
 arg_parser = FlaskParser()
 
@@ -88,7 +89,7 @@ actions_needed_args = {
 @main.route('/API/pico/getActionsNeeded')
 @use_args(actions_needed_args, location='querystring')
 def process_get_actions_needed(args):
-    if dirty_sessions_since_clean(args['uid']) >= 3:
+    if dirty_sessions_since_clean(args['uid'], MachineType.PICOBREW) >= 3:
         return '#7#'
     return '##'
 
@@ -253,31 +254,6 @@ def get_recipe_list():
     for r in get_pico_recipes():
         recipe_list += f'{r.id},{r.name}|'
     return recipe_list
-
-
-def dirty_sessions_since_clean(uid):
-    brew_session_files = list_brew_session_files(uid)
-    post_clean_sessions = []
-    clean_found = False
-
-    for s in brew_session_files:
-        session_name = session_name_from_filename(s)
-        
-        if (session_name.upper() in ["CLEAN", "DEEP CLEAN"]):
-            clean_found = True
-
-        if (not clean_found and session_name.upper() not in ["RINSE", "CLEAN", "DEEP CLEAN", "RACK", "DRAIN"]):
-            post_clean_sessions.append(s)
-
-    return len(post_clean_sessions)
-
-
-def session_name_from_filename(filename):
-    info = filename.stem.split('#')
-    name = "NOT CLEAN"
-    if len(info) >= 3:
-        name = info[3].replace('_', ' ').replace("%23", "#")
-    return name
 
 
 def create_new_session(uid, sesId, sesType):

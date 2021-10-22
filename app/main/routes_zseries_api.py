@@ -5,7 +5,6 @@ from datetime import datetime
 from flask import current_app, request, Response, abort, send_from_directory
 from webargs import fields
 from webargs.flaskparser import use_args, FlaskParser
-from enum import Enum
 from random import seed, randint
 
 from .. import socketio
@@ -13,8 +12,9 @@ from . import main
 from .config import MachineType, brew_active_sessions_path, zseries_firmware_path
 from .firmware import firmware_filename, firmware_upgrade_required, minimum_firmware
 from .model import PicoBrewSession
-from .routes_frontend import get_zseries_recipes, parse_brew_session, list_brew_session_files, load_brew_sessions
-from .session_parser import active_brew_sessions
+from .routes_frontend import get_zseries_recipes
+from .session_parser import (active_brew_sessions, dirty_sessions_since_clean, get_machine_by_session,
+                             increment_session_id, last_session_type, ZSessionType)
 from .units import convert_temp
 
 
@@ -22,32 +22,6 @@ arg_parser = FlaskParser()
 seed(1)
 
 events = {}
-
-
-class SessionType(int, Enum):
-    RINSE = 0
-    CLEAN = 1
-    DRAIN = 2
-    RACK_BEER = 3
-    CIRCULATE = 4
-    SOUS_VIDE = 5
-    BEER = 6
-    STILL = 11
-    COFFEE = 12
-    CHILL = 13
-    MANUAL = 14
-
-
-class ZProgramId(int, Enum):
-    RINSE = 1
-    DRAIN = 2
-    RACK_BEER = 3
-    CIRRCULATE = 4
-    SOUS_VIDE = 6
-    CLEAN = 12
-    BEER_OR_COFFEE = 24
-    STILL = 26
-    CHILL = 27
 
 
 # Get Firmware: /firmware/zseries/<version>
@@ -183,8 +157,8 @@ def process_zstate(args):
         "ProgramUri": None,                     # what is this?
         "RegistrationToken": -1,
         "SessionStats": {
-            "DirtySessionsSinceClean": dirty_sessions_since_clean(uid),
-            "LastSessionType": last_session_type(uid),
+            "DirtySessionsSinceClean": dirty_sessions_since_clean(uid, MachineType.ZSERIES),
+            "LastSessionType": last_session_type(uid, MachineType.ZSERIES),
             "ResumableSessionID": resumable_session_id(uid)
         },
         "UpdateAddress": firmware_source if update_required else "-1",
@@ -192,31 +166,6 @@ def process_zstate(args):
         "ZBackendError": 0
     }
     return returnVal
-
-
-def dirty_sessions_since_clean(uid):
-    brew_session_files = list_brew_session_files(uid)
-    post_clean_sessions = []
-    clean_found = False
-
-    for s in brew_session_files:
-        session_type = SessionType(session_type_from_filename(s))
-        if (session_type == SessionType.CLEAN):
-            clean_found = True
-
-        if (not clean_found and session_type in [SessionType.BEER.value, SessionType.COFFEE.value, SessionType.SOUS_VIDE.value]):
-            post_clean_sessions.append(s)
-
-    return len(post_clean_sessions)
-
-
-def last_session_type(uid):
-    brew_sessions = list_brew_session_files(uid)
-
-    if len(brew_sessions) == 0:
-        return SessionType.CLEAN
-    else:
-        return SessionType(session_type_from_filename(brew_sessions[0])) or SessionType.RINSE
 
 
 def resumable_session_id(uid):
@@ -378,7 +327,7 @@ def create_session(token, body):
 
     # error out if recipe isn't known where session is beer type (ie 6)
     # due to rinse, rack beer, clean, coffee, sous vide, etc not having server known "recipes"
-    if recipe is None and body['SessionType'] == SessionType.BEER:
+    if recipe is None and body['SessionType'] == ZSessionType.BEER:
         error = {
             'error': 'recipe \'{}\' not found - unable to start session'.format(body['Name'])
         }
@@ -655,27 +604,3 @@ def get_recipe_by_id(recipe_id):
 def get_recipe_by_name(recipe_name):
     recipe = next((r for r in get_zseries_recipes() if r.name == recipe_name), None)
     return recipe
-
-
-def increment_session_id(uid):
-    return len(list_brew_session_files(uid)) + (1 if active_brew_sessions[uid].session != '' else 1)
-
-
-def get_machine_by_session(session_id):
-    return next((uid for uid in active_brew_sessions if active_brew_sessions[uid].session == session_id or active_brew_sessions[uid].id == int(session_id) or active_brew_sessions[uid].id == -1), None)
-
-
-def get_archived_sessions_by_machine(uid):
-    brew_sessions = load_brew_sessions(uid=uid)
-    return brew_sessions
-
-
-def session_type_from_filename(filename):
-    info = filename.stem.split('#')
-    session_type = SessionType.BEER
-    try:
-        if len(info) > 4:
-            session_type = int(info[4])
-    except Exception as error:
-        current_app.logger.warn("error occurred reading {}".format(filename),)
-    return session_type
