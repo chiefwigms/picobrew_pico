@@ -2,6 +2,7 @@ import json
 from datetime import datetime
 from dateutil import tz
 from enum import Enum
+from aenum import MultiValueEnum
 from pathlib import Path
 from flask import current_app
 
@@ -17,6 +18,8 @@ active_ferm_sessions = {}
 active_still_sessions = {}
 active_iSpindel_sessions = {}
 active_tilt_sessions = {}
+
+invalid_sessions = {}
 
 
 def load_session_file(filename):
@@ -607,7 +610,7 @@ class ZProgramId(int, Enum):
     RINSE = 1
     DRAIN = 2
     RACK_BEER = 3
-    CIRRCULATE = 4
+    CIRCULATE = 4
     SOUS_VIDE = 6
     CLEAN = 12
     BEER_OR_COFFEE = 24
@@ -615,28 +618,30 @@ class ZProgramId(int, Enum):
     CHILL = 27
 
 
-class PicoSessionType(str, Enum):
+class PicoSessionType(str, MultiValueEnum):
     RINSE = "RINSE"
-    CLEAN = "CLEAN"
-    DEEP_CLEAN = "DEEP CLEAN"
+    CLEAN = "CLEAN", "DEEP_CLEAN", "DEEP CLEAN"
     DRAIN = "DRAIN"
     RACK_BEER = "RACK"
     MANUAL = "MANUAL"
     BEER = "BEER"
 
+    @classmethod
+    def _missing_value_(cls, value):
+        for member in cls:
+            for _value in member._values_:
+                if _value.lower() == value.lower():
+                    return member
 
-class BrewSessionType(str, Enum):
+
+class BrewSessionType(str, MultiValueEnum):
     RINSE = "RINSE"
-    CLEAN = "CLEAN"
-    DRAIN = "DRAIN"
-    RACK_BEER = "RACK_BEER"
+    CLEAN = "CLEAN",
+    UTILITY = "RACK_BEER", "RACK BEER", "CIRCULATE", "CHILL", "SOUS_VIDE", "SOUS VIDE", "DRAIN"
     MANUAL = "MANUAL"
     BEER = "BEER"
-    CIRCULATE = "CIRCULATE"
-    SOUS_VIDE = "SOUS VIDE"
     STILL = "STILL"
     COFFEE = "COFFEE"
-    CHILL = "CHILL"
 
 
 def dirty_sessions_since_clean(uid, mtype):
@@ -692,7 +697,8 @@ def last_session_metadata(uid, mtype):
             try:
                 stype = PicoSessionType(sname)
             except Exception as err:
-                stype = PicoSessionType("BEER")  # pico only has name in file (no type enum)
+                current_app.logger.warn("unknown session type {} - {}".format(sname, err))
+                stype = PicoSessionType.BEER  # pico only has name in file (no type enum)
             return stype, sname
 
 
