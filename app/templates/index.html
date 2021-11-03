@@ -60,7 +60,7 @@
                 {% if brew_session.last_session.type == "CLEAN" or brew_session.last_session.type == "DEEP CLEAN" %}
                 {% set badge_color = "success" %}
                 {% elif brew_session.last_session.type == "RINSE" or brew_session.last_session.type == "STILL" %}
-                {% set badge_color = "blue" %}
+                {% set badge_color = "primary" %}
                 {% endif %}
                 <div class="text-white-50">Last Session <span class="badge badge-{{badge_color}} ml-2">{{brew_session.last_session.type}}</span></div>
                 <div>{{brew_session.last_session.name}}</div>
