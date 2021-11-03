@@ -610,7 +610,7 @@ class ZProgramId(int, Enum):
     RINSE = 1
     DRAIN = 2
     RACK_BEER = 3
-    CIRRCULATE = 4
+    CIRCULATE = 4
     SOUS_VIDE = 6
     CLEAN = 12
     BEER_OR_COFFEE = 24

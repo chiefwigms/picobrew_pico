@@ -56,9 +56,11 @@
             {% endif %}
             {% if brew_session.last_session %}
               <div class="col-sm">
-                {% set badge_color = "primary" %}
+                {% set badge_color = "blue" %} <!-- warning (yellow) == dirty session; success (green) == clean; primary (blue) == non-dirty session -->
                 {% if brew_session.last_session.type == "CLEAN" or brew_session.last_session.type == "RINSE" or brew_session.last_session.type == "STILL" or brew_session.last_session.type == "DEEP CLEAN" %}
                 {% set badge_color = "success" %}
+                {% elif brew_session.last_session.type == "BEER" or brew_session.last_session.type == "COFFEE" or brew_session.last_session.type == "MANUAL" or brew_session.last_session.type == "COFFEE" or brew_session.last_session.name.lower() == "rack" %}
+                {% set badge_color = "warning" %}
                 {% endif %}
                 <div class="text-white-50">Last Session <span class="badge badge-{{badge_color}} ml-2">{{brew_session.last_session.type}}</span></div>
                 <div>{{brew_session.last_session.name}}</div>
