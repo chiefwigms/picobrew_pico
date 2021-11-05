@@ -1,11 +1,14 @@
 import json
 from datetime import datetime
 from dateutil import tz
+from enum import Enum
+from aenum import MultiValueEnum
 from pathlib import Path
 from flask import current_app
 
 from .config import (brew_active_sessions_path, ferm_active_sessions_path, still_active_sessions_path,
-                     iSpindel_active_sessions_path, tilt_active_sessions_path)
+                     iSpindel_active_sessions_path, tilt_active_sessions_path, brew_archive_sessions_path,
+                     MachineType)
 from .model import PicoBrewSession, PicoFermSession, PicoStillSession, iSpindelSession, TiltSession
 
 file_glob_pattern = "[!._]*.json"
@@ -15,6 +18,8 @@ active_ferm_sessions = {}
 active_still_sessions = {}
 active_iSpindel_sessions = {}
 active_tilt_sessions = {}
+
+invalid_sessions = {}
 
 
 def load_session_file(filename):
@@ -50,6 +55,9 @@ def recover_incomplete_session(raw_data, filename):
     elif raw_data.endswith(','):
         # open trailing comma
         recovered_session = raw_data[:-1] + '\n]\n'
+    elif raw_data.endswith('\x00'):
+        # corrupted file (trailing nulls with open comma)
+        recovered_session = raw_data.rstrip("\x00")[:-1] + '\n]\n'
 
     return recovered_session
 
@@ -92,8 +100,11 @@ def load_brew_session(file):
         'data': json_data,
         'graph': get_brew_graph_data(chart_id, name, step, json_data)
     }
-    if len(json_data) > 0 and 'recovery' in json_data[-1]:
-        session.update({'recovery': json_data[-1]['recovery']})
+    if len(json_data) > 0:
+        if 'recovery' in json_data[-1]:
+            session.update({'recovery': json_data[-1]['recovery']})
+        if 'timeLeft' in json_data[-1]:
+            session.update({'timeLeft': json_data[-1]['timeLeft']})
     return (session)
 
 
@@ -433,6 +444,7 @@ def restore_active_brew_sessions():
 
             if 'recovery' in brew_session:
                 session.recovery = brew_session['recovery']             # find last step name
+                session.step = brew_session['recovery']
 
             # session.remaining_time = None
             session.data = brew_session['data']
@@ -546,3 +558,193 @@ def restore_active_sessions():
     restore_active_still_sessions()
     restore_active_iSpindel_sessions()
     restore_active_tilt_sessions()
+
+
+def add_invalid_session(sessionType, file):
+    global invalid_sessions
+    if sessionType not in invalid_sessions:
+        invalid_sessions[sessionType] = set()
+    invalid_sessions.get(sessionType).add(file)
+
+
+def parse_brew_session(file):
+    try:
+        return load_brew_session(file)
+    except Exception as e:
+        current_app.logger.error("An exception occurred parsing {}".format(file))
+        current_app.logger.error(e)
+        add_invalid_session("brew", file)
+
+
+def load_brew_sessions(uid=None):
+    files = list_brew_session_files(uid)
+
+    brew_sessions = [parse_brew_session(file) for file in files]
+    return list(filter(lambda x: x != None, brew_sessions))
+
+
+def list_brew_session_files(uid=None):
+    files = []
+    if uid:
+        files = list(brew_archive_sessions_path().glob("*#{}*.json".format(uid)))
+    else:
+        files = list(brew_archive_sessions_path().glob(file_glob_pattern))
+
+    return sorted(files, reverse=True)
+
+class ZSessionType(int, Enum):
+    RINSE = 0
+    CLEAN = 1
+    DRAIN = 2
+    RACK_BEER = 3
+    CIRCULATE = 4
+    SOUS_VIDE = 5
+    BEER = 6
+    STILL = 11
+    COFFEE = 12
+    CHILL = 13
+    MANUAL = 14
+
+
+class ZProgramId(int, Enum):
+    RINSE = 1
+    DRAIN = 2
+    RACK_BEER = 3
+    CIRCULATE = 4
+    SOUS_VIDE = 6
+    CLEAN = 12
+    BEER_OR_COFFEE = 24
+    STILL = 26
+    CHILL = 27
+
+
+class PicoSessionType(str, MultiValueEnum):
+    RINSE = "RINSE"
+    CLEAN = "CLEAN", "DEEP_CLEAN", "DEEP CLEAN"
+    DRAIN = "DRAIN"
+    RACK_BEER = "RACK"
+    MANUAL = "MANUAL"
+    BEER = "BEER"
+
+    @classmethod
+    def _missing_value_(cls, value):
+        for member in cls:
+            for _value in member._values_:
+                if _value.lower() == value.lower():
+                    return member
+
+
+class BrewSessionType(str, MultiValueEnum):
+    RINSE = "RINSE"
+    CLEAN = "CLEAN",
+    UTILITY = "RACK_BEER", "RACK BEER", "CIRCULATE", "CHILL", "SOUS_VIDE", "SOUS VIDE", "DRAIN"
+    MANUAL = "MANUAL"
+    BEER = "BEER"
+    STILL = "STILL"
+    COFFEE = "COFFEE"
+
+
+def dirty_sessions_since_clean(uid, mtype):
+    brew_session_files = list_brew_session_files(uid)
+    post_clean_sessions = []
+    clean_found = False
+
+    for s in brew_session_files:
+        if mtype == MachineType.PICOBREW_C or MachineType.PICOBREW:
+            session_name = session_name_from_filename(s)
+
+            if (session_name.upper() in ["CLEAN", "DEEP CLEAN"]):
+                clean_found = True
+
+            if (not clean_found and session_name.upper() not in ["RINSE", "CLEAN", "DEEP CLEAN", "RACK", "DRAIN"]):
+                post_clean_sessions.append(s)
+
+        elif mtype == MachineType.ZSERIES:
+            session_type = ZSessionType(session_type_from_filename(s))
+            if (session_type == ZSessionType.CLEAN):
+                clean_found = True
+
+            if (not clean_found and session_type in [ZSessionType.BEER.value, ZSessionType.COFFEE.value, ZSessionType.SOUS_VIDE.value]):
+                post_clean_sessions.append(s)
+
+    return len(post_clean_sessions)
+
+
+def last_session_type(uid, mtype):
+    session_type, _ = last_session_metadata(uid, mtype)
+    return session_type
+
+
+def last_session_metadata(uid, mtype):
+    brew_sessions = list_brew_session_files(uid)
+
+    if len(brew_sessions) == 0:
+        if mtype == MachineType.ZSERIES:
+            return ZSessionType.CLEAN, 'N/A'
+        else:
+            return PicoSessionType.CLEAN, 'N/A'
+    else:
+        last_session = brew_sessions[0]
+        stype = session_type_from_filename(last_session, mtype)
+        sname = session_name_from_filename(last_session)
+        if mtype == MachineType.ZSERIES:
+            try:
+                stype = ZSessionType(stype)
+            except Exception as err:
+                stype = ZSessionType(0)  # zseries has type enum, assume unmatched to be non-dirty session
+            return stype, sname
+        else:
+            try:
+                stype = PicoSessionType(sname)
+            except Exception as err:
+                current_app.logger.warn("unknown session type {} - {}".format(sname, err))
+                stype = PicoSessionType.BEER  # pico only has name in file (no type enum)
+            return stype, sname
+
+
+def increment_session_id(uid):
+    return len(list_brew_session_files(uid)) + (1 if active_brew_sessions[uid].session != '' else 1)
+
+
+def get_machine_by_session(session_id):
+    return next((uid for uid in active_brew_sessions if active_brew_sessions[uid].session == session_id or active_brew_sessions[uid].id == int(session_id) or active_brew_sessions[uid].id == -1), None)
+
+
+def get_archived_sessions_by_machine(uid):
+    brew_sessions = load_brew_sessions(uid=uid)
+    return brew_sessions
+
+
+def session_type_from_filename(filename, mtype):
+    info = filename.stem.split('#')
+
+    session_type = ZSessionType.BEER
+
+    if mtype == MachineType.ZSERIES:
+        try:
+            if len(info) > 4:
+                session_type = int(info[4])
+        except Exception as error:
+            current_app.logger.warn("error occurred extracting session type from {}".format(filename))
+
+    else:
+        session_type = PicoSessionType.BEER
+        try:
+            if len(info) > 3:
+                session_type = PicoSessionType(info[3])
+        except Exception as error:
+            current_app.logger.warn("error occurred extracting session type from {}".format(filename))
+            # info[3] is recipe name, utilities == session_type; beer recipe != session_type
+
+    return session_type
+
+
+def session_name_from_filename(filename):
+    info = filename.stem.split('#')
+    name = "N/A"
+    try:
+        if len(info) >= 3:
+            name = info[3].replace('_', ' ').replace("%23", "#")
+    except Exception as error:
+        current_app.logger.warn("error occurred extracting session name from {}".format(filename))
+    return name
