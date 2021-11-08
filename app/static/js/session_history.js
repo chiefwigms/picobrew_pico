@@ -15,11 +15,12 @@ const fetchMore = async (url) => {
 let end = false;
 
 async function loadMore() {
-    let scrollElement = document.getElementById("accordian");
+    let scrollElement = document.getElementById("accordion");
     let $loader = $("#load-more");
-    let $spinner = $("#load-spinner");
+    let $spinner = $("#loading");
 
     $spinner.removeClass("d-none");
+    $loader.hide();
     let offset = scrollElement.children.length
     let url = `${window.location.href}?offset=${offset}`;
     let req = await fetchMore(url);
@@ -28,6 +29,7 @@ async function loadMore() {
         // Be careful of XSS if you do this. Make sure
         // you remove all possible sources of XSS.
         scrollElement.innerHTML += body;
+        $loader.show();
     } else {
         // If it returns a 404, stop requesting new items
         end = true;
