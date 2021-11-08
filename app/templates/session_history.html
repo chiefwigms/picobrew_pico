@@ -8,51 +8,26 @@
   <script src="/static/js/server_management.js"></script>
   <script src="/static/js/session_history.js"></script>
   {% include "invalid_file.html" %}
-  <div id="accordion">
-    {% for session in sessions %}
-    <div class="card bg-dark text-white-50">
-      <h5 class="card-header" id="h_{{session.graph.chart_id}}">
-        <a class="collapsed" role="button" data-toggle="collapse" href="#c_{{session.graph.chart_id}}" data-parent="#accordion" aria-expanded="false" aria-controls="c_{{session.graph.chart_id}}">
-          {% if session_type == "brew" %}
-            {{session.name}} (Brewed {{session.date}}{% if session.alias is defined and session.alias|length %} with {{session.alias}}{% endif %}) 
-          {% else %}
-            {{session.name}} on {{session.date}}
-          {% endif %}
-          <button class="btn btn-sm btn-primary float-right mr-5" type="button" id="bdownload_{{session.filename}}"
-              onclick="event.stopPropagation();event.preventDefault();download_session('{{session.filename}}');">
-              <i class="fas fa-download"></i>
-          </button>
-          <button class="btn btn-sm btn-danger float-right mr-3" type="button" id="bdelete_{{session.filename}}"
-            onclick="event.stopPropagation();event.preventDefault();delete_file('{{session.filepath}}');">
-            <i class="fas fa-trash"></i>
-          </button>
-        </a>
-      </h5>
-      <div id="c_{{session.graph.chart_id}}" class="collapse" aria-labelledby="h_{{session.graph.chart_id}}">
-        <div class="card-body">
-          <div id="d_{{session.graph.chart_id}}" class="text-white">
-            <div class="row">
-              <div class="col-sm">
-                <div class="text-white-50">Machine</div>
-                <div>{% if session.alias is defined and session.alias|length %}{{session.alias}} ({{session.uid}}){% else %}{{session.uid}}{% endif %}</div>
-              </div>
-              <div class="col-sm">
-                <div class="text-white-50">Date Started</div>
-                <div>{{session.date.strftime('%A, %b %e %Y %H:%M:%S')}}</div>
-              </div>
-              <div class="col-sm">
-                <div class="text-white-50">Date Completed</div>
-                <div>{{session.end_date.strftime('%A, %b %e %Y %H:%M:%S')}}</div>
-              </div>
-            </div>
-            <div class="row">&nbsp;</div>
-          </div>
-          <div id="{{session.graph.chart_id}}" style="min-width: 320px; height: 400px; margin: 0 auto"></div>
-          <script>var graph_data={{session.graph|tojson}};</script>
-          <script src="/static/js/{{session_type}}_graph.js"></script>
+
+  <br /><br /><br />
+  <div id="accordion" class=scrollable-element>
+    {% include "_session_list.html" %}
+  </div>
+  <br/><br/>
+  <div id="sentinel" class="container">
+    <div class="row">
+      <div class="col text-center">
+        <div id="load-spinner" class="spinner-border text-info d-none" role="status">
+          <span class="sr-only">Loading...</span>
         </div>
       </div>
     </div>
-    {% endfor %}
+    <br/><br/>
+    <div class="row">
+      <div class="col text-center">
+        <input id="load-more" class="btn btn-sm btn-info" type="button" value="Load more...">
+      </div>
+    </div>
   </div>
+  <br/><br/><br/><br/>
 {% endblock %}

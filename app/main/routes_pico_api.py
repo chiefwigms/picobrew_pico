@@ -11,7 +11,7 @@ from .config import MachineType, brew_active_sessions_path, pico_firmware_path
 from .firmware import firmware_filename, minimum_firmware, firmware_upgrade_required
 from .model import PicoBrewSession, PICO_SESSION
 from .routes_frontend import get_pico_recipes
-from .session_parser import active_brew_sessions, list_brew_session_files, load_brew_sessions, dirty_sessions_since_clean
+from .session_parser import active_brew_sessions, dirty_sessions_since_clean
 
 
 arg_parser = FlaskParser()
