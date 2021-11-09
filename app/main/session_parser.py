@@ -124,6 +124,7 @@ def get_brew_graph_data(chart_id, session_name, session_step, session_data, is_p
 
     events = []
     plot_bands = []
+    prev = {}
     for data in session_data:
         if all(k in data for k in ('therm', 'wort')):  # Pico and ZSeries
             wort_data.append([data['time'], int(data['wort'])])
@@ -155,8 +156,15 @@ def get_brew_graph_data(chart_id, session_name, session_step, session_data, is_p
         # add an overlay error for each errorCode or pauseReason
         error_code = data['errorCode'] if 'errorCode' in data else 0
         pause_reason = data['pauseReason'] if 'pauseReason' in data else 0
+        prev_error_code = prev['errorCode'] if 'errorCode' in prev else 0
+        prev_pause_reason = prev['pauseReason'] if 'pauseReason' in prev else 0
         if error_code != 0 or pause_reason != 0:
-            if len(plot_bands) == 0:
+            new_band = False
+
+            if len(plot_bands) == 0 or error_code != prev_error_code or pause_reason != prev_pause_reason:
+                new_band = True
+
+            if new_band:
                 plot_bands.append({
                     'from': data.get('time'),
                     'to': None,
@@ -164,13 +172,16 @@ def get_brew_graph_data(chart_id, session_name, session_step, session_data, is_p
                         'text': reason_phrase(error_code, pause_reason)
                     }
                 })
-            elif len(plot_bands) > 0:
+            else:
                 plot_bands[-1]['to'] = data.get('time')
+        elif prev_error_code != 0 or prev_pause_reason != 0:
+            plot_bands[-1]['to'] = prev.get('time')
 
-    # if last data point is pause or error
+        prev = data
+
+    # fix plot_band if last data point is pause or error
     if len(plot_bands) > 0 and plot_bands[-1]['to'] == None:
         plot_bands[-1]['to'] = session_data[-1]['time']
-
 
     graph_data = {
         'chart_id': chart_id,
@@ -251,6 +262,8 @@ def reason_phrase(error_code, pause_reason):
         reason += 'pause: '
         if pause_reason == 1:
             reason += 'program'
+        if pause_reason == 2:
+            reason += 'user'
     elif error_code != 0:
         reason += 'error: {error_code}'
 

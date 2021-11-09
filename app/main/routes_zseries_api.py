@@ -447,7 +447,7 @@ def update_session_log(token, body):
         'drainPumpOn': body.get('DrainPumpOn', 0) == 1, # integer into boolean
         'kegPumpOn': body.get('KegPumpOn', 0) == 1,     # integer into boolean
         'errorCode': body.get('ErrorCode'),             # integer (4 == Overheat - too hot; 6 == Overheat - Max HEX Wort Delta; 12 == PicoStill Error)
-        'pauseReason': body.get('PauseReason'),         # integer (1 == waiting for user / finished / program)
+        'pauseReason': body.get('PauseReason'),         # integer (1 == waiting for user / finished / program, 2 == user initiated, 0 == running / not pause)
         # debug wifi information
         'network': {
             'recv': body.get('netRecv'),
@@ -487,6 +487,9 @@ def update_session_log(token, body):
             })
         elif len(session_plot_bands) > 0:
             session_plot_bands[-1]['to'] = session_data.get('time')
+
+    elif session_plot_bands[-1]['to'] == None:
+        session_plot_bands[-1]['to'] = active_session.data[-1].get('time')
 
     # for Z graphs we have more data available: wort, hex/therm, target, drain, ambient
     graph_update = json.dumps({'time': session_data['time'],
