@@ -82,6 +82,8 @@ def download_logs(log_type):
         response = make_response(send_file(filename))
         # custom content-type will force a download vs rendering with window.location
         response.headers['Content-Type'] = 'application/octet-stream'
+        response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+        response.headers['Pragma'] = 'no-cache'
         return response
     except Exception as e:
         error = f'Unexpected Error Retrieving {log_type} log file:<br/> {e}'
