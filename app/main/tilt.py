@@ -63,7 +63,7 @@ def tilts(devices):
                         'color': color,
                         'timestamp': datetime.utcnow().isoformat(),
                         'temp': get_number(data[18:20]),     # fahrenheit
-                        'gravity': get_number(data[20:22]),  # gravity * 1000
+                        'gravity': get_number(data[20:22]),  # gravity * 1000; or gravity * 10000 (pro)
                     })
     return tilts
 
