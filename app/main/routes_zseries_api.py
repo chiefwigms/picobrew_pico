@@ -464,6 +464,7 @@ def update_session_log(token, body):
         event = events[active_session].pop(0)
         session_data.update({'event': event})
 
+    last_session_data = active_session.data[-1] if len(active_session.data) > 0 else {}
     active_session.data.append(session_data)
     active_session.recovery = body['StepName']
     active_session.remaining_time = body['SecondsRemaining']
@@ -473,23 +474,21 @@ def update_session_log(token, body):
         plot_bands[active_session] = []
     session_plot_bands = plot_bands[active_session]
 
-    error_code = session_data.get('pauseReason', 0)
-    pause_reason = session_data.get('errorCode', 0)
-    if pause_reason != 0 or error_code != 0:
+    reason = reason_phrase(session_data.get('errorCode', 0), session_data.get('pauseReason', 0))
+    last_reason = reason_phrase(last_session_data.get('errorCode', 0), last_session_data.get('pauseReason', 0))
+    if reason != '':
         # either no existing plot_bands or prior plot_band marked closed
-        if len(session_plot_bands) == 0 or session_plot_bands[-1]['to'] != None:
+        if len(session_plot_bands) == 0 or reason != last_reason:
+            current_app.logger.debug('DEBUG: create new plot_band')
             session_plot_bands.append({
                 'from': session_data.get('time'),
-                'to': None,
+                'to': session_data.get('time'),
                 'label': {
-                    'text': reason_phrase(error_code, pause_reason)
+                    'text': reason
                 }
             })
-        elif len(session_plot_bands) > 0:
+        elif len(session_plot_bands) > 0 and reason == last_reason:
             session_plot_bands[-1]['to'] = session_data.get('time')
-
-    elif session_plot_bands[-1]['to'] == None:
-        session_plot_bands[-1]['to'] = active_session.data[-1].get('time')
 
     # for Z graphs we have more data available: wort, hex/therm, target, drain, ambient
     graph_update = json.dumps({'time': session_data['time'],
@@ -497,7 +496,7 @@ def update_session_log(token, body):
                                'session': active_session.name,
                                'step': active_session.step,
                                'event': event,
-                               'plotBand': session_plot_bands[-1] if len(session_plot_bands) > 0 else {}
+                               'plotBand': session_plot_bands[-1] if len(session_plot_bands) > 0 and reason != '' else {}
                                })
     socketio.emit('brew_session_update|{}'.format(token), graph_update)
     active_session.file.write('\n\t{},'.format(json.dumps(session_data)))

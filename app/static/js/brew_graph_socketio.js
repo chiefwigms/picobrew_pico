@@ -14,18 +14,43 @@ Highcharts.chart(graph_data.chart_id, {
         {
             var data = JSON.parse(event);
             self.setTitle({text: data.session}, {text: data.step});
+
             for (var i = 0; i < data.data.length; i++){
               self.series[i].addPoint([data.time, data.data[i]]);
             }
+
             if (data.event)
             {
               self.xAxis[0].addPlotLine({ 'color': 'black', 'width': '2', 'value': data.time, 'label': {'text': data.event, 'style': {'color': 'white', 'fontWeight': 'bold'}, 'verticalAlign': 'top', 'x': -15, 'y': 0}});
             }
 
-            if ('to' in data.plotBand && data.plotBand.to == null)
+            if ('plotBand' in data && data.plotBand && !$.isEmptyObject(data.plotBand))
             {
-              self.xAxis[0].options.plotBands[-1] = data.plotBand;
-              self.xAxis[0].update();
+              if (self.xAxis[0].options.plotBands.length > 0 && data.plotBand.from == self.xAxis[0].options.plotBands.at(-1).from)
+              {
+                // self.xAxis[0].options.plotBands.push(data.plotBand);
+                self.xAxis[0].options.plotBands.at(-1).to = data.time
+                self.xAxis[0].update();
+              } else {
+                data.plotBand.color = 'rgba(255, 86, 48, .2)';
+                if (data.plotBand.label.text.includes('pause')) {
+                  data.plotBand.label.style = {'color': 'yellow', 'fontWeight': 'bold'};
+                } else {
+                  data.plotBand.label.style = {'color': 'red', 'fontWeight': 'bold'};
+                }
+                data.plotBand.events = {
+                  mouseover: function(e) {
+                    const chart = this.axis.chart;
+                    chart.pauseReason = this.options.label.text;
+                  },
+                  mouseout: function(e) {
+                    const chart = this.axis.chart;
+                    chart.pauseReason = null;
+                  }
+                };
+                self.xAxis[0].options.plotBands.push(data.plotBand);
+                self.xAxis[0].update();
+              }
             }
         });
       },

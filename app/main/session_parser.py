@@ -265,7 +265,7 @@ def reason_phrase(error_code, pause_reason):
         if pause_reason == 2:
             reason += 'user'
     elif error_code != 0:
-        reason += 'error: {error_code}'
+        reason += f'error: {error_code}'
 
     return reason
 
@@ -505,7 +505,6 @@ def restore_active_brew_sessions():
             session.file.flush()
             session.filepath = file
             session.created_at = brew_session['date']
-            current_app.logger.debug(f'current created_at : {session.created_at}')
             session.name = brew_session['name']
             session.type = brew_session['type']
             session.session = brew_session['session']                   # session guid
