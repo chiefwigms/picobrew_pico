@@ -46,17 +46,26 @@ async def run():
             #print(d)
             if d.metadata['manufacturer_data'] and 76 in d.metadata['manufacturer_data']:
                 data = d.metadata['manufacturer_data'][76]
-                #print(get_string(data))
+                # print(get_string(data))
                 if bytearray(data[:2]) == bytearray(IBEACON_PROXIMITY_TYPE):
                     uuid=get_string(data[2:18])
                     if uuid in TILTS:
                         color = TILTS[uuid]
                         temp=get_number(data[18:20]) # farenheight
-                        gravity=get_number(data[20:22]) # gravity * 1000
+                        gravity=get_number(data[20:22]) # gravity * 1000; gravity * 10000 (pro)
                         tx_power=get_number(data[22:23])
                         rssi=get_rssi(data[22:23])
-                        print("uuid: {} color: {} temp: {} gravity: {} rssi: {} tx_power: {}".format(
-                                    uuid,     color,   temp,      gravity,  rssi,    tx_power))
+
+                        if gravity > 1000:
+                            # tilt pro has 1 more digit of resolution for both temp and gravity readings
+                            gravity = gravity / 10
+                            temp = temp / 10
+                            resolution = 'high'
+                        else:
+                            resolution = 'low'
+
+                        print("uuid: {} color: {} temp: {} gravity: {} rssi: {} tx_power: {} resolution: {}".format(
+                                    uuid,     color,   temp,      gravity,  rssi,      tx_power,     resolution))
         time.sleep(10)
 
 loop = asyncio.get_event_loop()
