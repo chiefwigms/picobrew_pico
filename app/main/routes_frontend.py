@@ -62,7 +62,7 @@ def _session_type_history(stype):
         sessions = _paginated_sessions(stype, None, offset, limit)
     except Exception as e:
         current_app.logger.error(f'failed to load brew sessions: {e}')
-        if is_ajax(request): # return error to loader, else return empty session list
+        if is_ajax(request):  # return error to loader, else return empty session list
             return f'unable to load more {stype.value} sessions', 404
 
     if is_ajax(request):
@@ -119,8 +119,8 @@ def new_zymatic_recipe():
 def import_zymatic_recipe():
     if request.method == 'POST':
         data = request.get_json()
-        guid = data['guid'] # user accountId
-        uid = data['uid'] # machine productId
+        guid = data['guid']  # user accountId
+        uid = data['uid']  # machine productId
         try:
             # import for picobrew and picobrew_c are the same
             import_recipes(uid, guid, None, MachineType.ZYMATIC)
@@ -365,7 +365,7 @@ def delete_zseries_recipe():
 def import_zseries_recipe():
     if request.method == 'POST':
         data = request.get_json()
-        uid = data['uid'] # machine productId
+        uid = data['uid']  # machine productId
         try:
             import_recipes(uid, None, None, MachineType.ZSERIES)
             return '', 204
@@ -467,8 +467,8 @@ def new_pico_recipe():
 def import_pico_recipe():
     if request.method == 'POST':
         data = request.get_json()
-        rfid = data['rfid'] # picopak rfid
-        uid = data['uid'] # picopak rfid
+        rfid = data['rfid']  # picopak rfid
+        uid = data['uid']  # picopak rfid
         try:
             # import for picobrew and picobrew_c are the same
             import_recipes(uid, None, rfid, MachineType.PICOBREW)

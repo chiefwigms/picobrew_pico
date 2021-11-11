@@ -16,15 +16,15 @@ from .units import convert_temp
 arg_parser = FlaskParser()
 
 iSpindel_dataset_args = {
-    'name': fields.Str(required=False),           #device name
-    'ID': fields.Int(required=True),             #random device ID
-    'angle': fields.Float(required=False),       #device floatation angle
-    'temperature': fields.Float(required=True),  #device temperature
-    'temp_units': fields.Str(required=True),     #temperature units in C or F
-    'battery': fields.Float(required=True),      #device battery voltage
-    'gravity': fields.Float(required=True),      #calculated specific gravity
-    'interval': fields.Int(required=False),      #sampling interval in seconds
-    'RSSI': fields.Int(required=False)           #RSSI of WiFi signal
+    'name': fields.Str(required=False),  # device name
+    'ID': fields.Int(required=True),  # random device ID
+    'angle': fields.Float(required=False),  # device floatation angle
+    'temperature': fields.Float(required=True),  # device temperature
+    'temp_units': fields.Str(required=True),  # temperature units in C or F
+    'battery': fields.Float(required=True),  # device battery voltage
+    'gravity': fields.Float(required=True),  # calculated specific gravity
+    'interval': fields.Int(required=False),  # sampling interval in seconds
+    'RSSI': fields.Int(required=False)  # RSSI of WiFi signal
 }
 
 # Process iSpindel Data: /API/iSpindel or /API/iSpindle
