@@ -22,6 +22,8 @@ user_setup_args = {
     'machine': fields.Str(required=True),       # 12 character alpha-numeric Product ID
     'admin': fields.Int(required=True),         # Always 0
 }
+
+
 @main.route('/API/usersetup')
 @use_args(user_setup_args, location='querystring')
 def process_user_setup(args):
@@ -36,6 +38,8 @@ first_setup_args = {
     'machine': fields.Str(required=True),       # 12 character alpha-numeric Product ID (1W_ADDR = 16 character alpha-numeric OneWire Address, i.e. 28b0123456789abc)
     'admin': fields.Int(required=True),         # Always 0
 }
+
+
 @main.route('/API/firstSetup')
 @use_args(first_setup_args, location='querystring')
 def process_first_setup(args):
@@ -50,6 +54,8 @@ zymatic_firmware_check_args = {
     'maj': fields.Int(required=True),           # Int Major Version
     'min': fields.Int(required=True),           # Int Minor Version
 }
+
+
 @main.route('/API/zymaticFirmwareCheck')
 @use_args(zymatic_firmware_check_args, location='querystring')
 def process_zymatic_firmware_check(args):
@@ -66,6 +72,8 @@ sync_user_args = {
     'user': fields.Str(required=True),          # 32 character alpha-numeric Profile GUID
     'machine': fields.Str(required=True),       # 12 character alpha-numeric Product ID
 }
+
+
 @main.route('/API/SyncUser')
 @main.route('/API/SyncUSer')
 @use_args(sync_user_args, location='querystring')
@@ -90,6 +98,8 @@ def process_sync_user(args):
 check_sync_args = {
     'user': fields.Str(required=True),          # 32 character alpha-numeric Profile GUID
 }
+
+
 @main.route('/API/checksync')
 @use_args(check_sync_args, location='querystring')
 def process_check_sync(args):
@@ -104,6 +114,8 @@ recover_session_args = {
     'session': fields.Str(required=True),       # 32 character alpha-numeric session
     'code': fields.Int(required=True),          # 0 = Step 1, 1 = Step 2
 }
+
+
 @main.route('/API/recoversession')
 @use_args(recover_session_args, location='querystring')
 def process_recover_session(args):
@@ -122,6 +134,8 @@ session_error_args = {
     'session': fields.Str(required=True),       # 32 character alpha-numeric session
     'errorcode': fields.Int(required=True),     # Int Error Code
 }
+
+
 @main.route('/API/sessionerror')
 @use_args(session_error_args, location='querystring')
 def process_session_error(args):
@@ -145,6 +159,8 @@ log_session_args = {
     'state': fields.Int(required=False),         # ?
     'step': fields.Str(required=False),          # 8 Integers separated by / for recovery
 }
+
+
 @main.route('/API/logsession')
 @main.route('/API/logSession')
 @main.route('/API/LogSession')

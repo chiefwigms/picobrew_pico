@@ -246,7 +246,6 @@ def update_device_session(uid, session_type):
                     current_app.logger.error(f'exception occured : {e}')
                     return getattr(e, 'message', e.args[0]), 418
 
-
         return '', 204
     else:
         current_app.logger.error(f'invalid session type : {session_type}')
@@ -689,8 +688,6 @@ def load_active_tilt_sessions():
                                   'graph': get_tilt_graph_data(uid, active_tilt_sessions[uid].rssi,
                                                                    active_tilt_sessions[uid].data)})
     return tilt_sessions
-
-
 
 
 def load_tilt_sessions(uid=None, offset=0, limit=None):

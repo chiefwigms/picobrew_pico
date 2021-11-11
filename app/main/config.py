@@ -15,6 +15,7 @@ class MachineType(str, Enum):
     ISPINDEL = 'iSpindel'
     TILT = 'Tilt'
 
+
 class SessionType(str, Enum):
     def __str__(self):
         return str(self.value)

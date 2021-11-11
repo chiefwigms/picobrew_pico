@@ -22,6 +22,8 @@ arg_parser = FlaskParser()
 register_args = {
     'uid': fields.Str(required=True),       # 32 character alpha-numeric serial number
 }
+
+
 @main.route('/API/pico/register')
 @use_args(register_args, location='querystring')
 def process_register(args):
@@ -37,6 +39,8 @@ change_state_args = {
     'picoUID': fields.Str(required=True),   # 32 character alpha-numeric serial number
     'state': fields.Int(required=True),     # 2 = Ready, 3 = Brewing, 4 = Sous Vide, 5 = Rack Beer, 6 = Rinse, 7 = Deep Clean, 9 = De-Scale
 }
+
+
 @main.route('/API/pico/picoChangeState')
 @use_args(change_state_args, location='querystring')
 def process_change_state_request(args):
@@ -49,6 +53,8 @@ check_firmware_args = {
     'uid': fields.Str(required=True),       # 32 character alpha-numeric serial number
     'version': fields.Str(required=True),   # Current firmware version - i.e. 0.1.11
 }
+
+
 @main.route('/API/pico/checkFirmware')
 @use_args(check_firmware_args, location='querystring')
 def process_check_firmware(args):
@@ -66,6 +72,8 @@ def process_check_firmware(args):
 get_firmware_args = {
     'uid': fields.Str(required=True),       # 32 character alpha-numeric serial number
 }
+
+
 @main.route('/API/pico/getFirmware')
 @use_args(get_firmware_args, location='querystring')
 def process_get_firmware(args):
@@ -86,6 +94,8 @@ def process_get_firmware(args):
 actions_needed_args = {
     'uid': fields.Str(required=True),       # 32 character alpha-numeric serial number
 }
+
+
 @main.route('/API/pico/getActionsNeeded')
 @use_args(actions_needed_args, location='querystring')
 def process_get_actions_needed(args):
@@ -101,6 +111,8 @@ error_args = {
     'code': fields.Str(required=True),       # Integer error number
     'rfid': fields.Str(required=False),      # 14 character alpha-numeric PicoPak RFID (could be blank)
 }
+
+
 @main.route('/API/pico/error')
 @use_args(error_args, location='querystring')
 def process_error(args):
@@ -114,6 +126,8 @@ get_session_args = {
     'uid': fields.Str(required=True),       # 32 character alpha-numeric serial number
     'sesType': fields.Int(required=True),   # 0 = Brewing (never happens since session = 14 alpha-numeric RFID), 1 = Deep Clean, 2 = Sous Vide, 4 = Cold Brew, 5 = Manual Brew
 }
+
+
 @main.route('/API/pico/getSession')
 @use_args(get_session_args, location='querystring')
 def process_get_session(args):
@@ -126,6 +140,8 @@ def process_get_session(args):
 recipe_list_args = {
     'uid': fields.Str(required=True),       # 32 character alpha-numeric serial number
 }
+
+
 @main.route('/API/pico/recipelist')
 @use_args(recipe_list_args, location='querystring')
 def process_recipe_list(args):
@@ -138,6 +154,8 @@ def process_recipe_list(args):
 associated_paks_args = {
     'uid': fields.Str(required=True),       # 32 character alpha-numeric serial number
 }
+
+
 @main.route('/API/pico/getAssociatedPaks')
 @use_args(associated_paks_args, location='querystring')
 def process_associated_paks(args):
@@ -153,6 +171,8 @@ get_recipe_args = {
     'ibu': fields.Str(required=True),       # Decimal IBU Tweak (i.e. -1, ignore -> not supported)
     'abv': fields.Str(required=True),       # Decimal ABV Tweak (i.e. -1.0, ignore -> not supported)
 }
+
+
 @main.route('/API/pico/getRecipe')
 @use_args(get_recipe_args, location='querystring')
 def process_get_recipe(args):
@@ -174,6 +194,8 @@ log_args = {
     'timeLeft': fields.Int(required=True),     # Integer (Seconds Left?)
     'shutScale': fields.Float(required=True),  # %0.2f
 }
+
+
 @main.route('/API/pico/log')
 @use_args(log_args, location='querystring')
 def process_log(args):
@@ -215,6 +237,8 @@ pico_still_args = {
 }
 # Can Use Still: /API/pico/canUsePicoStill?picoUid={UID}&picoStillUid={UID}
 #    Response: '#{0}#\r\n' where {0} : T (or F?)
+
+
 @main.route('/API/pico/canUsePicoStill')
 @use_args(pico_still_args, location='querystring')
 def process_can_use_pico_still(args):

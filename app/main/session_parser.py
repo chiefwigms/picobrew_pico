@@ -258,7 +258,6 @@ def load_still_session(file):
         # set server end datetime to last data log entry
         server_end_datetime = epoch_millis_converter(json_data[-1]['time'])
 
-
     return ({
         'uid': info[1],
         'date': server_start_datetime,
@@ -624,6 +623,7 @@ def list_session_files(session_path, uid=None, reverse=True):
         files = list(session_path.glob(file_glob_pattern))
 
     return sorted(files, reverse=reverse)
+
 
 class ZSessionType(int, Enum):
     RINSE = 0
