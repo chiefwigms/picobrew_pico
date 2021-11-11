@@ -144,11 +144,11 @@ def process_zstate(args):
     uid = request.args['token']
     if uid not in active_brew_sessions:
         active_brew_sessions[uid] = PicoBrewSession(MachineType.ZSERIES)
-    
+
     json = request.json
     update_required = firmware_upgrade_required(MachineType.ZSERIES, json['CurrentFirmware'])
     firmware_source = "https://picobrew.com/firmware/zseries/{}".format(firmware_filename(MachineType.ZSERIES, minimum_firmware(MachineType.ZSERIES)))
-    
+
     returnVal = {
         "Alias": zseries_alias(uid),
         "BoilerType": json.get('BoilerType', None),       # TODO sometimes machine loses boilertype, need to resync with known state

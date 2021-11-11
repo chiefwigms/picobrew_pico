@@ -16,24 +16,26 @@ from .units import convert_temp
 arg_parser = FlaskParser()
 
 iSpindel_dataset_args = {
-    'name': fields.Str(required=False),           #device name
-    'ID': fields.Int(required=True),             #random device ID
-    'angle': fields.Float(required=False),       #device floatation angle
-    'temperature': fields.Float(required=True),  #device temperature
-    'temp_units': fields.Str(required=True),     #temperature units in C or F
-    'battery': fields.Float(required=True),      #device battery voltage
-    'gravity': fields.Float(required=True),      #calculated specific gravity
-    'interval': fields.Int(required=False),      #sampling interval in seconds
-    'RSSI': fields.Int(required=False)           #RSSI of WiFi signal
+    'name': fields.Str(required=False),  # device name
+    'ID': fields.Int(required=True),  # random device ID
+    'angle': fields.Float(required=False),  # device floatation angle
+    'temperature': fields.Float(required=True),  # device temperature
+    'temp_units': fields.Str(required=True),  # temperature units in C or F
+    'battery': fields.Float(required=True),  # device battery voltage
+    'gravity': fields.Float(required=True),  # calculated specific gravity
+    'interval': fields.Int(required=False),  # sampling interval in seconds
+    'RSSI': fields.Int(required=False)  # RSSI of WiFi signal
 }
 
 # Process iSpindel Data: /API/iSpindel or /API/iSpindle
+
+
 @main.route('/API/iSpindle', methods=['POST'])
 @main.route('/API/iSpindel', methods=['POST'])
 @use_args(iSpindel_dataset_args, unknown=INCLUDE)
 def process_iSpindel_data(data):
     uid = str(data['ID'])
-    
+
     if uid not in active_iSpindel_sessions:
         active_iSpindel_sessions[uid] = iSpindelSession()
 
@@ -53,14 +55,13 @@ def process_iSpindel_data(data):
 
         session_data.append(point)
         log_data += '\n\t{},'.format(json.dumps(point))
-        
+
         active_iSpindel_sessions[uid].data.extend(session_data)
         active_iSpindel_sessions[uid].voltage = str(data['battery']) + 'V'
-        
+
         graph_update = json.dumps({'voltage': data['battery'], 'data': session_data})
         socketio.emit('iSpindel_session_update|{}'.format(data['ID']), graph_update)
-        
-        
+
         # end fermentation only when user specifies fermentation is complete
         if (active_iSpindel_sessions[uid].uninit == False and active_iSpindel_sessions[uid].active == False):
             active_iSpindel_sessions[uid].file.write('{}\n\n]'.format(log_data[:-2]))
@@ -75,6 +76,8 @@ def process_iSpindel_data(data):
         return('', 200)
 
 # -------- Utility --------
+
+
 def create_new_session(uid):
     if uid not in active_iSpindel_sessions:
         active_iSpindel_sessions[uid] = iSpindelSession()

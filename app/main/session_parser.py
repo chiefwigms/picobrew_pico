@@ -250,9 +250,18 @@ def load_still_session(file):
     name = info[1]
     alias = info[1] if info[1] not in active_still_sessions else active_still_sessions[info[1]].alias
 
+    # filename datetime string format "20200615_205946"
+    server_start_datetime = datetime.strptime(info[0], '%Y%m%d_%H%M%S')
+    # json datetime `timeStr` format "2020-06-15T20:59:46.280731" (UTC) ; 'time' milliseconds from epoch
+    server_end_datetime = datetime.strptime(info[0], '%Y%m%d_%H%M%S')
+    if len(json_data) > 0:
+        # set server end datetime to last data log entry
+        server_end_datetime = epoch_millis_converter(json_data[-1]['time'])
+
     return ({
         'uid': info[1],
-        'date': info[0],
+        'date': server_start_datetime,
+        'end_date': server_end_datetime,
         'name': name,
         'alias': alias,
         'data': json_data,
@@ -560,6 +569,11 @@ def restore_active_sessions():
     restore_active_tilt_sessions()
 
 
+def get_invalid_sessions(sessionType):
+    global invalid_sessions
+    return invalid_sessions.get(sessionType, set())
+
+
 def add_invalid_session(sessionType, file):
     global invalid_sessions
     if sessionType not in invalid_sessions:
@@ -576,21 +590,40 @@ def parse_brew_session(file):
         add_invalid_session("brew", file)
 
 
-def load_brew_sessions(uid=None):
-    files = list_brew_session_files(uid)
+def sampling(selection, offset=0, limit=None):
+    return selection[offset:(limit + offset if limit is not None else None)]
+
+
+def _paginate_sessions(sessions, offset=0, limit=None):
+    sessions = sampling(sessions, offset, limit)
+
+    # if pagination request and no sessions found return error
+    if (offset != 0 and len(sessions) == 0):
+        msg = "unable to paginate sessions to offset={}&limit={}".format(offset, limit)
+        current_app.logger.error(msg)
+        raise Exception(msg)
+
+    return sessions
+
+
+def load_brew_sessions(uid=None, offset=0, limit=None):
+    files = list_session_files(brew_archive_sessions_path(), uid)
 
     brew_sessions = [parse_brew_session(file) for file in files]
-    return list(filter(lambda x: x != None, brew_sessions))
+    brew_sessions = list(filter(lambda x: x != None, brew_sessions))
+
+    return _paginate_sessions(brew_sessions, offset, limit)
 
 
-def list_brew_session_files(uid=None):
+def list_session_files(session_path, uid=None, reverse=True):
     files = []
     if uid:
-        files = list(brew_archive_sessions_path().glob("*#{}*.json".format(uid)))
+        files = list(session_path.glob("*#{}*.json".format(uid)))
     else:
-        files = list(brew_archive_sessions_path().glob(file_glob_pattern))
+        files = list(session_path.glob(file_glob_pattern))
 
-    return sorted(files, reverse=True)
+    return sorted(files, reverse=reverse)
+
 
 class ZSessionType(int, Enum):
     RINSE = 0
@@ -645,7 +678,7 @@ class BrewSessionType(str, MultiValueEnum):
 
 
 def dirty_sessions_since_clean(uid, mtype):
-    brew_session_files = list_brew_session_files(uid)
+    brew_session_files = list_session_files(brew_archive_sessions_path(), uid)
     post_clean_sessions = []
     clean_found = False
 
@@ -676,7 +709,7 @@ def last_session_type(uid, mtype):
 
 
 def last_session_metadata(uid, mtype):
-    brew_sessions = list_brew_session_files(uid)
+    brew_sessions = list_session_files(brew_archive_sessions_path(), uid)
 
     if len(brew_sessions) == 0:
         if mtype == MachineType.ZSERIES:
@@ -697,13 +730,13 @@ def last_session_metadata(uid, mtype):
             try:
                 stype = PicoSessionType(sname)
             except Exception as err:
-                current_app.logger.warn("unknown session type {} - {}".format(sname, err))
+                # current_app.logger.warn("unknown session type {} - {}".format(sname, err))
                 stype = PicoSessionType.BEER  # pico only has name in file (no type enum)
             return stype, sname
 
 
 def increment_session_id(uid):
-    return len(list_brew_session_files(uid)) + (1 if active_brew_sessions[uid].session != '' else 1)
+    return len(list_session_files(brew_archive_sessions_path(), uid)) + (1 if active_brew_sessions[uid].session != '' else 1)
 
 
 def get_machine_by_session(session_id):
@@ -733,7 +766,8 @@ def session_type_from_filename(filename, mtype):
             if len(info) > 3:
                 session_type = PicoSessionType(info[3])
         except Exception as error:
-            current_app.logger.warn("error occurred extracting session type from {}".format(filename))
+            pass
+            # current_app.logger.warn("error occurred extracting session type from {}".format(filename))
             # info[3] is recipe name, utilities == session_type; beer recipe != session_type
 
     return session_type

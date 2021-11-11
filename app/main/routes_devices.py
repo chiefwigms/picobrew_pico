@@ -6,8 +6,8 @@ from .frontend_common import active_session, render_template_with_defaults
 from .model import PicoBrewSession, PicoFermSession, PicoStillSession, iSpindelSession, TiltSession
 from .session_parser import (BrewSessionType, active_brew_sessions, active_ferm_sessions,
                              active_iSpindel_sessions, active_tilt_sessions, active_still_sessions,
-                             list_brew_session_files, dirty_sessions_since_clean, last_session_metadata)
-from .config import base_path, server_config, MachineType
+                             list_session_files, dirty_sessions_since_clean, last_session_metadata)
+from .config import base_path, server_config, MachineType, brew_archive_sessions_path
 
 
 yaml = YAML()
@@ -42,7 +42,7 @@ def handle_devices():
             })
 
             # add total session count
-            machine_stats[uid].update({'total_sessions': len(list_brew_session_files(uid))})
+            machine_stats[uid].update({'total_sessions': len(list_session_files(brew_archive_sessions_path(), uid))})
 
     # register device alias and type
     if request.method == 'POST':

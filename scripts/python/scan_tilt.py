@@ -1,6 +1,4 @@
 import asyncio
-import struct
-from datetime import datetime
 import time
 from bleak import BleakScanner
 
@@ -18,6 +16,7 @@ TILTS = {
     'a495ff10c5b14b44b5121370f02d74de': 'Black',
 }
 
+
 def get_number(data):
     integer = 0
     multiple = 256
@@ -26,35 +25,38 @@ def get_number(data):
         multiple = 1
     return integer
 
+
 def get_string(data):
     string = ''
     for c in data:
         string += '%02x' % c
     return string
 
+
 # rssi is is the 2's complement of the calibrated Tx Power
 def get_rssi(data):
     #tx_power=struct.unpack('B', data)[0]
-    tx_power=data[0]
-    return -(256-tx_power)
+    tx_power = data[0]
+    return -(256 - tx_power)
+
 
 async def run():
     print("Scanning for tilts...")
     while True:
         devices = await BleakScanner.discover(10)
         for d in devices:
-            #print(d)
+            # print(d)
             if d.metadata['manufacturer_data'] and 76 in d.metadata['manufacturer_data']:
                 data = d.metadata['manufacturer_data'][76]
                 # print(get_string(data))
                 if bytearray(data[:2]) == bytearray(IBEACON_PROXIMITY_TYPE):
-                    uuid=get_string(data[2:18])
+                    uuid = get_string(data[2:18])
                     if uuid in TILTS:
                         color = TILTS[uuid]
-                        temp=get_number(data[18:20]) # farenheight
-                        gravity=get_number(data[20:22]) # gravity * 1000; gravity * 10000 (pro)
-                        tx_power=get_number(data[22:23])
-                        rssi=get_rssi(data[22:23])
+                        temp = get_number(data[18:20]) # farenheight
+                        gravity = get_number(data[20:22]) # gravity * 1000; gravity * 10000 (pro)
+                        tx_power = get_number(data[22:23])
+                        rssi = get_rssi(data[22:23])
 
                         if gravity > 1000:
                             # tilt pro has 1 more digit of resolution for both temp and gravity readings

@@ -16,6 +16,17 @@ class MachineType(str, Enum):
     TILT = 'Tilt'
 
 
+class SessionType(str, Enum):
+    def __str__(self):
+        return str(self.value)
+
+    BREW = 'brew'
+    PICOSTILL = 'still'
+    PICOFERM = 'ferm'
+    TILT = 'tilt'
+    ISPINDEL = 'iSpindel'
+
+
 # server config
 def server_config():
     return current_app.config['SERVER_CONFIG']

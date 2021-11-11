@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block content %}
+  <script src="/static/js/highcharts/highcharts.js"></script>
+  <script src="/static/js/highcharts/annotations.js"></script>
+  <script src="/static/js/highcharts/export-data.js"></script>
+  <script src="/static/js/highcharts/exporting.js"></script>
+  <script src="/static/js/highcharts/dark-unica.js"></script>
+  <script src="/static/js/server_management.js"></script>
+  <script src="/static/js/session_history.js"></script>
+  {% include "invalid_file.html" %}
+
+  <br /><br /><br />
+  <div id="accordion" class=scrollable-element>
+    {% include "_session_list.html" %}
+  </div>
+  <br/>
+  <div id="sentinel" class="container">
+    <div class="row">
+      <div class="col text-center">
+        <input id="load-more" class="btn btn-primary" type="button" value="Load more...">
+        <button id="loading" class="btn btn-primary d-none" disabled>
+          <span class="spinner-border spinner-border-sm"></span>
+          Loading...
+        </button>
+      </div>
+    </div>
+  </div>
+  <br/><br/><br/><br/>
+{% endblock %}

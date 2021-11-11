@@ -1,0 +1,46 @@
+<div class="card bg-dark text-white-50">
+    {% set chart_id = session.graph.chart_id %}
+    <h5 class="card-header" id="h_{{chart_id}}">
+        <a class="collapsed" role="button" data-toggle="collapse" href="#c_{{chart_id}}" data-parent="#accordion" aria-expanded="false" aria-controls="c_{{chart_id}}">
+            {% if session_type == "brew" %}
+            {{session.name}} (Brewed {{session.date}}{% if session.alias is defined and session.alias|length %} with {{session.alias}}{% endif %}) 
+            {% else %}
+            {{session.name}} on {{session.date}}
+            {% endif %}
+            <button class="btn btn-sm btn-primary float-right mr-5" type="button" id="bdownload_{{session.filename}}"
+                onclick="event.stopPropagation();event.preventDefault();download_session('{{session.filename}}');">
+                <i class="fas fa-download"></i>
+            </button>
+            <button class="btn btn-sm btn-danger float-right mr-3" type="button" id="bdelete_{{session.filename}}"
+                onclick="event.stopPropagation();event.preventDefault();delete_file('{{session.filepath}}');">
+                <i class="fas fa-trash"></i>
+            </button>
+        </a>
+    </h5>
+    <div id="c_{{chart_id}}" class="collapse" aria-labelledby="h_{{chart_id}}">
+        <div class="card-body">
+            <div id="d_{{chart_id}}" class="text-white">
+                <div class="row">
+                    <div class="col-sm">
+                        <div class="text-white-50">Machine</div>
+                        <div>{% if session.alias is defined and session.alias|length %}{{session.alias}} ({{session.uid}}){% else %}{{session.uid}}{% endif %}</div>
+                    </div>
+                    <div class="col-sm">
+                        <div class="text-white-50">Date Started</div>
+                        <div>{{session.date.strftime('%A, %b %e %Y %H:%M:%S')}}</div>
+                    </div>
+                    <div class="col-sm">
+                        {% if session.end_date %}
+                        <div class="text-white-50">Date Completed</div>
+                        <div>{{session.end_date.strftime('%A, %b %e %Y %H:%M:%S')}}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="row">&nbsp;</div>
+            </div>
+            <div id="{{chart_id}}" style="min-width: 320px; height: 400px; margin: 0 auto"></div>
+            <script>var graph_data={{session.graph|tojson}};</script>
+            <script src="/static/js/{{session_type}}_graph.js"></script>
+        </div>
+    </div>
+</div>

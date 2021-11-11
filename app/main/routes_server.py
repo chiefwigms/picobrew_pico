@@ -21,12 +21,12 @@ def restart_server():
     # TODO: Close file handles for open sessions?
 
     if platform() == "RaspberryPi":
-        update_script="./scripts/pi/post-git-update.sh"
+        update_script = "./scripts/pi/post-git-update.sh"
         os.system('cd {0}; if [ -f {1} ]; then {1} --allow-reboot; fi'.format(base_path(), update_script))
 
     def restart():
         sleep(2)
-        os.execl(sys.executable, *([sys.executable]+sys.argv))
+        os.execl(sys.executable, *([sys.executable] + sys.argv))
     thread = Thread(target=restart, daemon=True)
     thread.start()
     return redirect('/')
@@ -304,7 +304,7 @@ def wireless_credentials():
     except Exception:
         bssid = None
 
-    return { 
+    return {
         'ssid': ssid.decode("utf-8").strip().strip('"'),
         'psk': psk.decode("utf-8").strip().strip('"'),
         'bssid': bssid.decode("utf-8").strip().strip('"')
@@ -348,8 +348,8 @@ def about():
 
     image_release = os.environ.get("IMG_RELEASE", None)
     image_variant = os.environ.get("IMG_VARIANT", None)
-    image_version = None if image_release is None else f"{image_release}_{image_variant}" 
-    
+    image_version = None if image_release is None else f"{image_release}_{image_variant}"
+
     return render_template_with_defaults('about.html', git_version=gitSha, latest_git_sha=latestMasterSha, local_changes=localChanges,
                            server_info=server_information, os_release=system_info,
                            raspberrypi_info=pinout, raspberrypi_image=image_version)
