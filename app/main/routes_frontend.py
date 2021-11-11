@@ -56,7 +56,7 @@ def _paginated_sessions(stype, uid=None, offset=0, limit=None):
 def _session_type_history(stype):
     offset = request.args.get('offset', 0, type=int)
     limit = request.args.get('limit', 10, type=int)
-    
+
     sessions = []
     try:
         sessions = _paginated_sessions(stype, None, offset, limit)
@@ -67,7 +67,7 @@ def _session_type_history(stype):
 
     if is_ajax(request):
         return render_template('_session_list.html', session_type=stype, sessions=sessions)
-    
+
     return render_template_with_defaults('session_history.html', session_type=stype, sessions=sessions, invalid=get_invalid_sessions(stype.value))
 
 
@@ -245,7 +245,7 @@ def update_device_session(uid, session_type):
                 except Exception as e:
                     current_app.logger.error(f'exception occured : {e}')
                     return getattr(e, 'message', e.args[0]), 418
-        
+
 
         return '', 204
     else:
@@ -304,7 +304,7 @@ def download_recipe(machine_type, id, name):
         return f'Invalid machine type provided "{machine_type}"', 418
 
     files = list(dirpath.glob(file_glob_pattern))
-    
+
     for filename in files:
         recipe = None
         if machine_type == "picobrew":
@@ -398,7 +398,7 @@ def parse_recipe(machineType, recipe, file):
         current_app.logger.error("ERROR: An exception occurred parsing recipe {}".format(file))
         current_app.logger.error(e)
         add_invalid_recipe(machineType, file)
-    
+
 
 def get_zseries_recipes():
     global zseries_recipes
@@ -524,7 +524,7 @@ def load_pico_recipes():
 def load_pico_recipe(file):
     recipe = PicoBrewRecipe()
     parse_recipe(MachineType.PICOBREW, recipe, file)
-    
+
     recipe.name_escaped = escape(recipe.name).replace(" ", "_")
     return recipe
 
@@ -590,7 +590,7 @@ def parse_ferm_session(file):
     except Exception:
         current_app.logger.error("ERROR: An exception occurred parsing {}".format(file))
         add_invalid_session("ferm", file)
-    
+
 
 def load_active_ferm_sessions():
     ferm_sessions = []
@@ -619,7 +619,7 @@ def parse_still_session(file):
     except Exception:
         current_app.logger.error("ERROR: An exception occurred parsing {}".format(file))
         add_invalid_session("still", file)
-    
+
 
 def load_active_still_sessions():
     still_sessions = []

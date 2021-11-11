@@ -74,7 +74,7 @@ def process_get_ferm_state(args):
     uid = args['uid']
     if uid not in active_ferm_sessions:
         active_ferm_sessions[uid] = PicoFermSession()
-    
+
     session = active_ferm_sessions[uid]
 
     if session.active == True:

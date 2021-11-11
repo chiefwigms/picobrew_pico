@@ -33,7 +33,7 @@ iSpindel_dataset_args = {
 @use_args(iSpindel_dataset_args, unknown=INCLUDE)
 def process_iSpindel_data(data):
     uid = str(data['ID'])
-    
+
     if uid not in active_iSpindel_sessions:
         active_iSpindel_sessions[uid] = iSpindelSession()
 
@@ -53,14 +53,14 @@ def process_iSpindel_data(data):
 
         session_data.append(point)
         log_data += '\n\t{},'.format(json.dumps(point))
-        
+
         active_iSpindel_sessions[uid].data.extend(session_data)
         active_iSpindel_sessions[uid].voltage = str(data['battery']) + 'V'
-        
+
         graph_update = json.dumps({'voltage': data['battery'], 'data': session_data})
         socketio.emit('iSpindel_session_update|{}'.format(data['ID']), graph_update)
-        
-        
+
+
         # end fermentation only when user specifies fermentation is complete
         if (active_iSpindel_sessions[uid].uninit == False and active_iSpindel_sessions[uid].active == False):
             active_iSpindel_sessions[uid].file.write('{}\n\n]'.format(log_data[:-2]))

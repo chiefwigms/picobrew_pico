@@ -81,10 +81,10 @@ async def scan(app, interval):
             app.logger.debug(f"found {len(tilts_found)} tilt(s)")
         except Exception as e:
             app.logger.error(f"error occurred parsing ble broadcasts - {e}")
-            
+
 
 async def start_infinite_scan(app, interval):
-    while True: 
+    while True:
         await scan(app, interval)
         # pause and rescan for available tilts after specified interval
         time.sleep(interval)
