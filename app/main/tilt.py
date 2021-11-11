@@ -38,7 +38,7 @@ def get_string(data):
 # rssi is is the 2's complement of the calibrated Tx Power
 def get_rssi(data):
     tx_power = data[0]
-    return -(256-tx_power)
+    return -(256 - tx_power)
 
 
 # there may be a better way, but i wasn't sure how to filter out

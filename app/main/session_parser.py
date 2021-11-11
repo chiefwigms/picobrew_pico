@@ -678,7 +678,7 @@ class BrewSessionType(str, MultiValueEnum):
 
 
 def dirty_sessions_since_clean(uid, mtype):
-    brew_session_files = list_session_files(brew_archive_sessions_path(),uid)
+    brew_session_files = list_session_files(brew_archive_sessions_path(), uid)
     post_clean_sessions = []
     clean_found = False
 
@@ -709,7 +709,7 @@ def last_session_type(uid, mtype):
 
 
 def last_session_metadata(uid, mtype):
-    brew_sessions = list_session_files(brew_archive_sessions_path(),uid)
+    brew_sessions = list_session_files(brew_archive_sessions_path(), uid)
 
     if len(brew_sessions) == 0:
         if mtype == MachineType.ZSERIES:
@@ -736,7 +736,7 @@ def last_session_metadata(uid, mtype):
 
 
 def increment_session_id(uid):
-    return len(list_session_files(brew_archive_sessions_path(),uid)) + (1 if active_brew_sessions[uid].session != '' else 1)
+    return len(list_session_files(brew_archive_sessions_path(), uid)) + (1 if active_brew_sessions[uid].session != '' else 1)
 
 
 def get_machine_by_session(session_id):
