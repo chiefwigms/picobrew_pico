@@ -15,6 +15,7 @@ from .config import (MachineType, SessionType,
                      zymatic_recipe_path, zseries_recipe_path, pico_recipe_path,
                      brew_archive_sessions_path, ferm_archive_sessions_path, still_archive_sessions_path, iSpindel_archive_sessions_path, tilt_archive_sessions_path)
 from .frontend_common import render_template_with_defaults
+from .model import Webhook
 from .recipe_import import import_recipes
 from .recipe_parser import PicoBrewRecipe, ZymaticRecipe, ZSeriesRecipe
 from .session_parser import (_paginate_sessions, list_session_files,
@@ -23,8 +24,6 @@ from .session_parser import (_paginate_sessions, list_session_files,
                              get_brew_graph_data, get_ferm_graph_data, get_still_graph_data, get_iSpindel_graph_data, get_tilt_graph_data,
                              active_brew_sessions, active_ferm_sessions, active_still_sessions, active_iSpindel_sessions, active_tilt_sessions,
                              add_invalid_session, get_invalid_sessions, load_brew_session, load_brew_sessions)
-from .webhook import Webhook
-
 
 file_glob_pattern = "[!._]*.json"
 yaml = YAML()
