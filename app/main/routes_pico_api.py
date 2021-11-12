@@ -227,7 +227,7 @@ def process_log(args):
             'ThermoBlockTemp': session_data['therm'],
             'WortTemp': session_data['wort'],
         }
-        
+
         # send and update status of webhook
         send_webhook(webhook, webhook_data)
 

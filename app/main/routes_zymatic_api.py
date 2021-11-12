@@ -214,7 +214,7 @@ def process_log_session(args):
                 print('DEBUG: Zymatic events > 1 - size = {}'.format(len(events[session])))
             event = events[session].pop(0)
             session_data.update({'event': event})
-        
+
         # send data to configured webhooks (logging error and tracking individual status)
         for webhook in active_brew_sessions[uid].webhooks:
             webhook_data = {
@@ -224,10 +224,10 @@ def process_log_session(args):
                 'Heat2': session_data['heat2'],
                 'Wort': session_data['wort'],
             }
-            
+
             # send and update status of webhook
             send_webhook(webhook, webhook_data)
-        
+
         active_brew_sessions[uid].data.append(session_data)
         active_brew_sessions[uid].recovery = args['step']
         graph_update = json.dumps({'time': session_data['time'],

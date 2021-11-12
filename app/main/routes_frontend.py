@@ -256,7 +256,7 @@ def allowed_extension(filename):
 @main.route('/device/<uid>/sessions/<session_type>/webhooks', methods=['POST'])
 def update_session_webhooks(uid, session_type):
     body = request.get_json()
-    
+
     # current_app.logger.error(f'request_body : {webhooks}')
     session, valid_session = active_session(uid, session_type)
 
@@ -413,7 +413,7 @@ def download_session(session_type, filename, extension):
                     }
 
                 writer.writerow(data_map.keys())
-                
+
                 for index, log_data in enumerate(session['data']):
                     data = []
                     for key, data_key in data_map.items():
@@ -428,10 +428,10 @@ def download_session(session_type, filename, extension):
                             data.append(data_key)
                         elif type(data_key) is str:
                             data.append(log_data[data_key])
-                    
+
                     # add data to csv
                     writer.writerow(data)
-                    
+
                 response = make_response(output.getvalue())
                 response.headers["Content-Disposition"] = f'attachment; filename={filename}.{extension}'
                 response.headers["Content-type"] = "text/html"
@@ -852,5 +852,5 @@ def active_session(uid, session_type):
         session = active_tilt_sessions[uid]
     elif session_type == 'still':
         session = active_still_sessions[uid]
-    
+
     return session, session != None

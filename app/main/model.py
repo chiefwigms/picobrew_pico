@@ -228,6 +228,7 @@ class Webhook:
         self.enabled = enabled
         self.status = status if not enabled and status == "disabled" else "enabled"
 
+
 class SupportObject:
     def __init__(self):
         self.name = None

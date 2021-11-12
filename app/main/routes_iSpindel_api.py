@@ -68,7 +68,7 @@ def process_iSpindel_data(data):
             }
             # send and update status of webhook
             send_webhook(webhook, webhook_data)
-        
+
         active_iSpindel_sessions[uid].data.extend(session_data)
         active_iSpindel_sessions[uid].voltage = str(data['battery']) + 'V'
 

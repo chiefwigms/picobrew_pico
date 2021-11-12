@@ -66,7 +66,7 @@ def poll_still(still_ip, uid):
             'T4': point['t4'],
             'Pressure': point['pres']
         }
-        
+
         # send and update status of webhook
         send_webhook(webhook, webhook_data)
 
