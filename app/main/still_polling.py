@@ -6,6 +6,8 @@ from flask import current_app
 from .config import still_active_sessions_path, server_config
 from .model import PicoStillSession
 from .session_parser import active_still_sessions
+from .units import epoch_time
+from .webhook import send_webhook
 
 from time import sleep
 from datetime import datetime
@@ -42,10 +44,10 @@ def poll_still(still_ip, uid):
 
     datastring = datastring[1:-1]
     t1, t2, t3, t4, pres, ok, d1, d2, errmsg = datastring.split(',')
-    time = (datetime.utcnow() - datetime(1970, 1, 1)).total_seconds() * 1000
+    log_time = datetime.utcnow()
     session_data = []
     log_data = ''
-    point = {'time': time,
+    point = {'time': epoch_time(log_time),
              't1': t1,
              't2': t2,
              't3': t3,
@@ -54,6 +56,19 @@ def poll_still(still_ip, uid):
              }
     session_data.append(point)
     log_data += '\t{},\n'.format(json.dumps(point))
+
+    # send data to configured webhooks (logging error and tracking individual status)
+    for webhook in active_still_sessions[uid].webhooks:
+        webhook_data = {
+            'T1': point['t1'],
+            'T2': point['t2'],
+            'T3': point['t3'],
+            'T4': point['t4'],
+            'Pressure': point['pres']
+        }
+
+        # send and update status of webhook
+        send_webhook(webhook, webhook_data)
 
     active_still_sessions[uid].data.extend(session_data)
     graph_update = json.dumps({'data': session_data})

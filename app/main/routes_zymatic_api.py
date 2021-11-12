@@ -11,6 +11,8 @@ from .config import brew_active_sessions_path
 from .model import MachineType, PicoBrewSession
 from .routes_frontend import get_zymatic_recipes
 from .session_parser import active_brew_sessions
+from .units import epoch_time
+from .webhook import send_webhook
 
 
 arg_parser = FlaskParser()
@@ -194,8 +196,9 @@ def process_log_session(args):
     elif args['code'] == 2:
         session = args['session']
         uid = get_machine_by_session(session)
+        log_time = datetime.utcnow()
         temps = [int(temp[2:]) for temp in args['data'].split('|')]
-        session_data = {'time': ((datetime.utcnow() - datetime(1970, 1, 1)).total_seconds() * 1000),
+        session_data = {'time': epoch_time(log_time),
                         'wort': temps[0],
                         'heat1': temps[1],
                         'board': temps[2],
@@ -204,12 +207,27 @@ def process_log_session(args):
                         'recovery': args['step'],
                         'state': args['state'],
                         }
+
         event = None
         if session in events and len(events[session]) > 0:
             if len(events[session]) > 1:
                 print('DEBUG: Zymatic events > 1 - size = {}'.format(len(events[session])))
             event = events[session].pop(0)
             session_data.update({'event': event})
+
+        # send data to configured webhooks (logging error and tracking individual status)
+        for webhook in active_brew_sessions[uid].webhooks:
+            webhook_data = {
+                'Board': session_data['board'],
+                'Event': event,
+                'Heat': session_data['heat1'],
+                'Heat2': session_data['heat2'],
+                'Wort': session_data['wort'],
+            }
+
+            # send and update status of webhook
+            send_webhook(webhook, webhook_data)
+
         active_brew_sessions[uid].data.append(session_data)
         active_brew_sessions[uid].recovery = args['step']
         graph_update = json.dumps({'time': session_data['time'],

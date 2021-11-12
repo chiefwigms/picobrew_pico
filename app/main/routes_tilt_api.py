@@ -11,6 +11,8 @@ from .. import socketio
 from .config import tilt_active_sessions_path
 from .model import TiltSession
 from .session_parser import active_tilt_sessions
+from .units import epoch_time, excel_date
+from .webhook import send_webhook
 
 _lock = threading.Lock()
 arg_parser = FlaskParser()
@@ -49,15 +51,14 @@ def process_tilt_data(data):
 
         if uid not in active_tilt_sessions:
             active_tilt_sessions[uid] = TiltSession()
-            if data['color']:
-                active_tilt_sessions[uid].color = data['color']
+            active_tilt_sessions[uid].color = data.get('color')
 
         if active_tilt_sessions[uid].active:
             # initialize session and session files
             if active_tilt_sessions[uid].uninit:
                 create_new_session(uid)
 
-            time = (datetime.fromisoformat(data['timestamp']) - datetime(1970, 1, 1)).total_seconds() * 1000
+            time = datetime.fromisoformat(data.get('timestamp'))
             session_data = []
             log_data = ''
 
@@ -82,9 +83,21 @@ def process_tilt_data(data):
             session_data.append(point)
             log_data += '\n\t{},'.format(json.dumps(point))
 
+            # send data to configured webhooks (logging error and tracking individual status)
+            for webhook in active_tilt_sessions[uid].webhooks:
+                # translate point into Tilt webhook data payload
+                webhook_data = {
+                    'Timepoint': excel_date(time),
+                    'Temp': point['temp'],
+                    'SG': point['gravity'],
+                    'color': data.get('color')
+                }
+                # send and update status of
+                send_webhook(webhook, webhook_data)
+
             active_tilt_sessions[uid].data.extend(session_data)
-            active_tilt_sessions[uid].rssi = str(data['rssi'])
-            graph_update = json.dumps({'rssi': data['rssi'], 'data': session_data})
+            active_tilt_sessions[uid].rssi = str(data.get('rssi'))
+            graph_update = json.dumps({'rssi': data.get('rssi'), 'data': session_data})
             socketio.emit('tilt_session_update|{}'.format(uid), graph_update)
 
             # end fermentation only when user specifies fermentation is complete

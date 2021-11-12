@@ -87,6 +87,11 @@
             {% endif %}
           </div>
           <div class="row">&nbsp;</div>
+          {% with session_type='brew' %}
+          {% set session=brew_session %}
+            {% include "webhooks.html" %}
+          {% endwith %}
+          <div class="row">&nbsp;</div>
           <div id="{{chart_id}}" style="min-width: 320px; height: 400px; margin: 0 auto"></div>
           <script>var graph_data={{brew_session.graph|tojson}};</script>
           <script src="/static/js/brew_graph_socketio.js"></script>
@@ -133,6 +138,11 @@
               {% endif %}
             </div>
           </div>
+          <div class="row">&nbsp;</div>
+          {% with session_type='ferm' %}
+          {% set session=ferm_session %}
+            {% include "webhooks.html" %}
+          {% endwith %}
           <div class="row">&nbsp;</div>
           <div id="{{chart_id}}" style="min-width: 320px; height: 400px; margin: 0 auto"></div>
           <script>var graph_data={{ferm_session.graph|tojson}};</script>
@@ -184,6 +194,11 @@
               {% endif %}
             </div>
           </div>
+          <div class="row">&nbsp;</div>
+          {% with session_type='still' %}
+          {% set session=still_session %}
+            {% include "webhooks.html" %}
+          {% endwith %}
           <div class="row">&nbsp;</div>
           <div id="{{chart_id}}" style="min-width: 320px; height: 400px; margin: 0 auto"></div>
           <script>var graph_data={{still_session.graph|tojson}};</script>
@@ -254,6 +269,11 @@
             </div>
           </div>
           <div class="row">&nbsp;</div>
+          {% with session_type='iSpindel' %}
+          {% set session=iSpindel_session %}
+            {% include "webhooks.html" %}
+          {% endwith %}
+          <div class="row">&nbsp;</div>
           <div id="{{chart_id}}" style="min-width: 320px; height: 400px; margin: 0 auto"></div>
           <script>var graph_data={{iSpindel_session.graph|tojson}};</script>
           <script src="/static/js/iSpindel_graph_socketio.js"></script>
@@ -309,6 +329,11 @@
               {% endif %}
             </div>
           </div>
+          <div class="row">&nbsp;</div>
+          {% with session_type='tilt' %}
+          {% set session=tilt_session %}
+            {% include "webhooks.html" %}
+          {% endwith %}
           <div class="row">&nbsp;</div>
           <div id="{{chart_id}}" style="min-width: 320px; height: 400px; margin: 0 auto"></div>
           <script>var graph_data={{tilt_session.graph|tojson}};</script>
