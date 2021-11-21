@@ -13,8 +13,8 @@ from .config import MachineType, brew_active_sessions_path, zseries_firmware_pat
 from .firmware import firmware_filename, firmware_upgrade_required, minimum_firmware
 from .model import PicoBrewSession
 from .routes_frontend import get_zseries_recipes
-from .session_parser import (active_brew_sessions, dirty_sessions_since_clean, get_machine_by_session,
-                             increment_session_id, last_session_type, ZSessionType)
+from .session_parser import (active_brew_sessions, reason_phrase, dirty_sessions_since_clean,
+                             get_machine_by_session, increment_session_id, last_session_type, ZSessionType)
 from .units import convert_temp
 
 
@@ -22,6 +22,7 @@ arg_parser = FlaskParser()
 seed(1)
 
 events = {}
+plot_bands = {}
 
 
 # Get Firmware: /firmware/zseries/<version>
@@ -152,15 +153,16 @@ def process_zstate(args):
     returnVal = {
         "Alias": zseries_alias(uid),
         "BoilerType": json.get('BoilerType', None),       # TODO sometimes machine loses boilertype, need to resync with known state
-        "IsRegistered": True,                   # likely we don't care about registration with BYOS
+        "IsRegistered": True,
         "IsUpdated": False if update_required else True,
-        "ProgramUri": None,                     # what is this?
-        "RegistrationToken": -1,
+        "ProgramUri": None,                               # what is this?
+        "RegistrationToken": "-1",
         "SessionStats": {
             "DirtySessionsSinceClean": dirty_sessions_since_clean(uid, MachineType.ZSERIES),
             "LastSessionType": last_session_type(uid, MachineType.ZSERIES),
             "ResumableSessionID": resumable_session_id(uid)
         },
+        "TokenExpired": False,
         "UpdateAddress": firmware_source if update_required else "-1",
         "UpdateToFirmware": None,
         "ZBackendError": 0
@@ -441,7 +443,18 @@ def update_session_log(token, body):
         'wort': convert_temp(body['WortTemp'], 'F'),
         'therm': convert_temp(body['ThermoBlockTemp'], 'F'),
         'recovery': body['StepName'],
-        'position': body['ValvePosition']
+        'position': body['ValvePosition'],
+        'drainPumpOn': body.get('DrainPumpOn', 0) == 1, # integer into boolean
+        'kegPumpOn': body.get('KegPumpOn', 0) == 1,     # integer into boolean
+        'errorCode': body.get('ErrorCode'),             # integer (4 == Overheat - too hot; 6 == Overheat - Max HEX Wort Delta; 12 == PicoStill Error)
+        'pauseReason': body.get('PauseReason'),         # integer (1 == waiting for user / finished / program, 2 == user initiated, 0 == running / not pause)
+        # debug wifi information
+        'network': {
+            'recv': body.get('netRecv'),
+            'send': body.get('netSend'),
+            'wait': body.get('netWait'),
+            'signal': body.get('rssi')
+        }
     }
 
     event = None
@@ -451,15 +464,39 @@ def update_session_log(token, body):
         event = events[active_session].pop(0)
         session_data.update({'event': event})
 
+    last_session_data = active_session.data[-1] if len(active_session.data) > 0 else {}
     active_session.data.append(session_data)
     active_session.recovery = body['StepName']
     active_session.remaining_time = body['SecondsRemaining']
+
+    session_plot_bands = []
+    if active_session not in plot_bands:
+        plot_bands[active_session] = []
+    session_plot_bands = plot_bands[active_session]
+
+    reason = reason_phrase(session_data.get('errorCode', 0), session_data.get('pauseReason', 0))
+    last_reason = reason_phrase(last_session_data.get('errorCode', 0), last_session_data.get('pauseReason', 0))
+    if reason != '':
+        # either no existing plot_bands or prior plot_band marked closed
+        if len(session_plot_bands) == 0 or reason != last_reason:
+            current_app.logger.debug('DEBUG: create new plot_band')
+            session_plot_bands.append({
+                'from': session_data.get('time'),
+                'to': session_data.get('time'),
+                'label': {
+                    'text': reason
+                }
+            })
+        elif len(session_plot_bands) > 0 and reason == last_reason:
+            session_plot_bands[-1]['to'] = session_data.get('time')
+
     # for Z graphs we have more data available: wort, hex/therm, target, drain, ambient
     graph_update = json.dumps({'time': session_data['time'],
                                'data': [session_data['target'], session_data['wort'], session_data['therm'], session_data['drain'], session_data['ambient']],
                                'session': active_session.name,
                                'step': active_session.step,
                                'event': event,
+                               'plotBand': session_plot_bands[-1] if len(session_plot_bands) > 0 and reason != '' else {}
                                })
     socketio.emit('brew_session_update|{}'.format(token), graph_update)
     active_session.file.write('\n\t{},'.format(json.dumps(session_data)))
