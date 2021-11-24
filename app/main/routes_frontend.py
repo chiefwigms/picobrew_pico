@@ -696,7 +696,8 @@ def load_tilt_sessions(uid=None, offset=0, limit=None):
     tilt_sessions = [parse_tilt_session(file) for file in sorted(files, reverse=True)]
     tilt_sessions = list(filter(lambda x: x != None, tilt_sessions))
 
-    return _paginate_sessions(brew_sessions, offset, limit)
+    return _paginate_sessions(tilt_sessions, offset, limit)
+
 
 # Read initial recipe list on load
 pico_recipes = []
@@ -707,6 +708,7 @@ brew_sessions = []
 ferm_sessions = []
 still_sessions = []
 iSpindel_sessions = []
+tilt_sessions = []
 
 invalid_recipes = {}
 invalid_sessions = {}
