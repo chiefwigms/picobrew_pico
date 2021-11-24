@@ -60,12 +60,24 @@ def process_tilt_data(data):
             time = (datetime.fromisoformat(data['timestamp']) - datetime(1970, 1, 1)).total_seconds() * 1000
             session_data = []
             log_data = ''
+
             point = {
                 'time': time,
-                'temp': data['temp'],
-                'gravity': data['gravity'] / 1000,
                 'rssi': data['rssi'],
             }
+
+            if data['gravity'] > 2000:
+                point.update({
+                    'temp': data['temp'] / 10,
+                    'gravity': data['gravity'] / 10000,
+                    'resolution': 'high'
+                })
+            else:
+                point.update({
+                    'temp': data['temp'],
+                    'gravity': data['gravity'] / 1000,
+                    'resolution': 'low'
+                })
 
             session_data.append(point)
             log_data += '\n\t{},'.format(json.dumps(point))

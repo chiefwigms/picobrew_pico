@@ -20,6 +20,8 @@ ferm_registered_args = {
     'uid': fields.Str(required=True),       # 12 character alpha-numeric serial number
     'token': fields.Str(required=True),    # 8 character alpha-numberic number
 }
+
+
 @main.route('/API/PicoFerm/isRegistered')
 @use_args(ferm_registered_args, location='querystring')
 def process_ferm_registered(args):
@@ -35,6 +37,8 @@ check_ferm_firmware_args = {
     'uid': fields.Str(required=True),       # 12 character alpha-numeric serial number
     'version': fields.Str(required=True),   # Current firmware version - i.e. 0.1.11
 }
+
+
 @main.route('/API/PicoFerm/checkFirmware')
 @use_args(check_ferm_firmware_args, location='querystring')
 def process_check_ferm_firmware(args):
@@ -48,6 +52,8 @@ def process_check_ferm_firmware(args):
 get_firmware_args = {
     'uid': fields.Str(required=True),       # 12 character alpha-numeric serial number
 }
+
+
 @main.route('/API/PicoFerm/getFirmwareAddress')
 @use_args(get_firmware_args, location='querystring')
 def process_get_firmware_address(args):
@@ -68,13 +74,15 @@ def process_picoferm_firmware(file):
 get_ferm_state_args = {
     'uid': fields.Str(required=True),   # 12 character alpha-numeric serial number
 }
+
+
 @main.route('/API/PicoFerm/getState')
 @use_args(get_ferm_state_args, location='querystring')
 def process_get_ferm_state(args):
     uid = args['uid']
     if uid not in active_ferm_sessions:
         active_ferm_sessions[uid] = PicoFermSession()
-    
+
     session = active_ferm_sessions[uid]
 
     if session.active == True:
@@ -91,6 +99,8 @@ log_ferm_dataset_args = {
     'voltage': fields.Float(required=True),  # %0.2f Voltage
     'data': fields.Str(required=True),       # List of dictionary (Temperature (S1), Pressure (S2)): [{"s1":%0.2f,"s2":%0.2f},]
 }
+
+
 @main.route('/API/PicoFerm/logDataSet')
 @use_args(log_ferm_dataset_args, location='querystring')
 def process_log_ferm_dataset(args):
@@ -118,7 +128,6 @@ def process_log_ferm_dataset(args):
     active_ferm_sessions[uid].voltage = str(args['voltage']) + 'V'
     graph_update = json.dumps({'voltage': args['voltage'], 'data': session_data})
     socketio.emit('ferm_session_update|{}'.format(args['uid']), graph_update)
-
 
     # end fermentation only when user specifies fermentation is complete
     if active_ferm_sessions[uid].uninit == False and active_ferm_sessions[uid].active == False:

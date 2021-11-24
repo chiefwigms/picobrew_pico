@@ -38,7 +38,7 @@ def get_string(data):
 # rssi is is the 2's complement of the calibrated Tx Power
 def get_rssi(data):
     tx_power = data[0]
-    return -(256-tx_power)
+    return -(256 - tx_power)
 
 
 # there may be a better way, but i wasn't sure how to filter out
@@ -63,7 +63,7 @@ def tilts(devices):
                         'color': color,
                         'timestamp': datetime.utcnow().isoformat(),
                         'temp': get_number(data[18:20]),     # fahrenheit
-                        'gravity': get_number(data[20:22]),  # gravity * 1000
+                        'gravity': get_number(data[20:22]),  # gravity * 1000; or gravity * 10000 (pro)
                     })
     return tilts
 
@@ -81,10 +81,10 @@ async def scan(app, interval):
             app.logger.debug(f"found {len(tilts_found)} tilt(s)")
         except Exception as e:
             app.logger.error(f"error occurred parsing ble broadcasts - {e}")
-            
+
 
 async def start_infinite_scan(app, interval):
-    while True: 
+    while True:
         await scan(app, interval)
         # pause and rescan for available tilts after specified interval
         time.sleep(interval)

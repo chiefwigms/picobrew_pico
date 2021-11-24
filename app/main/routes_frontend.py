@@ -1,31 +1,26 @@
 import json
 import os
-import re
-import requests
-import socket
 import uuid
-from datetime import datetime, timedelta
-from flask import current_app, escape, make_response, redirect, request, send_file
-from os import path
+from datetime import timedelta
+from flask import current_app, escape, make_response, request, send_file, render_template
 from pathlib import Path
 from ruamel.yaml import YAML
 from werkzeug.utils import secure_filename
 
 
 from . import main
-from .config import MachineType, base_path, server_config
-from .frontend_common import render_template_with_defaults
-from .model import PicoBrewSession, PicoFermSession, PicoStillSession, iSpindelSession, TiltSession
-from .recipe_import import import_recipes
-from .recipe_parser import PicoBrewRecipe, PicoBrewRecipeImport, ZymaticRecipe, ZymaticRecipeImport, ZSeriesRecipe
-from .session_parser import (load_brew_session, load_ferm_session, load_still_session, load_iSpindel_session, load_tilt_session,
-                             dirty_sessions_since_clean, last_session_metadata, list_brew_session_files, BrewSessionType, load_session_file,
-                             get_brew_graph_data, get_ferm_graph_data, get_still_graph_data, get_iSpindel_graph_data, get_tilt_graph_data,
-                             active_brew_sessions, active_ferm_sessions, active_still_sessions, active_iSpindel_sessions, active_tilt_sessions,
-                             add_invalid_session, load_brew_sessions)
-from .config import (base_path, MachineType,
+from .config import (MachineType, SessionType,
                      zymatic_recipe_path, zseries_recipe_path, pico_recipe_path,
                      brew_archive_sessions_path, ferm_archive_sessions_path, still_archive_sessions_path, iSpindel_archive_sessions_path, tilt_archive_sessions_path)
+from .frontend_common import render_template_with_defaults
+from .recipe_import import import_recipes
+from .recipe_parser import PicoBrewRecipe, ZymaticRecipe, ZSeriesRecipe
+from .session_parser import (_paginate_sessions, list_session_files,
+                             load_ferm_session, load_still_session, load_iSpindel_session, load_tilt_session,
+                             dirty_sessions_since_clean, last_session_metadata, BrewSessionType,
+                             get_brew_graph_data, get_ferm_graph_data, get_still_graph_data, get_iSpindel_graph_data, get_tilt_graph_data,
+                             active_brew_sessions, active_ferm_sessions, active_still_sessions, active_iSpindel_sessions, active_tilt_sessions,
+                             add_invalid_session, get_invalid_sessions, load_brew_sessions)
 
 
 file_glob_pattern = "[!._]*.json"
@@ -42,29 +37,63 @@ def index():
                            iSpindel_sessions=load_active_iSpindel_sessions())
 
 
+def _paginated_sessions(stype, uid=None, offset=0, limit=None):
+    sessions = []
+    if stype == SessionType.BREW:
+        sessions = load_brew_sessions(uid, offset, limit)
+    elif stype == SessionType.PICOFERM:
+        sessions = load_ferm_sessions(uid, offset, limit)
+    elif stype == SessionType.PICOSTILL:
+        sessions = load_still_sessions(uid, offset, limit)
+    elif stype == SessionType.ISPINDEL:
+        sessions = load_iSpindel_sessions(uid, offset, limit)
+    elif stype == SessionType.TILT:
+        sessions = load_tilt_sessions(uid, offset, limit)
+
+    return sessions
+
+
+def _session_type_history(stype):
+    offset = request.args.get('offset', 0, type=int)
+    limit = request.args.get('limit', 10, type=int)
+
+    sessions = []
+    try:
+        sessions = _paginated_sessions(stype, None, offset, limit)
+    except Exception as e:
+        current_app.logger.error(f'failed to load brew sessions: {e}')
+        if is_ajax(request):  # return error to loader, else return empty session list
+            return f'unable to load more {stype.value} sessions', 404
+
+    if is_ajax(request):
+        return render_template('_session_list.html', session_type=stype, sessions=sessions)
+
+    return render_template_with_defaults('session_history.html', session_type=stype, sessions=sessions, invalid=get_invalid_sessions(stype.value))
+
+
 @main.route('/brew_history')
 def brew_history():
-    return render_template_with_defaults('brew_history.html', sessions=load_brew_sessions(), invalid=get_invalid_sessions('brew'))
+    return _session_type_history(SessionType.BREW)
 
 
 @main.route('/ferm_history')
 def ferm_history():
-    return render_template_with_defaults('ferm_history.html', sessions=load_ferm_sessions(), invalid=get_invalid_sessions('ferm'))
+    return _session_type_history(SessionType.PICOFERM)
 
 
 @main.route('/still_history')
 def still_history():
-    return render_template_with_defaults('still_history.html', sessions=load_still_sessions(), invalid=get_invalid_sessions('still'))
+    return _session_type_history(SessionType.PICOSTILL)
 
 
 @main.route('/iSpindel_history')
 def iSpindel_history():
-    return render_template_with_defaults('iSpindel_history.html', sessions=load_iSpindel_sessions(), invalid=get_invalid_sessions('iSpindel'))
+    return _session_type_history(SessionType.ISPINDEL)
 
 
 @main.route('/tilt_history')
 def tilt_history():
-    return render_template_with_defaults('tilt_history.html', sessions=load_tilt_sessions(), invalid=get_invalid_sessions('tilt'))
+    return _session_type_history(SessionType.TILT)
 
 
 @main.route('/zymatic_recipes')
@@ -90,8 +119,8 @@ def new_zymatic_recipe():
 def import_zymatic_recipe():
     if request.method == 'POST':
         data = request.get_json()
-        guid = data['guid'] # user accountId
-        uid = data['uid'] # machine productId
+        guid = data['guid']  # user accountId
+        uid = data['uid']  # machine productId
         try:
             # import for picobrew and picobrew_c are the same
             import_recipes(uid, guid, None, MachineType.ZYMATIC)
@@ -216,7 +245,6 @@ def update_device_session(uid, session_type):
                 except Exception as e:
                     current_app.logger.error(f'exception occured : {e}')
                     return getattr(e, 'message', e.args[0]), 418
-        
 
         return '', 204
     else:
@@ -275,7 +303,7 @@ def download_recipe(machine_type, id, name):
         return f'Invalid machine type provided "{machine_type}"', 418
 
     files = list(dirpath.glob(file_glob_pattern))
-    
+
     for filename in files:
         recipe = None
         if machine_type == "picobrew":
@@ -337,7 +365,7 @@ def delete_zseries_recipe():
 def import_zseries_recipe():
     if request.method == 'POST':
         data = request.get_json()
-        uid = data['uid'] # machine productId
+        uid = data['uid']  # machine productId
         try:
             import_recipes(uid, None, None, MachineType.ZSERIES)
             return '', 204
@@ -369,7 +397,7 @@ def parse_recipe(machineType, recipe, file):
         current_app.logger.error("ERROR: An exception occurred parsing recipe {}".format(file))
         current_app.logger.error(e)
         add_invalid_recipe(machineType, file)
-    
+
 
 def get_zseries_recipes():
     global zseries_recipes
@@ -439,8 +467,8 @@ def new_pico_recipe():
 def import_pico_recipe():
     if request.method == 'POST':
         data = request.get_json()
-        rfid = data['rfid'] # picopak rfid
-        uid = data['uid'] # picopak rfid
+        rfid = data['rfid']  # picopak rfid
+        uid = data['uid']  # picopak rfid
         try:
             # import for picobrew and picobrew_c are the same
             import_recipes(uid, None, rfid, MachineType.PICOBREW)
@@ -476,6 +504,16 @@ def delete_pico_recipe():
     return 'Delete Recipe: Failed to find recipe id "{recipe_id}"', 418
 
 
+def is_ajax(request):
+    """
+    This utility function is used, as `request.is_ajax()` is deprecated.
+
+    This implements the previous functionality. Note that you need to
+    attach this header manually if using fetch.
+    """
+    return request.headers.get('X_REQUESTED_WITH') == "XMLHttpRequest"
+
+
 def load_pico_recipes():
     files = list(pico_recipe_path().glob(file_glob_pattern))
     recipes = [load_pico_recipe(file) for file in files]
@@ -485,7 +523,7 @@ def load_pico_recipes():
 def load_pico_recipe(file):
     recipe = PicoBrewRecipe()
     parse_recipe(MachineType.PICOBREW, recipe, file)
-    
+
     recipe.name_escaped = escape(recipe.name).replace(" ", "_")
     return recipe
 
@@ -493,11 +531,6 @@ def load_pico_recipe(file):
 def get_pico_recipes():
     global pico_recipes
     return pico_recipes
-
-
-def get_invalid_sessions(sessionType):
-    global invalid_sessions
-    return invalid_sessions.get(sessionType, set())
 
 
 def build_recipe_filename(recipe_path, recipe_name):
@@ -556,7 +589,7 @@ def parse_ferm_session(file):
     except Exception:
         current_app.logger.error("ERROR: An exception occurred parsing {}".format(file))
         add_invalid_session("ferm", file)
-    
+
 
 def load_active_ferm_sessions():
     ferm_sessions = []
@@ -570,10 +603,13 @@ def load_active_ferm_sessions():
     return ferm_sessions
 
 
-def load_ferm_sessions():
-    files = list(ferm_archive_sessions_path().glob(file_glob_pattern))
-    ferm_sessions = [parse_ferm_session(file) for file in sorted(files, reverse=True)]
-    return list(filter(lambda x: x != None, ferm_sessions))
+def load_ferm_sessions(uid=None, offset=0, limit=None):
+    files = list_session_files(ferm_archive_sessions_path(), uid)
+
+    ferm_sessions = [parse_ferm_session(file) for file in files]
+    ferm_sessions = list(filter(lambda x: x != None, ferm_sessions))
+
+    return _paginate_sessions(ferm_sessions, offset, limit)
 
 
 def parse_still_session(file):
@@ -582,7 +618,7 @@ def parse_still_session(file):
     except Exception:
         current_app.logger.error("ERROR: An exception occurred parsing {}".format(file))
         add_invalid_session("still", file)
-    
+
 
 def load_active_still_sessions():
     still_sessions = []
@@ -596,10 +632,13 @@ def load_active_still_sessions():
     return still_sessions
 
 
-def load_still_sessions():
-    files = list(still_archive_sessions_path().glob(file_glob_pattern))
+def load_still_sessions(uid=None, offset=0, limit=None):
+    files = list_session_files(still_archive_sessions_path(), uid)
+
     still_sessions = [parse_still_session(file) for file in sorted(files, reverse=True)]
-    return list(filter(lambda x: x != None, still_sessions))
+    still_sessions = list(filter(lambda x: x != None, still_sessions))
+
+    return _paginate_sessions(still_sessions, offset, limit)
 
 
 def parse_iSpindel_session(file):
@@ -622,10 +661,12 @@ def load_active_iSpindel_sessions():
     return iSpindel_sessions
 
 
-def load_iSpindel_sessions():
-    files = list(iSpindel_archive_sessions_path().glob(file_glob_pattern))
+def load_iSpindel_sessions(uid=None, offset=0, limit=None):
+    files = list_session_files(iSpindel_archive_sessions_path(), uid)
     iSpindel_sessions = [parse_iSpindel_session(file) for file in sorted(files, reverse=True)]
-    return list(filter(lambda x: x != None, iSpindel_sessions))
+    iSpindel_sessions = list(filter(lambda x: x != None, iSpindel_sessions))
+
+    return _paginate_sessions(iSpindel_sessions, offset, limit)
 
 
 def parse_tilt_session(file):
@@ -649,10 +690,14 @@ def load_active_tilt_sessions():
     return tilt_sessions
 
 
-def load_tilt_sessions():
-    files = list(tilt_archive_sessions_path().glob(file_glob_pattern))
+def load_tilt_sessions(uid=None, offset=0, limit=None):
+    files = list_session_files(tilt_archive_sessions_path(), uid)
+
     tilt_sessions = [parse_tilt_session(file) for file in sorted(files, reverse=True)]
-    return list(filter(lambda x: x != None, tilt_sessions))
+    tilt_sessions = list(filter(lambda x: x != None, tilt_sessions))
+
+    return _paginate_sessions(tilt_sessions, offset, limit)
+
 
 # Read initial recipe list on load
 pico_recipes = []
@@ -663,6 +708,7 @@ brew_sessions = []
 ferm_sessions = []
 still_sessions = []
 iSpindel_sessions = []
+tilt_sessions = []
 
 invalid_recipes = {}
 invalid_sessions = {}

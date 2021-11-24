@@ -123,6 +123,8 @@ def get_brew_graph_data(chart_id, session_name, session_step, session_data, is_p
     valve_position = []  # ZSeries Only
 
     events = []
+    plot_bands = []
+    prev = {}
     for data in session_data:
         if all(k in data for k in ('therm', 'wort')):  # Pico and ZSeries
             wort_data.append([data['time'], int(data['wort'])])
@@ -143,15 +145,50 @@ def get_brew_graph_data(chart_id, session_name, session_step, session_data, is_p
 
         # add an overlay event for each step
         if 'event' in data:
-            events.append({'color': 'black', 'width': '2', 'value': data['time'],
-                           'label': {'text': data['event'], 'style': {'color': 'white', 'fontWeight': 'bold'},
-                                     'verticalAlign': 'top', 'x': -15, 'y': 0}})
+            events.append({
+                'color': 'black',
+                'value': data['time'],
+                'label': {
+                    'text': data['event']
+                }
+            })
+
+        # add an overlay error for each errorCode or pauseReason
+        error_code = data['errorCode'] if 'errorCode' in data else 0
+        pause_reason = data['pauseReason'] if 'pauseReason' in data else 0
+        prev_error_code = prev['errorCode'] if 'errorCode' in prev else 0
+        prev_pause_reason = prev['pauseReason'] if 'pauseReason' in prev else 0
+        if error_code != 0 or pause_reason != 0:
+            new_band = False
+
+            if len(plot_bands) == 0 or error_code != prev_error_code or pause_reason != prev_pause_reason:
+                new_band = True
+
+            if new_band:
+                plot_bands.append({
+                    'from': data.get('time'),
+                    'to': None,
+                    'label': {
+                        'text': reason_phrase(error_code, pause_reason)
+                    }
+                })
+            else:
+                plot_bands[-1]['to'] = data.get('time')
+        elif prev_error_code != 0 or prev_pause_reason != 0:
+            plot_bands[-1]['to'] = prev.get('time')
+
+        prev = data
+
+    # fix plot_band if last data point is pause or error
+    if len(plot_bands) > 0 and plot_bands[-1]['to'] == None:
+        plot_bands[-1]['to'] = session_data[-1]['time']
 
     graph_data = {
         'chart_id': chart_id,
         'title': {'text': session_name},
         'subtitle': {'text': session_step},
-        'xaplotlines': events
+        'xaplotlines': events,
+        'xaplotbands': plot_bands
     }
     if len(ambient_data) > 0:
         graph_data.update({'series': [
@@ -210,6 +247,29 @@ def load_ferm_session(file):
     })
 
 
+# map programmatic codes to user facing strings (displayed in the brew graph)
+#
+# error codes:
+#   4 == Overheat - too hot
+#   6 == Overheat - Max HEX Wort Delta
+#  12 == PicoStill Error
+#
+# pause reasons:
+#   1 == waiting for user / finished / program
+def reason_phrase(error_code, pause_reason):
+    reason = ''
+    if pause_reason != 0:
+        reason += 'pause: '
+        if pause_reason == 1:
+            reason += 'program'
+        if pause_reason == 2:
+            reason += 'user'
+    elif error_code != 0:
+        reason += f'error: {error_code}'
+
+    return reason
+
+
 def get_ferm_graph_data(chart_id, voltage, session_data):
     temp_data = []
     pres_data = []
@@ -250,9 +310,18 @@ def load_still_session(file):
     name = info[1]
     alias = info[1] if info[1] not in active_still_sessions else active_still_sessions[info[1]].alias
 
+    # filename datetime string format "20200615_205946"
+    server_start_datetime = datetime.strptime(info[0], '%Y%m%d_%H%M%S')
+    # json datetime `timeStr` format "2020-06-15T20:59:46.280731" (UTC) ; 'time' milliseconds from epoch
+    server_end_datetime = datetime.strptime(info[0], '%Y%m%d_%H%M%S')
+    if len(json_data) > 0:
+        # set server end datetime to last data log entry
+        server_end_datetime = epoch_millis_converter(json_data[-1]['time'])
+
     return ({
         'uid': info[1],
-        'date': info[0],
+        'date': server_start_datetime,
+        'end_date': server_end_datetime,
         'name': name,
         'alias': alias,
         'data': json_data,
@@ -436,7 +505,6 @@ def restore_active_brew_sessions():
             session.file.flush()
             session.filepath = file
             session.created_at = brew_session['date']
-            current_app.logger.debug(f'current created_at : {session.created_at}')
             session.name = brew_session['name']
             session.type = brew_session['type']
             session.session = brew_session['session']                   # session guid
@@ -560,6 +628,11 @@ def restore_active_sessions():
     restore_active_tilt_sessions()
 
 
+def get_invalid_sessions(sessionType):
+    global invalid_sessions
+    return invalid_sessions.get(sessionType, set())
+
+
 def add_invalid_session(sessionType, file):
     global invalid_sessions
     if sessionType not in invalid_sessions:
@@ -576,21 +649,40 @@ def parse_brew_session(file):
         add_invalid_session("brew", file)
 
 
-def load_brew_sessions(uid=None):
-    files = list_brew_session_files(uid)
+def sampling(selection, offset=0, limit=None):
+    return selection[offset:(limit + offset if limit is not None else None)]
+
+
+def _paginate_sessions(sessions, offset=0, limit=None):
+    sessions = sampling(sessions, offset, limit)
+
+    # if pagination request and no sessions found return error
+    if (offset != 0 and len(sessions) == 0):
+        msg = "unable to paginate sessions to offset={}&limit={}".format(offset, limit)
+        current_app.logger.error(msg)
+        raise Exception(msg)
+
+    return sessions
+
+
+def load_brew_sessions(uid=None, offset=0, limit=None):
+    files = list_session_files(brew_archive_sessions_path(), uid)
 
     brew_sessions = [parse_brew_session(file) for file in files]
-    return list(filter(lambda x: x != None, brew_sessions))
+    brew_sessions = list(filter(lambda x: x != None, brew_sessions))
+
+    return _paginate_sessions(brew_sessions, offset, limit)
 
 
-def list_brew_session_files(uid=None):
+def list_session_files(session_path, uid=None, reverse=True):
     files = []
     if uid:
-        files = list(brew_archive_sessions_path().glob("*#{}*.json".format(uid)))
+        files = list(session_path.glob("*#{}*.json".format(uid)))
     else:
-        files = list(brew_archive_sessions_path().glob(file_glob_pattern))
+        files = list(session_path.glob(file_glob_pattern))
 
-    return sorted(files, reverse=True)
+    return sorted(files, reverse=reverse)
+
 
 class ZSessionType(int, Enum):
     RINSE = 0
@@ -645,7 +737,7 @@ class BrewSessionType(str, MultiValueEnum):
 
 
 def dirty_sessions_since_clean(uid, mtype):
-    brew_session_files = list_brew_session_files(uid)
+    brew_session_files = list_session_files(brew_archive_sessions_path(), uid)
     post_clean_sessions = []
     clean_found = False
 
@@ -676,7 +768,7 @@ def last_session_type(uid, mtype):
 
 
 def last_session_metadata(uid, mtype):
-    brew_sessions = list_brew_session_files(uid)
+    brew_sessions = list_session_files(brew_archive_sessions_path(), uid)
 
     if len(brew_sessions) == 0:
         if mtype == MachineType.ZSERIES:
@@ -697,13 +789,13 @@ def last_session_metadata(uid, mtype):
             try:
                 stype = PicoSessionType(sname)
             except Exception as err:
-                current_app.logger.warn("unknown session type {} - {}".format(sname, err))
+                # current_app.logger.warn("unknown session type {} - {}".format(sname, err))
                 stype = PicoSessionType.BEER  # pico only has name in file (no type enum)
             return stype, sname
 
 
 def increment_session_id(uid):
-    return len(list_brew_session_files(uid)) + (1 if active_brew_sessions[uid].session != '' else 1)
+    return len(list_session_files(brew_archive_sessions_path(), uid)) + (1 if active_brew_sessions[uid].session != '' else 1)
 
 
 def get_machine_by_session(session_id):
@@ -733,7 +825,8 @@ def session_type_from_filename(filename, mtype):
             if len(info) > 3:
                 session_type = PicoSessionType(info[3])
         except Exception as error:
-            current_app.logger.warn("error occurred extracting session type from {}".format(filename))
+            pass
+            # current_app.logger.warn("error occurred extracting session type from {}".format(filename))
             # info[3] is recipe name, utilities == session_type; beer recipe != session_type
 
     return session_type
