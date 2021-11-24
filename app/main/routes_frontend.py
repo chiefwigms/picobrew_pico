@@ -334,6 +334,8 @@ def download_session(session_type, filename):
         session_dirpath = iSpindel_archive_sessions_path()
     elif session_type == "tilt":
         session_dirpath = tilt_archive_sessions_path()
+    elif session_type == "still":
+        session_dirpath = still_archive_sessions_path()
     else:
         return f'Invalid session type provided "{session_type}"', 418
 

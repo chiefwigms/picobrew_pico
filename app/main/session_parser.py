@@ -321,6 +321,8 @@ def load_still_session(file):
     return ({
         'uid': info[1],
         'date': server_start_datetime,
+        'filename': Path(file).name,
+        'filepath': Path(file),
         'end_date': server_end_datetime,
         'name': name,
         'alias': alias,
