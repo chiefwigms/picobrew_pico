@@ -52,50 +52,57 @@ Highcharts.chart(graph_data.chart_id, {
     },
   },
 
-  yAxis: [
-    {
-      title: {
-        text: 'Temperature (F)'
-      },
-	  
-	  tickPositioner: function () {
-        var positions = [],
-        tick = Math.floor(this.dataMin),
-        increment = Math.ceil((this.dataMax - this.dataMin) / 6);
+  yAxis: [{
+    title: {
+      text: 'Temperature (F)'
+    },
+	
+    labels: {
+      format: '{value:,.0f}'
+    },
 
-        if (this.dataMax !== null && this.dataMin !== null) {
-          for (tick; tick - increment <= this.dataMax; tick += increment) {
-            positions.push(tick);
-          }
-        }
-		TickAmountValue = positions.length;
-        return positions;
-	  },
-    }, {
-      title: {
-        text: 'Specific Gravity'
-      },
-	  
-	  labels: {
-        format: '{value:,.3f}'
-	  },
-	  
-	  tickPositioner: function () {
-        var positions = [],
-        maxTick = this.dataMax * 1000,
-        step = (maxTick - this.dataMin * 1000) / (TickAmountValue - 1),
-        tick = this.dataMin * 1000 - 1;
+    tickPositioner: function () {
+      var positions = [],
+      incrementNum = 6,
+      tick = this.dataMin,
+      increment = (this.dataMax - this.dataMin) / incrementNum;
 
-        if (this.dataMax !== null && this.dataMin !== null) {
-          while (tick <= maxTick) {
-            positions.push(tick/1000);
-            tick += step;
-          }
+      if (this.dataMax !== null && this.dataMin !== null) {
+        for (let i = 0; i <= incrementNum; i++) {
+          positions.push(tick),
+          tick += increment;
         }
-        return positions;
-	  },
-	  
-      opposite: true
+      }
+      TickAmountValue = positions.length;
+      return positions;
+    },
+  }, {
+    title: {
+      text: 'Specific Gravity'
+    },
+
+    labels: {
+      format: '{value:,.3f}'
+    },
+
+    tickPositioner: function () {
+      var positions = [],
+	  incrementNum = TickAmountValue - 1,
+      maxTick = this.dataMax,
+      tick = this.dataMin,
+      increment = (maxTick - this.dataMin) / incrementNum;
+
+
+      if (this.dataMax !== null && this.dataMin !== null) {
+        for (let i = 0; i <= incrementNum; i++) {
+          positions.push(tick),
+          tick += increment;
+        }
+      }
+      return positions;
+    },
+
+    opposite: true
   }],
   
   series: graph_data.series,
