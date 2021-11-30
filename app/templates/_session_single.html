@@ -8,11 +8,11 @@
             {{session.name}} on {{session.date}}
             {% endif %}
             <button class="btn btn-sm btn-primary float-right mr-5" type="button" id="bdownload_{{session.filename}}"
-                onclick="event.stopPropagation();event.preventDefault();download_session('{{session.filename}}');">
+                onclick="event.stopPropagation();event.preventDefault();download_session('{{session.filename}}', '{{session_type}}');">
                 <i class="fas fa-download"></i>
             </button>
             <button class="btn btn-sm btn-danger float-right mr-3" type="button" id="bdelete_{{session.filename}}"
-                onclick="event.stopPropagation();event.preventDefault();delete_file('{{session.filepath}}');">
+                onclick="event.stopPropagation();event.preventDefault();delete_file('{{session.filepath}}', '{{session_type}}');">
                 <i class="fas fa-trash"></i>
             </button>
         </a>
