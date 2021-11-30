@@ -13,11 +13,6 @@ Highcharts.chart(graph_data.chart_id, {
         socket.on(event_name, function (event)
         {
           var data = JSON.parse(event);
-          if (data['rssi']) {
-            self.setTitle(graph_data.title, {text: 'RSSI: ' + data['rssi'] + 'dBm'});
-          } else {
-            self.setTitle(graph_data.title);
-          }
           for (point of data['data']) {
             self.series[0].addPoint([point.time, point.temp]);
             self.series[1].addPoint([point.time, point.gravity]);  
@@ -76,15 +71,21 @@ Highcharts.chart(graph_data.chart_id, {
     title: {
       text: 'Temperature (F)'
     },
+	
+    labels: {
+      format: '{value:,.0f}'
+    },
 
     tickPositioner: function () {
       var positions = [],
-      tick = Math.floor(this.dataMin),
-      increment = Math.ceil((this.dataMax - this.dataMin) / 6);
+      incrementNum = 6,
+      tick = this.dataMin,
+      increment = (this.dataMax - this.dataMin) / incrementNum;
 
       if (this.dataMax !== null && this.dataMin !== null) {
-        for (tick; tick - increment <= this.dataMax; tick += increment) {
-          positions.push(tick);
+        for (let i = 0; i <= incrementNum; i++) {
+          positions.push(tick),
+          tick += increment;
         }
       }
       TickAmountValue = positions.length;
@@ -101,14 +102,16 @@ Highcharts.chart(graph_data.chart_id, {
 
     tickPositioner: function () {
       var positions = [],
-      maxTick = this.dataMax * 1000,
-      step = (maxTick - this.dataMin * 1000) / (TickAmountValue - 1),
-      tick = this.dataMin * 1000 - 1;
+	  incrementNum = TickAmountValue - 1,
+      maxTick = this.dataMax,
+      tick = this.dataMin,
+      increment = (maxTick - this.dataMin) / incrementNum;
+
 
       if (this.dataMax !== null && this.dataMin !== null) {
-        while (tick <= maxTick) {
-          positions.push(tick/1000);
-          tick += step;
+        for (let i = 0; i <= incrementNum; i++) {
+          positions.push(tick),
+          tick += increment;
         }
       }
       return positions;
@@ -116,6 +119,6 @@ Highcharts.chart(graph_data.chart_id, {
 
     opposite: true
   }],
-  
+
   series: graph_data.series,
 });
