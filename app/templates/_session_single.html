@@ -39,8 +39,10 @@
                 <div class="row">&nbsp;</div>
             </div>
             <div id="{{chart_id}}" style="min-width: 320px; height: 400px; margin: 0 auto"></div>
-            <script>var graph_data={{session.graph|tojson}};</script>
-            <script src="/static/js/{{session_type}}_graph.js"></script>
+            <script>
+                var graph_data={{session.graph|tojson}};
+                initiatizeChart(graph_data)
+            </script>
         </div>
     </div>
 </div>
