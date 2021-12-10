@@ -3,7 +3,7 @@ Highcharts.setOptions({
         useUTC: false
     }
 });
-	  
+
 function initiatizeChart(graph_data) {
   Highcharts.chart(graph_data.chart_id, {
     chart: {
@@ -57,7 +57,7 @@ function initiatizeChart(graph_data) {
       title: {
         text: 'Temperature (F)'
       },
-	
+
       labels: {
         format: '{value:,.0f}'
       },
@@ -88,7 +88,7 @@ function initiatizeChart(graph_data) {
 
       tickPositioner: function () {
         var positions = [],
-	    incrementNum = TickAmountValue - 1,
+        incrementNum = TickAmountValue - 1,
         maxTick = this.dataMax,
         tick = this.dataMin,
         increment = (maxTick - this.dataMin) / incrementNum;
