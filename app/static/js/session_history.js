@@ -29,6 +29,14 @@ async function loadMore() {
         // Be careful of XSS if you do this. Make sure
         // you remove all possible sources of XSS.
         scrollElement.innerHTML += body;
+        
+        // dynamically load scripts within loaded content (html5 doesn't allow embedding <script> within innerHTML)
+        var doc = document.createElement( 'html' );
+        doc.innerHTML = body;
+        var arr = doc.getElementsByTagName("script")
+        for (var n = 0; n < arr.length; n++)
+            eval(arr[n].innerHTML) //run script inside div
+        
         $loader.show();
     } else {
         // If it returns a 404, stop requesting new items
