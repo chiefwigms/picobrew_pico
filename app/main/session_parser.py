@@ -487,7 +487,9 @@ def get_tilt_graph_data(chart_id, rssi, session_data):
     }
 
     if rssi:
-        graph_data.update({'subtitle': {'text': 'RSSI: ' + str(rssi) + 'dBm'}})
+        last_temp = session_data[-1]['temp']
+        last_gravity = session_data[-1]['gravity']
+        graph_data.update({'subtitle': {'text': 'Temperature: ' + str(last_temp) + 'F<br>Specific Gravity: ' + str(last_gravity) + '<br>RSSI: ' + str(rssi) + 'dBm'}})
     return graph_data
 
 
