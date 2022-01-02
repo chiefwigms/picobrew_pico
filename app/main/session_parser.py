@@ -776,7 +776,7 @@ def dirty_sessions_since_clean(uid, mtype):
             if (session_name.upper() in ["CLEAN", "DEEP CLEAN"]):
                 clean_found = True
 
-            if (not clean_found and session_name.upper() not in ["RINSE", "CLEAN", "DEEP CLEAN", "RACK", "DRAIN"]):
+            if (not clean_found and session_name.upper() not in ["RINSE", "RACK", "DRAIN"]):
                 post_clean_sessions.append(s)
 
         elif mtype == MachineType.ZSERIES:
@@ -786,6 +786,16 @@ def dirty_sessions_since_clean(uid, mtype):
 
             if (not clean_found and session_type in [ZSessionType.BEER.value, ZSessionType.COFFEE.value, ZSessionType.SOUS_VIDE.value]):
                 post_clean_sessions.append(s)
+        
+        elif mtype == MachineType.ZYMATIC:
+            session_name = session_name_from_filename(s)
+
+            if (session_name.upper() in ["CLEAN", "CLEAN V1", "NEW CLEAN BETA V6"]):
+                clean_found = True
+            
+            if (not clean_found and session_name.upper() not in ["RINSE", "RINSE V3", "RACK", "DRAIN"]):
+                post_clean_sessions.append(s)
+        
 
     return len(post_clean_sessions)
 
