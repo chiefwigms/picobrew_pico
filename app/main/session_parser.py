@@ -379,10 +379,11 @@ def fermentation_graph_subtitle(session_data, voltage=None, rssi=None):
         last_datetime = epoch_millis_converter(session_data[-1]['time'])
         duration_days = round((last_datetime - start_datetime) / timedelta(days=1), 2)
         original_gravity = session_data[0]['gravity']
-        standard_abv = round((original_gravity - last_gravity) * 1.3125, 2)
+        standard_abv = round((original_gravity - last_gravity) * 1.3125, 4) # decimal ABV calc (ex. 0.04867);
+        abv_pct = round(standard_abv * 100, 2)
 
         subtitle_text = 'Temperature: ' + str(last_temp) + 'F  |  Specific Gravity: ' + str(last_gravity)
-        subtitle_text += '<br>Duration: ' + str(duration_days) + ' Days  |  Approx. ABV: ' + str(standard_abv) + '%'
+        subtitle_text += '<br>Duration: ' + str(duration_days) + ' Days  |  Approx. ABV: ' + str(abv_pct) + '%'
 
     if voltage:
         subtitle_text += '<br>Voltage: ' + str(voltage)
