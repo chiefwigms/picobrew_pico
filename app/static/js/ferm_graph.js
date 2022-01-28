@@ -29,6 +29,20 @@ function initiatizeChart(graph_data) {
 
     subtitle: graph_data.subtitle,
 
+    tooltip: {
+      formatter: function() {
+        var s = '<b>'+ Highcharts.dateFormat('%A, %b %e %k:%M:%S.%L', // Friday, Jan ## ##:##:##.####
+          new Date(this.x)) +'</b>';
+
+        $.each(this.points, function(i, point) {
+          s += '<br/><span style="color:' + point.color + '">\u25CF</span> ' + point.series.name + ': ' + point.y;
+        });
+
+        return s;
+      },
+      shared: true
+    },
+
     xAxis: {
       type: 'datetime',
       dateTimeLabelFormats: {

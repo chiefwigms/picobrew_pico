@@ -10,7 +10,7 @@ from .units import convert_temp
 from .. import socketio
 from .config import tilt_active_sessions_path
 from .model import TiltSession
-from .session_parser import active_tilt_sessions
+from .session_parser import active_tilt_sessions, fermentation_graph_subtitle
 
 _lock = threading.Lock()
 arg_parser = FlaskParser()
@@ -84,7 +84,12 @@ def process_tilt_data(data):
 
             active_tilt_sessions[uid].data.extend(session_data)
             active_tilt_sessions[uid].rssi = str(data['rssi'])
-            graph_update = json.dumps({'rssi': data['rssi'], 'data': session_data})
+
+            graph_update = json.dumps({
+                'rssi': data['rssi'],
+                'data': session_data,
+                'subtitle': fermentation_graph_subtitle(active_tilt_sessions[uid].data, rssi=data['rssi'])
+            })
             socketio.emit('tilt_session_update|{}'.format(uid), graph_update)
 
             # end fermentation only when user specifies fermentation is complete
