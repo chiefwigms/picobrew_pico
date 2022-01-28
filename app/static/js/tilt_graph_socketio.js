@@ -13,6 +13,7 @@ Highcharts.chart(graph_data.chart_id, {
         socket.on(event_name, function (event)
         {
           var data = JSON.parse(event);
+          self.setTitle(graph_data.title, {text: subtitle});
           for (point of data['data']) {
             self.series[0].addPoint([point.time, point.temp]);
             self.series[1].addPoint([point.time, point.gravity]);  

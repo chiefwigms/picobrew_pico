@@ -1,5 +1,5 @@
 import json
-from datetime import datetime
+from datetime import datetime, timedelta
 from dateutil import tz
 from enum import Enum
 from aenum import MultiValueEnum
@@ -369,6 +369,31 @@ def get_still_graph_data(chart_id, name, session_data):
     return graph_data
 
 
+def fermentation_graph_subtitle(session_data, voltage=None, rssi=None):
+    subtitle_text = ''
+    if len(session_data) > 0:
+        last_temp = session_data[-1]['temp']
+        last_gravity = session_data[-1]['gravity']
+
+        start_datetime = epoch_millis_converter(session_data[0]['time'])
+        last_datetime = epoch_millis_converter(session_data[-1]['time'])
+        duration_days = round((last_datetime - start_datetime) / timedelta(days=1), 2)
+        original_gravity = session_data[0]['gravity']
+        standard_abv = round((original_gravity - last_gravity) * 1.3125, 2)
+
+        subtitle_text = 'Temperature: ' + str(last_temp) + 'F  |  Specific Gravity: ' + str(last_gravity)
+        subtitle_text += '<br>Duration: ' + str(duration_days) + ' Days  |  Approx. ABV: ' + str(standard_abv) + '%'
+
+    if voltage:
+        subtitle_text += '<br>Voltage: ' + str(voltage)
+        subtitle_text += "V" if voltage != "-" else ""
+
+    if rssi:
+        subtitle_text += '<br>RSSI: ' + str(rssi)
+
+    return subtitle_text
+
+
 def load_iSpindel_session(file):
     info = file.stem.split('#')
 
@@ -382,12 +407,16 @@ def load_iSpindel_session(file):
     server_start_datetime = datetime.strptime(info[0], '%Y%m%d_%H%M%S')
     # json datetime `timeStr` format "2020-06-15T20:59:46.280731" (UTC) ; 'time' milliseconds from epoch
     server_end_datetime = datetime.strptime(info[0], '%Y%m%d_%H%M%S')
+    voltage = None
     if len(json_data) > 0:
         # set server start datetime to the first data log entry (approx -1hr from session file creation)
         server_start_datetime = epoch_millis_converter(json_data[0]['time'])
 
         # set server end datetime to last data log entry
         server_end_datetime = epoch_millis_converter(json_data[-1]['time'])
+
+        # use latest voltage reading
+        voltage = json_data[-1].get('battery')
 
     return ({
         'uid': info[1],
@@ -398,7 +427,7 @@ def load_iSpindel_session(file):
         'end_date': server_end_datetime,
         'name': alias,  # should change to brew/user defined session name
         'data': json_data,
-        'graph': get_iSpindel_graph_data(chart_id, None, json_data)
+        'graph': get_iSpindel_graph_data(chart_id, voltage, json_data)
     })
 
 
@@ -411,6 +440,7 @@ def get_iSpindel_graph_data(chart_id, voltage, session_data):
     graph_data = {
         'chart_id': str(chart_id),
         'title': {'text': 'Fermentation'},
+        'subtitle': {'text': fermentation_graph_subtitle(session_data, voltage=voltage)},
         'series': [
             {
                 'name': 'Temperature',
@@ -422,9 +452,6 @@ def get_iSpindel_graph_data(chart_id, voltage, session_data):
             }
         ],
     }
-
-    if voltage:
-        graph_data.update({'subtitle': {'text': 'Voltage: ' + voltage}})
     return graph_data
 
 
@@ -450,7 +477,7 @@ def load_tilt_session(file):
         server_end_datetime = epoch_millis_converter(json_data[-1]['time'])
 
         # use latest rssi reading
-        rssi = json_data[-1]['rssi']
+        rssi = json_data[-1].get('rssi')
 
     return ({
         'uid': info[1],
@@ -474,6 +501,7 @@ def get_tilt_graph_data(chart_id, rssi, session_data):
     graph_data = {
         'chart_id': str(chart_id),
         'title': {'text': 'Fermentation'},
+        'subtitle': {'text': fermentation_graph_subtitle(session_data, rssi=rssi)},
         'series': [
             {
                 'name': 'Temperature',
@@ -485,11 +513,6 @@ def get_tilt_graph_data(chart_id, rssi, session_data):
             }
         ],
     }
-
-    if rssi:
-        last_temp = session_data[-1]['temp']
-        last_gravity = session_data[-1]['gravity']
-        graph_data.update({'subtitle': {'text': 'Temperature: ' + str(last_temp) + 'F<br>Specific Gravity: ' + str(last_gravity) + '<br>RSSI: ' + str(rssi) + 'dBm'}})
     return graph_data
 
 
