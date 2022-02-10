@@ -3,16 +3,21 @@ Allows for full control of the PicoBrew Pico S/C/Pro & Zymatic models.  Shout ou
 [Demo Server](http://ec2-3-136-112-93.us-east-2.compute.amazonaws.com/)
 
 ## Supported Devices:
-* Pico S/C/Pro: fully featured
-* Zymatic: fully featured
-* ZSeries: fully featured
-* PicoFerm (Beta - Currently terminates fermentation after 14 days)
-* PicoStill (Beta)
-  * Firmware versions 0.0.30 - 0.0.35 (selectable)
-  * Pico S/C/Pro distillation (no session logging - limitation of firmware)
-  * ZSeries (full session logging as included in Z firmware)
-* iSpindel (Beta)
-* Tilt (Beta)
+* Hot Side
+  * Pico S/C/Pro: fully featured
+  * Zymatic: fully featured
+  * ZSeries: fully featured
+  * PicoStill: fully featured
+    * Optional internal PicoStill T1/2/3/4 and Pressure Logging 
+    * Firmware versions 0.0.30 - 0.0.35 (selectable)
+    * PicoBrew Controlling Devices:
+      * Pico S/C/Pro distillation (no heat sensor logging - limitation of firmware)
+      * ZSeries (full heat sensor logging - included and supported within Z firmware)
+      * Zymatic (no native support for controlling the PicoStill - limitation of firmware)
+* Cold Side (Fermentation)
+  * PicoFerm (Beta - Currently terminates fermentation after 14 days)
+  * iSpindel: full session graphing
+  * Tilt: full session graphing
 
 ## Features
 * Device Aliasing
@@ -24,7 +29,7 @@ Allows for full control of the PicoBrew Pico S/C/Pro & Zymatic models.  Shout ou
   * Create New Recipes
   * Import from PicoBrew Servers (Pico C/S/Pro and Zymatic)
 * Manual Recipe Editing
-  * **Note** The table for adding/removing/editing recipe steps has several validation checks in it, but there is always the possiblity of ruining your Pico.  
+  * **Note** The table for adding/removing/editing recipe steps has several validation checks in it, but there is always the possibility of ruining your Pico.  
   * *For Pico S/C/Pro Only*: DO NOT EDIT or MOVE Rows 1-3 (Preparing to Brew/Heating/Dough In).  Drain times should all be 0 except for Mash Out (2 minutes) and the last hop addition (5 minutes) (for example, if you only have Hops 1 & 2, set the drain time on Hops 2 to 5, and remove the Hops 3 and 4 rows)
 
 ## Installation
@@ -78,13 +83,13 @@ Run server volume mounting the above directory structure.
 
 ##### (Optional) Step 1: Generate SSL Certs
 
-If you are looking to support a ZSeries device which requires HTTP+SSL communication we need to generatae some self-signed certificates to place in front of the flask app. These will be used when running nginx to terminate SSL connection before sending the requests for processing by flask.
+If you are looking to support a ZSeries device which requires HTTP+SSL communication we need to generate some self-signed certificates to place in front of the flask app. These will be used when running nginx to terminate SSL connection before sending the requests for processing by flask.
 
 ```
-./scripts/doccker/nginx/ssl_certificates.sh
+./scripts/docker/nginx/ssl_certificates.sh
 ```
 
-On MacOS you can add permenant trust for the Certificate Authority (yourself) if you use Chrome and/or Safari this makes it so that the authority of the certificate generaated above is trusted. Only these browsers check keychain access to get a list of CAs whereas Firefox stores its own list of trusted CAs in the browser.
+On MacOS you can add permanent trust for the Certificate Authority (yourself) if you use Chrome and/or Safari this makes it so that the authority of the certificate generated above is trusted. Only these browsers check keychain access to get a list of CAs whereas Firefox stores its own list of trusted CAs in the browser.
 
 ```
 sudo security add-trusted-cert -d -r trustAsRoot -k /Library/Keychains/System.keychain $(pwd)/scripts/docker/nginx/certs/bundle.crt
