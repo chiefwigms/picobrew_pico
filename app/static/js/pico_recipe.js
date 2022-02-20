@@ -37,21 +37,24 @@ var idMutator = function (value, data, type, params, component) {
 }
 var recipe_table = {
     movableRows: true,
-    headerSort: false,
     layout: "fitDataFill",
-    resizableColumns: false,
     tooltipGenerationMode: "hover",
-    tooltipsHeader: recipe_tooltips("Picobrew"),
-    tooltips: recipe_tooltips("Picobrew"),
+    columnDefaults:{
+        headerSort: false,
+        hozAlign: "center",
+        resizableColumns: false,
+        tooltipsHeader: recipe_tooltips("Picobrew"),
+        tooltips: recipe_tooltips("Picobrew"),
+    },
     columns: [
         {
-            rowHandle: true, formatter: "handle", headerSort: false, frozen: true, width: 50
+            rowHandle: true, formatter: "handle", frozen: true, width: 50,
         },
         {
-			title: "ID", field:"id", visible: false, mutatorData: idMutator
+			title: "ID", field:"id", visible: false, mutatorData: idMutator,
         },        
         {
-            title: "Step #", field:"step_num", formatter: "rownum", hozAlign: "center", width: 60
+            title: "Step #", field:"step_num", formatter: "rownum", width: 60,
         },
         {
             title: "Name", field: "name", width: 200,
@@ -60,7 +63,7 @@ var recipe_table = {
             editor: "input"
         },
         {
-            title: "Location", field: "location", width: 120, hozAlign: "center",
+            title: "Location", field: "location", width: 120,
             validator: ["required", "string"],
             editable: editCheck,
             editor: "select",
@@ -80,7 +83,7 @@ var recipe_table = {
             }
         },
         {
-            title: "Temp (°F)", field: "temperature", width: 100, hozAlign: "center",
+            title: "Temp (°F)", field: "temperature", width: 100,
             validator: ["required", "min:0", "max:208", "numeric"],
             editable: editCheck,
             editorParams: {
@@ -91,7 +94,7 @@ var recipe_table = {
             formatter: format_temperature
         },
         {
-            title: "Time (min)", field: "step_time", width: 100, hozAlign: "center",
+            title: "Time (min)", field: "step_time", width: 100,
             validator: ["required", "min:0", "max:180", "numeric"],
             editable: editCheck,
             editor: "number",
@@ -106,7 +109,7 @@ var recipe_table = {
             }
         },
         {
-            title: "Drain (min)", field: "drain_time", width: 100, hozAlign: "center",
+            title: "Drain (min)", field: "drain_time", width: 100,
             validator: ["required", "min:0", "max:10", "numeric"],
             editable: editCheck,
             editor: "number",
@@ -120,7 +123,7 @@ var recipe_table = {
             }
         },
         {   // hop timings are cumulative (H1+H2+H3+H4 = H1 Hop Contact Time)
-            title: "Hop (min)", field: "hop_time", width: 100, hozAlign: "center",
+            title: "Hop (min)", field: "hop_time", width: 100,
             editable: false,
             mutator: (value, data, type, params, component) => {
                 // type is always data (field isn't editable)
@@ -131,7 +134,7 @@ var recipe_table = {
             },
         },
         {
-            title: "Total (min)", field: "total_time", width: 100, hozAlign: "center",
+            title: "Total (min)", field: "total_time", width: 100,
             editable: false,
             mutator: (value, data, type, params, component) => {
                 return data.step_time + data.drain_time;
@@ -139,7 +142,7 @@ var recipe_table = {
             bottomCalc: "sum"
         },
         {
-            formatter: plusIcon, field: "add_step", width: 49, hozAlign: "center",
+            formatter: plusIcon, field: "add_step", width: 49,
             cellClick: function (e, cell) {
                 if (rowIsEditable(cell,true)) {
                     var newRowData = Object.assign({}, cell.getRow().getData());
@@ -150,7 +153,7 @@ var recipe_table = {
             }
         },
         {
-            formatter: minusIcon, field: "remove_step", width: 49, hozAlign: "center",
+            formatter: minusIcon, field: "remove_step", width: 49,
             cellClick: function (e, cell) {
                 if (rowIsEditable(cell,false)) {
                     cell.getRow().delete();
@@ -188,7 +191,7 @@ function calculate_hop_timing(data, provided_table = undefined) {
                 provided_table = table;
             }
         }
-        
+
         var rows = provided_table.getRows();
         var adjunctSteps = rows.filter(row => row.getData().location.indexOf("Adjunct") == 0);
 
@@ -315,7 +318,7 @@ function update_recipe(recipe_id) {
                 setTimeout(function () { window.location.href = "pico_recipes"; }, 2000);
             },
             error: function (request, status, error) {
-                //showAlert("Error: " + request.responseText, "danger");
+                showAlert("Error: " + request.responseText, "danger");
                 //setTimeout(function () { window.location.href = "pico_recipes";}, 2000);
             },
         });
@@ -369,7 +372,7 @@ function delete_recipe(recipe_id) {
                 setTimeout(function () { window.location.href = "pico_recipes"; }, 2000);
             },
             error: function (request, status, error) {
-                //showAlert(`Error: ${request.responseText}`, "danger");
+                showAlert(`Error: ${request.responseText}`, "danger");
                 //setTimeout(function () { window.location.href = "pico_recipes";}, 2000);
             },
         });

@@ -34,18 +34,21 @@ var default_data = [
 var tables_loaded = [];
 var recipe_table = {
     movableRows: true,
-    headerSort: false,
     layout: "fitDataFill",
-    resizableColumns: false,
     tooltipGenerationMode: "hover",
-    tooltipsHeader: recipe_tooltips("ZSeries"),
-    tooltips: recipe_tooltips("ZSeries"),
+    columnDefaults:{
+        headerSort: false,
+        hozAlign: "center",
+        resizableColumns: false,
+        tooltipsHeader: recipe_tooltips("ZSeries"),
+        tooltips: recipe_tooltips("ZSeries"),
+    },
     columns: [
         {
-            rowHandle: true, formatter: "handle", headerSort: false, frozen: true, width: 50
+            rowHandle: true, formatter: "handle", frozen: true, width: 50,
         },
         {
-            title: "Step #", formatter: "rownum", hozAlign: "center", width: 60
+            title: "Step #", formatter: "rownum", width: 60,
         },
         {
             title: "Name", field: "name", width: 200,
@@ -53,7 +56,7 @@ var recipe_table = {
             editor: "input"
         },
         {
-            title: "Location", field: "location", width: 120, hozAlign: "center",
+            title: "Location", field: "location", width: 120,
             validator: ["required", "string"],
             editor: "select",
             editorParams: {
@@ -72,7 +75,7 @@ var recipe_table = {
             }
         },
         {
-            title: "Temp (°F)", field: "temperature", width: 100, hozAlign: "center",
+            title: "Temp (°F)", field: "temperature", width: 100,
             validator: ["required", "min:0", "max:208", "numeric"],
             editorParams: {
                 min: 0,     // -18 C
@@ -82,7 +85,7 @@ var recipe_table = {
             formatter: format_temperature
         },
         {
-            title: "Time (min)", field: "step_time", width: 100, hozAlign: "center",
+            title: "Time (min)", field: "step_time", width: 100,
             validator: ["required", "min:0", "max:180", "numeric"],
             editor: "number",
             editorParams: {
@@ -96,7 +99,7 @@ var recipe_table = {
             }
         },
         {
-            title: "Drain (min)", field: "drain_time", width: 100, hozAlign: "center",
+            title: "Drain (min)", field: "drain_time", width: 100,
             validator: ["required", "min:0", "max:10", "numeric"],
             editor: "number",
             editorParams: {
@@ -109,7 +112,7 @@ var recipe_table = {
             }
         },
         {   // hop timings are cumulative (H1+H2+H3+H4 = H1 Hop Contact Time)
-            title: "Hop (min)", field: "hop_time", width: 100, hozAlign: "center",
+            title: "Hop (min)", field: "hop_time", width: 100,
             editable: false,
             mutator: (value, data, type, params, component) => {
                 // type is always data (field isn't editable)
@@ -120,7 +123,7 @@ var recipe_table = {
             },
         },
         {
-            title: "Total (min)", field: "total_time", width: 100, hozAlign: "center",
+            title: "Total (min)", field: "total_time", width: 100,
             editable: false,
             mutator: (value, data, type, params, component) => {
                 return data.step_time + data.drain_time;
@@ -128,7 +131,7 @@ var recipe_table = {
             bottomCalc: "sum"
         },
         {
-            formatter: plusIcon, width: 49, hozAlign: "center",
+            formatter: plusIcon, width: 49,
             cellClick: function (e, cell) {
                 cell.getTable().addRow(Object.assign({}, cell.getRow().getData()), false, cell.getRow()).then(function(row) {
                     row.update({name: "New Step"});
@@ -136,7 +139,7 @@ var recipe_table = {
             }
         },
         {
-            formatter: minusIcon, width: 49, hozAlign: "center",
+            formatter: minusIcon, width: 49,
             cellClick: function (e, cell) {
                 cell.getRow().delete();
                 if (cell.getTable().getRows().length==fixedRows) {
@@ -175,7 +178,7 @@ function calculate_hop_timing(data, provided_table = undefined) {
                 provided_table = table;
             }
         }
-        
+
         var rows = provided_table.getRows();
         var adjunctSteps = rows.filter(row => row.getData().location.indexOf("Adjunct") == 0);
 
@@ -214,11 +217,11 @@ $(document).ready(function () {
             processData: false,
             contentType: "application/json; charset=UTF-8",
             success: function (data) {
-                showAlert("Success!", "success")
+                showAlert("Success!", "success");
                 setTimeout(function () { window.location.href = "zseries_recipes"; }, 2000);
             },
             error: function (request, status, error) {
-                showAlert("Error: " + request.responseText, "danger")
+                showAlert("Error: " + request.responseText, "danger");
             },
         });
     });

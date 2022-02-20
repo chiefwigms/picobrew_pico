@@ -52,8 +52,8 @@
   recipe_table['rowMoved'] = function (row) {
     isRowMoved(row);
   }
+  recipe_table['data'] = default_data;
   var table = new Tabulator("#t_new_recipe", recipe_table);
-  table.setData(default_data);
   tables["new_recipe"] = table;
   load_image('recipe_image', recipe_img);
 </script>

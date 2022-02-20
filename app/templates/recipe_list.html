@@ -144,9 +144,9 @@
                         if (isRowMoved(row))
                             displayUnsavedState(row)
                     }
+                    recipe_table['data'] = {{ recipe['steps']| tojson }};
 
                     tables["{{recipe['id']}}"] = new Tabulator("#t_{{recipe['id']}}", recipe_table);
-                    tables["{{recipe['id']}}"].setData({{ recipe['steps']| tojson }});
                 </script>
             </div>
         </div>
