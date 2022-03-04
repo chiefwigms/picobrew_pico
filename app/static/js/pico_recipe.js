@@ -318,7 +318,7 @@ function update_recipe(recipe_id) {
                 setTimeout(function () { window.location.href = "pico_recipes"; }, 2000);
             },
             error: function (request, status, error) {
-                showAlert("Error: " + request.responseText, "danger");
+                //showAlert("Error: " + request.responseText, "danger");
                 //setTimeout(function () { window.location.href = "pico_recipes";}, 2000);
             },
         });
@@ -372,7 +372,7 @@ function delete_recipe(recipe_id) {
                 setTimeout(function () { window.location.href = "pico_recipes"; }, 2000);
             },
             error: function (request, status, error) {
-                showAlert(`Error: ${request.responseText}`, "danger");
+                //showAlert(`Error: ${request.responseText}`, "danger");
                 //setTimeout(function () { window.location.href = "pico_recipes";}, 2000);
             },
         });
