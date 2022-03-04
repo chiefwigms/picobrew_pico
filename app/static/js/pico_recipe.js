@@ -296,7 +296,7 @@ $(document).ready(function () {
 });
 
 function update_recipe(recipe_id) {
-    var table = Tabulator.prototype.findTable("#t_" + recipe_id)[0];
+    var table = Tabulator.findTable("#t_" + recipe_id)[0];
     if (table) {
         var recipe = {};
         recipe.id = recipe_id
@@ -318,7 +318,7 @@ function update_recipe(recipe_id) {
                 setTimeout(function () { window.location.href = "pico_recipes"; }, 2000);
             },
             error: function (request, status, error) {
-                //showAlert("Error: " + request.responseText, "danger");
+                showAlert("Error: " + request.responseText, "danger");
                 //setTimeout(function () { window.location.href = "pico_recipes";}, 2000);
             },
         });
@@ -331,7 +331,7 @@ function edit_recipe(recipe_id) {
 };
 
 function download_recipe(recipe_id, recipe_name) {
-    var table = Tabulator.prototype.findTable("#t_" + recipe_id)[0];
+    var table = Tabulator.findTable("#t_" + recipe_id)[0];
     if (table) {
         window.location = `/recipes/picobrew/${recipe_id}/${unescapeHtml(recipe_name)}.json`;
     }
@@ -372,7 +372,7 @@ function delete_recipe(recipe_id) {
                 setTimeout(function () { window.location.href = "pico_recipes"; }, 2000);
             },
             error: function (request, status, error) {
-                //showAlert(`Error: ${request.responseText}`, "danger");
+                showAlert(`Error: ${request.responseText}`, "danger");
                 //setTimeout(function () { window.location.href = "pico_recipes";}, 2000);
             },
         });
