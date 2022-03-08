@@ -259,15 +259,20 @@ $(document).ready(function () {
 
 
     $('#b_new_recipe').click(function () {
+        var form = document.getElementById('f_new_recipe');
+        if (!validate(form)) {
+            return false;
+        }
+
         var recipe = {}
         recipe.id = ''
-        recipe.name = document.getElementById('f_new_recipe').elements['recipe_name'].value;
-        recipe.abv = document.getElementById('f_new_recipe').elements['abv'].value;
-        recipe.ibu = document.getElementById('f_new_recipe').elements['ibu'].value;
+        recipe.name = form.elements['recipe_name'].value;
+        recipe.abv = form.elements['abv'].value;
+        recipe.ibu = form.elements['ibu'].value;
         recipe.abv_tweak = -1
         recipe.ibu_tweak = -1
         recipe.image = recipe_images[recipe.id]
-        recipe.notes = document.getElementById('f_new_recipe').elements['notes'].value;
+        recipe.notes = form.elements['notes'].value;
         recipe.steps = table.getData();
         $.ajax({
             url: 'new_pico_recipe',
@@ -290,7 +295,41 @@ $(document).ready(function () {
     $('#upload_recipe_file').on('change', function () {
         upload_recipe_file('picobrew', $(this).prop('files')[0], 'pico_recipes');
     });
+
+    for (element of document.getElementsByTagName("input")) {
+        const $feedback = $(element).siblings(".invalid-feedback", ".invalid-tooltip");
+        if (element.pattern && element.required && $feedback) {
+            element.addEventListener('change', (event) => {
+                $(element).closest("form").removeClass("was-validated");
+                $feedback.hide();
+          });
+        }
+    }
 });
+
+function validate(form) {
+    let valid = true;
+    for (element of form.getElementsByTagName('input')) {
+        const $feedback = $(element).siblings(".invalid-feedback", ".invalid-tooltip");
+        if (element.type == "text" && element.pattern) {
+            const re = new RegExp(element.pattern)
+            if (!re.test(element.value)) {
+                $feedback.show();
+                valid = false;
+            }
+        }
+
+        if (element.type == "number" && (element.min || element.max)) {
+            if ((element.min && element.value < element.min) || (element.max && element.value > element.max)) {
+                $feedback.show();
+                valid = false;
+            }
+        }
+    };
+
+    $(form).addClass("was-validated");
+    return valid;
+}
 
 function update_recipe(recipe_id) {
     var table = Tabulator.prototype.findTable("#t_" + recipe_id)[0];

@@ -6,36 +6,45 @@
 <script src="/static/js/pico_recipe.js"></script>
 <script>var tables = {};</script>
 {% include "units_selector.html" %}
-<form id="f_new_recipe">
+<form id="f_new_recipe" class="needs-validation">
   <div class="form-row">
     <div class="form-inline">
-      <div class="form-group col-sm-2">
+      <div class="form-group col-sm-3">
         <canvas id="recipe_image" width="128" height="64"></canvas>
       </div>
       <div class="form-group col-sm-2">
+        <label for="recipe_image_loader">Upload Image</label>
         <input type="file" accept="image/*" style="color:transparent;" id="recipe_image_loader" class="recipe_image_loader">
       </div>
-      <div class="form-group col-sm-1">
-        <label class="checkbox-inline" for="recipe_image_invert">Invert</label>
+      <div class="form-group col-sm-2 form-check">
         <input type="checkbox" class="form-check-input" id="recipe_image_invert">
+        <label class="form-check-label" for="recipe_image_invert">Invert</label>
       </div>
       <div class="form-group col-sm-1">
         <label for="recipe_image_threshold">Threshold</label>
-        <input type="text" class="form-control form-control-sm" id="recipe_image_threshold" placeholder="0-255" value=128>
+        <input type="number" class="form-control form-control-sm" id="recipe_image_threshold"
+          placeholder="0-255" value=128 min="0" max="255">
+        <div class="invalid-tooltip collapsed">Image threshold must be a number between 0 and 255.</div>
       </div>
     </div>
   </div>
   <div class="form-row">
     <div class="form-group col-sm-3">
-      <input type="text" class="form-control form-control-sm" id="recipe_name" placeholder="Recipe Name">
+      <input type="text" class="form-control form-control-sm" id="recipe_name" placeholder="Recipe Name"
+        pattern="^[a-zA-Z0-9\\ \\-\\(\\)]+$" required>
+      <div class="invalid-tooltip collapsed">Recipe name should not contain special characters. Picobrew devices only support a limited character set.</div>
     </div>
     <div class="form-group col-sm-1">
-      <input type="text" class="form-control form-control-sm" id="abv" placeholder="ABV (7.9)">
+      <input type="number" class="form-control form-control-sm" id="abv" placeholder="ABV (7.9)"
+        min="0" max="20" step="0.01" required>
+      <div class="invalid-tooltip collapsed">ABV must be a positive number less than 20.</div>
     </div>
     <div class="form-group col-sm-1">
-      <input type="text" class="form-control form-control-sm" id="ibu" placeholder="IBU (48)">
+      <input type="number" class="form-control form-control-sm" id="ibu" placeholder="IBU (48)"
+        min="0" step="1" required>
+      <div class="invalid-tooltip collapsed">IBU must be a positive number.</div>
     </div>
-    <div class="form-group col-sm-7">
+    <div class="form-group col-sm">
       <button class="btn btn-sm btn-success float-right mr-3" type="button" id="b_new_recipe">
         <i class="far fa-save fa-lg"></i>
       </button>
