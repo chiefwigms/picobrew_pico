@@ -195,10 +195,15 @@ function calculate_hop_timing(data, provided_table = undefined) {
 
 $(document).ready(function () {
     $('#b_new_recipe').click(function () {
+        var form = document.getElementById('f_new_recipe');
+        if (!validate(form)) {
+            return false;
+        }
+
         var recipe = {}
         recipe.id = ''
-        recipe.name = document.getElementById('f_new_recipe').elements['recipe_name'].value;
-        recipe.notes = document.getElementById('f_new_recipe').elements['notes'].value;
+        recipe.name = form.elements['recipe_name'].value;
+        recipe.notes = form.elements['notes'].value;
         recipe.steps = table.getData();
         $.ajax({
             url: 'new_zymatic_recipe',
@@ -221,7 +226,32 @@ $(document).ready(function () {
     $('#upload_recipe_file').on('change', function () {
         upload_recipe_file('zymatic', $(this).prop('files')[0], 'zymatic_recipes');
     });
+
+    for (element of document.getElementsByTagName("input")) {
+        const $feedback = $(element).siblings(".invalid-feedback", ".invalid-tooltip");
+        if (element.pattern && element.required && $feedback) {
+            element.addEventListener('change', (event) => {
+                $(element).closest("form").removeClass("was-validated");
+                $feedback.hide();
+          });
+        }
+    }
 });
+
+function validate(form) {
+    for (element of form.getElementsByTagName('input')) {
+        const $feedback = $(element).siblings(".invalid-feedback", ".invalid-tooltip");
+        if (element.pattern) {
+            const re = new RegExp(element.pattern)
+            if (!re.test(element.value)) {
+                $(form).addClass("was-validated");
+                $feedback.show();
+                return false;
+            }
+        }
+    };
+    return  true;
+}
 
 function update_recipe(recipe_id) {
     var table = Tabulator.prototype.findTable("#t_" + recipe_id)[0];
