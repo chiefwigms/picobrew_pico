@@ -6,7 +6,7 @@ from webargs.flaskparser import use_args, FlaskParser
 
 from . import main
 from .. import socketio
-from .config import ferm_active_sessions_path, picoferm_firmware_path, MachineType
+from .config import ferm_active_sessions_path, firmware_path, MachineType
 from .firmware import firmware_filename, minimum_firmware, firmware_upgrade_required
 from .model import PicoFermSession
 from .session_parser import active_ferm_sessions
@@ -66,7 +66,7 @@ def process_get_firmware_address(args):
 @main.route('/firmware/picoferm/<file>', methods=['GET'])
 def process_picoferm_firmware(file):
     current_app.logger.debug('DEBUG: PicoFerm fetch firmware file={}'.format(file))
-    return send_from_directory(picoferm_firmware_path(), file)
+    return send_from_directory(firmware_path(MachineType.PICOFERM), file)
 
 
 # Get State: /API/PicoFerm/getState?uid={UID}

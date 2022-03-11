@@ -5,12 +5,13 @@ from datetime import timedelta
 from flask import current_app, escape, make_response, request, send_file, render_template
 from pathlib import Path
 from ruamel.yaml import YAML
+from webargs import fields
+from webargs.flaskparser import use_args
 from werkzeug.utils import secure_filename
 
 
 from . import main
-from .config import (MachineType, SessionType,
-                     zymatic_recipe_path, zseries_recipe_path, pico_recipe_path,
+from .config import (MachineType, SessionType, recipe_path,
                      brew_archive_sessions_path, ferm_archive_sessions_path, still_archive_sessions_path, iSpindel_archive_sessions_path, tilt_archive_sessions_path)
 from .frontend_common import render_template_with_defaults
 from .recipe_import import import_recipes
@@ -109,7 +110,7 @@ def new_zymatic_recipe():
     if request.method == 'POST':
         recipe = request.get_json()
         recipe['id'] = uuid.uuid4().hex[:32]
-        filename = build_recipe_filename(zymatic_recipe_path(), recipe['name'])
+        filename = build_recipe_filename(recipe_path(MachineType.ZYMATIC), recipe['name'])
         return write_recipe_file(filename, recipe)
     else:
         return render_template_with_defaults('new_zymatic_recipe.html')
@@ -136,7 +137,10 @@ def import_zymatic_recipe():
 @main.route('/update_zymatic_recipe', methods=['POST'])
 def update_zymatic_recipe():
     update_recipe = request.get_json()
-    files = list(zymatic_recipe_path().glob(file_glob_pattern))
+    synced_files = list(recipe_path(MachineType.ZYMATIC).glob(file_glob_pattern))
+    archived_files = list(recipe_path(MachineType.ZYMATIC, True).glob(file_glob_pattern))
+    files = synced_files + archived_files
+
     for filename in files:
         recipe = load_zymatic_recipe(filename)
         if recipe.id == update_recipe['id']:
@@ -144,10 +148,13 @@ def update_zymatic_recipe():
     return '', 204
 
 
-@main.route('/delete_zymatic_recipe', methods=['GET', 'POST'])
+@main.route('/delete_zymatic_recipe', methods=['GET'])
 def delete_zymatic_recipe():
     recipe_id = request.get_json()
-    files = list(zymatic_recipe_path().glob(file_glob_pattern))
+    synced_files = list(recipe_path(MachineType.ZYMATIC).glob(file_glob_pattern))
+    archived_files = list(recipe_path(MachineType.ZYMATIC, True).glob(file_glob_pattern))
+    files = synced_files + archived_files
+
     for filename in files:
         recipe = load_zymatic_recipe(filename)
         if recipe.id == recipe_id:
@@ -156,8 +163,15 @@ def delete_zymatic_recipe():
     return 'Delete Recipe: Failed to find recipe id \"' + recipe_id + '\"', 418
 
 
-def load_zymatic_recipes():
-    files = list(zymatic_recipe_path().glob(file_glob_pattern))
+def load_zymatic_recipes(include_archived=True):
+    synced_files = list(recipe_path(MachineType.ZYMATIC).glob(file_glob_pattern))
+    archived_files = list(recipe_path(MachineType.ZYMATIC, True).glob(file_glob_pattern))
+
+    files = synced_files
+    if include_archived:
+        files += archived_files
+
+    current_app.logger.info(f'load_zymatic_recipes : {len(synced_files)} synced ; {len(archived_files)} archived ')
     recipes = [load_zymatic_recipe(file) for file in files]
     return list(sorted(filter(lambda x: x.name != None, recipes), key=lambda x: x.name))
 
@@ -170,9 +184,10 @@ def load_zymatic_recipe(file):
     return recipe
 
 
-def get_zymatic_recipes():
+def get_zymatic_recipes(include_archived: True):
     global zymatic_recipes
-    return zymatic_recipes
+    global zymatic_active_recipes
+    return zymatic_recipes if include_archived else zymatic_active_recipes
 
 
 @main.route('/zseries_recipes')
@@ -193,14 +208,16 @@ def new_zseries_recipe_save():
     recipe = request.get_json()
     recipe['id'] = increment_zseries_recipe_id()
     recipe['start_water'] = recipe.get('start_water', 13.1)
-    filename = build_recipe_filename(zseries_recipe_path(), recipe['name'])
+    filename = build_recipe_filename(recipe_path(MachineType.ZSERIES), recipe['name'])
     return write_recipe_file(filename, recipe)
 
 
 @main.route('/update_zseries_recipe', methods=['POST'])
 def update_zseries_recipe():
     update_recipe = request.get_json()
-    files = list(zseries_recipe_path().glob(file_glob_pattern))
+    synced_files = list(recipe_path(MachineType.ZSERIES).glob(file_glob_pattern))
+    archived_files = list(recipe_path(MachineType.ZSERIES, True).glob(file_glob_pattern))
+    files = synced_files + archived_files
     for filename in files:
         recipe = load_zseries_recipe(filename)
         if str(recipe.id) == update_recipe['id']:
@@ -263,11 +280,11 @@ def allowed_extension(filename):
 def recipe_dirpath(machine_type):
     dirpath = None
     if machine_type == "picobrew" or machine_type == "pico":
-        dirpath = pico_recipe_path()
+        dirpath = recipe_path(MachineType.PICOBREW)
     elif machine_type == "zymatic":
-        dirpath = zymatic_recipe_path()
+        dirpath = recipe_path(MachineType.ZYMATIC)
     elif machine_type == "zseries":
-        dirpath = zseries_recipe_path()
+        dirpath = recipe_path(MachineType.ZSERIES)
     return dirpath
 
 
@@ -351,10 +368,12 @@ def download_session(session_type, filename):
     return f'Download Session: Failed to find session with filename "{filename}"', 418
 
 
-@main.route('/delete_zseries_recipe', methods=['GET', 'POST'])
+@main.route('/delete_zseries_recipe', methods=['GET'])
 def delete_zseries_recipe():
     recipe_id = request.get_json()
-    files = list(zseries_recipe_path().glob(file_glob_pattern))
+    synced_files = list(recipe_path(MachineType.ZSERIES).glob(file_glob_pattern))
+    archived_files = list(recipe_path(MachineType.ZSERIES, True).glob(file_glob_pattern))
+    files = synced_files + archived_files
     for filename in files:
         recipe = load_zseries_recipe(filename)
         if str(recipe.id) == recipe_id:
@@ -379,8 +398,15 @@ def import_zseries_recipe():
         return render_template_with_defaults('import_brewhouse_recipe.html', user_required=False, machine_ids=machine_ids)
 
 
-def load_zseries_recipes():
-    files = list(zseries_recipe_path().glob(file_glob_pattern))
+def load_zseries_recipes(include_archived=True):
+    synced_files = list(recipe_path(MachineType.ZSERIES).glob(file_glob_pattern))
+    archived_files = list(recipe_path(MachineType.ZSERIES, True).glob(file_glob_pattern))
+
+    files = synced_files
+    if include_archived:
+        files += archived_files
+
+    current_app.logger.info(f'load_zseries_recipes : {len(synced_files)} synced ; {len(archived_files)} archived ')
     recipes = [load_zseries_recipe(file) for file in files]
     return list(sorted(filter(lambda x: x.name != None, recipes), key=lambda x: x.name))
 
@@ -401,9 +427,10 @@ def parse_recipe(machineType, recipe, file):
         add_invalid_recipe(machineType, file)
 
 
-def get_zseries_recipes():
+def get_zseries_recipes(include_archived: True):
     global zseries_recipes
-    return zseries_recipes
+    global zseries_active_recipes
+    return zseries_recipes if include_archived else zseries_active_recipes
 
 
 def get_invalid_recipes():
@@ -459,7 +486,7 @@ def new_pico_recipe():
     if request.method == 'POST':
         recipe = request.get_json()
         recipe['id'] = uuid.uuid4().hex[:14]
-        filename = build_recipe_filename(pico_recipe_path(), recipe['name'])
+        filename = build_recipe_filename(recipe_path(MachineType.PICOBREW), recipe['name'])
         return write_recipe_file(filename, recipe)
     else:
         return render_template_with_defaults('new_pico_recipe.html')
@@ -486,7 +513,9 @@ def import_pico_recipe():
 @main.route('/update_pico_recipe', methods=['POST'])
 def update_pico_recipe():
     update_recipe = request.get_json()
-    files = list(pico_recipe_path().glob(file_glob_pattern))
+    synced_files = list(recipe_path(MachineType.PICOBREW).glob(file_glob_pattern))
+    archived_files = list(recipe_path(MachineType.PICOBREW, True).glob(file_glob_pattern))
+    files = synced_files + archived_files
     for filename in files:
         recipe = load_pico_recipe(filename)
         if recipe.id == update_recipe['id']:
@@ -494,16 +523,63 @@ def update_pico_recipe():
     return '', 204
 
 
-@main.route('/delete_pico_recipe', methods=['GET', 'POST'])
+@main.route('/delete_pico_recipe', methods=['GET'])
 def delete_pico_recipe():
     recipe_id = request.get_json()
-    files = list(pico_recipe_path().glob(file_glob_pattern))
+    synced_files = list(recipe_path(MachineType.PICOBREW).glob(file_glob_pattern))
+    archived_files = list(recipe_path(MachineType.PICOBREW, True).glob(file_glob_pattern))
+    files = synced_files + archived_files
     for filename in files:
         recipe = load_pico_recipe(filename)
         if recipe.id == recipe_id:
             os.remove(filename)
             return '', 204
     return 'Delete Recipe: Failed to find recipe id "{recipe_id}"', 418
+
+
+sync_recipe_args = {
+    'recipe_type': fields.Str(required=True),        # type of recipe (pico, zymatic, zseries)
+    'recipe_id': fields.Str(required=True),          # unique id of recipe file
+}
+
+
+@main.route('/sync_recipe', methods=['POST'])
+@use_args(sync_recipe_args, location='querystring')
+def sync_recipe(args):
+    recipe_type = args['recipe_type']
+    if recipe_type == "pico":
+        mtype = MachineType.PICOBREW
+    elif recipe_type == "zymatic":
+        mtype = MachineType.ZYMATIC
+    elif recipe_type == "zseries":
+        mtype = MachineType.ZSERIES
+    else:
+        raise Exception("unsupported recipe_type {{args['recipe_type']}}")
+
+    recipe_id = args['recipe_id']
+    synced_files = list(recipe_path(mtype).glob(file_glob_pattern))
+    archived_files = list(recipe_path(mtype, True).glob(file_glob_pattern))
+    files = synced_files + archived_files
+    for filename in files:
+        recipe = load_recipe(filename, mtype)
+        # zseries recipe.id is an integer, whereas pico and zymatic recipe.id is a string
+        if str(recipe.id) == str(recipe_id):
+            recipe.is_archived = not recipe.is_archived  # toggle archive/sync status
+            recipe.sync_recipe(filename)
+            load_active_recipes(mtype)
+            return '', 204
+
+    return 'could not sync - failed to find recipe.id {recipe_id}', 404
+
+
+def load_recipe(filename, mtype):
+    if mtype == MachineType.PICOBREW or mtype == MachineType.PICOBREW_C:
+        return load_pico_recipe(filename)
+    elif mtype == MachineType.ZYMATIC:
+        return load_zymatic_recipe(filename)
+    elif mtype == MachineType.ZSERIES:
+        return load_zseries_recipe(filename)
+    raise Exception("invalid device type {mtype}")
 
 
 def is_ajax(request):
@@ -516,8 +592,15 @@ def is_ajax(request):
     return request.headers.get('X_REQUESTED_WITH') == "XMLHttpRequest"
 
 
-def load_pico_recipes():
-    files = list(pico_recipe_path().glob(file_glob_pattern))
+def load_pico_recipes(include_archived=True):
+    synced_files = list(recipe_path(MachineType.PICOBREW).glob(file_glob_pattern))
+    archived_files = list(recipe_path(MachineType.PICOBREW, True).glob(file_glob_pattern))
+
+    files = synced_files
+    if include_archived:
+        files += archived_files
+
+    current_app.logger.info(f'load_pico_recipes : {len(synced_files)} synced ; {len(archived_files)} archived ')
     recipes = [load_pico_recipe(file) for file in files]
     return list(sorted(filter(lambda x: x.name != None, recipes), key=lambda x: x.name))
 
@@ -530,9 +613,10 @@ def load_pico_recipe(file):
     return recipe
 
 
-def get_pico_recipes():
+def get_pico_recipes(archive_included: True):
     global pico_recipes
-    return pico_recipes
+    global pico_active_recipes
+    return pico_recipes if archive_included else pico_active_recipes
 
 
 def build_recipe_filename(recipe_path, recipe_name):
@@ -702,9 +786,9 @@ def load_tilt_sessions(uid=None, offset=0, limit=None):
 
 
 # Read initial recipe list on load
-pico_recipes = []
-zymatic_recipes = []
-zseries_recipes = []
+pico_recipes, pico_active_recipes = [], []
+zymatic_recipes, zymatic_active_recipes = [], []
+zseries_recipes, zseries_active_recipes = [], []
 
 brew_sessions = []
 ferm_sessions = []
@@ -718,6 +802,7 @@ invalid_sessions = {}
 
 def initialize_data():
     global pico_recipes, zymatic_recipes, zseries_recipes, invalid_recipes
+    global pico_active_recipes, zymatic_active_recipes, zseries_active_recipes, invalid_recipes
     global brew_sessions, ferm_sessions, still_sessions, iSpindel_sessions, tilt_sessions
 
     # Read initial recipe list on load
@@ -725,12 +810,30 @@ def initialize_data():
     zymatic_recipes = load_zymatic_recipes()
     zseries_recipes = load_zseries_recipes()
 
+    # Read initial active recipe list on load
+    load_active_recipes(None)
+
     # load all archive brew sessions
     brew_sessions = load_active_brew_sessions()
     ferm_sessions = load_active_ferm_sessions()
     still_sessions = load_active_still_sessions()
     iSpindel_sessions = load_active_iSpindel_sessions()
     tilt_sessions = load_active_tilt_sessions()
+
+
+def load_active_recipes(mtype):
+    global pico_active_recipes, zymatic_active_recipes, zseries_active_recipes
+
+    if mtype == MachineType.PICOBREW or mtype == MachineType.PICOBREW_C:
+        pico_active_recipes = load_pico_recipes(False)
+    elif mtype == MachineType.ZYMATIC:
+        zymatic_active_recipes = load_zymatic_recipes(False)
+    elif mtype == MachineType.ZSERIES:
+        zseries_active_recipes = load_zseries_recipes(False)
+    elif mtype == None:
+        pico_active_recipes = load_pico_recipes(False)
+        zymatic_active_recipes = load_zymatic_recipes(False)
+        zseries_active_recipes = load_zseries_recipes(False)
 
 
 # utilities

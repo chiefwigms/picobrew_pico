@@ -9,7 +9,7 @@ from random import seed, randint
 
 from .. import socketio
 from . import main
-from .config import MachineType, brew_active_sessions_path, zseries_firmware_path
+from .config import MachineType, brew_active_sessions_path, firmware_path
 from .firmware import firmware_filename, firmware_upgrade_required, minimum_firmware
 from .model import PicoBrewSession
 from .routes_frontend import get_zseries_recipes
@@ -30,7 +30,7 @@ plot_bands = {}
 @main.route('/firmware/zseries/<file>', methods=['GET'])
 def process_zseries_firmware(file):
     current_app.logger.debug('DEBUG: ZSeries fetch firmware file={}'.format(file))
-    return send_from_directory(zseries_firmware_path(), file)
+    return send_from_directory(firmware_path(MachineType.ZSERIES), file)
 
 
 # ZState: PUT /Vendors/input.cshtml?type=ZState&token={}
@@ -613,14 +613,14 @@ def process_recover_session(token, session_id):
 # -------- Utility --------
 def get_zseries_recipe_list():
     recipe_list = []
-    for r in get_zseries_recipes():
+    for r in get_zseries_recipes(False):
         recipe_list.append(r)
     return recipe_list
 
 
 def get_zseries_recipe_metadata_list():
     recipe_metadata = []
-    for r in get_zseries_recipes():
+    for r in get_zseries_recipes(False):
         meta = {
             "ID": r.id,
             "Name": r.name,
@@ -634,10 +634,10 @@ def get_zseries_recipe_metadata_list():
 
 
 def get_recipe_by_id(recipe_id):
-    recipe = next((r for r in get_zseries_recipes() if str(r.id) == str(recipe_id)), None)
+    recipe = next((r for r in get_zseries_recipes(False) if str(r.id) == str(recipe_id)), None)
     return recipe
 
 
 def get_recipe_by_name(recipe_name):
-    recipe = next((r for r in get_zseries_recipes() if r.name == recipe_name), None)
+    recipe = next((r for r in get_zseries_recipes(False) if r.name == recipe_name), None)
     return recipe
