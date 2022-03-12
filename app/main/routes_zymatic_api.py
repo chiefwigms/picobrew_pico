@@ -235,7 +235,7 @@ def process_log_session(args):
 def get_zymatic_recipe_list(clean):
     recipe_list_clean = ''
     recipe_list_brew = ''
-    for r in get_zymatic_recipes():
+    for r in get_zymatic_recipes(False):
         if r.clean:
             recipe_list_clean += r.serialize()
         else:
@@ -244,12 +244,12 @@ def get_zymatic_recipe_list(clean):
 
 
 def get_recipe_name_by_id(recipe_id):
-    recipe = next((r for r in get_zymatic_recipes() if r.id == recipe_id), None)
+    recipe = next((r for r in get_zymatic_recipes(False) if r.id == recipe_id), None)
     return 'Invalid Recipe' if not recipe else recipe.name
 
 
 def get_recipe_by_name(recipe_name):
-    recipe = next((r for r in get_zymatic_recipes() if r.name == recipe_name), None)
+    recipe = next((r for r in get_zymatic_recipes(False) if r.name == recipe_name), None)
     return '' if not recipe else recipe.serialize()
 
 

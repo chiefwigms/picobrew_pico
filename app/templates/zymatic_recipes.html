@@ -6,10 +6,10 @@
 <script src="/static/js/zymatic_recipe.js"></script>
 <script>var tables = {};</script>
 {% include "units_selector.html" %}
-{% with machine_type='zymatic' %}
+{% with recipe_type='zymatic' %}
     {% include "recipe_actions.html" %}
+    {% include "invalid_file.html" %}
+    <br /><br /><br />
+    {% include "recipe_list.html" %}
 {% endwith %}
-{% include "invalid_file.html" %}
-<br /><br /><br />
-{% include "recipe_list.html" %}
 {% endblock %}

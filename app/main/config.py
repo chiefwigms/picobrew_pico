@@ -38,36 +38,39 @@ def base_path():
 
 
 # firmware paths
-def zseries_firmware_path():
-    return current_app.config['FIRMWARE_PATH'].joinpath('zseries')
-
-
-def pico_firmware_path(machineType):
+def firmware_path(machineType):
     if machineType is MachineType.PICOBREW:
         return current_app.config['FIRMWARE_PATH'].joinpath('pico')
-    else:
+    elif machineType is MachineType.PICOBREW_C:
         return current_app.config['FIRMWARE_PATH'].joinpath('pico_c')
-
-
-def picostill_firmware_path():
-    return current_app.config['FIRMWARE_PATH'].joinpath('picostill')
-
-
-def picoferm_firmware_path():
-    return current_app.config['FIRMWARE_PATH'].joinpath('picoferm')
+    elif machineType is MachineType.ZYMATIC:
+        return current_app.config['FIRMWARE_PATH'].joinpath('zymatic')
+    elif machineType is MachineType.ZSERIES:
+        return current_app.config['FIRMWARE_PATH'].joinpath('zseries')
+    elif machineType is MachineType.PICOSTILL:
+        return current_app.config['FIRMWARE_PATH'].joinpath('picostill')
+    elif machineType is MachineType.PICOFERM:
+        return current_app.config['FIRMWARE_PATH'].joinpath('picoferm')
+    else:
+        raise Exception("firmware_path: unsupported machine type {machineType}")
 
 
 # recipe paths
-def zymatic_recipe_path():
-    return current_app.config['RECIPES_PATH'].joinpath('zymatic')
+def recipe_path(machineType, archived=False):
+    recipe_filepath = ""
+    if machineType is MachineType.PICOBREW or machineType is MachineType.PICOBREW_C:
+        recipe_filepath = current_app.config['RECIPES_PATH'].joinpath('pico')
+    elif machineType is MachineType.ZYMATIC:
+        recipe_filepath = current_app.config['RECIPES_PATH'].joinpath('zymatic')
+    elif machineType is MachineType.ZSERIES:
+        recipe_filepath = current_app.config['RECIPES_PATH'].joinpath('zseries')
+    else:
+        raise Exception("recipe_path: unsupported machine type {machineType}")
 
+    if archived:
+        recipe_filepath = recipe_filepath.joinpath('archive')
 
-def zseries_recipe_path():
-    return current_app.config['RECIPES_PATH'].joinpath('zseries')
-
-
-def pico_recipe_path():
-    return current_app.config['RECIPES_PATH'].joinpath('pico')
+    return recipe_filepath
 
 
 # sessions paths

@@ -7,7 +7,7 @@ from webargs.flaskparser import use_args, FlaskParser
 
 from .. import socketio
 from . import main
-from .config import MachineType, brew_active_sessions_path, pico_firmware_path
+from .config import MachineType, brew_active_sessions_path, firmware_path
 from .firmware import firmware_filename, minimum_firmware, firmware_upgrade_required
 from .model import PicoBrewSession, PICO_SESSION
 from .routes_frontend import get_pico_recipes
@@ -80,7 +80,7 @@ def process_get_firmware(args):
     if args['uid'] in active_brew_sessions:
         machine_type = active_brew_sessions[args['uid']].machine_type
         filename = firmware_filename(machine_type, minimum_firmware(machine_type))
-        f = open(pico_firmware_path(machine_type).joinpath(filename))
+        f = open(firmware_path(machine_type).joinpath(filename))
         fw = f.read()
         f.close()
         return '{}'.format(fw)
@@ -264,18 +264,18 @@ def process_set_cleaned(args):
 
 # -------- Utility --------
 def get_recipe_by_id(recipe_id):
-    recipe = next((r for r in get_pico_recipes() if r.id == recipe_id), None)
+    recipe = next((r for r in get_pico_recipes(False) if r.id == recipe_id), None)
     return '' if not recipe else recipe.serialize()
 
 
 def get_recipe_name_by_id(recipe_id):
-    recipe = next((r for r in get_pico_recipes() if r.id == recipe_id), None)
+    recipe = next((r for r in get_pico_recipes(False) if r.id == recipe_id), None)
     return 'Invalid Recipe' if not recipe else recipe.name
 
 
 def get_recipe_list():
     recipe_list = ''
-    for r in get_pico_recipes():
+    for r in get_pico_recipes(False):
         recipe_list += f'{r.id},{r.name}|'
     return recipe_list
 
