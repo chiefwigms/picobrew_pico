@@ -148,7 +148,7 @@ def update_zymatic_recipe():
     return '', 204
 
 
-@main.route('/delete_zymatic_recipe', methods=['GET'])
+@main.route('/delete_zymatic_recipe', methods=['POST'])
 def delete_zymatic_recipe():
     recipe_id = request.get_json()
     synced_files = list(recipe_path(MachineType.ZYMATIC).glob(file_glob_pattern))
@@ -368,7 +368,7 @@ def download_session(session_type, filename):
     return f'Download Session: Failed to find session with filename "{filename}"', 418
 
 
-@main.route('/delete_zseries_recipe', methods=['GET'])
+@main.route('/delete_zseries_recipe', methods=['POST'])
 def delete_zseries_recipe():
     recipe_id = request.get_json()
     synced_files = list(recipe_path(MachineType.ZSERIES).glob(file_glob_pattern))
@@ -523,7 +523,7 @@ def update_pico_recipe():
     return '', 204
 
 
-@main.route('/delete_pico_recipe', methods=['GET'])
+@main.route('/delete_pico_recipe', methods=['POST'])
 def delete_pico_recipe():
     recipe_id = request.get_json()
     synced_files = list(recipe_path(MachineType.PICOBREW).glob(file_glob_pattern))
