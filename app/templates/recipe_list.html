@@ -27,24 +27,44 @@
     <div class="card bg-dark text-white-50">
         <h5 class="card-header" id="h_{{recipe['id']}}">
             <a class="collapsed" role="button" data-toggle="collapse" href="#c_{{recipe['id']}}"
+                data-toggle="tooltip" data-placement="bottom" title="Expand to See Recipe Details"
                 data-parent="#accordion" aria-expanded="false" aria-controls="c_{{recipe['id']}}">
                 {{recipe['name']}}
                 {% if recipe['abv'] and recipe['ibu'] %}
                 (ABV = {{recipe['abv']}}, IBU = {{recipe['ibu']}})
                 {% endif %}
-                <button class="btn btn-sm btn-primary float-right mr-5" type="button" id="bdownload_{{recipe['id']}}"
+                <!-- <div class="float-right mr-5">
+                    {% if recipe['is_archived'] %}
+                    <input type="checkbox" class="custom-control-input" id="sSync_{{recipe['id']}}">
+                    {% else %}
+                    <input type="checkbox" class="custom-control-input" id="sSync_{{recipe['id']}}" checked>
+                    {% endif %}
+                </div> -->
+                {% set synced_status = 'secondary' if recipe.is_archived else 'success' %}
+                {% set sync_prefix = 'Sync' if recipe.is_archived else 'Archive' %}
+                {% set sync_icon = 'fa-sync' if recipe.is_archived else 'fa-check-square' %}
+                <button class="btn btn-sm btn-{{synced_status}} float-right mr-5" type="button" id="bsync_{{recipe['id']}}"
+                    data-toggle="tooltip" data-placement="bottom" title="{{sync_prefix}} Recipe"
+                    onclick="event.stopPropagation();event.preventDefault();toggle_sync_recipe('{{recipe['id']}}', '{{recipe_type}}');">
+                    <i class="fas {{sync_icon}}"></i>
+                </button>
+                <button class="btn btn-sm btn-primary float-right mr-3" type="button" id="bdownload_{{recipe['id']}}"
+                    data-toggle="tooltip" data-placement="bottom" title="Download"
                     onclick="event.stopPropagation();event.preventDefault();download_recipe('{{recipe['id']}}', '{{recipe['name_escaped']}}');">
                     <i class="fas fa-download"></i>
                 </button>
                 <button class="btn btn-sm btn-info float-right mr-3" type="button" id="bclone_{{recipe['id']}}"
+                    data-toggle="tooltip" data-placement="bottom" title="Clone/Copy"
                     onclick='event.stopPropagation();event.preventDefault();clone_recipe({{recipe| tojson}});'>
                     <i class="fas fa-copy"></i>
                 </button>
                 <button class="btn btn-sm btn-danger float-right mr-3" type="button" id="bdelete_{{recipe['id']}}"
+                    data-toggle="tooltip" data-placement="bottom" title="Delete"
                     onclick="event.stopPropagation();event.preventDefault();delete_recipe('{{recipe['id']}}');">
                     <i class="fas fa-trash"></i>
                 </button>
                 <button class="btn btn-sm btn-success float-right mr-3" type="button" id="bsave_{{recipe['id']}}"
+                    data-toggle="tooltip" data-placement="bottom" title="Save Changes"
                     onclick="event.stopPropagation();event.preventDefault();update_recipe('{{recipe['id']}}');"
                     style="display:none;">
                     <i class="far fa-save fa-lg"></i>

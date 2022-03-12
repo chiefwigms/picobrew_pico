@@ -2,8 +2,8 @@ import json
 import os
 import uuid
 
-from .config import zymatic_recipe_path, pico_recipe_path, zseries_recipe_path
-from .model import PICO_LOCATION, ZYMATIC_LOCATION, ZSERIES_LOCATION
+from .config import recipe_path
+from .model import PICO_LOCATION, ZYMATIC_LOCATION, ZSERIES_LOCATION, MachineType
 from flask import current_app
 
 
@@ -32,6 +32,7 @@ class ZymaticRecipe():
         self.name = None
         self.name_ = None
         self.notes = None
+        self.is_archived = False
         self.steps = []
 
     def parse(self, file):
@@ -43,6 +44,7 @@ class ZymaticRecipe():
         self.name = recipe.get('name', 'Empty Recipe') or 'Empty Recipe'
         self.name_ = self.name.replace(" ", "_").replace("\'", "")
         self.notes = recipe.get('notes', None) or None
+        self.is_archived = "/archive/" in str(file)
         if 'steps' in recipe:
             for recipe_step in recipe['steps']:
                 step = ZymaticRecipeStep()
@@ -63,13 +65,18 @@ class ZymaticRecipe():
             ''.join(steps)
         )
 
+    def sync_recipe(self, filename):
+        old_recipe_file = filename
+        filename = recipe_path(MachineType.ZYMATIC, self.is_archived).joinpath('{}.json'.format(self.name_))
+        os.rename(old_recipe_file, filename)
+
     def update_recipe(self, filename, recipe):
         old_recipe_file = None
         if (self.name and self.name != recipe.get('name', self.name)):
             self.name = recipe.get('name', 'Empty Recipe')
             self.name_ = self.name.replace(" ", "_").replace("\'", "")
             old_recipe_file = filename
-            filename = zymatic_recipe_path().joinpath('{}.json'.format(self.name_))
+            filename = recipe_path(MachineType.ZYMATIC, recipe.get('is_archived')).joinpath('{}.json'.format(self.name_))
 
         self.notes = recipe.get('notes', self.notes)
         self.steps = []
@@ -110,7 +117,7 @@ def ZymaticRecipeImport(recipes):
             s['location'] = next(k for k, v in ZYMATIC_LOCATION.items() if v == values[3])
             s['drain_time'] = int(values[4])
             r['steps'].append(s)
-        filename = zymatic_recipe_path().joinpath('{}.json'.format(r['name'].replace(' ', '_')))
+        filename = recipe_path(MachineType.ZYMATIC).joinpath('{}.json'.format(r['name'].replace(' ', '_')))
         if not filename.exists():
             with open(filename, "w") as file:
                 json.dump(r, file, indent=4, sort_keys=True)
@@ -143,6 +150,7 @@ class ZSeriesRecipe():
         self.start_water = 13.1
         self.kind_code = 0
         self.type_code = None
+        self.is_archived = False
         self.steps = []
 
     def parse(self, file):
@@ -156,6 +164,7 @@ class ZSeriesRecipe():
         self.notes = recipe.get('notes', None) or None
         self.start_water = recipe.get('start_water', 13.1) or 13.1
         self.type_code = recipe.get('type_code', "Beer") or "Beer"
+        self.is_archived = "/archive/" in str(file)
         if 'steps' in recipe:
             for recipe_step in recipe['steps']:
                 step = ZSeriesRecipeStep()
@@ -180,13 +189,18 @@ class ZSeriesRecipe():
             r['Steps'].append(step.serialize())
         return r
 
+    def sync_recipe(self, filename):
+        old_recipe_file = filename
+        filename = recipe_path(MachineType.ZSERIES, self.is_archived).joinpath('{}.json'.format(self.name_))
+        os.rename(old_recipe_file, filename)
+
     def update_recipe(self, filename, recipe):
         old_recipe_file = None
         if (self.name and self.name != recipe.get('name', self.name)):
             self.name = recipe.get('name', 'Empty Recipe')
             self.name_ = self.name.replace(" ", "_").replace("\'", "")
             old_recipe_file = filename
-            filename = zseries_recipe_path().joinpath('{}.json'.format(self.name_))
+            filename = recipe_path(MachineType.ZSERIES, recipe.get('is_archived')).joinpath('{}.json'.format(self.name_))
 
         self.notes = recipe.get('notes', self.notes)
         self.steps = []
@@ -245,7 +259,7 @@ def ZSeriesRecipeImport(recipe):
     #    return None
 
     recipe_name = r['name'].replace(' ', '_')
-    filename = zseries_recipe_path().joinpath(f'{recipe_name}.json')
+    filename = recipe_path(MachineType.ZSERIES).joinpath(f'{recipe_name}.json')
     if not filename.exists():
         with open(filename, "w") as file:
             json.dump(r, file, indent=4, sort_keys=True)
@@ -280,6 +294,7 @@ class PicoBrewRecipe():
         self.abv = None
         self.ibu = None
         self.is_pico = True
+        self.is_archived = False
         self.image = None
         self.steps = []
 
@@ -296,6 +311,7 @@ class PicoBrewRecipe():
         self.abv = recipe.get('abv', 6) or 6
         self.ibu = recipe.get('ibu', 40) or 40
         self.image = recipe.get('image', '') or ''
+        self.is_archived = "/archive/" in str(file)
         if 'steps' in recipe:
             for recipe_step in recipe['steps']:
                 step = PicoBrewRecipeStep()
@@ -320,13 +336,18 @@ class PicoBrewRecipe():
             self.image
         )
 
+    def sync_recipe(self, filename):
+        old_recipe_file = filename
+        filename = recipe_path(MachineType.PICOBREW, self.is_archived).joinpath('{}.json'.format(self.name_))
+        os.rename(old_recipe_file, filename)
+
     def update_recipe(self, filename, recipe):
         old_recipe_file = None
         if (self.name and self.name != recipe.get('name', self.name)):
             self.name = recipe.get('name', 'Empty Recipe')
             self.name_ = self.name.replace(" ", "_").replace("\'", "")
             old_recipe_file = filename
-            filename = pico_recipe_path().joinpath('{}.json'.format(self.name_))
+            filename = recipe_path(MachineType.PICOBREW, recipe.get('is_archived')).joinpath('{}.json'.format(self.name_))
 
         self.abv = float(recipe.get('abv', self.abv) or 6)
         self.ibu = float(recipe.get('ibu', self.ibu) or 40)
@@ -375,7 +396,7 @@ def PicoBrewRecipeImport(recipe, rfid=None):
         s['location'] = next(k for k, v in PICO_LOCATION.items() if v == step[3])
         s['name'] = step[4]
         r['steps'].append(s)
-    filename = pico_recipe_path().joinpath('{}.json'.format(r['name'].replace(' ', '_')))
+    filename = recipe_path(MachineType.PICOBREW).joinpath('{}.json'.format(r['name'].replace(' ', '_')))
     if not filename.exists():
         with open(filename, "w") as file:
             json.dump(r, file, indent=4, sort_keys=True)

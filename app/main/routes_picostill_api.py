@@ -4,7 +4,7 @@ from webargs.flaskparser import use_args, FlaskParser
 from random import seed
 
 from . import main
-from .config import picostill_firmware_path
+from .config import firmware_path
 from .firmware import MachineType, firmware_filename, firmware_upgrade_required, minimum_firmware
 from .model import PicoStillSession
 from .session_parser import active_still_sessions
@@ -21,7 +21,7 @@ events = {}
 @main.route('/firmware/picostill/<file>', methods=['GET'])
 def process_picostill_firmware(file):
     current_app.logger.debug('DEBUG: PicoStill fetch firmware file={}'.format(file))
-    return send_from_directory(picostill_firmware_path(), file)
+    return send_from_directory(firmware_path(MachineType.PICOSTILL), file)
 
 
 picostill_check_firmware_args = {

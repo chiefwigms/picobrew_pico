@@ -159,55 +159,18 @@ function isRowMoved(row){
 	return true;
 }
 
-function calculate_hop_timing(data, provided_table = undefined) {
-    //data - all data loaded into the table
-    if (data.length == 0) {
-        return;
-    } else {
-        // called outside cell edit
-        if (provided_table == undefined) {
-            recently_loaded = Object.keys(tables).filter(key => tables_loaded.indexOf(key) == -1)
-
-            // type is always data (field isn't editable)
-            // table data is being filled in and not completely available, build up global reference for each recipe
-            if (recently_loaded.length != 0) {
-                provided_table = tables[recently_loaded[0]]
-                tables_loaded.push(recently_loaded[0])
-            } else {
-                // create experience
-                provided_table = table;
-            }
-        }
-
-        var rows = provided_table.getRows();
-        var adjunctSteps = rows.filter(row => row.getData().location.indexOf("Adjunct") == 0);
-
-        var cumulative_hop_time = {
-            "Adjunct1": 0,
-            "Adjunct2": 0,
-            "Adjunct3": 0,
-            "Adjunct4": 0
-        };
-        adjunctSteps.slice().reverse().forEach(adjunctRow => {
-            var row_data = adjunctRow.getData();
-            for (x in cumulative_hop_time) {
-                if (row_data.location <= "Adjunct" + x) {
-                    cumulative_hop_time[x] += row_data.step_time
-                }
-            }
-
-            // cumulative_hop_time += row_data.step_time;
-            adjunctRow.update({ "hop_time": cumulative_hop_time[row_data.location] });
-        });
-    }
-}
 
 $(document).ready(function () {
     $('#b_new_recipe').click(function () {
+        var form = document.getElementById('f_new_recipe');
+        if (!validate(form)) {
+            return false;
+        }
+
         var recipe = {}
         recipe.id = ''
-        recipe.name = document.getElementById('f_new_recipe').elements['recipe_name'].value;
-        recipe.notes = document.getElementById('f_new_recipe').elements['notes'].value;
+        recipe.name = form.elements['recipe_name'].value;
+        recipe.notes = form.elements['notes'].value;
         recipe.steps = table.getData();
         $.ajax({
             url: 'new_zseries_recipe_save',
@@ -229,7 +192,32 @@ $(document).ready(function () {
     $('#upload_recipe_file').on('change', function () {
         upload_recipe_file('zseries', $(this).prop('files')[0], 'zseries_recipes');
     });
+
+    for (element of document.getElementsByTagName("input")) {
+        const $feedback = $(element).siblings(".invalid-feedback", ".invalid-tooltip");
+        if (element.pattern && element.required && $feedback) {
+            element.addEventListener('change', (event) => {
+                $(element).closest("form").removeClass("was-validated");
+                $feedback.hide();
+          });
+        }
+    }
 });
+
+function validate(form) {
+    for (element of form.getElementsByTagName('input')) {
+        const $feedback = $(element).siblings(".invalid-feedback", ".invalid-tooltip");
+        if (element.pattern) {
+            const re = new RegExp(element.pattern)
+            if (!re.test(element.value)) {
+                $(form).addClass("was-validated");
+                $feedback.show();
+                return false;
+            }
+        }
+    };
+    return  true;
+}
 
 function update_recipe(recipe_id) {
     var table = Tabulator.findTable("#t_" + recipe_id)[0];
@@ -258,10 +246,6 @@ function update_recipe(recipe_id) {
     }
 };
 
-function edit_recipe(recipe_id) {
-    $('#view_' + recipe_id).toggleClass('d-none');
-    $('#form_' + recipe_id).toggleClass('d-none');
-};
 
 function download_recipe(recipe_id, recipe_name) {
     var table = Tabulator.findTable("#t_" + recipe_id)[0];

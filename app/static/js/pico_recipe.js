@@ -172,48 +172,7 @@ function data_loaded(data) {
     calculate_hop_timing(data)
 }
 
-function calculate_hop_timing(data, provided_table = undefined) {
-    //data - all data loaded into the table
-    if (data.length == 0) {
-        return;
-    } else {
-        // called outside cell edit
-        if (provided_table == undefined) {
-            recently_loaded = Object.keys(tables).filter(key => tables_loaded.indexOf(key) == -1)
 
-            // type is always data (field isn't editable)
-            // table data is being filled in and not completely available, build up global reference for each recipe
-            if (recently_loaded.length != 0) {
-                provided_table = tables[recently_loaded[0]]
-                tables_loaded.push(recently_loaded[0])
-            } else {
-                // create experience
-                provided_table = table;
-            }
-        }
-
-        var rows = provided_table.getRows();
-        var adjunctSteps = rows.filter(row => row.getData().location.indexOf("Adjunct") == 0);
-
-        var cumulative_hop_time = {
-            "Adjunct1": 0,
-            "Adjunct2": 0,
-            "Adjunct3": 0,
-            "Adjunct4": 0
-        };
-        adjunctSteps.slice().reverse().forEach(adjunctRow => {
-            var row_data = adjunctRow.getData();
-            for (x in cumulative_hop_time) {
-                if (row_data.location <= "Adjunct" + x) {
-                    cumulative_hop_time[x] += row_data.step_time
-                }
-            }
-
-            // cumulative_hop_time += row_data.step_time;
-            adjunctRow.update({ "hop_time": cumulative_hop_time[row_data.location] });
-        });
-    }
-}
 
 function getMaxID(component) {
     var maxID=0;
@@ -262,15 +221,20 @@ $(document).ready(function () {
 
 
     $('#b_new_recipe').click(function () {
+        var form = document.getElementById('f_new_recipe');
+        if (!validate(form)) {
+            return false;
+        }
+
         var recipe = {}
         recipe.id = ''
-        recipe.name = document.getElementById('f_new_recipe').elements['recipe_name'].value;
-        recipe.abv = document.getElementById('f_new_recipe').elements['abv'].value;
-        recipe.ibu = document.getElementById('f_new_recipe').elements['ibu'].value;
+        recipe.name = form.elements['recipe_name'].value;
+        recipe.abv = form.elements['abv'].value;
+        recipe.ibu = form.elements['ibu'].value;
         recipe.abv_tweak = -1
         recipe.ibu_tweak = -1
         recipe.image = recipe_images[recipe.id]
-        recipe.notes = document.getElementById('f_new_recipe').elements['notes'].value;
+        recipe.notes = form.elements['notes'].value;
         recipe.steps = table.getData();
         $.ajax({
             url: 'new_pico_recipe',
@@ -293,7 +257,41 @@ $(document).ready(function () {
     $('#upload_recipe_file').on('change', function () {
         upload_recipe_file('picobrew', $(this).prop('files')[0], 'pico_recipes');
     });
+
+    for (element of document.getElementsByTagName("input")) {
+        const $feedback = $(element).siblings(".invalid-feedback", ".invalid-tooltip");
+        if (element.pattern && element.required && $feedback) {
+            element.addEventListener('change', (event) => {
+                $(element).closest("form").removeClass("was-validated");
+                $feedback.hide();
+          });
+        }
+    }
 });
+
+function validate(form) {
+    let valid = true;
+    for (element of form.getElementsByTagName('input')) {
+        const $feedback = $(element).siblings(".invalid-feedback", ".invalid-tooltip");
+        if (element.type == "text" && element.pattern) {
+            const re = new RegExp(element.pattern)
+            if (!re.test(element.value)) {
+                $feedback.show();
+                valid = false;
+            }
+        }
+
+        if (element.type == "number" && (element.min || element.max)) {
+            if ((element.min && element.value < element.min) || (element.max && element.value > element.max)) {
+                $feedback.show();
+                valid = false;
+            }
+        }
+    };
+
+    $(form).addClass("was-validated");
+    return valid;
+}
 
 function update_recipe(recipe_id) {
     var table = Tabulator.findTable("#t_" + recipe_id)[0];
@@ -323,11 +321,6 @@ function update_recipe(recipe_id) {
             },
         });
     }
-};
-
-function edit_recipe(recipe_id) {
-    $('#view_' + recipe_id).toggleClass('d-none');
-    $('#form_' + recipe_id).toggleClass('d-none');
 };
 
 function download_recipe(recipe_id, recipe_name) {
