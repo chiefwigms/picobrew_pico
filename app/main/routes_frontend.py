@@ -184,7 +184,7 @@ def load_zymatic_recipe(file):
     return recipe
 
 
-def get_zymatic_recipes(include_archived: True):
+def get_zymatic_recipes(include_archived=True):
     global zymatic_recipes
     global zymatic_active_recipes
     return zymatic_recipes if include_archived else zymatic_active_recipes
@@ -427,7 +427,7 @@ def parse_recipe(machineType, recipe, file):
         add_invalid_recipe(machineType, file)
 
 
-def get_zseries_recipes(include_archived: True):
+def get_zseries_recipes(include_archived=True):
     global zseries_recipes
     global zseries_active_recipes
     return zseries_recipes if include_archived else zseries_active_recipes
@@ -613,7 +613,7 @@ def load_pico_recipe(file):
     return recipe
 
 
-def get_pico_recipes(archive_included: True):
+def get_pico_recipes(archive_included=True):
     global pico_recipes
     global pico_active_recipes
     return pico_recipes if archive_included else pico_active_recipes
