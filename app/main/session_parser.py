@@ -756,7 +756,7 @@ class PicoSessionType(str, MultiValueEnum):
 
 class BrewSessionType(str, MultiValueEnum):
     RINSE = "RINSE"
-    CLEAN = "CLEAN",
+    CLEAN = "CLEAN", "CLEANING V1", "NEW CLEAN BETA V6"
     UTILITY = "RACK_BEER", "RACK BEER", "CIRCULATE", "CHILL", "SOUS_VIDE", "SOUS VIDE", "DRAIN"
     MANUAL = "MANUAL"
     BEER = "BEER"
@@ -770,9 +770,8 @@ def dirty_sessions_since_clean(uid, mtype):
     clean_found = False
 
     for s in brew_session_files:
-        if mtype == MachineType.PICOBREW_C or MachineType.PICOBREW:
+        if mtype == MachineType.PICOBREW_C or mtype == MachineType.PICOBREW:
             session_name = session_name_from_filename(s)
-
             if (session_name.upper() in ["CLEAN", "DEEP CLEAN"]):
                 clean_found = True
 
@@ -780,7 +779,7 @@ def dirty_sessions_since_clean(uid, mtype):
                 post_clean_sessions.append(s)
 
         elif mtype == MachineType.ZSERIES:
-            session_type = ZSessionType(session_type_from_filename(s))
+            session_type = ZSessionType(session_type_from_filename(s, mtype))
             if (session_type == ZSessionType.CLEAN):
                 clean_found = True
 
@@ -789,11 +788,10 @@ def dirty_sessions_since_clean(uid, mtype):
 
         elif mtype == MachineType.ZYMATIC:
             session_name = session_name_from_filename(s)
-
-            if (session_name.upper() in ["CLEAN", "CLEAN V1", "NEW CLEAN BETA V6"]):
+            if (session_name.upper() in ["CLEANING V1", "NEW CLEAN BETA V6"]):
                 clean_found = True
 
-            if (not clean_found and session_name.upper() not in ["RINSE", "RINSE V3"]):
+            if (not clean_found):
                 post_clean_sessions.append(s)
 
     return len(post_clean_sessions)
@@ -820,15 +818,19 @@ def last_session_metadata(uid, mtype):
             try:
                 stype = ZSessionType(stype)
             except Exception as err:
-                stype = ZSessionType(0)  # zseries has type enum, assume unmatched to be non-dirty session
-            return stype, sname
+                stype = ZSessionType.RINSE  # zseries has type enum, assume unmatched to be non-dirty session
+        elif mtype == MachineType.ZYMATIC:
+            try:
+                stype = BrewSessionType(sname.upper())
+            except Exception as err:
+                stype = BrewSessionType.BEER
         else:
             try:
                 stype = PicoSessionType(sname)
             except Exception as err:
                 # current_app.logger.warn("unknown session type {} - {}".format(sname, err))
                 stype = PicoSessionType.BEER  # pico only has name in file (no type enum)
-            return stype, sname
+        return stype, sname
 
 
 def increment_session_id(uid):
