@@ -324,7 +324,7 @@ def backup_recipes(directory):
         zip_directory(f"{filepath}/{directory}", filepath)
     elif directory == "sessions":
         filepath = str(current_app.config['SESSIONS_PATH'])
-        zip_directory(f"{filepath}/{directory}", str(current_app.config['SESSIONS_PATH']))
+        zip_directory(f"{filepath}/{directory}", filepath)
     else:
         return 400, f"{directory} not supported for backing up"
 
