@@ -55,22 +55,37 @@ def firmware_path(machineType):
         raise Exception("firmware_path: unsupported machine type {machineType}")
 
 
-# recipe paths
+# recipe path
 def recipe_path(machineType, archived=False):
-    recipe_filepath = ""
+    filepath = current_app.config['RECIPES_PATH']
     if machineType is MachineType.PICOBREW or machineType is MachineType.PICOBREW_C:
-        recipe_filepath = current_app.config['RECIPES_PATH'].joinpath('pico')
+        filepath = filepath.joinpath('pico')
     elif machineType is MachineType.ZYMATIC:
-        recipe_filepath = current_app.config['RECIPES_PATH'].joinpath('zymatic')
+        filepath = filepath.joinpath('zymatic')
     elif machineType is MachineType.ZSERIES:
-        recipe_filepath = current_app.config['RECIPES_PATH'].joinpath('zseries')
+        filepath = filepath.joinpath('zseries')
     else:
         raise Exception("recipe_path: unsupported machine type {machineType}")
 
     if archived:
-        recipe_filepath = recipe_filepath.joinpath('archive')
+        filepath = filepath.joinpath('archive')
 
-    return recipe_filepath
+    return filepath
+
+
+# session path
+def session_path(sessionType, archived=False):
+    try:
+        filepath = current_app.config['SESSIONS_PATH'].joinpath(SessionType(sessionType))
+    except:
+        raise Exception("session_path: unsupported session type {sessionType}")
+
+    if archived:
+        filepath = filepath.joinpath('archive')
+    else:
+        filepath = filepath.joinpath('active')
+
+    return filepath
 
 
 # sessions paths
