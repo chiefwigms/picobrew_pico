@@ -4,12 +4,13 @@ import shlex
 import subprocess
 import sys
 import traceback
+import zipfile
 from flask import current_app, make_response, request, redirect, send_file
 from threading import Thread
 from time import sleep
 
 from . import main
-from .config import base_path
+from .config import base_path, recipe_path, session_path
 from .frontend_common import platform, render_template_with_defaults, system_info
 
 
@@ -79,12 +80,7 @@ def download_logs(log_type):
             error_msg = f"invalid log type specified {log_type} is unsupported"
             return error_msg, 400
 
-        response = make_response(send_file(filename))
-        # custom content-type will force a download vs rendering with window.location
-        response.headers['Content-Type'] = 'application/octet-stream'
-        response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
-        response.headers['Pragma'] = 'no-cache'
-        return response
+        return send_file(filename, as_attachment=True, cache_timeout=0)
     except Exception as e:
         error = f'Unexpected Error Retrieving {log_type} log file:<br/> {e}'
         return error, 500
@@ -309,6 +305,30 @@ def wireless_credentials():
         'psk': psk.decode("utf-8").strip().strip('"'),
         'bssid': bssid.decode("utf-8").strip().strip('"')
     }
+
+
+def zip_directory(file_name, target_dir):
+    zipobj = zipfile.ZipFile(file_name + '.zip', 'w', zipfile.ZIP_DEFLATED)
+    rootlen = len(target_dir) + 1
+    for base, _, files in os.walk(target_dir):
+        for file in files:
+            fn = os.path.join(base, file)
+            zipobj.write(fn, fn[rootlen:])
+
+
+@main.route("/backup/<directory>", methods=['GET'])
+def backup_recipes(directory):
+    filepath = ""
+    if directory == "recipes":
+        filepath = str(current_app.config['RECIPES_PATH'])
+        zip_directory(f"{filepath}/{directory}", filepath)
+    elif directory == "sessions":
+        filepath = str(current_app.config['SESSIONS_PATH'])
+        zip_directory(f"{filepath}/{directory}", str(current_app.config['SESSIONS_PATH']))
+    else:
+        return 400, f"{directory} not supported for backing up"
+
+    return send_file(f"{filepath}/{directory}.zip", as_attachment=True, attachment_filename=f"{directory}.zip", cache_timeout=0)
 
 
 @main.route('/about', methods=['GET'])
