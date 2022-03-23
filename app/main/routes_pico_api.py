@@ -2,6 +2,7 @@ import json
 import os
 import uuid
 from datetime import datetime
+from flask import current_app
 from webargs import fields
 from webargs.flaskparser import use_args, FlaskParser
 
@@ -86,6 +87,7 @@ def process_get_firmware(args):
         f.close()
         return '{}'.format(fw)
     else:
+        current_app.logger.warn('machine_type unknown - can not fetch firmware. Configuration of the device type via /devices UX is required.')
         # TODO: Error Processing?
         return '#F#'
 
