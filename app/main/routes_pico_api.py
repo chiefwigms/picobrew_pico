@@ -77,8 +77,9 @@ get_firmware_args = {
 @main.route('/API/pico/getFirmware')
 @use_args(get_firmware_args, location='querystring')
 def process_get_firmware(args):
-    if args['uid'] in active_brew_sessions:
-        machine_type = active_brew_sessions[args['uid']].machine_type
+    uid = args['uid']
+    if uid in active_brew_sessions and active_brew_sessions[uid].machine_type is not None:
+        machine_type = active_brew_sessions[uid].machine_type
         filename = firmware_filename(machine_type, minimum_firmware(machine_type))
         f = open(firmware_path(machine_type).joinpath(filename))
         fw = f.read()
@@ -107,7 +108,7 @@ def process_get_actions_needed(args):
 #    Error: /API/pico/error?uid={UID}&rfid={RFID}
 # Response: '\r\n'
 error_args = {
-    'uid': fields.Str(required=True),       # 32 character alpha-numeric serial number
+    'uid': fields.Str(required=True),        # 32 character alpha-numeric serial number
     'code': fields.Str(required=True),       # Integer error number
     'rfid': fields.Str(required=False),      # 14 character alpha-numeric PicoPak RFID (could be blank)
 }
