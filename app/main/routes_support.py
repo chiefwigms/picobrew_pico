@@ -58,6 +58,22 @@ def support_pico_pro():
     return render_support_template(pico_pro_support)
 
 
+@main.route('/support/pico_s')
+def support_pico_s():
+    pico_s_support = SupportObject()
+    pico_s_support.name = 'Pico S'
+    pico_s_support.logo = '/static/img/picobrew.svg'
+    pico_s_support.trademark_attribution = picobrew_attribution
+    pico_s_support.manual = SupportMedia('/static/support/legacy/pico-s/Pico_Manual.pdf')
+    pico_s_support.faq = SupportMedia('/static/support/legacy/pico-s/Frequently-Asked-Questions.md')
+    pico_s_support.instructional_videos = SupportMedia('/static/support/legacy/pico-s/Instructional-Videos.md')
+    pico_s_support.misc_media = {
+        'Base Recipes': SupportMedia('/static/support/legacy/pico-s/Base-Recipes.md', community_owner),
+        'Troubleshooting': SupportMedia('/static/support/legacy/pico-s/Pico_Troubleshooting.pdf'),
+    }
+    return render_support_template(pico_s_support)
+
+
 @main.route('/support/picoferm')
 def support_picoferm():
     picoferm_support = SupportObject()
@@ -164,22 +180,6 @@ def support_kegsmarts():
         'Troubleshooting': SupportMedia('/static/support/legacy/kegsmarts/KegSmarts_Troubleshooting.pdf'),
     }
     return render_support_template(kegsmarts_support)
-
-
-@main.route('/support/pico_s')
-def support_pico_s():
-    pico_s_support = SupportObject()
-    pico_s_support.name = 'Pico S'
-    pico_s_support.logo = '/static/img/picobrew.svg'
-    pico_s_support.trademark_attribution = picobrew_attribution
-    pico_s_support.manual = SupportMedia('/static/support/legacy/pico-s/Pico_Manual.pdf')
-    pico_s_support.faq = SupportMedia('/static/support/legacy/pico-s/Frequently-Asked-Questions.md')
-    pico_s_support.instructional_videos = SupportMedia('/static/support/legacy/pico-s/Instructional-Videos.md')
-    pico_s_support.misc_media = {
-        'Base Recipes': SupportMedia('/static/support/legacy/pico-s/Base-Recipes.md', community_owner),
-        'Troubleshooting': SupportMedia('/static/support/legacy/legacy/pico-s/Pico_Troubleshooting.pdf'),
-    }
-    return render_support_template(pico_s_support)
 
 
 @main.route('/support/zymatic')
