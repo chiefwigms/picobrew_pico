@@ -238,7 +238,7 @@ def hostname():
     try:
         return subprocess.check_output("hostname", shell=True).decode("utf-8").strip()
     except Exception:
-        current_app.logger.warn("current device doesn't support hostname changes")
+        current_app.logger.warning("current device doesn't support hostname changes")
     return None
 
 
@@ -249,7 +249,7 @@ def ip_addresses():
         command_output = list(filter(None, re.split('\\s', command_output)))
     except subprocess.CalledProcessError as error:
         # any interface that doesn't contain an IP address (bridges, etc) will error the `ipconfig getifaddr` command
-        current_app.logger.warn(f"current device doesn't support 'ifconfig' error={error.returncode} output={error.output}")
+        current_app.logger.warning(f"current device doesn't support 'ifconfig' error={error.returncode} output={error.output}")
         command_output = list(filter(None, re.split('\\s', error.output.decode())))
 
     pat = re.compile(r'\b(?:\d{1,3}\.){3}\d{1,3}\b')
@@ -258,7 +258,7 @@ def ip_addresses():
     if len(ip_addrs) > 0:
         return ip_addrs
     else:
-        current_app.logger.warn(f"ip addresses weren't able to be discovered output={command_output}")
+        current_app.logger.warning(f"ip addresses weren't able to be discovered output={command_output}")
         # ip addresses weren't able to be gathered successfully
         return None
 
@@ -274,7 +274,7 @@ def accesspoint_credentials():
             'psk': psk.decode("utf-8").strip().strip('"'),
         }
     except Exception:
-        current_app.logger.warn("WARN: failed to retrieve access point information from hostapd")
+        current_app.logger.warning("WARN: failed to retrieve access point information from hostapd")
 
     return {}
 
