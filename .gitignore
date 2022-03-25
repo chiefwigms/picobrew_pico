@@ -10,8 +10,9 @@ config.yaml
 
 # ignore all machine_type recipe and session files
 app/recipes/*/*
-app/sessions/*/active/*
-app/sessions/*/archive/*
+app/sessions/*/*/*
+app/recipes/*.zip
+app/sessions/*.zip
 
 scripts/docker/nginx/certs/*
 
