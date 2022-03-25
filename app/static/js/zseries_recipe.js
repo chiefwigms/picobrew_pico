@@ -1,4 +1,6 @@
 const fixedRows = 0;
+var isDataLoading;
+
 var plusIcon = function (cell, formatterParams) {
     return "<i class='far fa-plus-square fa-lg'></i>";
 }
@@ -69,9 +71,6 @@ var recipe_table = {
                     "Adjunct4",
                     "Pause",
                 ]
-            },
-            cellEdited: (cell) => {
-                calculate_hop_timing(cell.getTable().getData(), cell.getTable())
             }
         },
         {
@@ -91,11 +90,6 @@ var recipe_table = {
             editorParams: {
                 min: 0,
                 max: 180,
-            },
-            cellEdited: (cell) => {
-                total_time = cell.getValue() + cell.getData().drain_time;
-                cell.getRow().getCell("total_time").setValue(total_time);
-                calculate_hop_timing(cell.getTable().getData(), cell.getTable())
             }
         },
         {
@@ -105,10 +99,6 @@ var recipe_table = {
             editorParams: {
                 min: 0,
                 max: 10,
-            },
-            cellEdited: (cell) => {
-                total_time = cell.getValue() + cell.getData().step_time;
-                cell.getRow().getCell("total_time").setValue(total_time);
             }
         },
         {   // hop timings are cumulative (H1+H2+H3+H4 = H1 Hop Contact Time)
@@ -151,14 +141,9 @@ var recipe_table = {
     dataLoaded: data_loaded,
 };
 
-function data_loaded(data) {
-    calculate_hop_timing(data)
-}
-
 function isRowMoved(row){
 	return true;
 }
-
 
 $(document).ready(function () {
     $('#b_new_recipe').click(function () {

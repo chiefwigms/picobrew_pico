@@ -64,6 +64,7 @@
   recipe_table['data'] = default_data;
   var table = new Tabulator("#t_new_recipe", recipe_table);
   tables["new_recipe"] = table;
+  subscribe_table_callbacks(table);
   load_image('recipe_image', recipe_img);
 </script>
 {% endblock %}

@@ -26,6 +26,35 @@ function toggle_sync_recipe(recipe_id, recipe_type) {
     });
 }
 
+// tabulator utility functions for recipe table functionalities
+
+function subscribe_table_callbacks(table) {
+    table.on("dataLoading", function() {
+        isDataLoading=true;
+    })
+
+    table.on("dataLoaded", function(data) {
+        isDataLoading=false;
+        calculate_hop_timing(data);
+    })
+
+    table.on("cellEdited", function(cell) {
+        var column = cell.getColumn();
+        var columnField = column.getField();
+
+        if (columnField == "location") {
+            calculate_hop_timing(cell.getTable().getData(), cell.getTable())
+        } else if (columnField == "step_time") {
+            total_time = cell.getValue() + cell.getData().drain_time;
+            cell.getRow().getCell("total_time").setValue(total_time);
+            calculate_hop_timing(cell.getTable().getData(), cell.getTable())
+        } else if (columnField == "drain_time") {
+            total_time = cell.getValue() + cell.getData().drain_time;
+            cell.getRow().getCell("total_time").setValue(total_time);
+        }
+    })
+}
+
 function calculate_hop_timing(data, provided_table = undefined) {
     //data - all data loaded into the table
     if (data.length == 0) {

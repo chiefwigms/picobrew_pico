@@ -157,16 +157,18 @@
                     $('#f_{{recipe['id']}} textarea').bind('input propertychange', displayUnsavedState)
                     $('#f_{{recipe['id']}} input[type=text]').bind('input propertychange', displayUnsavedState)
 
-                    recipe_table['cellEdited'] = displayUnsavedState
-                    recipe_table['rowAdded'] = displayUnsavedState
-                    recipe_table['rowDeleted'] = displayUnsavedState
-                    recipe_table['rowMoved'] = function(row) {
-                        if (isRowMoved(row))
-                            displayUnsavedState(row)
-                    }
                     recipe_table['data'] = {{ recipe['steps']| tojson }};
 
                     tables["{{recipe['id']}}"] = new Tabulator("#t_{{recipe['id']}}", recipe_table);
+
+                    subscribe_table_callbacks(tables["{{recipe['id']}}"]);
+                    tables["{{recipe['id']}}"].on('cellEdited', displayUnsavedState)
+                    tables["{{recipe['id']}}"].on('rowAdded', displayUnsavedState)
+                    tables["{{recipe['id']}}"].on('rowDeleted', displayUnsavedState)
+                    tables["{{recipe['id']}}"].on('rowMoved', function(row) {
+                      if (isRowMoved(row))
+                        displayUnsavedState(row)
+                    });
                 </script>
             </div>
         </div>

@@ -77,9 +77,6 @@ var recipe_table = {
                     "Adjunct3",
                     "Adjunct4",
                 ]
-            },
-            cellEdited: (cell) => {
-                calculate_hop_timing(cell.getTable().getData(), cell.getTable())
             }
         },
         {
@@ -101,11 +98,6 @@ var recipe_table = {
             editorParams: {
                 min: 0,
                 max: 180,
-            },
-            cellEdited: (cell) => {
-                total_time = cell.getValue() + cell.getData().drain_time;
-                cell.getRow().getCell("total_time").setValue(total_time);
-                calculate_hop_timing(cell.getTable().getData(), cell.getTable())
             }
         },
         {
@@ -116,10 +108,6 @@ var recipe_table = {
             editorParams: {
                 min: 0,
                 max: 10,
-            },
-            cellEdited: (cell) => {
-                total_time = cell.getValue() + cell.getData().step_time;
-                cell.getRow().getCell("total_time").setValue(total_time);
             }
         },
         {   // hop timings are cumulative (H1+H2+H3+H4 = H1 Hop Contact Time)
@@ -160,19 +148,8 @@ var recipe_table = {
                 }
             }
         },
-    ],
-    dataLoading: function() {
-        isDataLoading=true;
-    },
-    dataLoaded: data_loaded,
+    ]
 };
-
-function data_loaded(data) {
-    isDataLoading=false;
-    calculate_hop_timing(data)
-}
-
-
 
 function getMaxID(component) {
     var maxID=0;

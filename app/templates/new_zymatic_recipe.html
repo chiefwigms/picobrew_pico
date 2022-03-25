@@ -30,6 +30,7 @@
 <script>
   recipe_table['data'] = default_data;
   var table = new Tabulator("#t_new_recipe", recipe_table);
+  subscribe_table_callbacks(table);
   tables["new_recipe"] = table;
 </script>
 {% endblock %}
