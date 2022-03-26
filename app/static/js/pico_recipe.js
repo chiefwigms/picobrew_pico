@@ -42,9 +42,9 @@ var recipe_table = {
     columnDefaults:{
         headerSort: false,
         hozAlign: "center",
-        resizableColumns: false,
-        tooltipsHeader: recipe_tooltips("Picobrew"),
-        tooltips: recipe_tooltips("Picobrew"),
+        resizable: false,
+        headerTooltip: recipe_tooltips("Picobrew"),
+        tooltip: recipe_tooltips("Picobrew"),
     },
     columns: [
         {

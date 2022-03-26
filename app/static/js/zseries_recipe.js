@@ -41,9 +41,9 @@ var recipe_table = {
     columnDefaults:{
         headerSort: false,
         hozAlign: "center",
-        resizableColumns: false,
-        tooltipsHeader: recipe_tooltips("ZSeries"),
-        tooltips: recipe_tooltips("ZSeries"),
+        resizable: false,
+        headerTooltip: recipe_tooltips("ZSeries"),
+        tooltip: recipe_tooltips("ZSeries"),
     },
     columns: [
         {

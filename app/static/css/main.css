@@ -61,6 +61,11 @@ p.mr-8 table {
   margin-bottom: 1rem;
 }
 
+.tabulator-calcs-bottom {
+  color: #fff;
+  font-weight: 700;
+}
+
 textarea[readonly].form-control-plaintext,
 input[readonly].form-control-plaintext {
   background-color: transparent;

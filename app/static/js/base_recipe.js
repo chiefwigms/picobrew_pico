@@ -38,6 +38,18 @@ function subscribe_table_callbacks(table) {
         calculate_hop_timing(data);
     })
 
+    table.on("rowMoved", function(row) {
+        calculate_hop_timing(row.getTable().getData(), row.getTable())
+    })
+
+    table.on("rowDeleted", function(row) {
+        calculate_hop_timing(row.getTable().getData(), row.getTable())
+    })
+
+    table.on("rowAdded", function(row) {
+        calculate_hop_timing(row.getTable().getData(), row.getTable())
+    })
+
     table.on("cellEdited", function(cell) {
         var column = cell.getColumn();
         var columnField = column.getField();
@@ -60,23 +72,7 @@ function calculate_hop_timing(data, provided_table = undefined) {
     if (data.length == 0) {
         return;
     } else {
-        // called outside cell edit
-        if (provided_table == undefined) {
-            recently_loaded = Object.keys(tables).filter(key => tables_loaded.indexOf(key) == -1)
-
-            // type is always data (field isn't editable)
-            // table data is being filled in and not completely available, build up global reference for each recipe
-            if (recently_loaded.length != 0) {
-                provided_table = tables[recently_loaded[0]]
-                tables_loaded.push(recently_loaded[0])
-            } else {
-                // create experience
-                provided_table = table;
-            }
-        }
-        
-        var rows = provided_table.getRows();
-        var adjunctSteps = rows.filter(row => row.getData().location.indexOf("Adjunct") == 0);
+        var adjunctSteps = data.filter(step => step.location.indexOf("Adjunct") == 0);
 
         var cumulative_hop_time = {
             "Adjunct1": 0,
@@ -84,17 +80,27 @@ function calculate_hop_timing(data, provided_table = undefined) {
             "Adjunct3": 0,
             "Adjunct4": 0
         };
-        adjunctSteps.slice().reverse().forEach(adjunctRow => {
-            var row_data = adjunctRow.getData();
+        adjunctSteps.slice().reverse().forEach(step => {
             for (x in cumulative_hop_time) {
-                if (row_data.location <= "Adjunct" + x) {
-                    cumulative_hop_time[x] += row_data.step_time
+                if (step.location >= x) {
+                    cumulative_hop_time[x] += step.step_time
                 }
             }
 
-            // cumulative_hop_time += row_data.step_time;
-            adjunctRow.update({ "hop_time": cumulative_hop_time[row_data.location] });
+            if (provided_table) {
+                provided_table.getRows()
+                    .filter(row => row.getData().location == step.location)
+                    .forEach(row => row.update({ "hop_time": cumulative_hop_time[step.location]}));
+            }
+            step['hop_time'] = cumulative_hop_time[step.location]
         });
+
+        // clear non adjunct hop_time from table (change adjunct->mash/passthru)
+        if (provided_table) {
+            provided_table.getRows()
+                .filter(row => row.getData().location.indexOf("Adjunct") != 0)
+                .forEach(row => row.update({"hop_time": undefined}));
+        }
     }
 }
 
