@@ -149,26 +149,16 @@
                 <div class="table-recipe table-sm table-striped table-bordered table-light" id="t_{{recipe['id']}}">
                 </div>
                 <script>
-                    function displayUnsavedState(data) {
-                        $("#bsave_{{recipe['id']}}").show();
-                    }
-                    
+                    var recipe_id = "{{recipe['id']}}"
                     // recipe metadata toggles unsaved state
-                    $('#f_{{recipe['id']}} textarea').bind('input propertychange', displayUnsavedState)
-                    $('#f_{{recipe['id']}} input[type=text]').bind('input propertychange', displayUnsavedState)
+                    $(`#f_${recipe_id} textarea`).bind('input propertychange', () => displayUnsavedState(recipe_id))
+                    $(`#f_${recipe_id} input[type=text]`).bind('input propertychange', () => displayUnsavedState(recipe_id))
 
                     recipe_table['data'] = {{ recipe['steps']| tojson }};
 
-                    tables["{{recipe['id']}}"] = new Tabulator("#t_{{recipe['id']}}", recipe_table);
+                    tables[recipe_id] = new Tabulator(`#t_${recipe_id}`, recipe_table);
 
-                    subscribe_table_callbacks(tables["{{recipe['id']}}"]);
-                    tables["{{recipe['id']}}"].on('cellEdited', displayUnsavedState)
-                    tables["{{recipe['id']}}"].on('rowAdded', displayUnsavedState)
-                    tables["{{recipe['id']}}"].on('rowDeleted', displayUnsavedState)
-                    tables["{{recipe['id']}}"].on('rowMoved', function(row) {
-                      if (isRowMoved(row))
-                        displayUnsavedState(row)
-                    });
+                    subscribe_table_callbacks(tables[recipe_id]);
                 </script>
             </div>
         </div>

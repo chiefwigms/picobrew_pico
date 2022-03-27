@@ -27,27 +27,83 @@ function toggle_sync_recipe(recipe_id, recipe_type) {
 }
 
 // tabulator utility functions for recipe table functionalities
+var isDataLoading = true;
+var tables_loaded = [];
+
+function rowIsEditable(cell,plus) {
+    var pos = cell.getTable().getRowPosition(cell.getRow(),true);
+    pos += plus ? 1 : 0;
+    return (pos < fixedRows) ? false : true;
+}
+
+var editCheck = function (cell) {
+    return rowIsEditable(cell,false);
+}
+
+var plusIcon = function (cell, formatterParams) {
+    return rowIsEditable(cell,true) ? "<i class='far fa-plus-square fa-lg'></i>" : "";
+}
+
+var minusIcon = function (cell, formatterParams) {
+    return rowIsEditable(cell,false) ? "<i class='far fa-minus-square fa-lg'></i>" : "";
+}
+
+function showAlert(msg, type) {
+    $('#alert').html("<div class='w-100 alert text-center alert-" + type + "'>" + msg + "</div>");
+    $('#alert').show();
+}
+
+function isRowMoved(row){
+	return true;
+}
+
+function displayUnsavedState(recipe_id) {
+    $(`#bsave_${recipe_id}`).show();
+}
 
 function subscribe_table_callbacks(table) {
     table.on("dataLoading", function() {
         isDataLoading=true;
     })
 
+    table.on("tableBuilt", function() {
+        isDataLoading = false;
+        removeMoveHandles(table);
+    })
+
     table.on("dataLoaded", function(data) {
-        isDataLoading=false;
         calculate_hop_timing(data);
     })
 
     table.on("rowMoved", function(row) {
-        calculate_hop_timing(row.getTable().getData(), row.getTable())
+        calculate_hop_timing(row.getTable().getData(), row.getTable());
+        
+        // prevent fixed rows from moving (revert move operation)
+        if (isRowMoved(row)) {
+            // extract recipe_id from "t_<recipe_id>"
+            recipe_id = row.getTable().element.id.substring(2)
+            displayUnsavedState(recipe_id)
+        }
+        
+        removeMoveHandles(row.getTable());
     })
 
+                    
+                    // displayUnsavedState is table scoped and overloaded
+                    // tables["{{recipe['id']}}"].on('cellEdited', displayUnsavedState)
+                    // tables["{{recipe['id']}}"].on('rowAdded', displayUnsavedState)
+                    // tables["{{recipe['id']}}"].on('rowDeleted', displayUnsavedState)
+
     table.on("rowDeleted", function(row) {
-        calculate_hop_timing(row.getTable().getData(), row.getTable())
+        calculate_hop_timing(row.getTable().getData(), row.getTable());
+        recipe_id = row.getTable().element.id.substring(2)
+        displayUnsavedState(recipe_id)
     })
 
     table.on("rowAdded", function(row) {
-        calculate_hop_timing(row.getTable().getData(), row.getTable())
+        calculate_hop_timing(row.getTable().getData(), row.getTable());
+        recipe_id = row.getTable().element.id.substring(2)
+        displayUnsavedState(recipe_id)
     })
 
     table.on("cellEdited", function(cell) {
@@ -55,16 +111,23 @@ function subscribe_table_callbacks(table) {
         var columnField = column.getField();
 
         if (columnField == "location") {
-            calculate_hop_timing(cell.getTable().getData(), cell.getTable())
+            calculate_hop_timing(cell.getTable().getData(), cell.getTable());
         } else if (columnField == "step_time") {
             total_time = cell.getValue() + cell.getData().drain_time;
             cell.getRow().getCell("total_time").setValue(total_time);
-            calculate_hop_timing(cell.getTable().getData(), cell.getTable())
+            calculate_hop_timing(cell.getTable().getData(), cell.getTable());
         } else if (columnField == "drain_time") {
             total_time = cell.getValue() + cell.getData().drain_time;
             cell.getRow().getCell("total_time").setValue(total_time);
         }
     })
+}
+
+function removeMoveHandles(table) {
+    table.getRows().filter(row => row.getIndex() < fixedRows)
+        .forEach(row => {
+            row.getCell("handle").getElement().children[0].style.display = "none";
+        });
 }
 
 function calculate_hop_timing(data, provided_table = undefined) {

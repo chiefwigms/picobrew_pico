@@ -1,24 +1,5 @@
 const fixedRows = 3;
-var isDataLoading;
 
-function rowIsEditable(cell,plus) {
-    var pos = cell.getTable().getRowPosition(cell.getRow(),true);
-    pos += plus ? 1 : 0;
-    return (pos < fixedRows) ? false : true;
-}
-var editCheck = function (cell) {
-    return rowIsEditable(cell,false);
-}
-var plusIcon = function (cell, formatterParams) {
-    return rowIsEditable(cell,true) ? "<i class='far fa-plus-square fa-lg'></i>" : "";
-}
-var minusIcon = function (cell, formatterParams) {
-    return rowIsEditable(cell,false) ? "<i class='far fa-minus-square fa-lg'></i>" : "";
-}
-function showAlert(msg, type) {
-    $('#alert').html("<div class='w-100 alert text-center alert-" + type + "'>" + msg + "</div>");
-    $('#alert').show();
-}
 var default_data = [
     { name: "Preparing To Brew", location: "Prime", temperature: 0, step_time: 3, drain_time: 0 },
     { name: "Heating", location: "PassThru", temperature: 110, step_time: 0, drain_time: 0 },
@@ -31,10 +12,11 @@ var default_data = [
     { name: "Hops 3", location: "Adjunct3", temperature: 202, step_time: 8, drain_time: 0 },
     { name: "Hops 4", location: "Adjunct4", temperature: 202, step_time: 8, drain_time: 5 },
 ];
-var tables_loaded = [];
+
 var idMutator = function (value, data, type, params, component) {
 	return isDataLoading ? component.getTable().getRows().length : data.id;
 }
+
 var recipe_table = {
     movableRows: true,
     layout: "fitDataFill",
@@ -48,7 +30,7 @@ var recipe_table = {
     },
     columns: [
         {
-            rowHandle: true, formatter: "handle", frozen: true, width: 50,
+            rowHandle: true, field:"handle", formatter: "handle", frozen: true, width: 50,
         },
         {
 			title: "ID", field:"id", visible: false, mutatorData: idMutator,

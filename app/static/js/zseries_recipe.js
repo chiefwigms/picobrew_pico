@@ -1,16 +1,4 @@
 const fixedRows = 0;
-var isDataLoading;
-
-var plusIcon = function (cell, formatterParams) {
-    return "<i class='far fa-plus-square fa-lg'></i>";
-}
-var minusIcon = function (cell, formatterParams) {
-    return "<i class='far fa-minus-square fa-lg'></i>";
-}
-function showAlert(msg, type) {
-    $('#alert').html("<div class='w-100 alert text-center alert-" + type + "'>" + msg + "</div>");
-    $('#alert').show();
-}
 
 // provide selector for default mash profiles (single infusion w/ mashout, single infusion w/o mashout, high efficiency multi-step, etc)
 var default_data = [
@@ -33,7 +21,7 @@ var default_data = [
     { name: "Connect Chiller", location: "Pause", temperature: 0, step_time: 0, drain_time: 0 },
     { name: "Chill", location: "PassThru", temperature: 66, step_time: 10, drain_time: 10 },
 ];
-var tables_loaded = [];
+
 var recipe_table = {
     movableRows: true,
     layout: "fitDataFill",
@@ -47,7 +35,7 @@ var recipe_table = {
     },
     columns: [
         {
-            rowHandle: true, formatter: "handle", frozen: true, width: 50,
+            rowHandle: true, field:"handle", formatter: "handle", frozen: true, width: 50,
         },
         {
             title: "Step #", formatter: "rownum", width: 60,
@@ -137,13 +125,8 @@ var recipe_table = {
                 }
             }
         },
-    ],
-    dataLoaded: data_loaded,
+    ]
 };
-
-function isRowMoved(row){
-	return true;
-}
 
 $(document).ready(function () {
     $('#b_new_recipe').click(function () {

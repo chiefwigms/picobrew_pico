@@ -66,6 +66,14 @@ p.mr-8 table {
   font-weight: 700;
 }
 
+.tabulator-row-odd .tabulator-cell.tabulator-row-handle .tabulator-row-handle-box .tabulator-row-handle-bar {
+  background: #555;
+}
+
+.tabulator-row-odd:hover .tabulator-cell.tabulator-row-handle .tabulator-row-handle-box .tabulator-row-handle-bar {
+  background: #666;
+}
+
 textarea[readonly].form-control-plaintext,
 input[readonly].form-control-plaintext {
   background-color: transparent;
