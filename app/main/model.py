@@ -60,6 +60,7 @@ class PicoBrewSession:
         self.recovery = ''
         self.remaining_time = None
         self.is_pico = True if machineType in [MachineType.PICOBREW, MachineType.PICOBREW_C] else False
+        self.boiler_type = None   # Z machines have 2 different configurations: 1 (big) or 2 (small)
         self.data = []
 
     def cleanup(self):
