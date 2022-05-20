@@ -150,9 +150,14 @@ def process_zstate(args):
     update_required = firmware_upgrade_required(MachineType.ZSERIES, json['CurrentFirmware'])
     firmware_source = "https://picobrew.com/firmware/zseries/{}".format(firmware_filename(MachineType.ZSERIES, minimum_firmware(MachineType.ZSERIES)))
 
+    # only update in-memory machine boiler_type if not already known
+    boiler_type = json.get('BoilerType', None)
+    if active_brew_sessions[uid].boiler_type == None:
+        active_brew_sessions[uid].boiler_type = boiler_type
+
     returnVal = {
         "Alias": zseries_alias(uid),
-        "BoilerType": json.get('BoilerType', None),       # TODO sometimes machine loses boilertype, need to resync with known state
+        "BoilerType": boiler_type,
         "IsRegistered": True,
         "IsUpdated": False if update_required else True,
         "ProgramUri": None,                               # what is this?
@@ -165,8 +170,13 @@ def process_zstate(args):
         "TokenExpired": False,
         "UpdateAddress": firmware_source if update_required else "-1",
         "UpdateToFirmware": None,
-        "ZBackendError": 0
+        "ZBackendError": 0              # 0: no error, 2: mismatched boilertype
     }
+
+    if boiler_type is not active_brew_sessions[uid].boiler_type:
+        # mismatched boiler type (otherwise Z will show Error 5: Too Cold)
+        returnVal.update({"ZBackendError": 2})
+
     return returnVal
 
 
