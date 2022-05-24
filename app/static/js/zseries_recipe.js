@@ -191,7 +191,7 @@ $(document).ready(function () {
     });
 
     for (element of document.getElementsByTagName("input")) {
-        const $feedback = $(element).siblings(".invalid-feedback", ".invalid-tooltip");
+        const $feedback = $(element).siblings(".invalid-tooltip");
         if (element.pattern && element.required && $feedback) {
             element.addEventListener('change', (event) => {
                 $(element).closest("form").removeClass("was-validated");
@@ -203,7 +203,7 @@ $(document).ready(function () {
 
 function validate(form) {
     for (element of form.getElementsByTagName('input')) {
-        const $feedback = $(element).siblings(".invalid-feedback", ".invalid-tooltip");
+        const $feedback = $(element).siblings(".invalid-tooltip");
         if (element.pattern) {
             const re = new RegExp(element.pattern)
             if (!re.test(element.value)) {
