@@ -218,7 +218,7 @@ $(document).ready(function () {
     });
 
     for (element of document.getElementsByTagName("input")) {
-        const $feedback = $(element).siblings(".invalid-feedback", ".invalid-tooltip");
+        const $feedback = $(element).siblings(".invalid-tooltip");
         if (element.pattern && element.required && $feedback) {
             element.addEventListener('change', (event) => {
                 $(element).closest("form").removeClass("was-validated");
@@ -231,7 +231,7 @@ $(document).ready(function () {
 function validate(form) {
     let valid = true;
     for (element of form.getElementsByTagName('input')) {
-        const $feedback = $(element).siblings(".invalid-feedback", ".invalid-tooltip");
+        const $feedback = $(element).siblings(".invalid-tooltip");
         if (element.type == "text" && element.pattern) {
             const re = new RegExp(element.pattern)
             if (!re.test(element.value)) {
@@ -241,7 +241,10 @@ function validate(form) {
         }
 
         if (element.type == "number" && (element.min || element.max)) {
-            if ((element.min && element.value < element.min) || (element.max && element.value > element.max)) {
+            const min = parseFloat(element.min);
+            const max = parseFloat(element.max);
+            const value = parseFloat(element.value);
+            if ((min && value <= min) || (max && value >= max)) {
                 $feedback.show();
                 valid = false;
             }
