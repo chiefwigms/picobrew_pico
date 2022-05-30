@@ -1,14 +1,4 @@
 const fixedRows = 0;
-var plusIcon = function (cell, formatterParams) {
-    return "<i class='far fa-plus-square fa-lg'></i>";
-}
-var minusIcon = function (cell, formatterParams) {
-    return "<i class='far fa-minus-square fa-lg'></i>";
-}
-function showAlert(msg, type) {
-    $('#alert').html("<div class='w-100 alert text-center alert-" + type + "'>" + msg + "</div>");
-    $('#alert').show();
-}
 
 var default_data = [
     { name: "Heat Mash", location: "PassThru", temperature: 152, step_time: 0, drain_time: 0 },
@@ -26,21 +16,24 @@ var default_data = [
     { name: "Connect Chiller", location: "Pause", temperature: 0, step_time: 0, drain_time: 0 },
     { name: "Chill", location: "PassThru", temperature: 66, step_time: 10, drain_time: 10 },
 ];
-var tables_loaded = [];
+
 var recipe_table = {
     movableRows: true,
-    headerSort: false,
     layout: "fitDataFill",
-    resizableColumns: false,
     tooltipGenerationMode: "hover",
-    tooltipsHeader: recipe_tooltips("Zymatic"),
-    tooltips: recipe_tooltips("Zymatic"),
+    columnDefaults:{
+        headerSort: false,
+        hozAlign: "center",
+        resizable: false,
+        headerTooltip: recipe_tooltips("Zymatic"),
+        tooltip: recipe_tooltips("Zymatic"),
+    },
     columns: [
         {
-            rowHandle: true, formatter: "handle", headerSort: false, frozen: true, width: 50
+            rowHandle: true, field:"handle", formatter: "handle", frozen: true, width: 50,
         },
         {
-            title: "Step #", formatter: "rownum", hozAlign: "center", width: 60
+            title: "Step #", formatter: "rownum", width: 60,
         },
         {
             title: "Name", field: "name", width: 200,
@@ -48,7 +41,7 @@ var recipe_table = {
             editor: "input"
         },
         {
-            title: "Location", field: "location", width: 120, hozAlign: "center",
+            title: "Location", field: "location", width: 120,
             validator: ["required", "string"],
             editor: "select",
             editorParams: {
@@ -61,13 +54,10 @@ var recipe_table = {
                     "Adjunct4",
                     "Pause",
                 ]
-            },
-            cellEdited: (cell) => {
-                calculate_hop_timing(cell.getTable().getData(), cell.getTable())
             }
         },
         {
-            title: "Temp (°F)", field: "temperature", width: 100, hozAlign: "center",
+            title: "Temp (°F)", field: "temperature", width: 100,
             validator: ["required", "min:0", "max:208", "numeric"],
             editorParams: {
                 min: 0,     // -18 C
@@ -77,34 +67,25 @@ var recipe_table = {
             formatter: format_temperature
         },
         {
-            title: "Time (min)", field: "step_time", width: 100, hozAlign: "center",
+            title: "Time (min)", field: "step_time", width: 100,
             validator: ["required", "min:0", "max:180", "numeric"],
             editor: "number",
             editorParams: {
                 min: 0,
                 max: 180,
-            },
-            cellEdited: (cell) => {
-                total_time = cell.getValue() + cell.getData().drain_time;
-                cell.getRow().getCell("total_time").setValue(total_time);
-                calculate_hop_timing(cell.getTable().getData(), cell.getTable())
             }
         },
         {
-            title: "Drain (min)", field: "drain_time", width: 100, hozAlign: "center",
+            title: "Drain (min)", field: "drain_time", width: 100,
             validator: ["required", "min:0", "max:10", "numeric"],
             editor: "number",
             editorParams: {
                 min: 0,
                 max: 10,
-            },
-            cellEdited: (cell) => {
-                total_time = cell.getValue() + cell.getData().step_time;
-                cell.getRow().getCell("total_time").setValue(total_time);
             }
         },
         {   // hop timings are cumulative (H1+H2+H3+H4 = H1 Hop Contact Time)
-            title: "Hop (min)", field: "hop_time", width: 100, hozAlign: "center",
+            title: "Hop (min)", field: "hop_time", width: 100,
             editable: false,
             mutator: (value, data, type, params, component) => {
                 // type is always data (field isn't editable)
@@ -115,7 +96,7 @@ var recipe_table = {
             },
         },
         {
-            title: "Total (min)", field: "total_time", width: 100, hozAlign: "center",
+            title: "Total (min)", field: "total_time", width: 100,
             editable: false,
             mutator: (value, data, type, params, component) => {
                 return data.step_time + data.drain_time;
@@ -123,7 +104,7 @@ var recipe_table = {
             bottomCalc: "sum"
         },
         {
-            formatter: plusIcon, width: 49, hozAlign: "center",
+            formatter: plusIcon, width: 49,
             cellClick: function (e, cell) {
                 cell.getTable().addRow(Object.assign({}, cell.getRow().getData()), false, cell.getRow()).then(function(row) {
                     row.update({name: "New Step"});
@@ -131,7 +112,7 @@ var recipe_table = {
             }
         },
         {
-            formatter: minusIcon, width: 49, hozAlign: "center",
+            formatter: minusIcon, width: 49,
             cellClick: function (e, cell) {
                 cell.getRow().delete();
                 if (cell.getTable().getRows().length==fixedRows) {
@@ -140,16 +121,7 @@ var recipe_table = {
             }
         },
     ],
-    dataLoaded: data_loaded
 };
-
-function data_loaded(data) {
-    calculate_hop_timing(data)
-}
-
-function isRowMoved(row){
-	return true;
-}
 
 $(document).ready(function () {
     $('#b_new_recipe').click(function () {
@@ -212,7 +184,7 @@ function validate(form) {
 }
 
 function update_recipe(recipe_id) {
-    var table = Tabulator.prototype.findTable("#t_" + recipe_id)[0];
+    var table = Tabulator.findTable("#t_" + recipe_id)[0];
     if (table) {
         var recipe = {};
         recipe.id = recipe_id
@@ -231,7 +203,7 @@ function update_recipe(recipe_id) {
                 setTimeout(function () { window.location.href = "zymatic_recipes"; }, 2000);
             },
             error: function (request, status, error) {
-                //showAlert("Error: " + request.responseText, "danger");
+                showAlert("Error: " + request.responseText, "danger");
                 //setTimeout(function () { window.location.href = "zymatic_recipes";}, 2000);
             },
         });
@@ -239,7 +211,7 @@ function update_recipe(recipe_id) {
 };
 
 function download_recipe(recipe_id, recipe_name) {
-    var table = Tabulator.prototype.findTable("#t_" + recipe_id)[0];
+    var table = Tabulator.findTable("#t_" + recipe_id)[0];
     if (table) {
         window.location = '/recipes/zymatic/' + recipe_id + '/' + unescapeHtml(recipe_name) + '.json';
     }
@@ -260,7 +232,7 @@ function clone_recipe(recipe) {
             setTimeout(function () { window.location.href = "zymatic_recipes"; }, 2000);
         },
         error: function (request, status, error) {
-            showAlert("Error: " + request.responseText, "danger")
+            showAlert("Error: " + request.responseText, "danger");
             //setTimeout(function () { window.location.href = "zymatic_recipes";}, 2000);
         },
     });
@@ -280,7 +252,7 @@ function delete_recipe(recipe_id) {
                 setTimeout(function () { window.location.href = "zymatic_recipes"; }, 2000);
             },
             error: function (request, status, error) {
-                //showAlert("Error: " + request.responseText, "danger");
+                showAlert("Error: " + request.responseText, "danger");
                 //setTimeout(function () { window.location.href = "zymatic_recipes";}, 2000);
             },
         });

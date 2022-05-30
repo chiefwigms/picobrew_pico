@@ -80,15 +80,6 @@ sync_user_args = {
 def process_sync_user(args):
     clean = False
     if args['user'] == '00000000000000000000000000000000':
-        # New Clean V6
-        # -Make sure that all 3 mash screens are in place in the step filter. Do not insert the adjunct loaf/hop cages.
-        # -Place cleaning tablet in the right area of the adjunct compartment, on top of the smaller screen, at the end of the metal tab. 1/4 cup of powdered dishwasher detergent can also be used.
-        # -Add 1.5 gallons of HOT tap water to the keg at completion of cleaning cycle (prompt notes/before final step) -Empty and rinse keg, step filter, screens, and in-line filter.
-        # -Fill keg with 4 gallons of hot tap water
-        # -Connect black fitting to 'OUT' post on keg
-        # -Attach wand to grey fitting and run it into bucket or sink, OR attach grey fitting to 'IN' post on empty keg
-        # -Continue, this will rinse your system. There should be no water left in the keg at the end of this step.
-        # Share your experience with info@picobrew.com, Subject - New Clean Beta attn: Kevin, attach pictures of debris removed and collected on screens if possible.
         clean = True
     return '\r\n\r\n#{0}#'.format(get_zymatic_recipe_list(clean))
 

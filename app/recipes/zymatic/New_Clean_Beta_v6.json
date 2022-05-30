@@ -2,6 +2,7 @@
     "clean": true,
     "id": "c66b2c4f4a3f42fb8180c795d0d01813",
     "name": "New Clean Beta v6",
+    "notes": "Pre Clean (not part of recipe):\n-Create a solution of 1 gallon of hot water and 1/4 cup of powdered dishwasher detergent in your keg\n-Place all three screens into the step filter. (No adjunct compartment or hop cages)\n-Use 'Circulate' from the help menu to run this through the machine for a few minutes, then turn the machine off, and disconnect the keg.\n-Empty and rinse keg, step filter, screens, and in-line filter.\n-Allow this solution to sit in the machine overnight.\n\nNew Clean V6 (this recipe):\n-Create a fresh detergent solution in your keg using the same ratio as before.\n-Place all three screens into the step filter. (No adjunct compartment or hop cages)\n-At completion of cleaning cycle (prompt notes/before final step),  fill keg with 4 gallons of hot tap water\n-Connect black fitting to 'OUT' post on keg\n-Attach wand to grey fitting and run it into bucket or sink, OR attach grey fitting to 'IN' post on empty keg\n-Continue, this will rinse your system. There should be no water left in the keg at the end of this step.",
     "steps": [
         {
             "drain_time": "0",

@@ -8,7 +8,7 @@
 }
 .card-header > a:after {
   content: "\f078"; /* fa-chevron-down */
-  font-family: 'Font Awesome\ 5 Free';
+  font-family: 'Font Awesome\ 6 Free';
   font-weight: 900;
   position: absolute;
   right: 0;
@@ -59,6 +59,19 @@ canvas {
 p.mr-8 table {
   margin-top: 0;
   margin-bottom: 1rem;
+}
+
+.tabulator-calcs-bottom {
+  color: #fff;
+  font-weight: 700;
+}
+
+.tabulator-row-odd .tabulator-cell.tabulator-row-handle .tabulator-row-handle-box .tabulator-row-handle-bar {
+  background: #555;
+}
+
+.tabulator-row-odd:hover .tabulator-cell.tabulator-row-handle .tabulator-row-handle-box .tabulator-row-handle-bar {
+  background: #666;
 }
 
 textarea[readonly].form-control-plaintext,

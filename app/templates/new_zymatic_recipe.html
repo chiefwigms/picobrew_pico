@@ -28,8 +28,9 @@
 </form>
 <div class="table-recipe table-sm table-striped table-bordered table-light" id="t_new_recipe"></div>
 <script>
+  recipe_table['data'] = default_data;
   var table = new Tabulator("#t_new_recipe", recipe_table);
-  table.setData(default_data);
+  subscribe_table_callbacks(table);
   tables["new_recipe"] = table;
 </script>
 {% endblock %}
