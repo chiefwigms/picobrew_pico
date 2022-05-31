@@ -6,7 +6,7 @@ ENV PORT=80
 WORKDIR /picobrew_pico
 
 RUN apt-get update && \
-    apt-get install -y bluez bluetooth git gcc && \
+    apt-get install -y bluez bluetooth git gcc g++ && \
     apt-get clean
 
 RUN pip3 install -U pip
