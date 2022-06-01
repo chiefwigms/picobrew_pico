@@ -426,7 +426,7 @@ def update_session_log(token, body):
         # upon file load with -1 (assume this is the right session to log with)
         active_session.id = session_id
     elif active_session.id != session_id:   # session_id is hex string; session.id is number
-        current_app.logger.warn('WARN: ZSeries reported session_id not active session')
+        current_app.logger.warning('WARN: ZSeries reported session_id not active session')
 
         error = {
             'error': 'matching server log identifier {} does not match requested session_id {}'.format(active_session.id, session_id)
@@ -593,7 +593,7 @@ def process_recover_session(token, session_id):
                 steps.append(s)
 
         if (not step_found or len(steps) == 0):
-            current_app.logger.warn("most recently logged step not found in linked recipe steps")
+            current_app.logger.warning("most recently logged step not found in linked recipe steps")
             error = {
                 'error': 'active brew session\'s most recently logged step not found in linked recipe'
             }

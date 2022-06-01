@@ -828,7 +828,7 @@ def last_session_metadata(uid, mtype):
             try:
                 stype = PicoSessionType(sname)
             except Exception as err:
-                # current_app.logger.warn("unknown session type {} - {}".format(sname, err))
+                # current_app.logger.warning("unknown session type {} - {}".format(sname, err))
                 stype = PicoSessionType.BEER  # pico only has name in file (no type enum)
         return stype, sname
 
@@ -856,7 +856,7 @@ def session_type_from_filename(filename, mtype):
             if len(info) > 4:
                 session_type = int(info[4])
         except Exception as error:
-            current_app.logger.warn("error occurred extracting session type from {}".format(filename))
+            current_app.logger.warning("error occurred extracting session type from {}".format(filename))
 
     else:
         session_type = PicoSessionType.BEER
@@ -865,7 +865,7 @@ def session_type_from_filename(filename, mtype):
                 session_type = PicoSessionType(info[3])
         except Exception as error:
             pass
-            # current_app.logger.warn("error occurred extracting session type from {}".format(filename))
+            # current_app.logger.warning("error occurred extracting session type from {}".format(filename))
             # info[3] is recipe name, utilities == session_type; beer recipe != session_type
 
     return session_type
@@ -878,5 +878,5 @@ def session_name_from_filename(filename):
         if len(info) >= 3:
             name = info[3].replace('_', ' ').replace("%23", "#")
     except Exception as error:
-        current_app.logger.warn("error occurred extracting session name from {}".format(filename))
+        current_app.logger.warning("error occurred extracting session name from {}".format(filename))
     return name
