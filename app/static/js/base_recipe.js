@@ -81,8 +81,8 @@ function subscribe_table_callbacks(table) {
         // prevent fixed rows from moving (revert move operation)
         if (isRowMoved(row)) {
             // extract recipe_id from "t_<recipe_id>"
-            recipe_id = row.getTable().element.id.substring(2)
-            displayUnsavedState(recipe_id)
+            var recipe_id = row.getTable().element.id.substring(2);
+            displayUnsavedState(recipe_id);
         }
         
         removeMoveHandles(row.getTable());
@@ -96,14 +96,14 @@ function subscribe_table_callbacks(table) {
 
     table.on("rowDeleted", function(row) {
         calculate_hop_timing(row.getTable().getData(), row.getTable());
-        recipe_id = row.getTable().element.id.substring(2)
-        displayUnsavedState(recipe_id)
+        var recipe_id = row.getTable().element.id.substring(2);
+        displayUnsavedState(recipe_id);
     })
 
     table.on("rowAdded", function(row) {
         calculate_hop_timing(row.getTable().getData(), row.getTable());
-        recipe_id = row.getTable().element.id.substring(2)
-        displayUnsavedState(recipe_id)
+        var recipe_id = row.getTable().element.id.substring(2);
+        displayUnsavedState(recipe_id);
     })
 
     table.on("cellEdited", function(cell) {
@@ -120,6 +120,8 @@ function subscribe_table_callbacks(table) {
             total_time = cell.getValue() + cell.getData().drain_time;
             cell.getRow().getCell("total_time").setValue(total_time);
         }
+        var recipe_id = cell.getRow().getTable().element.id.substring(2);
+        displayUnsavedState(recipe_id);
     })
 }
 
@@ -146,7 +148,7 @@ function calculate_hop_timing(data, provided_table = undefined) {
         adjunctSteps.slice().reverse().forEach(step => {
             for (x in cumulative_hop_time) {
                 if (step.location >= x) {
-                    cumulative_hop_time[x] += step.step_time
+                    cumulative_hop_time[x] += step.step_time;
                 }
             }
 
@@ -155,7 +157,7 @@ function calculate_hop_timing(data, provided_table = undefined) {
                     .filter(row => row.getData().location == step.location)
                     .forEach(row => row.update({ "hop_time": cumulative_hop_time[step.location]}));
             }
-            step['hop_time'] = cumulative_hop_time[step.location]
+            step['hop_time'] = cumulative_hop_time[step.location];
         });
 
         // clear non adjunct hop_time from table (change adjunct->mash/passthru)
@@ -174,7 +176,8 @@ function recipe_tooltips(machine_type) {
     } else {
         locations.push("Prime")
     }
-    return function(column) {
+    return function(e, cell, onRendered) {
+        var column = cell.getColumn();
         var tip = ""
         let selected_units = $("#unit_selector > label.active > input").length > 0 ? $("#unit_selector > label.active > input")[0].id : "imperial";
         switch (column.getField()) {
