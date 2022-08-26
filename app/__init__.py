@@ -60,14 +60,17 @@ def create_app(debug=False):
     )
 
     # create subdirectories if they don't already exist
-    create_dir(app.config['RECIPES_PATH'].joinpath('pico'))
-    create_dir(app.config['RECIPES_PATH'].joinpath('zymatic'))
+    create_dir(app.config['RECIPES_PATH'].joinpath('pico/archive'))
+    create_dir(app.config['RECIPES_PATH'].joinpath('zseries/archive'))
+    create_dir(app.config['RECIPES_PATH'].joinpath('zymatic/archive'))
     create_dir(app.config['SESSIONS_PATH'].joinpath('brew/active'))
     create_dir(app.config['SESSIONS_PATH'].joinpath('brew/archive'))
     create_dir(app.config['SESSIONS_PATH'].joinpath('ferm/active'))
     create_dir(app.config['SESSIONS_PATH'].joinpath('ferm/archive'))
     create_dir(app.config['SESSIONS_PATH'].joinpath('iSpindel/active'))
     create_dir(app.config['SESSIONS_PATH'].joinpath('iSpindel/archive'))
+    create_dir(app.config['SESSIONS_PATH'].joinpath('still/active'))
+    create_dir(app.config['SESSIONS_PATH'].joinpath('still/archive'))
     create_dir(app.config['SESSIONS_PATH'].joinpath('tilt/active'))
     create_dir(app.config['SESSIONS_PATH'].joinpath('tilt/archive'))
 
