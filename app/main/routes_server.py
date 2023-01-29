@@ -18,7 +18,7 @@ from .frontend_common import platform, render_template_with_defaults, system_inf
 @main.route('/restart_server')
 def restart_server():
     # git pull & install any updated requirements
-    os.system('cd {0}; git pull; pip3 install -r requirements.txt'.format(base_path()))
+    os.system('cd {}; git pull; pip3 install -r requirements.txt'.format(base_path()))
     # TODO: Close file handles for open sessions?
 
     if platform() == "RaspberryPi":
@@ -119,7 +119,7 @@ def setup():
             new_hostname = payload['hostname']
 
             # check if hostname is only a-z0-9\-\_
-            if not re.match("^[a-zA-Z0-9\-_]+$", new_hostname):
+            if not re.match(r"^[a-zA-Z0-9\-_]+$", new_hostname):
                 current_app.logger.error("ERROR: invalid hostname provided: {}".format(new_hostname))
                 return 'Invalid Hostname (only supports a-z, 0-9, - and _ as characters)!', 400
 
@@ -158,7 +158,7 @@ def setup():
                     else:
                         # add a comment for bssid line (if present)
                         subprocess.check_output(
-                            """sudo sed -i 's/\(bssid=.*\)/# \\1/g' {}""".format(wpa_files), shell=True)
+                            """sudo sed -i 's/\\(bssid=.*\\)/# \\1/g' {}""".format(wpa_files), shell=True)
 
                     # set credentials (if set by user) in wpa_supplicant files
                     if 'password' in payload:
@@ -287,7 +287,7 @@ def wireless_credentials():
     #       echo "bssid=test-value" | grep -w ssid => ""
     #   example match:
     #       echo "bssid=test-value" | grep -w bssid => "bssid=test-value"
-    cmd_template = "more /etc/wpa_supplicant/wpa_supplicant-wlan0.conf | grep -v '^\s*[#]' | grep -w {key} "
+    cmd_template = r"more /etc/wpa_supplicant/wpa_supplicant-wlan0.conf | grep -v '^\s*[#]' | grep -w {key} "
 
     ssid = subprocess.check_output(cmd_template.format(key='ssid') + '| awk -F "=" \'{print $2}\'', shell=True)
     psk = subprocess.check_output(cmd_template.format(key='psk') + '| awk -F "=" \'{print $2}\'', shell=True)
@@ -340,19 +340,19 @@ def about():
     }
 
     # query local git short sha
-    gitSha = subprocess.check_output("cd {0}; git rev-parse --short HEAD".format(base_path()), shell=True)
+    gitSha = subprocess.check_output("cd {}; git rev-parse --short HEAD".format(base_path()), shell=True)
     gitSha = gitSha.decode("utf-8")
 
     # query latest git remote sha
     try:
-        latestMasterSha = subprocess.check_output("cd {0}; git fetch origin && git rev-parse --short origin/master".format(base_path()), shell=True)
+        latestMasterSha = subprocess.check_output("cd {}; git fetch origin && git rev-parse --short origin/master".format(base_path()), shell=True)
         latestMasterSha = latestMasterSha.decode("utf-8")
     except Exception:
         latestMasterSha = "unavailable (check network)"
 
     # query for local file changes
     try:
-        localChanges = subprocess.check_output("cd {0}; git fetch origin; git --no-pager diff --name-only".format(base_path()), shell=True)
+        localChanges = subprocess.check_output("cd {}; git fetch origin; git --no-pager diff --name-only".format(base_path()), shell=True)
         localChanges = localChanges.decode("utf-8").strip()
     except Exception:
         localChanges = "unavailable (check network)"
