@@ -35,7 +35,7 @@ def process_tilt_dataset(dataset):
     for data in dataset:
         data['temp'] = convert_temp(data['temp'], 'F')
         process_tilt_data(data)
-    return('', 200)
+    return '', 200
 
 
 # this can also be called from tilt.py and when using bluetooth, more data is available
