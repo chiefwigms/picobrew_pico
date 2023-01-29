@@ -166,7 +166,7 @@ def handle_specific_device(uid):
             if request.method == 'POST':
                 new_server_cfg['aliases'][mtype][uid] = alias
             elif request.method == 'DELETE':
-                del(new_server_cfg['aliases'][mtype][uid])
+                del new_server_cfg['aliases'][mtype][uid]
             yaml.dump(new_server_cfg, f)
             current_app.config.update(SERVER_CONFIG=server_cfg)
     except Exception as e:
