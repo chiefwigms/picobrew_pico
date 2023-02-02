@@ -1,5 +1,5 @@
 from .config import MachineType, server_config
-from distutils.version import LooseVersion
+from packaging.version import Version
 
 
 def firmware_filename(device: MachineType, version: str):
@@ -12,7 +12,7 @@ def firmware_filename(device: MachineType, version: str):
 
 
 def firmware_upgrade_required(device: MachineType, version: str):
-    return LooseVersion(version) < LooseVersion(minimum_firmware(device))
+    return Version(version) < Version(minimum_firmware(device))
 
 
 def minimum_firmware(device: MachineType):
