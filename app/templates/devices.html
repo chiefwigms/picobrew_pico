@@ -128,9 +128,15 @@
               {% if machine_type in ['PicoBrewC', 'PicoBrewC_Alt'] %}
               {% set active_session = active_sessions['brew'][uid] %}
               {% set alt_checked = 'checked' if active_session.has_alt_firmware else "" %}
-              <div class="form-row form-group">
-                <input type="checkbox" class="custom-control-input" name="alt_firmware" id="alt_firmware" {{alt_checked}}>
-                <label class="custom-control-label" for="alt_firmware">Toggle for Alternative Firmware</label>
+              <div id="alt_firmware_entry" class="form-row form-group">
+                <div class="alert alert-danger" role="alert">
+                  <strong>Caution!</strong> Below configuration(s) are advanced, typically aren't required.
+                  <strong>Continue at your own risk.</strong>
+                </div>
+                <div class="custom-control custom-switch">
+                  <input type="checkbox" class="custom-control-input" name="alt_firmware" id="alt_firmware_{{uid}}" {{alt_checked}}>
+                  <label class="custom-control-label" for="alt_firmware_{{uid}}">Toggle for Alternative Firmware</label>
+                </div>
               </div>
               {% endif %}
               {% if machine_type == 'PicoStill' %}

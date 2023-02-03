@@ -105,7 +105,7 @@ def create_app(config="config.yaml", debug=False):
                             active_brew_sessions[uid].alias = aliases[mtype][uid]
                             active_brew_sessions[uid].machine_type = mtype
                             active_brew_sessions[uid].is_pico = mtype in [MachineType.PICOBREW, MachineType.PICOBREW_C, MachineType.PICOBREW_C_ALT]
-                            active_brew_sessions[uid].is_pico_alt = mtype in [MachineType.PICOBREW_C_ALT]
+                            active_brew_sessions[uid].has_alt_firmware = mtype in [MachineType.PICOBREW_C_ALT]
 
     # optional Tilt monitoring
     if 'tilt_monitoring' in server_cfg and server_cfg['tilt_monitoring']:
