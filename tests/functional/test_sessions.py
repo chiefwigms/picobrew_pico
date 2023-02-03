@@ -1,12 +1,13 @@
 from app import create_app
 
+flask_app = create_app('../../config.example.yaml')
+
 def test_brew_history():
     """
     GIVEN a Flask application configured for testing
     WHEN the '/brew_history' page is requested (GET)
     THEN check that the response is valid
     """
-    flask_app = create_app('../../config.example.yaml')
 
     # Create a test client using the Flask application configured for testing
     with flask_app.test_client() as test_client:
@@ -21,7 +22,6 @@ def test_ferm_history():
     WHEN the '/ferm_history' page is requested (GET)
     THEN check that the response is valid
     """
-    flask_app = create_app('../../config.example.yaml')
 
     # Create a test client using the Flask application configured for testing
     with flask_app.test_client() as test_client:
@@ -36,7 +36,6 @@ def test_still_history():
     WHEN the '/still_history' page is requested (GET)
     THEN check that the response is valid
     """
-    flask_app = create_app('../../config.example.yaml')
 
     # Create a test client using the Flask application configured for testing
     with flask_app.test_client() as test_client:
@@ -51,7 +50,6 @@ def test_ispindel_history():
     WHEN the '/iSpindel_history' page is requested (GET)
     THEN check that the response is valid
     """
-    flask_app = create_app('../../config.example.yaml')
 
     # Create a test client using the Flask application configured for testing
     with flask_app.test_client() as test_client:
@@ -66,7 +64,6 @@ def test_tilt_history():
     WHEN the '/tilt_history' page is requested (GET)
     THEN check that the response is valid
     """
-    flask_app = create_app('../../config.example.yaml')
 
     # Create a test client using the Flask application configured for testing
     with flask_app.test_client() as test_client:

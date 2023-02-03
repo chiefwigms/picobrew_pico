@@ -16,7 +16,8 @@ jobs:
       fail-fast: false
       matrix:
         python-version: ['3.7', '3.8', '3.9', '3.10', '3.11']
-        os: [macOS-11, macOS-12, ubuntu-latest, windows-latest]
+        os: [macOS-11, ubuntu-latest, windows-latest]
+        # macOS-12 (macOS-latest) has issue with Bluetooth Permissions (similar to https://github.com/hbldh/bleak/issues/768)
 
     runs-on: ${{ matrix.os }}
 

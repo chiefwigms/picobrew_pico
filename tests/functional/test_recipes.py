@@ -1,12 +1,13 @@
 from app import create_app
 
+flask_app = create_app('../../config.example.yaml')
+
 def test_picobrew_recipes():
     """
     GIVEN a Flask application configured for testing
     WHEN the '/pico_recipes' page is requested (GET)
     THEN check that the response is valid
     """
-    flask_app = create_app('../../config.example.yaml')
 
     # Create a test client using the Flask application configured for testing
     with flask_app.test_client() as test_client:
@@ -23,7 +24,6 @@ def test_zymatic_recipes():
     WHEN the '/zymatic_recipes' page is requested (GET)
     THEN check that the response is valid
     """
-    flask_app = create_app('../../config.example.yaml')
 
     # Create a test client using the Flask application configured for testing
     with flask_app.test_client() as test_client:
@@ -44,7 +44,6 @@ def test_zseries_recipes():
     WHEN the '/zseries_recipes' page is requested (GET)
     THEN check that the response is valid
     """
-    flask_app = create_app('../../config.example.yaml')
 
     # Create a test client using the Flask application configured for testing
     with flask_app.test_client() as test_client:
