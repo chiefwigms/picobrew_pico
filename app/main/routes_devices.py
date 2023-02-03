@@ -80,7 +80,7 @@ def handle_devices():
                                                  active_sessions=active_sessions,
                                                  machine_stats=machine_stats)
 
-        current_app.logger.debug(f'machine_type: {mtype}; uid: {uid}; alias: {alias}; alt-firmware: {alt_firmware}; ip-addr: {ip_addr}')
+        current_app.logger.debug(f'machine_type: {mtype}; uid: {uid}; alias: {alias}; alt_firmware: {alt_firmware}; ip_addr: {ip_addr}')
 
         # add new device into config
         cfg_file = base_path().joinpath('config.yaml')
@@ -129,6 +129,7 @@ def handle_devices():
             active_brew_sessions[uid].machine_type = mtype
             active_brew_sessions[uid].is_pico = True if mtype in [MachineType.PICOBREW, MachineType.PICOBREW_C, MachineType.PICOBREW_C_ALT] else False
             active_brew_sessions[uid].has_alt_firmware = mtype in [MachineType.PICOBREW_C_ALT]
+            active_brew_sessions[uid].needs_firmware = active_brew_sessions[uid].has_alt_firmware
             active_brew_sessions[uid].alias = alias
 
     # merge PicoBrewC_Alt and PicoBrewC for /devices experience
@@ -169,7 +170,7 @@ def handle_specific_device(uid):
                                              config=server_config(),
                                              active_sessions=active_sessions)
 
-    current_app.logger.debug(f'machine_type: {mtype}; uid: {uid}; alias: {alias}; alt-firmware: {alt_firmware}; ip-addr: {ip_addr}')
+    current_app.logger.debug(f'machine_type: {mtype}; uid: {uid}; alias: {alias}; alt_firmware: {alt_firmware}; ip_addr: {ip_addr}')
 
     # add new device into config
     cfg_file = base_path().joinpath('config.yaml')
@@ -214,7 +215,10 @@ def handle_specific_device(uid):
     else:
         active_brew_sessions[uid].alias = alias
         active_brew_sessions[uid].is_pico = True if mtype in [MachineType.PICOBREW, MachineType.PICOBREW_C, MachineType.PICOBREW_C_ALT] else False
+
+        prev_alt_firmware = active_brew_sessions[uid].has_alt_firmware
         active_brew_sessions[uid].has_alt_firmware = True if mtype in [MachineType.PICOBREW_C_ALT] else False
+        active_brew_sessions[uid].needs_firmware = prev_alt_firmware != active_brew_sessions[uid].has_alt_firmware
 
     if request.method == 'DELETE':
         return '', 204

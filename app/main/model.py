@@ -61,6 +61,7 @@ class PicoBrewSession:
         self.remaining_time = None
         self.is_pico = True if machineType in [MachineType.PICOBREW, MachineType.PICOBREW_C, MachineType.PICOBREW_C_ALT] else False
         self.has_alt_firmware = True if machineType in [MachineType.PICOBREW_C_ALT] else False
+        self.needs_firmware = False
         self.boiler_type = None   # Z machines have 2 different configurations: 1 (big) or 2 (small)
         self.data = []
 
