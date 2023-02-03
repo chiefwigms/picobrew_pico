@@ -87,6 +87,7 @@ def process_get_firmware(args):
         f.close()
         return '{}'.format(fw)
     else:
+        current_app.logger.warning(active_brew_sessions)
         current_app.logger.warning('machine_type unknown - can not fetch firmware. Configuration of the device type via /devices UX is required.')
         # TODO: Error Processing?
         return '#F#'

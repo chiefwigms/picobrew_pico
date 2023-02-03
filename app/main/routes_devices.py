@@ -50,6 +50,9 @@ def handle_devices():
         uid = str(request.form['uid']).strip()
         alias = str(request.form['alias']).strip()
         ip_addr = request.form['ip_addr'] if 'ip_addr' in request.form else None
+        alt_firmware = request.form['alt_firmware'] if 'alt_firmware' in request.form else None
+        if alt_firmware:
+            mtype = MachineType.PICOBREW_C_ALT
 
         # uid and alias are required
         if len(uid) == 0 or len(alias) == 0:
@@ -124,7 +127,7 @@ def handle_devices():
             if uid not in active_brew_sessions:
                 active_brew_sessions[uid] = PicoBrewSession(mtype)
             active_brew_sessions[uid].machine_type = mtype
-            active_brew_sessions[uid].is_pico = True if mtype in [MachineType.PICOBREW, MachineType.PICOBREW_C] else False
+            active_brew_sessions[uid].is_pico = True if mtype in [MachineType.PICOBREW, MachineType.PICOBREW_C, MachineType.PICOBREW_C_ALT] else False
             active_brew_sessions[uid].alias = alias
 
     return render_template_with_defaults('devices.html', config=server_config(), active_sessions=active_sessions, machine_stats=machine_stats)

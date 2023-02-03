@@ -29,7 +29,7 @@ class ImportException(Exception):
 
 
 def import_recipes(mach_uid: str, account_id: str, rfid: str, mach_type: MachineType):
-    if mach_type in [MachineType.ZYMATIC, MachineType.PICOBREW, MachineType.PICOBREW_C]:
+    if mach_type in [MachineType.ZYMATIC, MachineType.PICOBREW, MachineType.PICOBREW_C, MachineType.PICOBREW_C_ALT]:
         import_recipes_classic(mach_uid, account_id, rfid, mach_type)
     elif mach_type == MachineType.ZSERIES:
         import_recipes_z(mach_uid)
@@ -54,7 +54,7 @@ def import_recipes_classic(mach_uid, account_id, rfid, mach_type):
         and raw_reply.endswith("#")
         and raw_reply != "#Invalid|#"
     ):
-        if mach_type in [MachineType.PICOBREW, MachineType.PICOBREW_C]:
+        if mach_type in [MachineType.PICOBREW, MachineType.PICOBREW_C, MachineType.PICOBREW_C_ALT]:
             PicoBrewRecipeImport(recipe=raw_reply, rfid=rfid)
         elif mach_type is MachineType.ZYMATIC:
             current_app.logger.debug(f"Importing Zymatic recipe {raw_reply}")

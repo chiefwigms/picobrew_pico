@@ -1,6 +1,6 @@
 from app import create_app
 
-flask_app = create_app('../../config.example.yaml')
+flask_app = create_app('tests/functional/config.test.yaml')
 
 def test_picobrew_recipes():
     """
