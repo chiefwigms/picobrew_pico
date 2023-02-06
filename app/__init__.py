@@ -18,7 +18,7 @@ def create_dir(dir_path):
     pathlib.Path(dir_path).mkdir(parents=True, exist_ok=True)
 
 
-def create_app(debug=False):
+def create_app(config="config.yaml", debug=False):
     """Create an application."""
     app = Flask(__name__)
     CORS(app)
@@ -40,7 +40,7 @@ def create_app(debug=False):
     app.register_blueprint(main_blueprint)
 
     server_cfg = {}
-    cfg_file = BASE_PATH.joinpath('config.yaml')
+    cfg_file = BASE_PATH.joinpath(config)
     if not pathlib.Path(cfg_file).exists():
         # copy config.example.yaml > config.yaml if config.yaml doesn't exist
         example_cfg_file = BASE_PATH.joinpath('config.example.yaml')
@@ -79,7 +79,7 @@ def create_app(debug=False):
         initialize_data()
 
     if 'aliases' in server_cfg:
-        machine_types = [MachineType.ZSERIES, MachineType.ZYMATIC, MachineType.PICOBREW, MachineType.PICOBREW_C,
+        machine_types = [MachineType.ZSERIES, MachineType.ZYMATIC, MachineType.PICOBREW, MachineType.PICOBREW_C, MachineType.PICOBREW_C_ALT,
                          MachineType.PICOFERM, MachineType.ISPINDEL, MachineType.TILT, MachineType.PICOSTILL]
         for mtype in machine_types:
             aliases = server_cfg['aliases']
@@ -107,7 +107,8 @@ def create_app(debug=False):
                                 active_brew_sessions[uid] = PicoBrewSession(mtype)
                             active_brew_sessions[uid].alias = aliases[mtype][uid]
                             active_brew_sessions[uid].machine_type = mtype
-                            active_brew_sessions[uid].is_pico = mtype in [MachineType.PICOBREW, MachineType.PICOBREW_C]
+                            active_brew_sessions[uid].is_pico = mtype in [MachineType.PICOBREW, MachineType.PICOBREW_C, MachineType.PICOBREW_C_ALT]
+                            active_brew_sessions[uid].has_alt_firmware = mtype in [MachineType.PICOBREW_C_ALT]
 
     # optional Tilt monitoring
     if 'tilt_monitoring' in server_cfg and server_cfg['tilt_monitoring']:

@@ -63,6 +63,8 @@ def process_check_firmware(args):
     # only give update available if machine type is known (C firmware != S/Pro Firmware)
     if uid in active_brew_sessions:
         active_session = active_brew_sessions[uid]
+        if active_session.needs_firmware:
+            return '#T#'
         if active_session.machine_type and firmware_upgrade_required(active_session.machine_type, args['version']):
             return '#T#'
     return '#F#'
@@ -87,6 +89,7 @@ def process_get_firmware(args):
         f.close()
         return '{}'.format(fw)
     else:
+        current_app.logger.warning(active_brew_sessions)
         current_app.logger.warning('machine_type unknown - can not fetch firmware. Configuration of the device type via /devices UX is required.')
         # TODO: Error Processing?
         return '#F#'

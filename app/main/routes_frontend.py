@@ -573,7 +573,7 @@ def sync_recipe(args):
 
 
 def load_recipe(filename, mtype):
-    if mtype == MachineType.PICOBREW or mtype == MachineType.PICOBREW_C:
+    if mtype in [MachineType.PICOBREW, MachineType.PICOBREW_C, MachineType.PICOBREW_C_ALT]:
         return load_pico_recipe(filename)
     elif mtype == MachineType.ZYMATIC:
         return load_zymatic_recipe(filename)
@@ -824,7 +824,7 @@ def initialize_data():
 def load_active_recipes(mtype):
     global pico_active_recipes, zymatic_active_recipes, zseries_active_recipes
 
-    if mtype == MachineType.PICOBREW or mtype == MachineType.PICOBREW_C:
+    if mtype in [MachineType.PICOBREW, MachineType.PICOBREW_C, MachineType.PICOBREW_C_ALT]:
         pico_active_recipes = load_pico_recipes(False)
     elif mtype == MachineType.ZYMATIC:
         zymatic_active_recipes = load_zymatic_recipes(False)
