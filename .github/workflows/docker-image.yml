@@ -10,7 +10,7 @@ on:
 
 jobs:
   build:
-    if: ${{ github.ref != 'ref/heads/master' }}
+    if: ${{ github.ref != 'refs/heads/master' }}
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
@@ -34,7 +34,7 @@ jobs:
         tags: ${{ steps.prep.outputs.tags }}
 
   build-push:
-    if: ${{ github.ref == 'ref/heads/master' }}
+    if: ${{ github.ref == 'refs/heads/master' }}
     environment: picobrew-server
     runs-on: ubuntu-latest
     steps:
