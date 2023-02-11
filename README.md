@@ -67,16 +67,30 @@ Docker v19.x (https://docs.docker.com/get-docker/)
 
 Setup the following directory structure for use by the server.
 ```
-recipes/
-  pico/
-  zymatic/
-sessions/
-  brew/
-    active/
-    archive/
-  ferm/
-    active/
-    archive/
+app/
+  recipes/
+    pico/
+      archive/
+    zseries/
+      archive/
+    zymatic/
+      archive/
+  sessions/
+    brew/
+      active/
+      archive/
+    ferm/
+      active/
+      archive/
+    iSpindel/
+      active/
+      archive/
+    still/
+      active/
+      archive/
+    tilt/
+      active/
+      archive/
 ```
 
 Run server volume mounting the above directory structure.
@@ -97,7 +111,10 @@ sudo security add-trusted-cert -d -r trustAsRoot -k /Library/Keychains/System.ke
 
 ##### Step 2: Run Flask Server (optionally with `docker run` or with `docker-compose`)
 
-Either provide all variables to docker command directly or use the repository's docker-compose.yml (which will also include a working SSL enabled nginx configuration given you have setup certificates correctly with `./scripts/docker/nginx/ssl_certificates.sh`)
+Either: 
+* provide all variables to docker command directly
+* use the repository's docker-compose.yml (which will also include a working SSL enabled nginx configuration given you have setup certificates correctly with `./scripts/docker/nginx/ssl_certificates.sh`)
+* use the repository's docker-compose-no-ssl.yml for a non-SSL intall (this should work for non ZSeries devices)
 
 ###### Option 1: Docker Run (without SSL support or external SSL termination)
 

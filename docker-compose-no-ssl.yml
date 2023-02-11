@@ -1,0 +1,13 @@
+version: "3.8"
+
+services:
+  picobrew_pico:
+    container_name: picobrew_pico
+    image: chiefwigms/picobrew_pico:latest
+    ports:
+      - 80:80
+    volumes:
+      - ./app/recipes/:/picobrew_pico/app/recipes/
+      - ./app/sessions/:/picobrew_pico/app/sessions/
+      - ./config.yaml:/picobrew_pico/config.yaml
+    restart: unless-stopped
