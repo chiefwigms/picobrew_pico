@@ -69,14 +69,14 @@ def process_iSpindel_data(data):
         if (active_iSpindel_sessions[uid].uninit is False and active_iSpindel_sessions[uid].active is False):
             active_iSpindel_sessions[uid].file.write('{}\n\n]'.format(log_data[:-2]))
             active_iSpindel_sessions[uid].cleanup()
-            return('', 200)
+            return '', 200
         else:
             active_iSpindel_sessions[uid].active = True
             active_iSpindel_sessions[uid].file.write(log_data)
             active_iSpindel_sessions[uid].file.flush()
-            return('', 200)
+            return '', 200
     else:
-        return('', 200)
+        return '', 200
 
 # -------- Utility --------
 

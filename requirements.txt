@@ -6,7 +6,8 @@ ruamel.yaml==0.17.21
 requests==2.27.1
 mock==4.0.3
 python-dateutil==2.8.2
-bleak==0.14.3
-eventlet==0.33.1
+bleak==0.19.5
+eventlet==0.33.3
 dnspython==2.2.1
 aenum==3.1.11
+packaging==21.3

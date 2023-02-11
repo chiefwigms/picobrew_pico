@@ -14,6 +14,10 @@
           var ipAddrDiv = $("#ip_addr_entry")
           ipAddrDiv.slideDown().toggleClass("d-none d-block")
         }
+        if (value == "PicoBrewC") {
+          var altFirmwareDiv = $("#alt_firmware_entry")
+          altFirmwareDiv.slideDown().toggleClass("d-none d-block")
+        }
       });
     });
   </script>
@@ -55,6 +59,16 @@
           <input type="text" class="form-control form-control-sm" name="ip_addr" id="ip_addr_new"
             placeholder="192.168.72.108" value="">
         </div>
+        <div id="alt_firmware_entry" class="form-row form-group">
+          <div class="alert alert-danger" role="alert">
+            <strong>Caution!</strong> Below configuration(s) are advanced, typically aren't required.
+            <strong>Continue at your own risk.</strong>
+          </div>
+          <div class="custom-control custom-switch">
+            <input type="checkbox" class="custom-control-input" name="alt_firmware" id="alt_firmware_new">
+            <label class="custom-control-label" for="alt_firmware_new">Toggle for Alternative Firmware</label>
+          </div>
+        </div>
         <div class="form-row form-group">
             <button type="submit" class="btn btn-primary">Save</button>
         </div>
@@ -64,7 +78,7 @@
     {% if 'aliases' in config %}
     {% for machine_type in config['aliases'] %}
     <div class="card bg-dark text-white">
-      {% if machine_type == 'PicoBrewC' %}
+      {% if machine_type in ['PicoBrewC', 'PicoBrewC_Alt'] %}
       <h2 id="m_{{machine_type}}">Picobrew C</h2>
       {% elif machine_type == 'PicoBrew' %}
       <h2 id="m_{{machine_type}}">Picobrew S/Pro</h2>
@@ -111,6 +125,20 @@
                 <input type="text" class="form-control form-control-sm" name="alias" id="alias_{{uid}}"
                     placeholder="BrewHaus Alias" value="{{alias}}">
               </div>
+              {% if machine_type in ['PicoBrewC', 'PicoBrewC_Alt'] %}
+              {% set active_session = active_sessions['brew'][uid] %}
+              {% set alt_checked = 'checked' if active_session.has_alt_firmware else "" %}
+              <div id="alt_firmware_entry" class="form-row form-group">
+                <div class="alert alert-danger" role="alert">
+                  <strong>Caution!</strong> Below configuration(s) are advanced, typically aren't required.
+                  <strong>Continue at your own risk.</strong>
+                </div>
+                <div class="custom-control custom-switch">
+                  <input type="checkbox" class="custom-control-input" name="alt_firmware" id="alt_firmware_{{uid}}" {{alt_checked}}>
+                  <label class="custom-control-label" for="alt_firmware_{{uid}}">Toggle for Alternative Firmware</label>
+                </div>
+              </div>
+              {% endif %}
               {% if machine_type == 'PicoStill' %}
               {% set active_session = active_sessions['still'][uid] %}
               {% set ip_address = active_session.ip_address if active_session.ip_address != None and active_session.ip_address|length else "" %}

@@ -7,6 +7,7 @@ class MachineType(str, Enum):
         return str(self.value)
 
     PICOBREW_C = 'PicoBrewC'
+    PICOBREW_C_ALT = 'PicoBrewC_Alt'
     PICOBREW = 'PicoBrew'
     PICOFERM = 'PicoFerm'
     PICOSTILL = 'PicoStill'
@@ -41,7 +42,7 @@ def base_path():
 def firmware_path(machineType):
     if machineType is MachineType.PICOBREW:
         return current_app.config['FIRMWARE_PATH'].joinpath('pico')
-    elif machineType is MachineType.PICOBREW_C:
+    elif machineType in [MachineType.PICOBREW_C, MachineType.PICOBREW_C_ALT]:
         return current_app.config['FIRMWARE_PATH'].joinpath('pico_c')
     elif machineType is MachineType.ZYMATIC:
         return current_app.config['FIRMWARE_PATH'].joinpath('zymatic')
@@ -58,7 +59,7 @@ def firmware_path(machineType):
 # recipe path
 def recipe_path(machineType, archived=False):
     filepath = current_app.config['RECIPES_PATH']
-    if machineType is MachineType.PICOBREW or machineType is MachineType.PICOBREW_C:
+    if machineType in [MachineType.PICOBREW, MachineType.PICOBREW_C, MachineType.PICOBREW_C_ALT]:
         filepath = filepath.joinpath('pico')
     elif machineType is MachineType.ZYMATIC:
         filepath = filepath.joinpath('zymatic')

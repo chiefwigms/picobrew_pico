@@ -770,7 +770,7 @@ def dirty_sessions_since_clean(uid, mtype):
     clean_found = False
 
     for s in brew_session_files:
-        if mtype == MachineType.PICOBREW_C or mtype == MachineType.PICOBREW:
+        if mtype in [MachineType.PICOBREW_C, MachineType.PICOBREW, MachineType.PICOBREW_C_ALT]:
             session_name = session_name_from_filename(s)
             if (session_name.upper() in ["CLEAN", "DEEP CLEAN"]):
                 clean_found = True

@@ -26,22 +26,30 @@ tilt_monitoring_interval: 10
 aliases: 
   Zymatic:
     #ProductID : Nickname
+    zymatic1 : Zymatic1Machine
   ZSeries:
     #ProductID : Nickname
+    zseries1 : ZSeries1Machine
   PicoBrewC:
     #ProductID : Nickname
+    picobrew_c : PicoC
   PicoBrewC_Alt:
-    #ProductID : Nickname
+    picobrew_c_alt : PicoC_Alternative
   PicoBrew:
     #ProductID : Nickname
+    picobrew_pro : PicoPro
   PicoFerm:
     #ProductID : Nickname
+    ferm1 : PicoFerm1
   PicoStill:
     #ProductID : Nickname
+    still1 : PicoStill1
   iSpindel:
     #ID        : Nickname
+    ispindel1 : iSpindel1
   Tilt:
     #ProductID : Nickname
+    blue : BlueTilt
 
 # In order to force specific versions of device firmware there is a feature of the picobrew_pico
 # that will support OTA updates to the connected brewing devices which support OTA updates 
