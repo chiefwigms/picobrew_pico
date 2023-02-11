@@ -2,13 +2,15 @@ name: Build and (optionally Push) Docker Images
 
 on:
   push:
-    branches: [ master ]
+    branches:
+      - master
   pull_request:
-    branches: [ master ]
+    branches:
+      - master
 
 jobs:
   build:
-    if: github.ref != 'ref/heads/master'
+    if: ${{ github.ref != 'ref/heads/master' }}
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
@@ -32,7 +34,7 @@ jobs:
         tags: ${{ steps.prep.outputs.tags }}
 
   build-push:
-    if: github.ref == 'ref/heads/master'
+    if: ${{ github.ref == 'ref/heads/master' }}
     environment: picobrew-server
     runs-on: ubuntu-latest
     steps:
