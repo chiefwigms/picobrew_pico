@@ -135,10 +135,12 @@ def handle_devices():
     # merge PicoBrewC_Alt and PicoBrewC for /devices experience
     merged_config = server_config()
     if 'PicoBrewC_Alt' in merged_config['aliases']:
+        pico_c_alt = None
         pico_c_alt = merged_config['aliases']['PicoBrewC_Alt']
-        for uid in pico_c_alt:
-            merged_config['aliases']['PicoBrewC'][uid] = pico_c_alt[uid]
-        del merged_config['aliases']['PicoBrewC_Alt']
+        if pico_c_alt is not None:
+            for uid in pico_c_alt:
+                merged_config['aliases']['PicoBrewC'][uid] = pico_c_alt[uid]
+            del merged_config['aliases']['PicoBrewC_Alt']
 
     return render_template_with_defaults('devices.html', config=merged_config, active_sessions=active_sessions, machine_stats=machine_stats)
 
