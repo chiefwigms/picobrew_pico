@@ -4,9 +4,10 @@
 ![GitHub commit activity](https://img.shields.io/github/commit-activity/m/chiefwigms/picobrew_pico)
 
 ![Docker Image Version (latest semver)](https://img.shields.io/docker/v/chiefwigms/picobrew_pico?logo=docker)
+![Docker Pulls](https://img.shields.io/docker/pulls/chiefwigms/picobrew_pico?logo=docker)
 ![GitHub tag (latest SemVer pre-release)](https://img.shields.io/github/v/tag/chiefwigms/picobrew_pico?include_prereleases&sort=semver)
 ![GitHub all releases](https://img.shields.io/github/downloads/chiefwigms/picobrew_pico/total)
-![GitHub release (latest by SemVer including pre-releases)](https://img.shields.io/github/downloads-pre/chiefwigms/picobrew_pico/v0.0.1-beta6/total)
+![GitHub release (by tag)](https://img.shields.io/github/downloads/chiefwigms/picobrew_pico/v0.0.1-beta6/total)
 
 Allows for full control of the PicoBrew Pico S/C/Pro & Zymatic models.  Shout out to [@hotzenklotz](https://github.com/hotzenklotz/picobrew-server), Brian Moineau for PicoFerm API, @tmack8001 for Z series support & updates.  
 [Demo Server](http://ec2-3-136-112-93.us-east-2.compute.amazonaws.com/)
