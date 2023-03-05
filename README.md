@@ -1,8 +1,5 @@
 # picobrew_pico
-[![GitHub Release][releases-shield]][releases]
-![GitHub all releases][download-all]
-![GitHub release (latest by SemVer)][download-latest]
-[![GitHub Activity][commits-shield]][commits]
+[![Python Application](https://github.com/tmack8001/picobrew_pico/actions/workflows/python-app.yml/badge.svg?event=push)](https://github.com/tmack8001/picobrew_pico/actions/workflows/python-app.yml)
 
 Allows for full control of the PicoBrew Pico S/C/Pro & Zymatic models.  Shout out to [@hotzenklotz](https://github.com/hotzenklotz/picobrew-server), Brian Moineau for PicoFerm API, @tmack8001 for Z series support & updates.  
 [Demo Server](http://ec2-3-136-112-93.us-east-2.compute.amazonaws.com/)
