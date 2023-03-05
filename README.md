@@ -1,4 +1,9 @@
 # picobrew_pico
+[![GitHub Release][releases-shield]][releases]
+![GitHub all releases][download-all]
+![GitHub release (latest by SemVer)][download-latest]
+[![GitHub Activity][commits-shield]][commits]
+
 Allows for full control of the PicoBrew Pico S/C/Pro & Zymatic models.  Shout out to [@hotzenklotz](https://github.com/hotzenklotz/picobrew-server), Brian Moineau for PicoFerm API, @tmack8001 for Z series support & updates.  
 [Demo Server](http://ec2-3-136-112-93.us-east-2.compute.amazonaws.com/)
 
@@ -33,6 +38,9 @@ Allows for full control of the PicoBrew Pico S/C/Pro & Zymatic models.  Shout ou
   * *For Pico S/C/Pro Only*: DO NOT EDIT or MOVE Rows 1-3 (Preparing to Brew/Heating/Dough In).  Drain times should all be 0 except for Mash Out (2 minutes) and the last hop addition (5 minutes) (for example, if you only have Hops 1 & 2, set the drain time on Hops 2 to 5, and remove the Hops 3 and 4 rows)
 
 ## Installation
+[![GitHub Release][releases-shield]][releases]
+![GitHub all releases][download-all]
+![GitHub release (latest by SemVer)][download-latest]
 
 Refer to the [Releases Page](https://github.com/chiefwigms/picobrew_pico/releases) for steps to get up and running with your own Pico server with a Raspberry Pi device (recommended models include: Raspberry Pi Zero-W or Raspberry Pi 4).
 
