@@ -135,7 +135,6 @@ def handle_devices():
     # merge PicoBrewC_Alt and PicoBrewC for /devices experience
     merged_config = server_config()
     if 'PicoBrewC_Alt' in merged_config['aliases']:
-        pico_c_alt = None
         pico_c_alt = merged_config['aliases']['PicoBrewC_Alt']
         # skip merging if PicoBrewC_Alt is empty or not defined
         if pico_c_alt:
