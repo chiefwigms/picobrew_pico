@@ -90,7 +90,7 @@ def handle_devices():
             new_server_cfg = server_cfg
             with open(cfg_file, 'w') as f:
                 if mtype not in new_server_cfg['aliases'] or new_server_cfg['aliases'][mtype] is None:
-                    new_server_cfg['aliases'][str(mtype)] = {}
+                    new_server_cfg['aliases'][str(mtype)] = dict()
                 new_server_cfg['aliases'][mtype][uid] = alias
                 yaml.dump(new_server_cfg, f)
                 current_app.config.update(SERVER_CONFIG=server_cfg)
@@ -135,9 +135,12 @@ def handle_devices():
     # merge PicoBrewC_Alt and PicoBrewC for /devices experience
     merged_config = server_config()
     if 'PicoBrewC_Alt' in merged_config['aliases']:
+        pico_c_alt = None
         pico_c_alt = merged_config['aliases']['PicoBrewC_Alt']
-        for uid in pico_c_alt:
-            merged_config['aliases']['PicoBrewC'][uid] = pico_c_alt[uid]
+        # skip merging if PicoBrewC_Alt is empty or not defined
+        if pico_c_alt:
+            for uid in pico_c_alt:
+                merged_config['aliases']['PicoBrewC'][uid] = pico_c_alt[uid]
         del merged_config['aliases']['PicoBrewC_Alt']
 
     return render_template_with_defaults('devices.html', config=merged_config, active_sessions=active_sessions, machine_stats=machine_stats)
@@ -182,13 +185,18 @@ def handle_specific_device(uid):
             # delete uid entry from either PicoBrew C config (alternate or normal)
             if mtype in [MachineType.PICOBREW_C, MachineType.PICOBREW_C_ALT]:
                 for type in [MachineType.PICOBREW_C, MachineType.PICOBREW_C_ALT]:
-                    if uid in new_server_cfg['aliases'][type]:
+                    current_app.logger.error(f"type:%s mtype:%s", type, mtype)
+                    if type in new_server_cfg['aliases'] and uid in new_server_cfg['aliases'][type]:
+                        current_app.logger.error(f"found uid: %s", uid)
                         del new_server_cfg['aliases'][type][uid]
 
             if request.method == 'POST':
+                if mtype not in new_server_cfg['aliases']:
+                    new_server_cfg['aliases'][str(mtype)] = dict()
                 new_server_cfg['aliases'][mtype][uid] = alias
-            if request.method == 'DELETE' and uid in new_server_cfg['aliases'][mtype]:
-                del new_server_cfg['aliases'][mtype][uid]
+            if request.method == 'DELETE':
+                if mtype in new_server_cfg['aliases'] and uid in new_server_cfg['aliases'][mtype]:
+                    del new_server_cfg['aliases'][mtype][uid]
 
             yaml.dump(new_server_cfg, f)
             current_app.config.update(SERVER_CONFIG=server_cfg)
