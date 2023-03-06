@@ -1,4 +1,14 @@
 # picobrew_pico
+![GitHub Workflow Status (with branch)](https://img.shields.io/github/actions/workflow/status/chiefwigms/picobrew_pico/docker-image.yml)
+![GitHub contributors](https://img.shields.io/github/contributors/chiefwigms/picobrew_pico)
+![GitHub commit activity](https://img.shields.io/github/commit-activity/m/chiefwigms/picobrew_pico)
+
+![Docker Image Version (latest semver)](https://img.shields.io/docker/v/chiefwigms/picobrew_pico?logo=docker)
+![Docker Pulls](https://img.shields.io/docker/pulls/chiefwigms/picobrew_pico?logo=docker)
+![GitHub tag (latest SemVer pre-release)](https://img.shields.io/github/v/tag/chiefwigms/picobrew_pico?include_prereleases&sort=semver)
+![GitHub all releases](https://img.shields.io/github/downloads/chiefwigms/picobrew_pico/total)
+![GitHub release (by tag)](https://img.shields.io/github/downloads/chiefwigms/picobrew_pico/v0.0.1-beta6/total)
+
 Allows for full control of the PicoBrew Pico S/C/Pro & Zymatic models.  Shout out to [@hotzenklotz](https://github.com/hotzenklotz/picobrew-server), Brian Moineau for PicoFerm API, @tmack8001 for Z series support & updates.  
 [Demo Server](http://ec2-3-136-112-93.us-east-2.compute.amazonaws.com/)
 
@@ -33,6 +43,7 @@ Allows for full control of the PicoBrew Pico S/C/Pro & Zymatic models.  Shout ou
   * *For Pico S/C/Pro Only*: DO NOT EDIT or MOVE Rows 1-3 (Preparing to Brew/Heating/Dough In).  Drain times should all be 0 except for Mash Out (2 minutes) and the last hop addition (5 minutes) (for example, if you only have Hops 1 & 2, set the drain time on Hops 2 to 5, and remove the Hops 3 and 4 rows)
 
 ## Installation
+![GitHub tag (latest SemVer pre-release)](https://img.shields.io/github/v/tag/chiefwigms/picobrew_pico?include_prereleases&sort=semver)
 
 Refer to the [Releases Page](https://github.com/chiefwigms/picobrew_pico/releases) for steps to get up and running with your own Pico server with a Raspberry Pi device (recommended models include: Raspberry Pi Zero-W or Raspberry Pi 4).
 
@@ -60,7 +71,8 @@ DNS Forwarding (either through a router, RaspberryPi etc)
   - Have a Raspberry Pi Zero W : https://albeec13.github.io/2017/09/26/raspberry-pi-zero-w-simultaneous-ap-and-managed-mode-wifi/
   - DD-WRT/Open-WRT etc : Add additional option added to dnsmasq.conf: `address=/picobrew.com/<Server IP running this code>`
 
-### Option 1: Running pre packaged server via Docker or Docker-Compose
+### Option 1: Running pre packaged server via Docker or Docker-Compose ![Docker Image Version (latest semver)](https://img.shields.io/docker/v/chiefwigms/picobrew_pico?logo=docker)
+
 Docker v19.x (https://docs.docker.com/get-docker/)
 
 #### Setup/Run
