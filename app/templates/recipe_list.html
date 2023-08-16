@@ -24,7 +24,7 @@
 </script>
 <div id="accordion">
     {% for recipe in recipes %}
-    <div class="card bg-dark text-white-50">
+    <div class="card bg-dark text-white-50 recipe" data-recipe-id="{{recipe['id']}}">
         <h5 class="card-header" id="h_{{recipe['id']}}">
             <a class="collapsed" role="button" data-toggle="collapse" href="#c_{{recipe['id']}}"
                 data-toggle="tooltip" data-placement="bottom" title="Expand to See Recipe Details"
@@ -150,12 +150,8 @@
                 </div>
                 <script>
                     var recipe_id = "{{recipe['id']}}"
-                    // recipe metadata toggles unsaved state
-                    $(`#f_${recipe_id} textarea`).bind('input propertychange', () => displayUnsavedState(recipe_id))
-                    $(`#f_${recipe_id} input[type=text]`).bind('input propertychange', () => displayUnsavedState(recipe_id))
 
                     recipe_table['data'] = {{ recipe['steps']| tojson }};
-
                     tables[recipe_id] = new Tabulator(`#t_${recipe_id}`, recipe_table);
 
                     subscribe_table_callbacks(tables[recipe_id]);

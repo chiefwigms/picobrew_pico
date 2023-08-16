@@ -20,7 +20,6 @@ var idMutator = function (value, data, type, params, component) {
 var recipe_table = {
     movableRows: true,
     layout: "fitDataFill",
-    tooltipGenerationMode: "hover",
     columnDefaults:{
         headerSort: false,
         hozAlign: "center",

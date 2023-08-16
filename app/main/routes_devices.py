@@ -135,7 +135,6 @@ def handle_devices():
     # merge PicoBrewC_Alt and PicoBrewC for /devices experience
     merged_config = server_config()
     if 'PicoBrewC_Alt' in merged_config['aliases']:
-        pico_c_alt = None
         pico_c_alt = merged_config['aliases']['PicoBrewC_Alt']
         # skip merging if PicoBrewC_Alt is empty or not defined
         if pico_c_alt:
@@ -185,9 +184,7 @@ def handle_specific_device(uid):
             # delete uid entry from either PicoBrew C config (alternate or normal)
             if mtype in [MachineType.PICOBREW_C, MachineType.PICOBREW_C_ALT]:
                 for type in [MachineType.PICOBREW_C, MachineType.PICOBREW_C_ALT]:
-                    current_app.logger.error(f"type:%s mtype:%s", type, mtype)
                     if type in new_server_cfg['aliases'] and uid in new_server_cfg['aliases'][type]:
-                        current_app.logger.error(f"found uid: %s", uid)
                         del new_server_cfg['aliases'][type][uid]
 
             if request.method == 'POST':
