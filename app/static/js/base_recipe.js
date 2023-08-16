@@ -222,3 +222,18 @@ function recipe_tooltips(machine_type) {
         return tip;
     }
 }
+
+$(document).ready(function () {
+    // recipe metadata toggles unsaved state
+    for (element of document.getElementsByClassName("recipe")) {
+        const rId = element.dataset.recipeId
+        $(`#f_${rId} textarea`).bind('input propertychange', () => displayUnsavedState(rId));
+        $(`#f_${rId} input[type=text]`).bind('input propertychange', () => displayUnsavedState(rId));
+
+        // show error/alert if there are multiple recipes with the same matching id
+        const duplicatedIds = document.querySelectorAll(`#c_${rId}`)
+        if (duplicatedIds.length > 1) {
+            showAlert(`Error: ${duplicatedIds.length} recipes found with same id:${rId}`, "danger");
+        }
+    }
+})
