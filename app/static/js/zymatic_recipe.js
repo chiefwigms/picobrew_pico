@@ -20,7 +20,6 @@ var default_data = [
 var recipe_table = {
     movableRows: true,
     layout: "fitDataFill",
-    tooltipGenerationMode: "hover",
     columnDefaults:{
         headerSort: false,
         hozAlign: "center",
