@@ -25,7 +25,7 @@ jobs:
       uses: docker/setup-buildx-action@master
 
     - name: Build Docker Image
-      uses: docker/build-push-action@v4
+      uses: docker/build-push-action@v5
       with:
         builder: ${{ steps.buildx.outputs.name }}
         context: .
@@ -80,7 +80,7 @@ jobs:
         password: ${{ secrets.DOCKER_PASSWORD }}
 
     - name: Build and Push Docker Image
-      uses: docker/build-push-action@v4
+      uses: docker/build-push-action@v5
       with:
         builder: ${{ steps.buildx.outputs.name }}
         context: .
