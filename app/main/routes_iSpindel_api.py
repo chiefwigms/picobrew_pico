@@ -49,6 +49,8 @@ def process_iSpindel_data(data):
         point = {
             'time': time,
             'temp': data['temperature'] if data['temp_units'] == 'F' else convert_temp(data['temperature'], 'F'),
+            'angle': data['angle'],
+            'battery': data['battery'],
             'gravity': data['gravity'],
         }
 
