@@ -9,7 +9,7 @@ MarkupSafe==2.1.5
 mock==5.1.0
 packaging==21.3
 python-dateutil==2.9.0.post0
-requests==2.31.0
+requests==2.32.0
 ruamel.yaml==0.18.6
 webargs==8.3.0
 Werkzeug==2.2.3
