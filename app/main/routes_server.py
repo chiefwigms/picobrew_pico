@@ -73,7 +73,7 @@ def download_logs(log_type):
         elif log_type == 'nginx.error':
             filename = "/var/log/nginx/picobrew.error.log"
         elif log_type == 'picobrew_pico':
-            max_lines = request.args.get('max', 20000)
+            max_lines = int(request.args.get('max', 20000))
             filename = f"{current_app.config['BASE_PATH']}/app/logs/picobrew_pico.log"
             subprocess.check_output(f"systemctl status rc.local -n {max_lines} > {filename}", shell=True)
         else:
